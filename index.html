@@ -11,7 +11,7 @@
   --primary: #e67e22; --primary-hover: #d35400; --danger: #ef4444; --success: #10b981;
   --cooking-bg: #1e293b; --cooking-text: #fff; --hover-bg: #f1f5f9;
   --modal-overlay: rgba(0,0,0,.45); --card-shadow: 0 1px 3px rgba(0,0,0,.08);
-  --planner-bg: #f8fafc;
+
 }
 body.dark {
   --bg: #0f172a; --surface: #1e293b; --text: #e2e8f0; --text2: #94a3b8;
@@ -19,7 +19,7 @@ body.dark {
   --primary: #f59e0b; --primary-hover: #d97706;
   --cooking-bg: #020617; --hover-bg: #334155;
   --modal-overlay: rgba(0,0,0,.75); --card-shadow: 0 1px 3px rgba(0,0,0,.3);
-  --planner-bg: #1e293b;
+
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; transition: background .2s, color .2s; }
@@ -29,14 +29,7 @@ header p { font-size: .9rem; opacity: .9; width:100%; }
 .header-actions { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); display: flex; gap: .4rem; }
 .topbar-btn { background: rgba(255,255,255,.2); border: none; color: #fff; padding: .35rem .65rem; border-radius: 6px; cursor: pointer; font-size: .8rem; backdrop-filter: blur(4px); }
 .topbar-btn:hover { background: rgba(255,255,255,.35); }
-.tabs { display: flex; background: var(--surface); border-bottom: 2px solid var(--border); }
-.tab-btn { flex: 1; padding: .75rem .5rem; border: none; background: none; font-size: .85rem; font-weight: 600; cursor: pointer; color: var(--text2); transition: .15s; position: relative; }
-.tab-btn:hover { color: var(--primary); }
-.tab-btn.active { color: var(--primary); }
-.tab-btn.active::after { content: ''; position: absolute; bottom: -2px; left: 10%; right: 10%; height: 3px; background: var(--primary); border-radius: 3px; }
 .container { max-width: 960px; margin: 0 auto; padding: 1rem; }
-.tab-content { display: none; }
-.tab-content.active { display: block; }
 .controls { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1rem; align-items: center; }
 .controls input, .controls select { flex: 1; min-width: 130px; padding: .55rem .8rem; border: 1px solid var(--border); border-radius: 8px; font-size: .85rem; background: var(--input-bg); color: var(--text); }
 .btn { padding: .55rem 1rem; border: none; border-radius: 8px; font-size: .83rem; cursor: pointer; font-weight: 600; transition: .15s; display: inline-flex; align-items: center; gap: .35rem; white-space: nowrap; }
@@ -105,21 +98,7 @@ input, select, textarea { background: var(--input-bg); color: var(--text); borde
 .cooking-nav button:disabled { opacity: .3; cursor: not-allowed; }
 .cooking-progress { height: 4px; background: #334155; border-radius: 4px; }
 .cooking-progress-bar { height: 100%; background: var(--primary); border-radius: 4px; transition: width .3s; }
-.planner-grid { display: grid; grid-template-columns: 75px repeat(3, 1fr); gap: 1px; background: var(--border); border-radius: 8px; overflow: hidden; }
-.planner-header { background: var(--primary); color: #fff; padding: .3rem .4rem; text-align: center; font-weight: 600; font-size: .7rem; }
-.planner-day { background: var(--surface); padding: .3rem .35rem; min-height: 44px; font-size: .72rem; cursor: pointer; transition: .1s; }
-.planner-day:hover { background: var(--tag-bg); }
-.planner-day-label { background: var(--planner-bg); padding: .3rem .4rem; font-weight: 600; font-size: .72rem; color: var(--text); display: flex; align-items: center; }
-.planner-recipe { font-size: .65rem; padding: .08rem .2rem; margin: .06rem 0; border-radius: 4px; background: var(--tag-bg); display: inline-block; }
-.planner-empty { color: var(--text2); font-size: .75rem; }
-.shop-recipes { display: flex; flex-wrap: wrap; gap: .25rem; margin-bottom: .8rem; }
-.shop-recipe-tag { background: var(--border); padding: .2rem .6rem; border-radius: 20px; font-size: .75rem; cursor: pointer; font-weight: 500; transition: .15s; user-select: none; }
-.shop-recipe-tag.selected { background: var(--primary); color: #fff; }
-.shop-recipe-tag:hover { opacity: .8; }
-.shop-list { list-style: none; }
-.shop-list li { padding: .15rem .3rem; font-size: .82rem; border-bottom: none; display: flex; align-items: center; gap: .5rem; }
-.shop-list li input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
-.shop-list li.checked { text-decoration: line-through; color: var(--text2); }
+
 .import-hidden { display: none; }
 .fav-btn-active { color: #ef4444 !important; }
 .nutrition-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: .5rem; margin: .5rem 0; }
@@ -134,20 +113,17 @@ input, select, textarea { background: var(--input-bg); color: var(--text); borde
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }
 @media (max-width: 600px) {
   .recipe-grid { grid-template-columns: 1fr; }
-  .planner-grid { grid-template-columns: 65px repeat(3, 1fr); font-size: .75rem; }
   .cooking-step-text { font-size: 1.2rem; }
   .controls input, .controls select { min-width: 90px; }
   .header-actions { position: static; transform: none; margin-top: .3rem; }
   header { flex-direction: column; }
 }
 @media print {
-  .tabs,.controls,.modal-overlay,.cooking-overlay,.btn,.header-actions,.tabs,.topbar-btn { display: none !important; }
-  .tab-content { display: block !important; }
+  .controls,.modal-overlay,.cooking-overlay,.btn,.header-actions,.topbar-btn { display: none !important; }
   body { background: #fff; color: #000; }
   .recipe-card { break-inside: avoid; }
 }
-.week-nav { display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;gap:.4rem; }
-.week-nav span { font-size:.85rem;font-weight:600; }
+
 </style>
 </head>
 <body>
@@ -163,72 +139,28 @@ input, select, textarea { background: var(--input-bg); color: var(--text); borde
   </div>
 </header>
 
-<div class="tabs">
-  <button class="tab-btn active" data-tab="recipes" data-lang="tabRecipes">📖 Recepty</button>
-  <button class="tab-btn" data-tab="planner" data-lang="tabPlanner">📅 Plánovač</button>
-  <button class="tab-btn" data-tab="shopping" data-lang="tabShopping">🛒 Nákupy</button>
-  <button class="tab-btn" data-tab="tasks">📋 <span data-lang="tabTasks">Úlohy</span></button>
-</div>
-
 <div class="container">
-  <!-- RECIPES -->
-  <div class="tab-content active" id="tab-recipes">
-    <div class="controls">
-      <input type="text" id="search" data-lang="searchPlaceholder" placeholder="Hľadať...">
-      <select id="filter-category">
-        <option value="" data-lang="allCategories">Všetky</option>
-        <option>Hlavné jedlá</option><option>Polievky</option><option>Šaláty</option><option>Dezerty</option><option>Pečivo</option><option>Nápoje</option><option>Predjedlá</option><option>Raňajky</option><option>Prílohy</option><option>Detské</option>
-      </select>
-      <button class="btn btn-primary" onclick="openFormModal()" data-lang="btnAdd">+ Nový</button>
-      <button class="btn btn-secondary" onclick="openIngredientSearch()" data-lang="btnByIngr">🥕 Suroviny</button>
-      <button class="btn btn-secondary" onclick="randomRecipe()">🎲 <span data-lang="btnRandom">Náhodný</span></button>
-      <button class="btn btn-secondary" onclick="document.getElementById('import-file').click()">📥</button>
-      <button class="btn btn-secondary" onclick="exportRecipes()">📤</button>
-      <input type="file" id="import-file" class="import-hidden" accept=".json" onchange="importRecipes(event)">
-    </div>
-    <div class="age-filter" id="age-filter">
-      <button class="age-btn active" data-age="" onclick="setAgeFilter('')"><span data-lang="allAges">Všetky veky</span></button>
-      <button class="age-btn" data-age="baby-6m" onclick="setAgeFilter('baby-6m')">👶 <span data-lang="age6m">6m+</span></button>
-      <button class="age-btn" data-age="baby-1" onclick="setAgeFilter('baby-1')">👶 <span data-lang="age1">1r+</span></button>
-      <button class="age-btn" data-age="baby-2" onclick="setAgeFilter('baby-2')">👶 <span data-lang="age2">2r+</span></button>
-      <button class="age-btn" data-age="baby-3" onclick="setAgeFilter('baby-3')">👶 <span data-lang="age3">3r+</span></button>
-    </div>
-    <div class="recipe-grid" id="recipe-grid"></div>
+  <div class="controls">
+    <input type="text" id="search" data-lang="searchPlaceholder" placeholder="Hľadať...">
+    <select id="filter-category">
+      <option value="" data-lang="allCategories">Všetky</option>
+      <option>Hlavné jedlá</option><option>Polievky</option><option>Šaláty</option><option>Dezerty</option><option>Pečivo</option><option>Nápoje</option><option>Predjedlá</option><option>Raňajky</option><option>Prílohy</option><option>Detské</option>
+    </select>
+    <button class="btn btn-primary" onclick="openFormModal()" data-lang="btnAdd">+ Nový</button>
+    <button class="btn btn-secondary" onclick="openIngredientSearch()" data-lang="btnByIngr">🥕 Suroviny</button>
+    <button class="btn btn-secondary" onclick="randomRecipe()">🎲 <span data-lang="btnRandom">Náhodný</span></button>
+    <button class="btn btn-secondary" onclick="document.getElementById('import-file').click()">📥</button>
+    <button class="btn btn-secondary" onclick="exportRecipes()">📤</button>
+    <input type="file" id="import-file" class="import-hidden" accept=".json" onchange="importRecipes(event)">
   </div>
-
-  <!-- PLANNER -->
-  <div class="tab-content" id="tab-planner">
-    <div class="week-nav" id="planner-week-nav"></div>
-    <p style="margin-bottom:.4rem;font-size:.78rem;color:var(--text2);" data-lang="plannerHint2">Dospelí 👤 | Dieťa 👶 – klikni na políčko pre výber.</p>
-    <div class="planner-grid" id="planner-grid"></div>
-    <div style="margin-top:.6rem;display:flex;gap:.4rem;flex-wrap:wrap;">
-      <button class="btn btn-secondary" onclick="clearPlanner()" style="padding:.35rem .7rem;font-size:.78rem;" data-lang="plannerClear">🗑 Vyčistiť</button>
-      <button class="btn btn-success" onclick="generateShoppingFromPlanner()" style="padding:.35rem .7rem;font-size:.78rem;" data-lang="plannerShop">🛒 Zoznam z plánu</button>
-    </div>
+  <div class="age-filter" id="age-filter">
+    <button class="age-btn active" data-age="" onclick="setAgeFilter('')"><span data-lang="allAges">Všetky veky</span></button>
+    <button class="age-btn" data-age="baby-6m" onclick="setAgeFilter('baby-6m')">👶 <span data-lang="age6m">6m+</span></button>
+    <button class="age-btn" data-age="baby-1" onclick="setAgeFilter('baby-1')">👶 <span data-lang="age1">1r+</span></button>
+    <button class="age-btn" data-age="baby-2" onclick="setAgeFilter('baby-2')">👶 <span data-lang="age2">2r+</span></button>
+    <button class="age-btn" data-age="baby-3" onclick="setAgeFilter('baby-3')">👶 <span data-lang="age3">3r+</span></button>
   </div>
-
-  <!-- SHOPPING -->
-  <div class="tab-content" id="tab-shopping">
-    <p style="margin-bottom:.6rem;color:var(--text2);" data-lang="shopHint">Vyber recepty – suroviny sa spoja do zoznamu.</p>
-    <div id="shop-recipe-select" class="shop-recipes"></div>
-    <button class="btn btn-primary" onclick="generateShoppingList()" style="margin-bottom:.8rem;" data-lang="shopGenerate">🔄 Vygenerovať</button>
-    <button class="btn btn-secondary" onclick="clearShoppingChecks()" style="margin-bottom:.8rem;" data-lang="shopReset">☑ Reset</button>
-    <ul class="shop-list" id="shop-list"></ul>
-  </div>
-
-  <!-- TASKS -->
-  <div class="tab-content" id="tab-tasks">
-    <div style="display:flex;gap:.4rem;margin-bottom:.75rem;">
-      <input type="text" id="task-input" placeholder="" style="flex:1;padding:.5rem .75rem;border:1px solid var(--border);border-radius:8px;font-size:.85rem;background:var(--input-bg);color:var(--text);" onkeydown="if(event.key==='Enter')addTask()">
-      <button class="btn btn-primary" onclick="addTask()" data-lang="taskAdd">+ Pridať</button>
-    </div>
-    <div id="task-filters" style="display:flex;gap:.25rem;margin-bottom:.5rem;flex-wrap:wrap;">
-      <button class="age-btn active" data-tf="all" onclick="setTaskFilter('all')"><span data-lang="taskAll">Všetky</span></button>
-      <button class="age-btn" data-tf="today" onclick="setTaskFilter('today')"><span data-lang="taskToday">Dnes</span></button>
-      <button class="age-btn" data-tf="week" onclick="setTaskFilter('week')"><span data-lang="taskWeek">Tento týždeň</span></button>
-    </div>
-    <div id="task-list"></div>
-  </div>
+  <div class="recipe-grid" id="recipe-grid"></div>
 </div>
 
 <!-- FORM MODAL -->
@@ -310,29 +242,6 @@ input, select, textarea { background: var(--input-bg); color: var(--text); borde
   </div>
 </div>
 
-<!-- PLANNER PICK -->
-<div class="modal-overlay" id="planner-pick-modal">
-  <div class="modal" style="max-width:480px;">
-    <h2 id="planner-pick-title" style="font-size:1rem;">Vyber recept</h2>
-    <div style="margin-bottom:.5rem;">
-      <div id="planner-pick-adult" style="margin-bottom:.4rem;cursor:pointer;padding:.35rem .5rem;border-radius:8px;background:var(--border);display:flex;align-items:center;gap:.35rem;">
-        <span style="font-weight:600;">👤</span> <span id="planner-pick-adult-name" style="color:var(--text2);font-size:.85rem;">—</span>
-      </div>
-      <div id="planner-pick-kid" style="cursor:pointer;padding:.35rem .5rem;border-radius:8px;background:var(--border);display:flex;align-items:center;gap:.35rem;">
-        <span style="font-weight:600;">👶</span> <span id="planner-pick-kid-name" style="color:var(--text2);font-size:.85rem;">—</span>
-      </div>
-    </div>
-    <div id="planner-pick-search-area" style="display:none;">
-      <input type="text" id="planner-pick-search" placeholder="" oninput="renderPlannerPick()" style="width:100%;padding:.45rem .7rem;border:1px solid var(--border);border-radius:8px;font-size:.82rem;background:var(--input-bg);color:var(--text);margin-bottom:.4rem;">
-      <div id="planner-pick-list" style="max-height:220px;overflow-y:auto;"></div>
-      <div class="modal-footer" style="margin-top:.5rem;">
-        <button class="btn btn-secondary" onclick="closePlannerPick()" data-lang="cancel">Zrušiť</button>
-        <button class="btn btn-danger" id="planner-remove-btn" onclick="plannerRemove()" style="display:none;" data-lang="plannerRemove">Odstrániť</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- INGREDIENT SEARCH -->
 <div class="modal-overlay" id="ingredient-modal">
   <div class="modal">
@@ -353,14 +262,9 @@ input, select, textarea { background: var(--input-bg); color: var(--text); borde
 const LANG = {
   sk: {
     appTitle: 'Receptár', appSubtitle: 'Zbierka nápadov na varenie a pečenie',
-    tabRecipes: '📖 Recepty', tabPlanner: '📅 Plánovač', tabShopping: '🛒 Nákupy',
+    tabRecipes: '📖 Recepty',
     searchPlaceholder: 'Hľadať...', allCategories: 'Všetky kategórie',
     btnAdd: '+ Nový', btnByIngr: '🥕 Suroviny', btnRandom: 'Náhodný',
-    plannerHint: 'Kliknutím na políčko pridáš recept.',
-    plannerHint2: 'Dospelí 👤 | Dieťa 👶 – klikni na políčko pre výber.',
-    plannerClear: '🗑 Vyčistiť', plannerShop: '🛒 Zoznam z plánu',
-    shopHint: 'Vyber recepty – suroviny sa spoja do zoznamu.',
-    shopGenerate: '🔄 Vygenerovať', shopReset: '☑ Reset',
     formTitle: 'Nový recept', formName: 'Názov', formNamePlace: 'Názov',
     formCategory: 'Kategória', formTime: 'Čas (min)', formImage: 'Obrázok',
     formImagePlace: 'URL', formUpload: 'Nahrať', formNutrition: 'Nutričné hodnoty (na porciu)',
@@ -371,7 +275,7 @@ const LANG = {
     btnCook: 'Variť', btnPrint: 'Tlačiť', btnShare: 'Zdieľať', btnEdit: 'Upraviť',
     btnDelete: 'Zmazať', close: 'Zavrieť',
     cookingClose: 'Zavrieť', cookingPrev: 'Predošlý', cookingNext: 'Ďalší',
-    plannerRemove: 'Odstrániť',
+
     ingrTitle: '🔍 Čo máš doma?', ingrHint: 'Označ suroviny, ktoré máš – zobrazia sa recepty, čo z nich uvaríš.',
     ingrFilter: 'Filtrovať suroviny...', ingrClear: 'Vyčistiť', ingrDone: 'Hotovo',
     noRecipes: 'Žiadne recepty', noRecipesHint: 'Skúste iný filter alebo pridajte nový recept.',
@@ -381,23 +285,17 @@ const LANG = {
     cookingDone: 'Hotovo! Dobrú chuť! 🎉', cookingTimerStart: 'Spustiť', cookingTimerStop: 'Stop',
     exportError: 'Neplatný súbor. Vyber JSON exportovaný z Receptára.',
     importConfirm: 'Naozaj chcete importovať', importOk: 'Importovaných',
-    deleteConfirm: 'Naozaj chcete zmazať tento recept?', plannerClearConfirm: 'Vyčistiť celý plánovač?',
-    plannerEmpty: 'Plánovač je prázdny. Najprv naplánuj jedlá.',
+    deleteConfirm: 'Naozaj chcete zmazať tento recept?',
     recipeNutri: 'Nutričné hodnoty', kcal: 'kcal', protein: 'bielkoviny', fat: 'tuky', carbs: 'sacharidy',
     perPortion: 'na porciu',
     allAges: 'Všetky veky', age6m: '6m+', age1: '1r+', age2: '2r+', age3: '3r+',
-    tabTasks:'Úlohy',taskAdd:'+ Pridať',taskAll:'Všetky',taskToday:'Dnes',taskWeek:'Tento týždeň',taskPlaceholder:'Nová úloha...',taskEmpty:'Žiadne úlohy 😎',taskClearDone:'🗑 Hotové zmazať',taskDate:'Dátum',
+
   },
   en: {
     appTitle: 'Recipe Book', appSubtitle: 'Collection of cooking & baking ideas',
-    tabRecipes: '📖 Recipes', tabPlanner: '📅 Planner', tabShopping: '🛒 Shopping',
+    tabRecipes: '📖 Recipes',
     searchPlaceholder: 'Search...', allCategories: 'All categories',
     btnAdd: '+ New', btnByIngr: '🥕 Ingredients', btnRandom: 'Random',
-    plannerHint: 'Click a cell to add a recipe.',
-    plannerHint2: 'Adults 👤 | Kids 👶 – click a cell to pick.',
-    plannerClear: '🗑 Clear', plannerShop: '🛒 List from plan',
-    shopHint: 'Select recipes to merge ingredients.',
-    shopGenerate: '🔄 Generate', shopReset: '☑ Reset',
     formTitle: 'New Recipe', formName: 'Name', formNamePlace: 'Recipe name',
     formCategory: 'Category', formTime: 'Time (min)', formImage: 'Image',
     formImagePlace: 'URL', formUpload: 'Upload', formNutrition: 'Nutrition (per serving)',
@@ -408,7 +306,7 @@ const LANG = {
     btnCook: 'Cook', btnPrint: 'Print', btnShare: 'Share', btnEdit: 'Edit',
     btnDelete: 'Delete', close: 'Close',
     cookingClose: 'Close', cookingPrev: 'Previous', cookingNext: 'Next',
-    plannerRemove: 'Remove',
+
     ingrTitle: '🔍 What do you have?', ingrHint: 'Check ingredients you have at home – recipes you can make will show up.',
     ingrFilter: 'Filter ingredients...', ingrClear: 'Clear', ingrDone: 'Done',
     noRecipes: 'No recipes', noRecipesHint: 'Try a different filter or add a new recipe.',
@@ -418,12 +316,11 @@ const LANG = {
     cookingDone: 'Done! Enjoy your meal! 🎉', cookingTimerStart: 'Start', cookingTimerStop: 'Stop',
     exportError: 'Invalid file. Select a JSON exported from Recipe Book.',
     importConfirm: 'Import', importOk: 'Imported',
-    deleteConfirm: 'Really delete this recipe?', plannerClearConfirm: 'Clear entire planner?',
-    plannerEmpty: 'Planner is empty. Plan some meals first.',
+    deleteConfirm: 'Really delete this recipe?',
     recipeNutri: 'Nutrition', kcal: 'kcal', protein: 'protein', fat: 'fat', carbs: 'carbs',
     perPortion: 'per serving',
     allAges: 'All ages', age6m: '6m+', age1: '1y+', age2: '2y+', age3: '3y+',
-    tabTasks:'Tasks',taskAdd:'+ Add',taskAll:'All',taskToday:'Today',taskWeek:'This week',taskPlaceholder:'New task...',taskEmpty:'No tasks 😎',taskClearDone:'🗑 Clear done',taskDate:'Date',
+
   }
 };
 let lang = localStorage.getItem('lang') || 'sk';
@@ -528,120 +425,10 @@ const DEFAULT_RECIPES = [
 ];
 
 let recipes = JSON.parse(localStorage.getItem('recipes') || 'null') || DEFAULT_RECIPES.map(r => ({...r}));
-// Migrate old mealPlan (day names) to date-based keys and new format
-let raw = JSON.parse(localStorage.getItem('mealPlan') || '{}');
-let mealPlan = {};
-const dayMap = { Pondelok:'Monday',Utorok:'Tuesday',Streda:'Wednesday',Štvrtok:'Thursday',Piatok:'Friday',Sobota:'Saturday',Nedeľa:'Sunday' };
-const enDayMap = { Monday:'Pondelok',Tuesday:'Utorok',Wednesday:'Streda',Thursday:'Štvrtok',Friday:'Piatok',Saturday:'Sobota',Sunday:'Nedeľa' };
-Object.keys(raw).forEach(k => {
-  const v = raw[k];
-  // Parse old format: "DayName-Meal" -> convert to date-based
-  const parts = k.split('-');
-  if (parts.length === 2) {
-    const dayName = parts[0];
-    const meal = parts[1];
-    // Find next occurrence of this day from today
-    const targetDay = dayMap[dayName] || dayName;
-    const dayIdx = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'].indexOf(targetDay);
-    if (dayIdx !== -1) {
-      const now = new Date();
-      const currentDay = (now.getDay() + 6) % 7;
-      let diff = dayIdx - currentDay;
-      if (diff < 0) diff += 7;
-      const date = new Date(now);
-      date.setDate(now.getDate() + diff);
-      const dateKey = date.toISOString().slice(0,10);
-      const newKey = `${dateKey}-${meal}`;
-      if (v && typeof v === 'object' && 'adult' in v) {
-        mealPlan[newKey] = v;
-      } else {
-        mealPlan[newKey] = { adult: (typeof v === 'number' ? v : v?.adult || null), kid: v?.kid || null };
-      }
-      return;
-    }
-  }
-  // Already in new format or unrecognized
-  if (v && typeof v === 'object' && 'adult' in v) mealPlan[k] = v;
-  else mealPlan[k] = { adult: (typeof v === 'number' ? v : null), kid: null };
-});
 let editingId = null, viewingId = null;
 let cookingStep = 0, cookingRecipeId = null, cookingTimer = null, cookingTimerRunning = false, cookingTimerSeconds = 0;
-let plannerPickDay = '', plannerPickMeal = '';
-let plannerPickFor = 'adult'; // 'adult' or 'kid'
-let shopChecked = new Set(JSON.parse(localStorage.getItem('shopChecked') || '[]'));
 let voiceRecognition = null, voiceListening = false;
 let ingredientSearchSelected = new Set();
-let tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
-let taskFilter = 'all';
-let weekOffset = 0;
-
-// ======================== TASKS ========================
-function saveTasks() {
-  localStorage.setItem('tasks', JSON.stringify(tasks));
-  renderTasks();
-  renderPlanner();
-}
-
-function addTask() {
-  const input = document.getElementById('task-input');
-  const text = input.value.trim();
-  if (!text) return;
-  tasks.push({ id: Date.now(), text, done: false, date: new Date().toISOString().slice(0,10) });
-  input.value = '';
-  saveTasks();
-}
-
-function toggleTask(id) {
-  const t = tasks.find(t => t.id === id);
-  if (t) { t.done = !t.done; saveTasks(); }
-}
-
-function deleteTask(id) {
-  tasks = tasks.filter(t => t.id !== id);
-  saveTasks();
-}
-
-function clearDoneTasks() {
-  tasks = tasks.filter(t => !t.done);
-  saveTasks();
-}
-
-function setTaskFilter(f) {
-  taskFilter = f;
-  document.querySelectorAll('#task-filters .age-btn').forEach(b => b.classList.toggle('active', b.dataset.tf === f));
-  renderTasks();
-}
-
-function renderTasks() {
-  const el = document.getElementById('task-list');
-  if (!el) return;
-  let filtered = [...tasks];
-  const today = new Date().toISOString().slice(0,10);
-  if (taskFilter === 'today') filtered = filtered.filter(t => t.date === today);
-  else if (taskFilter === 'week') {
-    const monday = new Date(); monday.setDate(monday.getDate() - monday.getDay() + 1);
-    const sunday = new Date(monday); sunday.setDate(sunday.getDate() + 6);
-    filtered = filtered.filter(t => t.date && t.date >= monday.toISOString().slice(0,10) && t.date <= sunday.toISOString().slice(0,10));
-  }
-  // Sort: undone first, then by date
-  filtered.sort((a,b) => (a.done?1:0) - (b.done?1:0) || (b.date||'').localeCompare(a.date||''));
-  if (!filtered.length) {
-    el.innerHTML = `<div class="empty-state" style="padding:2rem 1rem;"><p data-lang="taskEmpty">Žiadne úlohy 😎</p></div>`;
-    return;
-  }
-  el.innerHTML = filtered.map(t => `
-    <div style="display:flex;align-items:center;gap:.4rem;padding:.35rem .4rem;border-bottom:1px solid var(--border);${t.done?'opacity:.5;':''}">
-      <input type="checkbox" ${t.done?'checked':''} onchange="toggleTask(${t.id})" style="width:16px;height:16px;cursor:pointer;">
-      <span style="flex:1;${t.done?'text-decoration:line-through;color:var(--text2);':''}font-size:.88rem;">${t.text}</span>
-      <span style="font-size:.7rem;color:var(--text2);min-width:75px;text-align:right;">${t.date||''}</span>
-      <button class="btn btn-danger" onclick="deleteTask(${t.id})" style="padding:.15rem .4rem;font-size:.7rem;">✕</button>
-    </div>
-  `).join('');
-  // Add "clear done" button if there are done tasks
-  if (tasks.some(t => t.done)) {
-    el.innerHTML += `<div style="text-align:center;margin-top:.5rem;"><button class="btn btn-secondary" onclick="clearDoneTasks()" data-lang="taskClearDone">🗑 Hotové zmazať</button></div>`;
-  }
-}
 
 // ======================== LANGUAGE ========================
 function t(key) { return (LANG[lang] && LANG[lang][key]) || LANG.sk[key] || key; }
@@ -669,17 +456,12 @@ function applyLang() {
   document.getElementById('lang-toggle').textContent = lang === 'en' ? '🇸🇰 SK' : '🇬🇧 EN';
   // Show/hide English name field in form
   document.getElementById('name-en-group').style.display = lang === 'en' ? 'block' : 'none';
-  const taskInput = document.getElementById('task-input');
-  if (taskInput) taskInput.placeholder = t('taskPlaceholder');
   // Update form title
   if (editingId !== null) {
     document.getElementById('form-title').textContent = t('formTitle') + ' (edit)';
   } else {
     document.getElementById('form-title').textContent = t('formTitle');
   }
-  // Re-render
-  renderPlanner();
-  generateShoppingList();
 }
 
 function switchLang() {
@@ -713,9 +495,6 @@ if (localStorage.getItem('dark')) { document.body.classList.add('dark'); documen
 // ======================== PERSISTENCE ========================
 function saveToLS() {
   localStorage.setItem('recipes', JSON.stringify(recipes));
-  localStorage.setItem('mealPlan', JSON.stringify(mealPlan));
-  localStorage.setItem('shopChecked', JSON.stringify([...shopChecked]));
-  localStorage.setItem('tasks', JSON.stringify(tasks));
 }
 
 // ======================== RECIPES TAB ========================
@@ -754,7 +533,6 @@ function render() {
       </div>
     </div>`;
   }).join('');
-  renderShopRecipes();
   updateFavFilter();
 }
 
@@ -772,7 +550,7 @@ function toggleFav(id) {
 function updateFavFilter() {
   let el = document.getElementById('filter-fav');
   if (!el) {
-    const controls = document.querySelector('#tab-recipes .controls');
+    const controls = document.querySelector('.controls');
     const lbl = document.createElement('label');
     lbl.style.cssText = 'display:flex;align-items:center;gap:.3rem;font-size:.82rem;white-space:nowrap;color:var(--text2);cursor:pointer;';
     lbl.innerHTML = `<input type="checkbox" id="filter-fav" onchange="render()"> ❤️`;
@@ -790,9 +568,9 @@ function randomRecipe() {
 
 // ======================== MODALS ========================
 function openModal(id) { document.getElementById(id).classList.add('active'); }
-function closeModal(id) { document.getElementById(id).classList.remove('active'); renderPlanner(); }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 document.querySelectorAll('.modal-overlay').forEach(el => {
-  el.addEventListener('click', e => { if (e.target === el) { el.classList.remove('active'); renderPlanner(); } });
+  el.addEventListener('click', e => { if (e.target === el) { el.classList.remove('active'); } });
 });
 
 // ======================== FORM ========================
@@ -925,15 +703,9 @@ function editCurrent() {
 function deleteCurrent() {
   if (!confirm(t('deleteConfirm'))) return;
   recipes = recipes.filter(r => r.id !== viewingId);
-  Object.keys(mealPlan).forEach(k => {
-    if (mealPlan[k].adult === viewingId) mealPlan[k].adult = null;
-    if (mealPlan[k].kid === viewingId) mealPlan[k].kid = null;
-    if (!mealPlan[k].adult && !mealPlan[k].kid) delete mealPlan[k];
-  });
   saveToLS();
   closeModal('detail-modal');
   render();
-  renderPlanner();
 }
 
 // ======================== PRINT ========================
@@ -1014,7 +786,7 @@ function importRecipes(e) {
           else recipes.push(imp);
         });
         saveToLS();
-        render(); renderPlanner(); renderShopRecipes();
+        render();
         alert(`${t('importOk')} ${data.length}.`);
       }
     } catch(err) { alert(t('exportError')); }
@@ -1142,241 +914,7 @@ function stopVoice() {
   document.getElementById('voice-btn').textContent = '🎤';
 }
 
-// ======================== PLANNER ========================
-const DAYS = ['Pondelok','Utorok','Streda','Štvrtok','Piatok','Sobota','Nedeľa'];
-const DAYS_EN = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
-const MEALS = ['Raňajky','Obed','Večera'];
-const MEALS_EN = ['Breakfast','Lunch','Dinner'];
 
-function getWeekDates() {
-  const now = new Date();
-  const day = now.getDay();
-  const diff = day === 0 ? -6 : 1 - day;
-  const monday = new Date(now);
-  monday.setDate(now.getDate() + diff + weekOffset * 7);
-  return Array.from({length: 7}, (_, i) => {
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + i);
-    return d;
-  });
-}
-
-function getDays() {
-  return getWeekDates().map(d => {
-    const dayNames = lang === 'en' ? ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] : ['Pon','Uto','Str','Štv','Pia','Sob','Ned'];
-    const dayNamesFull = lang === 'en' ? ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'] : ['Pondelok','Utorok','Streda','Štvrtok','Piatok','Sobota','Nedeľa'];
-    const dayIdx = (d.getDay() + 6) % 7; // 0=Mon
-    const dateStr = `${d.getDate()}.${d.getMonth()+1}.`;
-    const isToday = d.toISOString().slice(0,10) === new Date().toISOString().slice(0,10);
-    return { label: `${dayNames[dayIdx]} ${dateStr}`, full: dayNamesFull[dayIdx], date: d.toISOString().slice(0,10), isToday };
-  });
-}
-
-function getMeals() {
-  return lang === 'en' ? ['Breakfast','Lunch','Dinner'] : ['Raňajky','Obed','Večera'];
-}
-
-function changeWeek(delta) {
-  weekOffset += delta;
-  renderPlanner();
-}
-
-function renderPlanner() {
-  const grid = document.getElementById('planner-grid');
-  const days = getDays();
-  const meals = getMeals();
-  const todayStr = new Date().toISOString().slice(0,10);
-  
-  // Week navigation
-  const weekNav = document.getElementById('planner-week-nav');
-  const rangeStart = days[0].date;
-  const rangeEnd = days[6].date;
-  weekNav.innerHTML = `
-    <button class="btn btn-secondary" onclick="changeWeek(-1)" style="padding:.3rem .6rem;font-size:.75rem;">←</button>
-    <span>${rangeStart} – ${rangeEnd} ${weekOffset !== 0 ? `<button class="btn btn-secondary" onclick="changeWeek(${-weekOffset})" style="padding:.15rem .4rem;font-size:.7rem;vertical-align:middle;">${lang==='en'?'Today':'Dnes'}</button>` : ''}</span>
-    <button class="btn btn-secondary" onclick="changeWeek(1)" style="padding:.3rem .6rem;font-size:.75rem;">→</button>
-  `;
-  
-  let html = `<div class="planner-header">${lang==='en'?'Day':'Deň'}</div>${meals.map(m=>`<div class="planner-header">${m}</div>`).join('')}`;
-  
-  days.forEach((day, di) => {
-    const dayLabel = day.isToday ? `📌 ${day.label}` : day.label;
-    html += `<div class="planner-day-label" style="${day.isToday?'font-weight:700;color:var(--primary);':''}">${dayLabel}</div>`;
-    
-    meals.forEach((meal, mi) => {
-      const key = `${day.date}-${MEALS[mi]}`;
-      const slot = mealPlan[key] || { adult: null, kid: null };
-      const rAd = slot.adult ? recipes.find(rec => rec.id === slot.adult) : null;
-      const rKid = slot.kid ? recipes.find(rec => rec.id === slot.kid) : null;
-      const nAd = rAd ? (lang==='en'&&rAd.nameEn?rAd.nameEn:rAd.name) : '';
-      const nKid = rKid ? (lang==='en'&&rKid.nameEn?rKid.nameEn:rKid.name) : '';
-      
-      // Get tasks for this day
-      const dayTasks = tasks.filter(t => t.date === day.date && !t.done);
-      
-      html += `<div class="planner-day" onclick="openPlannerPick('${day.date}','${MEALS[mi]}')" style="${mi===0&&di===0?'border-top-left-radius:0;':''}">
-        <div style="display:flex;flex-direction:column;gap:1px;">
-          <div style="display:flex;gap:2px;align-items:center;"><span style="font-size:.55rem;color:var(--text2);min-width:12px;">👤</span>${nAd ? `<span class="planner-recipe">${nAd}</span>` : `<span class="planner-empty">+</span>`}</div>
-          <div style="display:flex;gap:2px;align-items:center;"><span style="font-size:.55rem;color:var(--text2);min-width:12px;">👶</span>${nKid ? `<span class="planner-recipe">${nKid}</span>` : `<span class="planner-empty">+</span>`}</div>
-          ${dayTasks.length ? `<div style="font-size:.55rem;color:var(--text2);margin-top:1px;">📋 ${dayTasks.length}</div>` : ''}
-        </div>
-      </div>`;
-    });
-  });
-  grid.innerHTML = html;
-}
-
-function openPlannerPick(day, meal) {
-  plannerPickDay = day;
-  plannerPickMeal = meal;
-  const days = getDays();
-  const meals = getMeals();
-  const dayInfo = days.find(d => d.date === day);
-  const mi = MEALS.indexOf(meal);
-  const title = dayInfo ? `${dayInfo.full} – ${meals[mi]}` : `${day} – ${meals[mi]}`;
-  document.getElementById('planner-pick-title').textContent = title;
-  
-  const slot = mealPlan[`${day}-${meal}`] || { adult: null, kid: null };
-  const updateNames = () => {
-    const rA = slot.adult ? recipes.find(r => r.id === slot.adult) : null;
-    const rK = slot.kid ? recipes.find(r => r.id === slot.kid) : null;
-    document.getElementById('planner-pick-adult-name').textContent = rA ? (lang==='en'&&rA.nameEn?rA.nameEn:rA.name) : '—';
-    document.getElementById('planner-pick-kid-name').textContent = rK ? (lang==='en'&&rK.nameEn?rK.nameEn:rK.name) : '—';
-  };
-  updateNames();
-  
-  document.getElementById('planner-pick-search-area').style.display = 'none';
-  document.getElementById('planner-pick-adult').onclick = () => openPlannerPickFor('adult');
-  document.getElementById('planner-pick-kid').onclick = () => openPlannerPickFor('kid');
-  
-  openModal('planner-pick-modal');
-}
-
-function openPlannerPickFor(type) {
-  plannerPickFor = type;
-  document.getElementById('planner-pick-search-area').style.display = 'block';
-  document.getElementById('planner-pick-search').value = '';
-  const key = `${plannerPickDay}-${plannerPickMeal}`;
-  const slot = mealPlan[key] || { adult: null, kid: null };
-  const rid = type === 'adult' ? slot.adult : slot.kid;
-  document.getElementById('planner-remove-btn').style.display = rid ? 'inline-flex' : 'none';
-  renderPlannerPick();
-  document.getElementById('planner-pick-search').focus();
-}
-
-function renderPlannerPick() {
-  const search = document.getElementById('planner-pick-search').value.toLowerCase();
-  const list = document.getElementById('planner-pick-list');
-  const filtered = recipes.filter(r => {
-    const n = lang === 'en' && r.nameEn ? r.nameEn : r.name;
-    return n.toLowerCase().includes(search);
-  });
-  if (!filtered.length) { list.innerHTML = `<p style="color:var(--text2);padding:.5rem;">—</p>`; return; }
-  list.innerHTML = filtered.map(r => {
-    const n = lang === 'en' && r.nameEn ? r.nameEn : r.name;
-    return `<div style="padding:.35rem;cursor:pointer;border-radius:6px;display:flex;align-items:center;gap:.4rem;"
-         onmouseenter="this.style.background='var(--hover-bg)'" onmouseleave="this.style.background=''"
-         onclick="plannerSelect(${r.id})">
-      ${r.image||r.imageData ? `<img src="${r.imageData||r.image}" style="width:30px;height:22px;object-fit:cover;border-radius:3px;" onerror="this.style.display='none'">` : '<span style="font-size:1rem;">🍽️</span>'}
-      <span style="font-size:.82rem;">${n}</span>
-    </div>`;
-  }).join('');
-}
-
-function plannerSelect(id) {
-  const key = `${plannerPickDay}-${plannerPickMeal}`;
-  if (!mealPlan[key]) mealPlan[key] = { adult: null, kid: null };
-  if (plannerPickFor === 'adult') mealPlan[key].adult = id;
-  else mealPlan[key].kid = id;
-  saveToLS();
-  openPlannerPick(plannerPickDay, plannerPickMeal);
-  renderPlanner();
-}
-
-function plannerRemove() {
-  const key = `${plannerPickDay}-${plannerPickMeal}`;
-  if (!mealPlan[key]) mealPlan[key] = { adult: null, kid: null };
-  if (plannerPickFor === 'adult') mealPlan[key].adult = null;
-  else mealPlan[key].kid = null;
-  // Clean up empty entries
-  if (!mealPlan[key].adult && !mealPlan[key].kid) delete mealPlan[key];
-  saveToLS();
-  openPlannerPick(plannerPickDay, plannerPickMeal);
-  renderPlanner();
-}
-
-function closePlannerPick() {
-  document.getElementById('planner-pick-search-area').style.display = 'none';
-  closeModal('planner-pick-modal');
-}
-
-function clearPlanner() {
-  if (!confirm(t('plannerClearConfirm'))) return;
-  mealPlan = {};
-  saveToLS();
-  renderPlanner();
-}
-
-// ======================== SHOPPING ========================
-function renderShopRecipes() {
-  const el = document.getElementById('shop-recipe-select');
-  el.innerHTML = recipes.map(r => {
-    const n = lang==='en' && r.nameEn ? r.nameEn : r.name;
-    return `<span class="shop-recipe-tag ${shopChecked.has(r.id)?'selected':''}" onclick="toggleShopRecipe(${r.id})">${n}</span>`;
-  }).join('');
-}
-
-function toggleShopRecipe(id) {
-  if (shopChecked.has(id)) shopChecked.delete(id);
-  else shopChecked.add(id);
-  saveToLS();
-  renderShopRecipes();
-  generateShoppingList();
-}
-
-function generateShoppingFromPlanner() {
-  const ids = new Set();
-  Object.values(mealPlan).forEach(slot => {
-    if (slot) {
-      if (slot.adult) ids.add(slot.adult);
-      if (slot.kid) ids.add(slot.kid);
-    }
-  });
-  if (!ids.size) return alert(t('plannerEmpty'));
-  shopChecked = ids;
-  saveToLS();
-  switchTab('shopping');
-  renderShopRecipes();
-  generateShoppingList();
-}
-
-function generateShoppingList() {
-  const el = document.getElementById('shop-list');
-  const all = [];
-  shopChecked.forEach(id => {
-    const r = recipes.find(rec => rec.id === id);
-    if (r) {
-      const ingr = lang === 'en' && r.ingredientsEn ? r.ingredientsEn : r.ingredients;
-      ingr.forEach(i => all.push(i));
-    }
-  });
-  if (!all.length) { el.innerHTML = `<li style="color:var(--text2);padding:.8rem;">—</li>`; return; }
-  const counts = {};
-  all.forEach(i => { const k = i.toLowerCase().replace(/^\d+[gml]\s*/,'').trim(); counts[k] = counts[k]||{text:i,count:0}; counts[k].count++; });
-  el.innerHTML = Object.values(counts).map(c =>
-    `<li><input type="checkbox"><span>${c.text}${c.count>1?` <span style="color:var(--text2);font-size:.78rem;">(×${c.count})</span>`:''}</span></li>`
-  ).join('');
-  el.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-    cb.addEventListener('change', function() { this.closest('li').classList.toggle('checked', this.checked); });
-  });
-}
-
-function clearShoppingChecks() {
-  shopChecked.clear();
-  saveToLS();
-  renderShopRecipes();
-  document.getElementById('shop-list').innerHTML = `<li style="color:var(--text2);padding:.8rem;">—</li>`;
-}
 
 // ======================== INGREDIENT SEARCH ========================
 function openIngredientSearch() {
@@ -1451,24 +989,9 @@ document.getElementById('ingredient-modal').addEventListener('click', function(e
   }
 });
 
-// ======================== TABS ========================
-function switchTab(name) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
-  document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.id === `tab-${name}`));
-  if (name === 'planner') renderPlanner();
-  if (name === 'tasks') renderTasks();
-  if (name === 'shopping') { renderShopRecipes(); generateShoppingList(); }
-}
-
-document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
-});
-
 // ======================== INIT ========================
 applyLang();
 render();
-renderPlanner();
-renderTasks();
 </script>
 </body>
 </html>
