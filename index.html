@@ -94,7 +94,8 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--p
 .recipe-card-body .stars { color: #f59e0b; font-size: .8rem; margin-top: .2rem; }
 .recipe-card-body .tags { margin-top: .35rem; display: flex; flex-wrap: wrap; gap: .25rem; }
 .tag { background: var(--tag-bg); color: var(--tag-text); padding: .15rem .6rem; border-radius: 20px; font-size: .7rem; font-weight: 500; }
-.age-filter { display: flex; gap: .35rem; margin-bottom: .75rem; flex-wrap: wrap; }
+.age-filter { display: flex; gap: .35rem; margin-bottom: .5rem; flex-wrap: wrap; }
+.diet-filter { display: flex; gap: .3rem; margin-bottom: .4rem; flex-wrap: wrap; }
 .age-btn { padding: .25rem .65rem; border-radius: 20px; border: 1px solid var(--border); background: var(--surface); color: var(--text2); font-size: .75rem; cursor: pointer; font-weight: 500; transition: .15s; }
 .age-btn:hover { border-color: #f472b6; color: #f472b6; }
 .age-btn.active { background: linear-gradient(135deg, var(--baby), #f472b6); color: #fff; border: none; }
@@ -155,12 +156,34 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--p
 .ingr-match { font-size: .8rem; color: var(--text2); margin-top: .5rem; }
 .voice-btn.listening { background: var(--danger); animation: pulse 1s infinite; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }
-@media (max-width: 600px) {
+.controls-bar { position: sticky; top: 0; z-index: 100; background: var(--bg); padding: .6rem 0 .3rem; margin: -.6rem 0 .2rem; }
+.controls-bar .controls { margin-bottom: .3rem; }
+.search-wrap { position: relative; display: flex; flex: 1; min-width: 130px; align-items: center; }
+.search-wrap input { flex: 1; padding: .55rem 2.2rem .55rem 1rem; border: 1px solid var(--border); border-radius: var(--radius-lg); font-size: .85rem; background: var(--input-bg); color: var(--text); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: .2s; width: 100%; }
+.search-wrap input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
+.search-clear { position: absolute; right: 2.4rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text2); cursor: pointer; font-size: .85rem; padding: .2rem .3rem; display: none; line-height: 1; border-radius: 50%; }
+.search-clear:hover { color: var(--text); background: var(--border); }
+.search-wrap .voice-btn { position: absolute; right: .2rem; top: 50%; transform: translateY(-50%); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; padding: 0; font-size: .85rem; }
+.controls-more { display: none; gap: .4rem; flex-wrap: wrap; align-items: center; margin-bottom: .35rem; }
+.controls-more.open { display: flex; }
+.more-toggle { transition: transform .2s; }
+.more-toggle.open { transform: rotate(180deg); }
+.fav-filter-label { display: flex; align-items: center; gap: .25rem; font-size: .8rem; cursor: pointer; color: var(--text2); }
+.fav-filter-label input { accent-color: var(--primary); }
+
+@media (max-width: 700px) {
   .recipe-grid { grid-template-columns: 1fr; }
   .cooking-step-text { font-size: 1.2rem; }
-  .controls input, .controls select { min-width: 90px; }
+  .controls { gap: .35rem; }
+  .controls-bar { padding: .4rem 0 .2rem; }
+  header { padding: 1rem 1rem .8rem !important; }
+  header h1 { font-size: 1.3rem !important; }
+}
+@media (max-width: 600px) {
   .header-actions { position: static; transform: none; margin-top: .3rem; }
-  header { flex-direction: column; }
+  header { flex-direction: column; padding: .8rem .8rem .6rem !important; }
+  header h1 { font-size: 1.15rem !important; }
+  .container { padding: .8rem; }
 }
 @media print {
   .controls,.modal-overlay,.cooking-overlay,.btn,.header-actions,.topbar-btn { display: none !important; }
@@ -190,41 +213,48 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--p
     <span style="margin-left:auto;font-size:.75rem;color:var(--text2);">→</span>
     <button class="btn btn-secondary" onclick="event.stopPropagation();dismissTip()" style="padding:.1rem .4rem;font-size:.7rem;">✕</button>
   </div>
-  <div class="controls">
-    <div style="display:flex;gap:.3rem;flex:1;min-width:130px;">
-      <input type="text" id="search" data-lang="searchPlaceholder" placeholder="" style="flex:1;padding:.55rem 1rem;border:1px solid var(--border);border-radius:var(--radius-lg);font-size:.85rem;background:var(--input-bg);color:var(--text);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);">
-      <button class="btn btn-secondary" id="voice-search-btn" onclick="toggleVoiceSearch()" style="padding:.35rem .6rem;font-size:.9rem;border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;" title="Hlasové vyhľadávanie">🎤</button>
+  <div class="controls-bar" id="controls-bar">
+    <div class="controls">
+      <div class="search-wrap">
+        <input type="text" id="search" data-lang="searchPlaceholder" placeholder="">
+        <button class="search-clear" id="search-clear" onclick="clearSearch()">✕</button>
+        <button class="btn btn-secondary voice-btn" id="voice-search-btn" onclick="toggleVoiceSearch()" title="Hlasové vyhľadávanie">🎤</button>
+      </div>
+      <select id="filter-category">
+        <option value="" data-lang="allCategories">Všetky</option>
+        <option>Hlavné jedlá</option><option>Polievky</option><option>Šaláty</option><option>Dezerty</option><option>Pečivo</option><option>Nápoje</option><option>Predjedlá</option><option>Raňajky</option><option>Prílohy</option><option>Detské</option>
+      </select>
+      <button class="btn btn-primary" onclick="openFormModal()" data-lang="btnAdd">➕</button>
+      <button class="btn btn-secondary more-toggle" id="more-toggle" onclick="toggleMore()" title="Ďalšie možnosti">⬇</button>
     </div>
-    <select id="filter-category">
-      <option value="" data-lang="allCategories">Všetky</option>
-      <option>Hlavné jedlá</option><option>Polievky</option><option>Šaláty</option><option>Dezerty</option><option>Pečivo</option><option>Nápoje</option><option>Predjedlá</option><option>Raňajky</option><option>Prílohy</option><option>Detské</option>
-    </select>
-    <button class="btn btn-primary" onclick="openFormModal()" data-lang="btnAdd">+ Nový</button>
-    <button class="btn btn-secondary" onclick="openIngredientSearch()" data-lang="btnByIngr">🥕 Suroviny</button>
-    <button class="btn btn-secondary" onclick="randomRecipe()">🎲 <span data-lang="btnRandom">Náhodný</span></button>
-    <button class="btn btn-secondary" onclick="document.getElementById('import-file').click()">📥</button>
-    <button class="btn btn-secondary" onclick="exportRecipes()">📤</button>
-    <select id="filter-collection" onchange="render()" style="min-width:100px;">
-      <option value="">📁 Všetky</option>
-    </select>
-    <button class="btn btn-secondary" onclick="openCollections()" data-lang="btnCollections">📁 Kolekcie</button>
-    <button class="btn btn-secondary" onclick="openHistory()" data-lang="btnHistory">📜 História</button>
-    <input type="file" id="import-file" class="import-hidden" accept=".json" onchange="importRecipes(event)">
-    <button class="btn btn-secondary" onclick="showImportUrlModal()">🌐 <span data-lang="btnImportUrl">Import z URL</span></button>
-  </div>
-  <div class="age-filter" id="age-filter">
-    <button class="age-btn active" data-age="" onclick="setAgeFilter('')"><span data-lang="allAges">Všetky veky</span></button>
-    <button class="age-btn" data-age="baby-6m" onclick="setAgeFilter('baby-6m')">👶 <span data-lang="age6m">6m+</span></button>
-    <button class="age-btn" data-age="baby-1" onclick="setAgeFilter('baby-1')">👶 <span data-lang="age1">1r+</span></button>
-    <button class="age-btn" data-age="baby-2" onclick="setAgeFilter('baby-2')">👶 <span data-lang="age2">2r+</span></button>
-    <button class="age-btn" data-age="baby-3" onclick="setAgeFilter('baby-3')">👶 <span data-lang="age3">3r+</span></button>
-  </div>
-  <div class="diet-filter" id="diet-filter" style="display:flex;gap:.3rem;margin-bottom:.6rem;flex-wrap:wrap;">
-    <button class="diet-btn active" data-diet="" onclick="setDietFilter('')" data-lang="allDiets">Všetky</button>
-    <button class="diet-btn" data-diet="vegan" onclick="setDietFilter('vegan')">🌱 Vegan</button>
-    <button class="diet-btn" data-diet="vegetarian" onclick="setDietFilter('vegetarian')">🥬 Vegetarián</button>
-    <button class="diet-btn" data-diet="gluten-free" onclick="setDietFilter('gluten-free')">🌾 Bez lepku</button>
-    <button class="diet-btn" data-diet="lactose-free" onclick="setDietFilter('lactose-free')">🥛 Bez laktózy</button>
+    <div class="controls-more" id="controls-more">
+      <button class="btn btn-secondary" onclick="randomRecipe()">🎲 <span data-lang="btnRandom">Náhodný</span></button>
+      <button class="btn btn-secondary" onclick="openIngredientSearch()">🥕 <span data-lang="btnByIngr">Suroviny</span></button>
+      <label class="fav-filter-label"><input type="checkbox" id="filter-fav" onchange="render()"> ❤️</label>
+      <button class="btn btn-secondary" onclick="openCollections()">📁 <span data-lang="btnCollections">Kolekcie</span></button>
+      <button class="btn btn-secondary" onclick="openHistory()">📜 <span data-lang="btnHistory">História</span></button>
+      <button class="btn btn-secondary" onclick="showImportUrlModal()">🌐 <span data-lang="btnImportUrl">Import z URL</span></button>
+      <button class="btn btn-secondary" onclick="document.getElementById('import-file').click()">📥</button>
+      <button class="btn btn-secondary" onclick="exportRecipes()">📤</button>
+      <select id="filter-collection" onchange="render()">
+        <option value="">📁 Všetky</option>
+      </select>
+      <input type="file" id="import-file" class="import-hidden" accept=".json" onchange="importRecipes(event)">
+    </div>
+    <div class="age-filter" id="age-filter">
+      <button class="age-btn active" data-age="" onclick="setAgeFilter('')"><span data-lang="allAges">Všetky veky</span></button>
+      <button class="age-btn" data-age="baby-6m" onclick="setAgeFilter('baby-6m')">👶 <span data-lang="age6m">6m+</span></button>
+      <button class="age-btn" data-age="baby-1" onclick="setAgeFilter('baby-1')">👶 <span data-lang="age1">1r+</span></button>
+      <button class="age-btn" data-age="baby-2" onclick="setAgeFilter('baby-2')">👶 <span data-lang="age2">2r+</span></button>
+      <button class="age-btn" data-age="baby-3" onclick="setAgeFilter('baby-3')">👶 <span data-lang="age3">3r+</span></button>
+    </div>
+    <div class="diet-filter" id="diet-filter">
+      <button class="diet-btn active" data-diet="" onclick="setDietFilter('')" data-lang="allDiets">Všetky</button>
+      <button class="diet-btn" data-diet="vegan" onclick="setDietFilter('vegan')">🌱 Vegan</button>
+      <button class="diet-btn" data-diet="vegetarian" onclick="setDietFilter('vegetarian')">🥬 Vegetarián</button>
+      <button class="diet-btn" data-diet="gluten-free" onclick="setDietFilter('gluten-free')">🌾 Bez lepku</button>
+      <button class="diet-btn" data-diet="lactose-free" onclick="setDietFilter('lactose-free')">🥛 Bez laktózy</button>
+    </div>
   </div>
   <div class="recipe-grid" id="recipe-grid"></div>
 </div>
@@ -380,7 +410,7 @@ const LANG = {
     appTitle: 'Receptár', appSubtitle: 'Zbierka nápadov na varenie a pečenie',
     tabRecipes: '📖 Recepty',
     searchPlaceholder: 'Hľadať...', allCategories: 'Všetky kategórie',
-    btnAdd: '+ Nový', btnByIngr: '🥕 Suroviny', btnRandom: 'Náhodný',
+    btnAdd: '➕ Nový', btnByIngr: '🥕 Suroviny', btnRandom: 'Náhodný',
     formTitle: 'Nový recept', formName: 'Názov', formNamePlace: 'Názov',
     formCategory: 'Kategória', formTime: 'Čas (min)', formImage: 'Obrázok',
     formImagePlace: 'URL', formUpload: 'Nahrať', formNutrition: 'Nutričné hodnoty (na porciu)',
@@ -419,7 +449,7 @@ const LANG = {
     appTitle: 'Recipe Book', appSubtitle: 'Collection of cooking & baking ideas',
     tabRecipes: '📖 Recipes',
     searchPlaceholder: 'Search...', allCategories: 'All categories',
-    btnAdd: '+ New', btnByIngr: '🥕 Ingredients', btnRandom: 'Random',
+    btnAdd: '➕ New', btnByIngr: '🥕 Ingredients', btnRandom: 'Random',
     formTitle: 'New Recipe', formName: 'Name', formNamePlace: 'Recipe name',
     formCategory: 'Category', formTime: 'Time (min)', formImage: 'Image',
     formImagePlace: 'URL', formUpload: 'Upload', formNutrition: 'Nutrition (per serving)',
@@ -661,6 +691,10 @@ function saveToLS() {
   localStorage.setItem('recipes', JSON.stringify(recipes));
 }
 
+function norm(s) {
+  return (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
 // ======================== RECIPES TAB ========================
 function render() {
   const grid = document.getElementById('recipe-grid');
@@ -670,7 +704,7 @@ function render() {
   let filtered = recipes.filter(r => {
     const name = lang === 'en' && r.nameEn ? r.nameEn : r.name;
     const tags = lang === 'en' && r.tagsEn ? r.tagsEn : r.tags;
-    const matchSearch = name.toLowerCase().includes(search) || tags.some(t => t.toLowerCase().includes(search));
+    const matchSearch = norm(name).includes(norm(search)) || tags.some(t => norm(t).includes(norm(search)));
     const matchCat = !cat || r.category === cat;
     const matchFav = !showFav || r.favorite;
     const matchAge = matchesAgeFilter(r);
@@ -711,8 +745,22 @@ function render() {
   updateCollectionFilter();
 }
 
-document.getElementById('search').addEventListener('input', render);
+document.getElementById('search').addEventListener('input', function() {
+  document.getElementById('search-clear').style.display = this.value ? 'block' : 'none';
+  render();
+});
 document.getElementById('filter-category').addEventListener('change', render);
+
+function clearSearch() {
+  document.getElementById('search').value = '';
+  document.getElementById('search-clear').style.display = 'none';
+  render();
+}
+
+function toggleMore() {
+  document.getElementById('controls-more').classList.toggle('open');
+  document.getElementById('more-toggle').classList.toggle('open');
+}
 
 function toggleFav(id) {
   const r = recipes.find(rec => rec.id === id);
@@ -722,17 +770,7 @@ function toggleFav(id) {
   render();
 }
 
-function updateFavFilter() {
-  let el = document.getElementById('filter-fav');
-  if (!el) {
-    const controls = document.querySelector('.controls');
-    const lbl = document.createElement('label');
-    lbl.style.cssText = 'display:flex;align-items:center;gap:.3rem;font-size:.82rem;white-space:nowrap;color:var(--text2);cursor:pointer;';
-    lbl.innerHTML = `<input type="checkbox" id="filter-fav" onchange="render()"> ❤️`;
-    controls.appendChild(lbl);
-    el = document.getElementById('filter-fav');
-  }
-}
+function updateFavFilter() {}
 
 // ======================== RANDOM ========================
 function randomRecipe() {
@@ -1146,6 +1184,7 @@ function toggleVoiceSearch() {
   voiceSearch.onresult = function(e) {
     const txt = e.results[0][0].transcript;
     document.getElementById('search').value = txt;
+    document.getElementById('search-clear').style.display = txt ? 'block' : 'none';
     render();
     stopVoiceSearch();
   };
@@ -1177,8 +1216,8 @@ function openIngredientSearch() {
 
 function renderIngredientSearch() {
   const all = JSON.parse(document.getElementById('ingredient-modal').dataset.all || '[]');
-  const filter = document.getElementById('ingr-search').value.toLowerCase();
-  const visible = filter ? all.filter(i => i.toLowerCase().includes(filter)) : all;
+  const filter = norm(document.getElementById('ingr-search').value);
+  const visible = filter ? all.filter(i => norm(i).includes(filter)) : all;
   const list = document.getElementById('ingr-list');
   list.innerHTML = visible.map(i =>
     `<span class="ingr-tag ${ingredientSearchSelected.has(i)?'selected':''}" onclick="toggleIngrSearch('${i.replace(/'/g,"\\'")}')">${i}</span>`
@@ -1190,11 +1229,11 @@ function renderIngredientSearch() {
   const cat = document.getElementById('ingr-category').value;
   const fullMatch = recipes.filter(r => {
     const ingr = lang === 'en' && r.ingredientsEn ? r.ingredientsEn : r.ingredients;
-    return (!cat || r.category === cat) && sel.every(s => ingr.some(i => i.toLowerCase().includes(s.toLowerCase())));
+    return (!cat || r.category === cat) && sel.every(s => ingr.some(i => norm(i).includes(norm(s))));
   });
   const partialMatch = recipes.filter(r => {
     const ingr = lang === 'en' && r.ingredientsEn ? r.ingredientsEn : r.ingredients;
-    return (!cat || r.category === cat) && !fullMatch.includes(r) && sel.some(s => ingr.some(i => i.toLowerCase().includes(s.toLowerCase())));
+    return (!cat || r.category === cat) && !fullMatch.includes(r) && sel.some(s => ingr.some(i => norm(i).includes(norm(s))));
   });
   let html = '';
   if (fullMatch.length) html += `<div style="color:var(--success);">✅ ${fullMatch.length} ${t('matchCount')}</div>`;
@@ -1365,7 +1404,7 @@ function applyIngredientSearch() {
     const cat = document.getElementById('ingr-category').value;
     const matching = recipes.filter(r => {
       const ingr = lang === 'en' && r.ingredientsEn ? r.ingredientsEn : r.ingredients;
-      return sel.some(s => ingr.some(i => i.toLowerCase().includes(s.toLowerCase()))) && (!cat || r.category === cat);
+      return sel.some(s => ingr.some(i => norm(i).includes(norm(s)))) && (!cat || r.category === cat);
     });
     const grid = document.getElementById('recipe-grid');
     if (!matching.length) { grid.innerHTML = `<div class="empty-state"><h3>😕 ${t('noRecipes')}</h3></div>`; return; }
@@ -1441,7 +1480,7 @@ function importFromUrl() {
       let timeNum = parseInt(time.replace(/[^0-9]/g,'')) || 30;
       if (time.includes('H') || time.includes('h')) timeNum = timeNum * 60;
       const cats = ['Hlavné jedlá','Polievky','Šaláty','Dezerty','Pečivo','Nápoje','Predjedlá','Raňajky','Prílohy','Detské'];
-      const catMatch = cats.find(c => category.toLowerCase().includes(c.toLowerCase()) || c.toLowerCase().includes(category.toLowerCase()));
+      const catMatch = cats.find(c => norm(category).includes(norm(c)) || norm(c).includes(norm(category)));
       let yieldNum = parseInt(yield_) || 4;
       openFormModal();
       document.getElementById('r-name').value = name;
