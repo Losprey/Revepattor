@@ -38,6 +38,7 @@
   --radius-xl: 24px;
   --baby: #ec4899;
   --font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --section-bg: rgba(0,0,0,.02);
 }
 body.dark {
   --bg: #0c0a09;
@@ -54,6 +55,7 @@ body.dark {
   --modal-overlay: rgba(0,0,0,.5);
   --card-shadow: 0 1px 2px rgba(0,0,0,.2), 0 2px 8px rgba(0,0,0,.15);
   --card-shadow-hover: 0 4px 20px rgba(0,0,0,.3);
+  --section-bg: rgba(255,255,255,.04);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.6; transition: background .3s, color .3s; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
@@ -61,11 +63,12 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); line
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--text2); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text); }
-header { background: radial-gradient(circle at 20% 50%, rgba(255,255,255,.08) 0%, transparent 50%), linear-gradient(135deg, var(--primary), #f39c12); color: #fff; padding: 1.5rem 2rem 1.2rem; text-align: center; position: relative; display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: .5rem; box-shadow: 0 2px 12px rgba(0,0,0,.08); }
-header h1 { font-size: 1.6rem; font-weight: 700; }
-header p { font-size: .9rem; opacity: .9; width:100%; }
-.header-actions { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); display: flex; gap: .4rem; }
-.topbar-btn { background: rgba(255,255,255,.2); border: none; color: #fff; padding: .35rem .65rem; border-radius: 20px; cursor: pointer; font-size: .8rem; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: .2s; }
+header { background: linear-gradient(135deg, var(--primary), #f39c12); color: #fff; padding: .7rem 1.2rem; display: flex; justify-content: space-between; align-items: center; gap: .5rem; box-shadow: 0 2px 12px rgba(0,0,0,.08); }
+header h1 { font-size: 1.15rem; font-weight: 700; }
+header h1 span { font-size: 1rem; }
+header p { display: none; }
+.header-actions { display: flex; gap: .35rem; }
+.topbar-btn { background: rgba(255,255,255,.2); border: none; color: #fff; padding: .3rem .55rem; border-radius: 20px; cursor: pointer; font-size: .75rem; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: .2s; white-space: nowrap; }
 .topbar-btn:hover { background: rgba(255,255,255,.35); transform: scale(1.05); }
 .container { max-width: 960px; margin: 0 auto; padding: 1.2rem; }
 .controls { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1rem; align-items: center; }
@@ -82,18 +85,19 @@ header p { font-size: .9rem; opacity: .9; width:100%; }
 .btn-danger:hover { background: #dc2626; }
 input, select, textarea { background: var(--input-bg); color: var(--text); border-color: var(--border); }
 input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
-.recipe-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; }
-.recipe-card { background: var(--surface); border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--card-shadow); transition: .25s cubic-bezier(.4,0,.2,1); cursor: pointer; border: 1px solid var(--border); position: relative; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
-.recipe-card:hover { transform: translateY(-3px); box-shadow: var(--card-shadow-hover); }
-.recipe-card .fav-btn { position: absolute; top: .5rem; right: .5rem; background: rgba(255,255,255,.85); border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 1.1rem; cursor: pointer; z-index: 2; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: .2s; }
+.recipe-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: .75rem; }
+.recipe-card { background: var(--surface); border-radius: var(--radius-sm); overflow: hidden; box-shadow: var(--card-shadow); transition: .25s cubic-bezier(.4,0,.2,1); cursor: pointer; border: 1px solid var(--border); position: relative; }
+.recipe-card:hover { transform: translateY(-2px); box-shadow: var(--card-shadow-hover); }
+.recipe-card .fav-btn { position: absolute; top: .3rem; right: .3rem; background: rgba(255,255,255,.85); border: none; border-radius: 50%; width: 28px; height: 28px; font-size: .9rem; cursor: pointer; z-index: 2; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: .2s; }
 .recipe-card .fav-btn:hover { transform: scale(1.15); }
-.recipe-card-img { width: 100%; height: 140px; object-fit: cover; background: var(--border); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: var(--text2); border-radius: var(--radius-md) var(--radius-md) 0 0; }
-.recipe-card-body { padding: .85rem; }
-.recipe-card-body h3 { font-size: .92rem; font-weight: 600; }
-.recipe-card-body .meta { font-size: .75rem; color: var(--text2); display: flex; gap: .5rem; flex-wrap: wrap; }
-.recipe-card-body .stars { color: #f59e0b; font-size: .8rem; margin-top: .2rem; }
-.recipe-card-body .tags { margin-top: .35rem; display: flex; flex-wrap: wrap; gap: .25rem; }
-.tag { background: var(--tag-bg); color: var(--tag-text); padding: .15rem .6rem; border-radius: 20px; font-size: .7rem; font-weight: 500; }
+.recipe-card-img { width: 100%; height: 110px; object-fit: cover; background: var(--border); display: flex; align-items: center; justify-content: center; font-size: 2rem; color: var(--text2); border-radius: var(--radius-sm) var(--radius-sm) 0 0; }
+.recipe-card-body { padding: .6rem .7rem .7rem; }
+.recipe-card-body h3 { font-size: .85rem; font-weight: 600; line-height: 1.3; }
+.recipe-card-body .meta { font-size: .7rem; color: var(--text2); display: flex; gap: .35rem; flex-wrap: wrap; }
+.recipe-card-body .meta-line { display: flex; align-items: center; gap: .35rem; margin-top: .15rem; font-size: .7rem; color: var(--text2); flex-wrap: wrap; }
+.recipe-card-body .stars { color: #f59e0b; font-size: .7rem; }
+.recipe-card-body .tags { margin-top: .25rem; display: flex; flex-wrap: wrap; gap: .2rem; }
+.tag { background: var(--tag-bg); color: var(--tag-text); padding: .1rem .5rem; border-radius: 20px; font-size: .65rem; font-weight: 500; }
 .age-filter { display: flex; gap: .35rem; margin-bottom: .5rem; flex-wrap: wrap; }
 .diet-filter { display: flex; gap: .3rem; margin-bottom: .4rem; flex-wrap: wrap; }
 .age-btn { padding: .25rem .65rem; border-radius: 20px; border: 1px solid var(--border); background: var(--surface); color: var(--text2); font-size: .75rem; cursor: pointer; font-weight: 500; transition: .15s; }
@@ -107,49 +111,54 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--p
 .empty-state h3 { color: var(--text); }
 .modal-overlay { display: none; position: fixed; inset: 0; background: var(--modal-overlay); z-index: 1000; align-items: center; justify-content: center; padding: 1rem; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
 .modal-overlay.active { display: flex; }
-.modal { background: var(--surface-solid); border-radius: var(--radius-xl); max-width: 640px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 1.25rem; box-shadow: 0 20px 60px rgba(0,0,0,.12); border: 1px solid var(--border); }
-.modal h2 { margin-bottom: .75rem; font-size: 1.2rem; }
-.form-group { margin-bottom: .8rem; }
-.form-group label { display: block; font-weight: 600; margin-bottom: .25rem; font-size: .78rem; color: var(--text2); }
+.modal { background: var(--surface-solid); border-radius: var(--radius-xl); max-width: 640px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 1rem 1.25rem; box-shadow: 0 20px 60px rgba(0,0,0,.12); border: 1px solid var(--border); }
+.modal h2 { margin-bottom: .6rem; font-size: 1.15rem; }
+.modal hr { border: none; border-top: 1px solid var(--border); margin: .5rem 0; }
+.form-group { margin-bottom: .65rem; }
+.form-group label { display: block; font-weight: 600; margin-bottom: .2rem; font-size: .75rem; color: var(--text2); text-transform: uppercase; letter-spacing: .03em; }
 .form-group input, .form-group textarea, .form-group select { width: 100%; padding: .5rem .75rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: .85rem; font-family: inherit; background: var(--input-bg); color: var(--text); transition: .2s; }
 .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
-.form-group textarea { resize: vertical; min-height: 55px; }
-.form-row { display: flex; gap: .7rem; }
+.form-group textarea { resize: vertical; min-height: 50px; }
+.form-row { display: flex; gap: .6rem; }
 .form-row > * { flex: 1; }
-.modal-footer { display: flex; gap: .5rem; justify-content: flex-end; flex-wrap: wrap; margin-top: .8rem; }
-.detail-img { width: 100%; height: 200px; object-fit: cover; border-radius: var(--radius-md); background: var(--border); display: flex; align-items: center; justify-content: center; font-size: 3.5rem; margin-bottom: .8rem; color: var(--text2); }
-.detail-meta { display: flex; gap: .8rem; font-size: .85rem; color: var(--text2); margin-bottom: .6rem; flex-wrap: wrap; }
-.detail-actions { display: flex; gap: .4rem; margin-bottom: .8rem; flex-wrap: wrap; }
-.detail-section h3 { margin: .8rem 0 .35rem; font-size: 1rem; border-bottom: 2px solid var(--tag-bg); padding-bottom: .2rem; }
-.detail-section ul, .detail-section ol { padding-left: 1.2rem; }
-.detail-section li { margin-bottom: .25rem; }
+.form-section { background: var(--section-bg); border-radius: var(--radius-sm); padding: .6rem .75rem; margin-bottom: .65rem; }
+.form-section-title { font-size: .7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--text2); margin-bottom: .4rem; }
+.modal-footer { display: flex; gap: .4rem; justify-content: flex-end; flex-wrap: wrap; margin-top: .6rem; }
+.detail-img { width: 100%; height: 180px; object-fit: cover; border-radius: var(--radius-sm); background: var(--border); display: flex; align-items: center; justify-content: center; font-size: 3rem; margin-bottom: .6rem; color: var(--text2); }
+.detail-meta { display: flex; gap: .6rem; font-size: .82rem; color: var(--text2); margin-bottom: .5rem; flex-wrap: wrap; }
+.detail-actions { display: flex; gap: .35rem; margin-bottom: .6rem; flex-wrap: wrap; }
+.detail-section { background: var(--section-bg); border-radius: var(--radius-sm); padding: .6rem .75rem; margin-bottom: .5rem; }
+.detail-section h3 { font-size: .85rem; font-weight: 600; margin-bottom: .35rem; color: var(--text); display: flex; align-items: center; gap: .35rem; }
+.detail-section ul, .detail-section ol { padding-left: 1.1rem; font-size: .85rem; }
+.detail-section li { margin-bottom: .2rem; line-height: 1.4; }
 .star-rating { display: inline-flex; gap: .2rem; font-size: 1.4rem; cursor: pointer; }
 .star-rating .star { color: var(--border); transition: .15s; }
 .star-rating .star.active { color: #f59e0b; }
 .star-rating .star:hover { color: #f59e0b; transform: scale(1.15); }
-.cooking-overlay { display: none; position: fixed; inset: 0; background: var(--cooking-bg); z-index: 2000; flex-direction: column; color: var(--cooking-text); padding: 1.5rem; }
+.cooking-overlay { display: none; position: fixed; inset: 0; background: var(--cooking-bg); z-index: 2000; flex-direction: column; color: var(--cooking-text); padding: .8rem 1rem; }
 .cooking-overlay.active { display: flex; }
-.cooking-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: .8rem; flex-wrap: wrap; gap: .5rem; }
-.cooking-header h2 { font-size: 1.2rem; }
-.cooking-top-actions { display: flex; gap: .4rem; }
-.cooking-timer { background: rgba(255,255,255,.1); padding: .4rem .9rem; border-radius: var(--radius-lg); font-size: 1.1rem; font-weight: 700; display: inline-flex; align-items: center; gap: .5rem; }
+.cooking-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: .5rem; gap: .4rem; flex-wrap: wrap; }
+.cooking-header h2 { font-size: 1rem; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cooking-top-actions { display: flex; gap: .3rem; flex-shrink: 0; }
+.cooking-top-actions button { padding: .3rem .5rem; font-size: .75rem; }
+.cooking-timer { background: rgba(255,255,255,.1); padding: .3rem .7rem; border-radius: var(--radius-lg); font-size: .95rem; font-weight: 700; display: inline-flex; align-items: center; gap: .4rem; cursor: pointer; }
 .cooking-timer.running { color: #f59e0b; }
-.cooking-img { width: 100%; max-height: 260px; object-fit: contain; border-radius: var(--radius-md); margin-bottom: .8rem; background: rgba(255,255,255,.05); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; }
-.cooking-step-indicator { text-align: center; font-size: .85rem; color: #78716c; margin-bottom: .4rem; }
-.cooking-step-text { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; text-align: center; padding: 1rem; cursor: pointer; line-height: 1.5; }
-.cooking-nav { display: flex; justify-content: space-between; align-items: center; padding: .8rem 0; gap: .8rem; }
-.cooking-nav button { background: rgba(255,255,255,.1); color: #fff; border: none; padding: .7rem 1.3rem; border-radius: var(--radius-lg); font-size: .95rem; cursor: pointer; font-weight: 600; transition: .2s; }
+.cooking-img { width: 100%; max-height: 200px; object-fit: contain; border-radius: var(--radius-sm); margin-bottom: .5rem; background: rgba(255,255,255,.05); display: flex; align-items: center; justify-content: center; font-size: 2rem; }
+.cooking-step-indicator { text-align: center; font-size: .78rem; color: #78716c; margin-bottom: .25rem; }
+.cooking-step-text { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; text-align: center; padding: .8rem; cursor: pointer; line-height: 1.5; }
+.cooking-nav { display: flex; justify-content: space-between; align-items: center; padding: .5rem 0; gap: .6rem; }
+.cooking-nav button { background: rgba(255,255,255,.1); color: #fff; border: none; padding: .6rem 1rem; border-radius: var(--radius-lg); font-size: .85rem; cursor: pointer; font-weight: 600; transition: .2s; }
 .cooking-nav button:hover { background: rgba(255,255,255,.2); }
 .cooking-nav button:disabled { opacity: .3; cursor: not-allowed; }
-.cooking-progress { height: 4px; background: rgba(255,255,255,.1); border-radius: 4px; }
-.cooking-progress-bar { height: 100%; background: linear-gradient(90deg, var(--primary), #f39c12); border-radius: 4px; transition: width .3s; }
+.cooking-progress { height: 3px; background: rgba(255,255,255,.1); border-radius: 3px; }
+.cooking-progress-bar { height: 100%; background: linear-gradient(90deg, var(--primary), #f39c12); border-radius: 3px; transition: width .3s; }
 
 .import-hidden { display: none; }
 .fav-btn-active { color: #ef4444 !important; }
-.nutrition-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: .5rem; margin: .5rem 0; }
-.nutrition-item { text-align: center; background: var(--border); border-radius: var(--radius-sm); padding: .5rem .3rem; }
-.nutrition-item .val { font-weight: 700; font-size: 1.1rem; }
-.nutrition-item .lbl { font-size: .7rem; color: var(--text2); }
+.nutrition-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: .35rem; margin: .4rem 0; }
+.nutrition-item { text-align: center; background: var(--border); border-radius: var(--radius-sm); padding: .35rem .2rem; }
+.nutrition-item .val { font-weight: 700; font-size: 1rem; }
+.nutrition-item .lbl { font-size: .6rem; color: var(--text2); text-transform: uppercase; letter-spacing: .02em; }
 .ingredient-search-modal .ingr-list { max-height: 300px; overflow-y: auto; display: flex; flex-wrap: wrap; gap: .35rem; padding: .5rem 0; }
 .ingr-tag { background: var(--border); padding: .3rem .65rem; border-radius: 20px; font-size: .8rem; cursor: pointer; user-select: none; transition: .1s; }
 .ingr-tag.selected { background: var(--primary); color: #fff; }
@@ -172,18 +181,31 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--p
 .fav-filter-label input { accent-color: var(--primary); }
 
 @media (max-width: 700px) {
-  .recipe-grid { grid-template-columns: 1fr; }
-  .cooking-step-text { font-size: 1.2rem; }
-  .controls { gap: .35rem; }
-  .controls-bar { padding: .4rem 0 .2rem; }
-  header { padding: 1rem 1rem .8rem !important; }
-  header h1 { font-size: 1.3rem !important; }
+  .recipe-grid { grid-template-columns: 1fr 1fr; gap: .5rem; }
+  .cooking-step-text { font-size: 1.1rem; }
+  .controls { gap: .3rem; }
+  .controls-bar { padding: .3rem 0 .15rem; }
+  header { padding: .5rem .8rem !important; }
+  header h1 { font-size: 1.05rem !important; }
+  .container { padding: .6rem; }
+  .recipe-card-img { height: 85px; }
+  .recipe-card-body { padding: .4rem .5rem .5rem; }
+  .recipe-card-body h3 { font-size: .78rem; }
+  .detail-img { height: 140px; }
 }
-@media (max-width: 600px) {
-  .header-actions { position: static; transform: none; margin-top: .3rem; }
-  header { flex-direction: column; padding: .8rem .8rem .6rem !important; }
-  header h1 { font-size: 1.15rem !important; }
-  .container { padding: .8rem; }
+@media (max-width: 460px) {
+  .recipe-grid { grid-template-columns: 1fr; gap: .5rem; }
+  .header-actions { margin-top: 0; }
+  header { flex-direction: row; padding: .4rem .6rem !important; }
+  header h1 { font-size: .95rem !important; }
+  .container { padding: .45rem; }
+  .recipe-card-img { height: 100px; }
+  .cooking-step-text { font-size: 1rem; padding: .5rem; }
+  .cooking-header h2 { font-size: .85rem; }
+  .modal { padding: .8rem .9rem; }
+  .detail-section, .form-section { padding: .45rem .55rem; }
+  .form-row { flex-direction: column; gap: .4rem; }
+  .nutrition-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media print {
   .controls,.modal-overlay,.cooking-overlay,.btn,.header-actions,.topbar-btn { display: none !important; }
@@ -196,10 +218,7 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--p
 <body>
 
 <header>
-  <div style="text-align:center;">
-    <h1>🍽️ <span data-lang="appTitle">Receptár</span></h1>
-    <p data-lang="appSubtitle">Zbierka nápadov na varenie a pečenie</p>
-  </div>
+  <h1>🍽️ <span data-lang="appTitle">Receptár</span></h1>
   <div class="header-actions">
     <button class="topbar-btn" onclick="toggleDark()" id="dark-toggle" title="Tmavý režim">🌙</button>
     <button class="topbar-btn" onclick="switchLang()" id="lang-toggle">🇬🇧 EN</button>
@@ -263,46 +282,56 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--p
 <div class="modal-overlay" id="form-modal">
   <div class="modal">
     <h2 data-lang="formTitle" id="form-title">Nový recept</h2>
-    <div class="form-group"><label data-lang="formName">Názov</label><input id="r-name" data-lang="formNamePlace" placeholder="Názov"></div>
-    <div class="form-group" id="name-en-group" style="display:none;"><label>Name (EN)</label><input id="r-nameEn" placeholder="Recipe name"></div>
-    <div class="form-row">
-      <div class="form-group">
-        <label data-lang="formCategory">Kategória</label>
-        <select id="r-category">
-          <option>Hlavné jedlá</option><option>Polievky</option><option>Šaláty</option><option>Dezerty</option><option>Pečivo</option><option>Nápoje</option><option>Predjedlá</option><option>Raňajky</option><option>Prílohy</option><option>Detské</option>
-        </select>
-      </div>
-      <div class="form-group"><label>⏱ <span data-lang="formTime">Čas (min)</span></label><input id="r-time" type="number" placeholder="30" min="1"></div>
-      <div class="form-group">
-        <label data-lang="difficulty">Obtiažnosť</label>
-        <select id="r-difficulty">
-          <option value="1">⚪⚪⚪ <span data-lang="diffEasy">Ľahké</span></option>
-          <option value="2" selected>⚪⚪⚫ <span data-lang="diffMedium">Stredné</span></option>
-          <option value="3">⚪⚫⚫ <span data-lang="diffHard">Ťažké</span></option>
-        </select>
+    <div class="form-section">
+      <div class="form-section-title" data-lang="formName">Základné info</div>
+      <div class="form-group"><input id="r-name" data-lang="formNamePlace" placeholder="Názov"></div>
+      <div class="form-group" id="name-en-group" style="display:none;"><input id="r-nameEn" placeholder="Recipe name (English)"></div>
+      <div class="form-row">
+        <div class="form-group">
+          <select id="r-category">
+            <option>Hlavné jedlá</option><option>Polievky</option><option>Šaláty</option><option>Dezerty</option><option>Pečivo</option><option>Nápoje</option><option>Predjedlá</option><option>Raňajky</option><option>Prílohy</option><option>Detské</option>
+          </select>
+        </div>
+        <div class="form-group"><input id="r-time" type="number" placeholder="⏱ min" min="1"></div>
+        <div class="form-group">
+          <select id="r-difficulty">
+            <option value="1">⚪⚪⚪ <span data-lang="diffEasy">Ľahké</span></option>
+            <option value="2" selected>⚪⚪⚫ <span data-lang="diffMedium">Stredné</span></option>
+            <option value="3">⚪⚫⚫ <span data-lang="diffHard">Ťažké</span></option>
+          </select>
+        </div>
       </div>
     </div>
-    <div class="form-group">
-      <label>🖼 <span data-lang="formImage">Obrázok</span></label>
-      <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+    <div class="form-section">
+      <div class="form-section-title" data-lang="formImage">Obrázok</div>
+      <div style="display:flex;gap:.4rem;flex-wrap:wrap;">
         <input id="r-image" data-lang="formImagePlace" placeholder="URL" style="flex:1;">
         <input type="file" id="r-image-file" accept="image/*" style="display:none">
         <button class="btn btn-secondary" onclick="document.getElementById('r-image-file').click()" data-lang="formUpload">Nahrať</button>
       </div>
-      <img id="r-image-preview" style="max-width:100px;max-height:75px;margin-top:.35rem;border-radius:6px;display:none;object-fit:cover;">
+      <img id="r-image-preview" style="max-width:80px;max-height:60px;margin-top:.3rem;border-radius:6px;display:none;object-fit:cover;">
     </div>
-    <div class="form-group">
-      <label data-lang="formNutrition">Nutričné hodnoty (na porciu)</label>
+    <div class="form-section">
+      <div class="form-section-title" data-lang="formNutrition">Nutričné hodnoty (na porciu)</div>
       <div class="form-row">
-        <div class="form-group"><label>🔥 kcal</label><input id="r-kcal" type="number" placeholder="350"></div>
-        <div class="form-group"><label>💪 bielkoviny (g)</label><input id="r-protein" type="number" placeholder="20"></div>
-        <div class="form-group"><label>🧈 tuky (g)</label><input id="r-fat" type="number" placeholder="15"></div>
-        <div class="form-group"><label>🍚 sacharidy (g)</label><input id="r-carbs" type="number" placeholder="40"></div>
+        <div class="form-group"><input id="r-kcal" type="number" placeholder="🔥 kcal"></div>
+        <div class="form-group"><input id="r-protein" type="number" placeholder="💪 bielkoviny"></div>
+        <div class="form-group"><input id="r-fat" type="number" placeholder="🧈 tuky"></div>
+        <div class="form-group"><input id="r-carbs" type="number" placeholder="🍚 sacharidy"></div>
       </div>
     </div>
-    <div class="form-group"><label data-lang="formIngredients">Suroviny (každá na nový riadok)</label><textarea id="r-ingredients" data-lang="formIngrPlace" placeholder="200g múky"></textarea></div>
-    <div class="form-group"><label data-lang="formSteps">Postup (každý krok na nový riadok)</label><textarea id="r-steps" data-lang="formStepsPlace" placeholder="1. Zmiešajte..."></textarea></div>
-    <div class="form-group"><label data-lang="formTags">Štítky (oddelené čiarkou)</label><input id="r-tags" data-lang="formTagsPlace" placeholder="rýchle, lacné"></div>
+    <div class="form-section">
+      <div class="form-section-title" data-lang="formIngredients">Suroviny</div>
+      <textarea id="r-ingredients" data-lang="formIngrPlace" placeholder="200g múky" rows="3"></textarea>
+    </div>
+    <div class="form-section">
+      <div class="form-section-title" data-lang="formSteps">Postup</div>
+      <textarea id="r-steps" data-lang="formStepsPlace" placeholder="1. Zmiešajte..." rows="4"></textarea>
+    </div>
+    <div class="form-section">
+      <div class="form-section-title" data-lang="formTags">Štítky</div>
+      <input id="r-tags" data-lang="formTagsPlace" placeholder="rýchle, lacné, vegánske">
+    </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('form-modal')" data-lang="cancel">Zrušiť</button>
       <button class="btn btn-primary" id="form-submit-btn" data-lang="save" onclick="saveRecipe()">Uložiť</button>
@@ -316,11 +345,11 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--p
     <div id="recipe-detail"></div>
     <div class="modal-footer">
       <button class="btn btn-primary" onclick="openCookingMode()">👨‍🍳 <span data-lang="btnCook">Variť</span></button>
+      <button class="btn btn-secondary" onclick="editCurrent()">✏️ <span data-lang="btnEdit">Upraviť</span></button>
       <button class="btn btn-secondary" onclick="printRecipe()">🖨️ <span data-lang="btnPrint">Tlačiť</span></button>
-      <button class="btn btn-secondary" onclick="copyRecipe()" data-lang="btnCopy">📋 Kopírovať</button>
       <button class="btn btn-secondary" onclick="shareRecipe()">📤 <span data-lang="btnShare">Zdieľať</span></button>
-      <button class="btn btn-primary" onclick="editCurrent()">✏️ <span data-lang="btnEdit">Upraviť</span></button>
-      <button class="btn btn-danger" onclick="deleteCurrent()">🗑 <span data-lang="btnDelete">Zmazať</span></button>
+      <button class="btn btn-secondary" onclick="copyRecipe()" data-lang="btnCopy">📋</button>
+      <button class="btn btn-danger" onclick="deleteCurrent()">🗑</button>
       <button class="btn btn-secondary" onclick="closeModal('detail-modal')" data-lang="close">Zavrieť</button>
     </div>
   </div>
@@ -342,9 +371,9 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--p
 <div class="cooking-overlay" id="cooking-mode">
   <div class="cooking-header">
     <div class="cooking-top-actions">
-      <button class="btn btn-secondary" onclick="closeCookingMode()" style="background:#475569;color:#fff;">✕ <span data-lang="cookingClose">Zavrieť</span></button>
-      <button class="btn btn-secondary" id="voice-btn" onclick="toggleVoice()" style="background:#475569;color:#fff;">🎤</button>
-      <button class="btn btn-secondary" id="cooking-timer-btn" style="background:#475569;color:#fff;display:none;">⏱</button>
+      <button class="btn btn-secondary" onclick="closeCookingMode()" style="background:#475569;color:#fff;padding:.25rem .5rem;font-size:.75rem;">✕ <span data-lang="cookingClose">Zavrieť</span></button>
+      <button class="btn btn-secondary" id="voice-btn" onclick="toggleVoice()" style="background:#475569;color:#fff;padding:.25rem .5rem;font-size:.75rem;">🎤</button>
+      <button class="btn btn-secondary" id="cooking-timer-btn" style="background:#475569;color:#fff;padding:.25rem .5rem;font-size:.75rem;display:none;">⏱</button>
     </div>
     <h2 id="cooking-title"></h2>
     <div class="cooking-timer" id="cooking-timer" onclick="toggleTimer()">⏱️ 00:00</div>
@@ -729,14 +758,14 @@ function render() {
         ? `<img class="recipe-card-img" src="${r.imageData || r.image}" alt="${name}" onerror="this.outerHTML='<div class=\\'recipe-card-img\\'>🍽️</div>'">`
         : `<div class="recipe-card-img">🍽️</div>`}
       <div class="recipe-card-body" onclick="viewRecipe(${r.id})">
-        <div style="display:flex;align-items:center;gap:.35rem;">
-          <h3>${name}</h3>
-          <span style="font-size:.7rem;">${'⚪'.repeat(r.difficulty||1)}${'⚫'.repeat(3-(r.difficulty||1))}</span>
+        <h3>${name}</h3>
+        <div class="meta-line">
+          <span>📂 ${r.category}</span>
+          <span>⏱ ${r.time}</span>
+          <span>${'●'.repeat(r.difficulty||1)}${'○'.repeat(3-(r.difficulty||1))}</span>
         </div>
-        <div class="meta"><span>📂 ${r.category}</span><span>⏱ ${r.time} ${lang==='en'?'min':'min'}</span></div>
         ${r.rating > 0 ? `<div class="stars">${'★'.repeat(Math.round(r.rating))}${'☆'.repeat(5-Math.round(r.rating))}</div>` : ''}
-        ${r.nutrition ? `<div class="meta">🔥 ${r.nutrition.kcal || '?'} kcal</div>` : ''}
-        ${(r.allergens||[]).length ? `<div class="meta" style="margin-top:2px;">⚠️ ${(r.allergens||[]).join(', ')}</div>` : ''}
+        ${r.nutrition ? `<div class="meta-line">🔥 ${r.nutrition.kcal||'?'} kcal</div>` : ''}
         <div class="tags">${tags.map(t => `<span class="tag${t.startsWith('deti-')||t.startsWith('baby')?' baby-tag':''}">${t}</span>`).join('')}</div>
       </div>
     </div>`;
@@ -872,16 +901,28 @@ function viewRecipe(id) {
   const el = document.getElementById('recipe-detail');
   el.innerHTML = `
     ${r.image || r.imageData ? `<img class="detail-img" src="${r.imageData||r.image}" onerror="this.outerHTML='<div class=\\'detail-img\\'>🍽️</div>'">` : `<div class="detail-img">🍽️</div>`}
-    <h2>${name} <span style="font-size:.7rem;">${'⚪'.repeat(r.difficulty||1)}${'⚫'.repeat(3-(r.difficulty||1))}</span> <span style="font-size:.85rem;color:var(--text2);font-weight:400;">(⏱ ${r.time} ${lang==='en'?'min':'min'})</span></h2>
-    <div class="detail-meta"><span>📂 ${r.category}</span><span>🏷 ${tgs.join(', ')}</span>${(r.allergens||[]).length ? `<span>⚠️ ${(r.allergens||[]).join(', ')}</span>` : ''}</div>
-    <div class="detail-actions">
-      <button class="btn btn-secondary" onclick="addToCollectionPrompt(${id})" style="padding:.25rem .6rem;font-size:.8rem;">📁 +</button>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.4rem;">
+      <h2 style="font-size:1.05rem;flex:1;">${name}</h2>
+      <div style="display:flex;align-items:center;gap:.3rem;flex-shrink:0;">
+        ${'●'.repeat(r.difficulty||1)}${'○'.repeat(3-(r.difficulty||1))}
+        <span style="font-size:.75rem;color:var(--text2);">⏱ ${r.time}</span>
+      </div>
+    </div>
+    <div class="detail-meta">
+      <span>📂 ${r.category}</span>
+      <span>🏷 ${tgs.join(', ')}</span>
+      ${(r.allergens||[]).length ? `<span>⚠️ ${(r.allergens||[]).join(', ')}</span>` : ''}
+    </div>
+    <div style="display:flex;gap:.3rem;margin-bottom:.5rem;flex-wrap:wrap;">
+      <button class="btn btn-secondary" onclick="addToCollectionPrompt(${id})" style="padding:.2rem .5rem;font-size:.75rem;">📁 + Kolekcia</button>
     </div>
     <div class="detail-section">
-      <h3>⭐ ${t('formTitle') === 'New Recipe' ? 'Rating' : 'Hodnotenie'}</h3>
-      <div class="star-rating">${[1,2,3,4,5].map(i => `<span class="star ${i<=Math.round(r.rating)?'active':''}" onclick="setRating(${id},${i})">★</span>`).join('')}</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <h3>⭐ ${t('formTitle') === 'New Recipe' ? 'Rating' : 'Hodnotenie'}</h3>
+        <div class="star-rating">${[1,2,3,4,5].map(i => `<span class="star ${i<=Math.round(r.rating)?'active':''}" onclick="setRating(${id},${i})">★</span>`).join('')}</div>
+      </div>
     </div>
-    ${n && (n.kcal||n.protein||n.fat||n.carbs) ? `<div class="detail-section"><h3>🥗 ${t('recipeNutri')} (${t('perPortion')})</h3>
+    ${n && (n.kcal||n.protein||n.fat||n.carbs) ? `<div class="detail-section"><h3>🥗 ${t('recipeNutri')}</h3>
       <div class="nutrition-grid">
         <div class="nutrition-item"><div class="val">🔥 ${n.kcal||'?'}</div><div class="lbl">${t('kcal')}</div></div>
         <div class="nutrition-item"><div class="val">💪 ${n.protein||'?'}g</div><div class="lbl">${t('protein')}</div></div>
@@ -889,18 +930,19 @@ function viewRecipe(id) {
         <div class="nutrition-item"><div class="val">🍚 ${n.carbs||'?'}g</div><div class="lbl">${t('carbs')}</div></div>
       </div></div>` : ''}
     <div class="detail-section">
-      <h3>🥕 ${t('formIngredients')}</h3>
-      <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem;">
-        <span style="font-size:.85rem;font-weight:600;" data-lang="portions">${lang==='en'?'Servings:':'Porcie:'}</span>
-        <button class="btn btn-secondary" onclick="changePortion(-1)" style="padding:.15rem .5rem;font-size:.9rem;">−</button>
-        <span id="portion-num" style="font-weight:700;font-size:1rem;">${basePortion}</span>
-        <button class="btn btn-secondary" onclick="changePortion(1)" style="padding:.15rem .5rem;font-size:.9rem;">+</button>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.3rem;">
+        <h3>🥕 ${t('formIngredients')}</h3>
+        <div style="display:flex;align-items:center;gap:.35rem;">
+          <button class="btn btn-secondary" onclick="changePortion(-1)" style="padding:.1rem .45rem;font-size:.85rem;">−</button>
+          <span id="portion-num" style="font-weight:700;font-size:.9rem;min-width:1.5rem;text-align:center;">${basePortion}</span>
+          <button class="btn btn-secondary" onclick="changePortion(1)" style="padding:.1rem .45rem;font-size:.85rem;">+</button>
+        </div>
       </div>
-      <ul id="ingredient-list">${ingr.map(i=>`<li>${i}</li>`).join('')}</ul>
+      <ul id="ingredient-list" style="margin-top:.3rem;">${ingr.map(i=>`<li>${i}</li>`).join('')}</ul>
     </div>
     <div class="detail-section"><h3>📝 ${t('formSteps')}</h3><ol>${stps.map(s=>`<li>${s}</li>`).join('')}</ol></div>
     <div class="detail-section"><h3>📓 ${t('formTitle')==='New Recipe'?'Notes':'Poznámky'}</h3>
-      <textarea id="recipe-notes" style="width:100%;padding:.5rem;border:1px solid var(--border);border-radius:8px;min-height:55px;font-family:inherit;font-size:.85rem;background:var(--input-bg);color:var(--text);" onchange="saveNotes(${id},this.value)">${(lang==='en'&&r.notesEn?r.notesEn:r.notes)||''}</textarea></div>
+      <textarea id="recipe-notes" style="width:100%;padding:.45rem;border:1px solid var(--border);border-radius:6px;min-height:45px;font-family:inherit;font-size:.82rem;background:var(--input-bg);color:var(--text);" onchange="saveNotes(${id},this.value)">${(lang==='en'&&r.notesEn?r.notesEn:r.notes)||''}</textarea></div>
   `;
   openModal('detail-modal');
 }
@@ -1414,10 +1456,9 @@ function applyIngredientSearch() {
       return `<div class="recipe-card"><button class="fav-btn" onclick="event.stopPropagation();toggleFav(${r.id})">${r.favorite?'❤️':'🤍'}</button>
         ${r.image||r.imageData?`<img class="recipe-card-img" src="${r.imageData||r.image}" onerror="this.outerHTML='<div class=\\'recipe-card-img\\'>🍽️</div>'">`:`<div class="recipe-card-img">🍽️</div>`}
         <div class="recipe-card-body" onclick="viewRecipe(${r.id})">
-        <div style="display:flex;align-items:center;gap:.35rem;"><h3>${name}</h3>
-        <span style="font-size:.7rem;">${'⚪'.repeat(r.difficulty||1)}${'⚫'.repeat(3-(r.difficulty||1))}</span></div>
-        <div class="meta"><span>📂 ${r.category}</span><span>⏱ ${r.time} min</span></div>
-        ${(r.allergens||[]).length ? `<div class="meta" style="margin-top:2px;">⚠️ ${(r.allergens||[]).join(', ')}</div>` : ''}
+        <h3>${name}</h3>
+        <div class="meta-line"><span>📂 ${r.category}</span><span>⏱ ${r.time}</span>
+        <span>${'●'.repeat(r.difficulty||1)}${'○'.repeat(3-(r.difficulty||1))}</span></div>
         <div class="tags">${tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div></div></div>`;
     }).join('');
   } else {
