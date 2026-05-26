@@ -105,19 +105,19 @@ input, select, textarea { background: var(--input-bg); color: var(--text); borde
 .cooking-nav button:disabled { opacity: .3; cursor: not-allowed; }
 .cooking-progress { height: 4px; background: #334155; border-radius: 4px; }
 .cooking-progress-bar { height: 100%; background: var(--primary); border-radius: 4px; transition: width .3s; }
-.planner-grid { display: grid; grid-template-columns: 95px repeat(3, 1fr); gap: 2px; background: var(--border); border-radius: 10px; overflow: hidden; }
-.planner-header { background: var(--primary); color: #fff; padding: .5rem; text-align: center; font-weight: 600; font-size: .8rem; }
-.planner-day { background: var(--surface); padding: .5rem; min-height: 60px; cursor: pointer; transition: .1s; }
+.planner-grid { display: grid; grid-template-columns: 75px repeat(3, 1fr); gap: 1px; background: var(--border); border-radius: 8px; overflow: hidden; }
+.planner-header { background: var(--primary); color: #fff; padding: .3rem .4rem; text-align: center; font-weight: 600; font-size: .7rem; }
+.planner-day { background: var(--surface); padding: .3rem .35rem; min-height: 44px; font-size: .72rem; cursor: pointer; transition: .1s; }
 .planner-day:hover { background: var(--tag-bg); }
-.planner-day-label { background: var(--planner-bg); padding: .5rem; font-weight: 600; font-size: .8rem; color: var(--text); display: flex; align-items: center; }
-.planner-recipe { font-size: .75rem; padding: .15rem .35rem; margin: .12rem 0; border-radius: 4px; background: var(--tag-bg); display: inline-block; }
+.planner-day-label { background: var(--planner-bg); padding: .3rem .4rem; font-weight: 600; font-size: .72rem; color: var(--text); display: flex; align-items: center; }
+.planner-recipe { font-size: .65rem; padding: .08rem .2rem; margin: .06rem 0; border-radius: 4px; background: var(--tag-bg); display: inline-block; }
 .planner-empty { color: var(--text2); font-size: .75rem; }
-.shop-recipes { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .8rem; }
-.shop-recipe-tag { background: var(--border); padding: .35rem .8rem; border-radius: 20px; font-size: .82rem; cursor: pointer; font-weight: 500; transition: .15s; user-select: none; }
+.shop-recipes { display: flex; flex-wrap: wrap; gap: .25rem; margin-bottom: .8rem; }
+.shop-recipe-tag { background: var(--border); padding: .2rem .6rem; border-radius: 20px; font-size: .75rem; cursor: pointer; font-weight: 500; transition: .15s; user-select: none; }
 .shop-recipe-tag.selected { background: var(--primary); color: #fff; }
 .shop-recipe-tag:hover { opacity: .8; }
 .shop-list { list-style: none; }
-.shop-list li { padding: .3rem .4rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: .5rem; }
+.shop-list li { padding: .15rem .3rem; font-size: .82rem; border-bottom: none; display: flex; align-items: center; gap: .5rem; }
 .shop-list li input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
 .shop-list li.checked { text-decoration: line-through; color: var(--text2); }
 .import-hidden { display: none; }
@@ -195,7 +195,7 @@ input, select, textarea { background: var(--input-bg); color: var(--text); borde
 
   <!-- PLANNER -->
   <div class="tab-content" id="tab-planner">
-    <p style="margin-bottom:.6rem;color:var(--text2);" data-lang="plannerHint">Kliknutím na políčko pridáš recept.</p>
+    <p style="margin-bottom:.6rem;color:var(--text2);" data-lang="plannerHint2">Dospelí 👤 | Dieťa 👶 – klikni na políčko pre výber.</p>
     <div class="planner-grid" id="planner-grid"></div>
     <div style="margin-top:.8rem;display:flex;gap:.5rem;flex-wrap:wrap;">
       <button class="btn btn-secondary" onclick="clearPlanner()" data-lang="plannerClear">🗑 Vyčistiť</button>
@@ -294,13 +294,23 @@ input, select, textarea { background: var(--input-bg); color: var(--text); borde
 
 <!-- PLANNER PICK -->
 <div class="modal-overlay" id="planner-pick-modal">
-  <div class="modal">
-    <h2 id="planner-pick-title">Vyber recept</h2>
-    <input type="text" id="planner-pick-search" data-lang="searchPlaceholder" placeholder="Hľadať..." oninput="renderPlannerPick()">
-    <div id="planner-pick-list" style="max-height:300px;overflow-y:auto;margin:.8rem 0;"></div>
-    <div class="modal-footer">
-      <button class="btn btn-danger" id="planner-remove-btn" onclick="plannerRemove()" style="display:none;" data-lang="plannerRemove">Odstrániť</button>
-      <button class="btn btn-secondary" onclick="closeModal('planner-pick-modal')" data-lang="cancel">Zrušiť</button>
+  <div class="modal" style="max-width:480px;">
+    <h2 id="planner-pick-title" style="font-size:1rem;">Vyber recept</h2>
+    <div style="margin-bottom:.5rem;">
+      <div id="planner-pick-adult" style="margin-bottom:.4rem;cursor:pointer;padding:.35rem .5rem;border-radius:8px;background:var(--border);display:flex;align-items:center;gap:.35rem;">
+        <span style="font-weight:600;">👤</span> <span id="planner-pick-adult-name" style="color:var(--text2);font-size:.85rem;">—</span>
+      </div>
+      <div id="planner-pick-kid" style="cursor:pointer;padding:.35rem .5rem;border-radius:8px;background:var(--border);display:flex;align-items:center;gap:.35rem;">
+        <span style="font-weight:600;">👶</span> <span id="planner-pick-kid-name" style="color:var(--text2);font-size:.85rem;">—</span>
+      </div>
+    </div>
+    <div id="planner-pick-search-area" style="display:none;">
+      <input type="text" id="planner-pick-search" placeholder="" oninput="renderPlannerPick()" style="width:100%;padding:.45rem .7rem;border:1px solid var(--border);border-radius:8px;font-size:.82rem;background:var(--input-bg);color:var(--text);margin-bottom:.4rem;">
+      <div id="planner-pick-list" style="max-height:220px;overflow-y:auto;"></div>
+      <div class="modal-footer" style="margin-top:.5rem;">
+        <button class="btn btn-secondary" onclick="closePlannerPick()" data-lang="cancel">Zrušiť</button>
+        <button class="btn btn-danger" id="planner-remove-btn" onclick="plannerRemove()" style="display:none;" data-lang="plannerRemove">Odstrániť</button>
+      </div>
     </div>
   </div>
 </div>
@@ -329,6 +339,7 @@ const LANG = {
     searchPlaceholder: 'Hľadať...', allCategories: 'Všetky kategórie',
     btnAdd: '+ Nový', btnByIngr: '🥕 Suroviny', btnRandom: 'Náhodný',
     plannerHint: 'Kliknutím na políčko pridáš recept.',
+    plannerHint2: 'Dospelí 👤 | Dieťa 👶 – klikni na políčko pre výber.',
     plannerClear: '🗑 Vyčistiť', plannerShop: '🛒 Zoznam z plánu',
     shopHint: 'Vyber recepty – suroviny sa spoja do zoznamu.',
     shopGenerate: '🔄 Vygenerovať', shopReset: '☑ Reset',
@@ -364,6 +375,7 @@ const LANG = {
     searchPlaceholder: 'Search...', allCategories: 'All categories',
     btnAdd: '+ New', btnByIngr: '🥕 Ingredients', btnRandom: 'Random',
     plannerHint: 'Click a cell to add a recipe.',
+    plannerHint2: 'Adults 👤 | Kids 👶 – click a cell to pick.',
     plannerClear: '🗑 Clear', plannerShop: '🛒 List from plan',
     shopHint: 'Select recipes to merge ingredients.',
     shopGenerate: '🔄 Generate', shopReset: '☑ Reset',
@@ -496,10 +508,21 @@ const DEFAULT_RECIPES = [
 ];
 
 let recipes = JSON.parse(localStorage.getItem('recipes') || 'null') || DEFAULT_RECIPES.map(r => ({...r}));
-let mealPlan = JSON.parse(localStorage.getItem('mealPlan') || '{}');
+// Migrate old mealPlan format to new format with adult/kid
+let raw = JSON.parse(localStorage.getItem('mealPlan') || '{}');
+let mealPlan = {};
+Object.keys(raw).forEach(k => {
+  const v = raw[k];
+  if (v && typeof v === 'object' && !Array.isArray(v) && 'adult' in v) {
+    mealPlan[k] = v;
+  } else {
+    mealPlan[k] = { adult: (typeof v === 'number' ? v : null), kid: null };
+  }
+});
 let editingId = null, viewingId = null;
 let cookingStep = 0, cookingRecipeId = null, cookingTimer = null, cookingTimerRunning = false, cookingTimerSeconds = 0;
 let plannerPickDay = '', plannerPickMeal = '';
+let plannerPickFor = 'adult'; // 'adult' or 'kid'
 let shopChecked = new Set(JSON.parse(localStorage.getItem('shopChecked') || '[]'));
 let voiceRecognition = null, voiceListening = false;
 let ingredientSearchSelected = new Set();
@@ -783,7 +806,11 @@ function editCurrent() {
 function deleteCurrent() {
   if (!confirm(t('deleteConfirm'))) return;
   recipes = recipes.filter(r => r.id !== viewingId);
-  Object.keys(mealPlan).forEach(k => { Object.keys(mealPlan[k]).forEach(m => { if (mealPlan[k][m] === viewingId) delete mealPlan[k][m]; }); });
+  Object.keys(mealPlan).forEach(k => {
+    if (mealPlan[k].adult === viewingId) mealPlan[k].adult = null;
+    if (mealPlan[k].kid === viewingId) mealPlan[k].kid = null;
+    if (!mealPlan[k].adult && !mealPlan[k].kid) delete mealPlan[k];
+  });
   saveToLS();
   closeModal('detail-modal');
   render();
@@ -1016,30 +1043,57 @@ function renderPlanner() {
     meals.forEach((meal, mi) => {
       const mealKey = MEALS[mi];
       const key = `${dayKey}-${mealKey}`;
-      const rid = mealPlan[key];
-      const r = rid ? recipes.find(rec => rec.id === rid) : null;
+      const slot = mealPlan[key] || { adult: null, kid: null };
+      const rAd = slot.adult ? recipes.find(rec => rec.id === slot.adult) : null;
+      const rKid = slot.kid ? recipes.find(rec => rec.id === slot.kid) : null;
+      const nAd = rAd ? (lang==='en'&&rAd.nameEn?rAd.nameEn:rAd.name) : '';
+      const nKid = rKid ? (lang==='en'&&rKid.nameEn?rKid.nameEn:rKid.name) : '';
       html += `<div class="planner-day" onclick="openPlannerPick('${dayKey}','${mealKey}')">`;
-      if (r) {
-        const n = lang==='en' && r.nameEn ? r.nameEn : r.name;
-        html += `<div class="planner-recipe">${n}</div>`;
-      } else { html += `<span class="planner-empty">+</span>`; }
-      html += `</div>`;
+      html += `<div style="display:flex;flex-direction:column;gap:2px;">`;
+      html += `<div style="display:flex;gap:2px;align-items:center;"><span style="font-size:.6rem;color:var(--text2);min-width:14px;">👤</span>${nAd ? `<span class="planner-recipe">${nAd}</span>` : `<span class="planner-empty">+</span>`}</div>`;
+      html += `<div style="display:flex;gap:2px;align-items:center;"><span style="font-size:.6rem;color:var(--text2);min-width:14px;">👶</span>${nKid ? `<span class="planner-recipe">${nKid}</span>` : `<span class="planner-empty">+</span>`}</div>`;
+      html += `</div></div>`;
     });
   });
   grid.innerHTML = html;
 }
 
 function openPlannerPick(day, meal) {
-  plannerPickDay = day; plannerPickMeal = meal;
-  const key = `${day}-${meal}`;
-  const rid = mealPlan[key];
-  const days = getDays(); const meals = getMeals();
-  const di = DAYS.indexOf(day); const mi = MEALS.indexOf(meal);
-  document.getElementById('planner-pick-title').textContent = `${days[di]} – ${meals[mi]}`;
+  plannerPickDay = day;
+  plannerPickMeal = meal;
+  const days = getDays();
+  const meals = getMeals();
+  const di = DAYS.indexOf(day);
+  const mi = MEALS.indexOf(meal);
+  const title = `${days[di]} – ${meals[mi]}`;
+  document.getElementById('planner-pick-title').textContent = title;
+  
+  const slot = mealPlan[`${day}-${meal}`] || { adult: null, kid: null };
+  const updateNames = () => {
+    const rA = slot.adult ? recipes.find(r => r.id === slot.adult) : null;
+    const rK = slot.kid ? recipes.find(r => r.id === slot.kid) : null;
+    document.getElementById('planner-pick-adult-name').textContent = rA ? (lang==='en'&&rA.nameEn?rA.nameEn:rA.name) : '—';
+    document.getElementById('planner-pick-kid-name').textContent = rK ? (lang==='en'&&rK.nameEn?rK.nameEn:rK.name) : '—';
+  };
+  updateNames();
+  
+  document.getElementById('planner-pick-search-area').style.display = 'none';
+  document.getElementById('planner-pick-adult').onclick = () => openPlannerPickFor('adult');
+  document.getElementById('planner-pick-kid').onclick = () => openPlannerPickFor('kid');
+  
+  openModal('planner-pick-modal');
+}
+
+function openPlannerPickFor(type) {
+  plannerPickFor = type;
+  document.getElementById('planner-pick-search-area').style.display = 'block';
   document.getElementById('planner-pick-search').value = '';
+  const key = `${plannerPickDay}-${plannerPickMeal}`;
+  const slot = mealPlan[key] || { adult: null, kid: null };
+  const rid = type === 'adult' ? slot.adult : slot.kid;
   document.getElementById('planner-remove-btn').style.display = rid ? 'inline-flex' : 'none';
   renderPlannerPick();
-  openModal('planner-pick-modal');
+  document.getElementById('planner-pick-search').focus();
 }
 
 function renderPlannerPick() {
@@ -1049,32 +1103,43 @@ function renderPlannerPick() {
     const n = lang === 'en' && r.nameEn ? r.nameEn : r.name;
     return n.toLowerCase().includes(search);
   });
-  if (!filtered.length) { list.innerHTML = `<p style="color:var(--text2);">—</p>`; return; }
+  if (!filtered.length) { list.innerHTML = `<p style="color:var(--text2);padding:.5rem;">—</p>`; return; }
   list.innerHTML = filtered.map(r => {
     const n = lang === 'en' && r.nameEn ? r.nameEn : r.name;
-    return `<div style="padding:.45rem;cursor:pointer;border-radius:6px;display:flex;align-items:center;gap:.5rem;"
+    return `<div style="padding:.35rem;cursor:pointer;border-radius:6px;display:flex;align-items:center;gap:.4rem;"
          onmouseenter="this.style.background='var(--hover-bg)'" onmouseleave="this.style.background=''"
          onclick="plannerSelect(${r.id})">
-      ${r.image||r.imageData ? `<img src="${r.imageData||r.image}" style="width:36px;height:28px;object-fit:cover;border-radius:4px;" onerror="this.style.display='none'">` : '<span style="font-size:1.2rem;">🍽️</span>'}
-      <span>${n}</span>
+      ${r.image||r.imageData ? `<img src="${r.imageData||r.image}" style="width:30px;height:22px;object-fit:cover;border-radius:3px;" onerror="this.style.display='none'">` : '<span style="font-size:1rem;">🍽️</span>'}
+      <span style="font-size:.82rem;">${n}</span>
     </div>`;
   }).join('');
 }
 
 function plannerSelect(id) {
   const key = `${plannerPickDay}-${plannerPickMeal}`;
-  mealPlan[key] = id;
+  if (!mealPlan[key]) mealPlan[key] = { adult: null, kid: null };
+  if (plannerPickFor === 'adult') mealPlan[key].adult = id;
+  else mealPlan[key].kid = id;
   saveToLS();
-  closeModal('planner-pick-modal');
+  openPlannerPick(plannerPickDay, plannerPickMeal);
   renderPlanner();
 }
 
 function plannerRemove() {
   const key = `${plannerPickDay}-${plannerPickMeal}`;
-  delete mealPlan[key];
+  if (!mealPlan[key]) mealPlan[key] = { adult: null, kid: null };
+  if (plannerPickFor === 'adult') mealPlan[key].adult = null;
+  else mealPlan[key].kid = null;
+  // Clean up empty entries
+  if (!mealPlan[key].adult && !mealPlan[key].kid) delete mealPlan[key];
   saveToLS();
-  closeModal('planner-pick-modal');
+  openPlannerPick(plannerPickDay, plannerPickMeal);
   renderPlanner();
+}
+
+function closePlannerPick() {
+  document.getElementById('planner-pick-search-area').style.display = 'none';
+  closeModal('planner-pick-modal');
 }
 
 function clearPlanner() {
@@ -1102,7 +1167,13 @@ function toggleShopRecipe(id) {
 }
 
 function generateShoppingFromPlanner() {
-  const ids = new Set(Object.values(mealPlan).filter(Boolean));
+  const ids = new Set();
+  Object.values(mealPlan).forEach(slot => {
+    if (slot) {
+      if (slot.adult) ids.add(slot.adult);
+      if (slot.kid) ids.add(slot.kid);
+    }
+  });
   if (!ids.size) return alert(t('plannerEmpty'));
   shopChecked = ids;
   saveToLS();
