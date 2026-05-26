@@ -61,6 +61,11 @@ input, select, textarea { background: var(--input-bg); color: var(--text); borde
 .recipe-card-body .stars { color: #f59e0b; font-size: .8rem; margin-top: .2rem; }
 .recipe-card-body .tags { margin-top: .35rem; display: flex; flex-wrap: wrap; gap: .25rem; }
 .tag { background: var(--tag-bg); color: var(--tag-text); padding: .1rem .45rem; border-radius: 20px; font-size: .68rem; font-weight: 500; }
+.age-filter { display: flex; gap: .35rem; margin-bottom: .75rem; flex-wrap: wrap; }
+.age-btn { padding: .3rem .7rem; border-radius: 20px; border: 1px solid var(--border); background: var(--surface); color: var(--text2); font-size: .8rem; cursor: pointer; font-weight: 500; transition: .15s; }
+.age-btn:hover { border-color: #f472b6; color: #f472b6; }
+.age-btn.active { background: #f472b6; color: #fff; border-color: #f472b6; }
+.tag.baby-tag { background: #fce7f3; color: #be185d; }
 .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text2); }
 .empty-state h3 { color: var(--text); }
 .modal-overlay { display: none; position: fixed; inset: 0; background: var(--modal-overlay); z-index: 1000; align-items: center; justify-content: center; padding: 1rem; }
@@ -169,7 +174,7 @@ input, select, textarea { background: var(--input-bg); color: var(--text); borde
       <input type="text" id="search" data-lang="searchPlaceholder" placeholder="Hľadať...">
       <select id="filter-category">
         <option value="" data-lang="allCategories">Všetky</option>
-        <option>Hlavné jedlá</option><option>Polievky</option><option>Šaláty</option><option>Dezerty</option><option>Pečivo</option><option>Nápoje</option><option>Predjedlá</option><option>Raňajky</option><option>Prílohy</option>
+        <option>Hlavné jedlá</option><option>Polievky</option><option>Šaláty</option><option>Dezerty</option><option>Pečivo</option><option>Nápoje</option><option>Predjedlá</option><option>Raňajky</option><option>Prílohy</option><option>Detské</option>
       </select>
       <button class="btn btn-primary" onclick="openFormModal()" data-lang="btnAdd">+ Nový</button>
       <button class="btn btn-secondary" onclick="openIngredientSearch()" data-lang="btnByIngr">🥕 Suroviny</button>
@@ -177,6 +182,13 @@ input, select, textarea { background: var(--input-bg); color: var(--text); borde
       <button class="btn btn-secondary" onclick="document.getElementById('import-file').click()">📥</button>
       <button class="btn btn-secondary" onclick="exportRecipes()">📤</button>
       <input type="file" id="import-file" class="import-hidden" accept=".json" onchange="importRecipes(event)">
+    </div>
+    <div class="age-filter" id="age-filter">
+      <button class="age-btn active" data-age="" onclick="setAgeFilter('')"><span data-lang="allAges">Všetky veky</span></button>
+      <button class="age-btn" data-age="baby-6m" onclick="setAgeFilter('baby-6m')">👶 <span data-lang="age6m">6m+</span></button>
+      <button class="age-btn" data-age="baby-1" onclick="setAgeFilter('baby-1')">👶 <span data-lang="age1">1r+</span></button>
+      <button class="age-btn" data-age="baby-2" onclick="setAgeFilter('baby-2')">👶 <span data-lang="age2">2r+</span></button>
+      <button class="age-btn" data-age="baby-3" onclick="setAgeFilter('baby-3')">👶 <span data-lang="age3">3r+</span></button>
     </div>
     <div class="recipe-grid" id="recipe-grid"></div>
   </div>
@@ -211,7 +223,7 @@ input, select, textarea { background: var(--input-bg); color: var(--text); borde
       <div class="form-group">
         <label data-lang="formCategory">Kategória</label>
         <select id="r-category">
-          <option>Hlavné jedlá</option><option>Polievky</option><option>Šaláty</option><option>Dezerty</option><option>Pečivo</option><option>Nápoje</option><option>Predjedlá</option><option>Raňajky</option><option>Prílohy</option>
+          <option>Hlavné jedlá</option><option>Polievky</option><option>Šaláty</option><option>Dezerty</option><option>Pečivo</option><option>Nápoje</option><option>Predjedlá</option><option>Raňajky</option><option>Prílohy</option><option>Detské</option>
         </select>
       </div>
       <div class="form-group"><label>⏱ <span data-lang="formTime">Čas (min)</span></label><input id="r-time" type="number" placeholder="30" min="1"></div>
@@ -344,6 +356,7 @@ const LANG = {
     plannerEmpty: 'Plánovač je prázdny. Najprv naplánuj jedlá.',
     recipeNutri: 'Nutričné hodnoty', kcal: 'kcal', protein: 'bielkoviny', fat: 'tuky', carbs: 'sacharidy',
     perPortion: 'na porciu',
+    allAges: 'Všetky veky', age6m: '6m+', age1: '1r+', age2: '2r+', age3: '3r+',
   },
   en: {
     appTitle: 'Recipe Book', appSubtitle: 'Collection of cooking & baking ideas',
@@ -378,9 +391,11 @@ const LANG = {
     plannerEmpty: 'Planner is empty. Plan some meals first.',
     recipeNutri: 'Nutrition', kcal: 'kcal', protein: 'protein', fat: 'fat', carbs: 'carbs',
     perPortion: 'per serving',
+    allAges: 'All ages', age6m: '6m+', age1: '1y+', age2: '2y+', age3: '3y+',
   }
 };
 let lang = localStorage.getItem('lang') || 'sk';
+let ageFilter = '';
 
 // ======================== DATA ========================
 const DEFAULT_RECIPES = [
@@ -409,6 +424,34 @@ const DEFAULT_RECIPES = [
   {id:23,name:'Horúca čokoláda',nameEn:'Hot chocolate',category:'Nápoje',time:10,image:'',imageData:'',ingredients:['500ml mlieka','100g horkej čokolády','1 lyžica kakaa','1 lyžica cukru','šľahačka'],ingredientsEn:['500ml milk','100g dark chocolate','1 tbsp cocoa','1 tbsp sugar','whipped cream'],steps:['Mlieko zohrejte v hrnci.','Pridajte čokoládu, kakao a cukor.','Miešajte, kým sa čokoláda nerozpustí.','Nalejte do pohárov a ozdobte šľahačkou.'],stepsEn:['Heat milk in a pot.','Add chocolate, cocoa and sugar.','Stir until chocolate melts.','Pour into mugs and top with whipped cream.'],tags:['nápoj','sladké','zima'],tagsEn:['drink','sweet','winter'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:350,protein:10,fat:20,carbs:36}},
   {id:24,name:'Bazová limonáda',nameEn:'Elderflower lemonade',category:'Nápoje',time:10,image:'',imageData:'',ingredients:['500ml bazového sirupu','1l perlivej vody','1 citrón','1 limetka','lístky mäty','kocky ľadu'],ingredientsEn:['500ml elderflower syrup','1L sparkling water','1 lemon','1 lime','mint leaves','ice cubes'],steps:['Zmiešajte sirup s perlivou vodou.','Pridajte na plátky nakrájaný citrón a limetku.','Pridajte mätu a ľad.'],stepsEn:['Mix syrup with sparkling water.','Add sliced lemon and lime.','Add mint and ice.'],tags:['nápoj','osviežujúce','leto'],tagsEn:['drink','refreshing','summer'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:120,protein:0,fat:0,carbs:30}},
   {id:25,name:'Pečené zemiaky s rozmarínom',nameEn:'Roasted rosemary potatoes',category:'Prílohy',time:40,image:'',imageData:'',ingredients:['800g zemiakov','4 lyžice olivového oleja','3 vetvičky rozmarínu','3 strúčiky cesnaku','soľ, korenie, rasca'],ingredientsEn:['800g potatoes','4 tbsp olive oil','3 rosemary sprigs','3 garlic cloves','salt, pepper, cumin'],steps:['Zemiaky nakrájajte na mesiačiky (nešúpte).','Premiešajte s olejom, rozmarínom, cesnakom, soľou a korením.','Rozložte na plech a pečte 30-35 minút na 200°C.'],stepsEn:['Cut potatoes into wedges (unpeeled).','Toss with oil, rosemary, garlic, salt and pepper.','Spread on a baking sheet and roast at 200°C for 30-35 min.'],tags:['jednoduché','príloha'],tagsEn:['easy','side'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:220,protein:4,fat:8,carbs:34}},
+  // === DETSKÉ RECEPTY (under 1 year - 6m+) ===
+  {id:66,name:'Jablková presnidávka',nameEn:'Apple puree',category:'Detské',time:20,image:'',imageData:'',ingredients:['4 jablká','trocha vody'],ingredientsEn:['4 apples','a little water'],steps:['Jablká ošúpte a nakrájajte na kocky.','Dajte do hrnca s trochou vody.','Duste 10-15 minút domäkka.','Rozmixujte dohladka.'],stepsEn:['Peel and dice apples.','Put in a pot with a little water.','Stew 10-15 min until soft.','Blend until smooth.'],tags:['deti-6m','baby','prvé jedlo'],tagsEn:['baby-6m','baby','first food'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:80,protein:0,fat:0,carbs:20}},
+  {id:67,name:'Mrkvové pyré',nameEn:'Carrot puree',category:'Detské',time:25,image:'',imageData:'',ingredients:['4 mrkvy','trocha vody','kvapka olivového oleja'],ingredientsEn:['4 carrots','a little water','drop of olive oil'],steps:['Mrkvy ošúpte a nakrájajte na kolieska.','Varte v malom množstve vody 15 minút.','Rozmixujte s vodou z varenia a olejom.'],stepsEn:['Peel and slice carrots.','Boil in a little water for 15 min.','Blend with cooking water and oil.'],tags:['deti-6m','baby','prvé jedlo'],tagsEn:['baby-6m','baby','first food'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:60,protein:1,fat:1,carbs:12}},
+  {id:68,name:'Tekvicové pyré',nameEn:'Pumpkin puree',category:'Detské',time:25,image:'',imageData:'',ingredients:['300g tekvice','trocha vody'],ingredientsEn:['300g pumpkin','a little water'],steps:['Tekvicu nakrájajte na kocky.','Duste v malom množstve vody 15-20 minút.','Rozmixujte dohladka.'],stepsEn:['Dice pumpkin.','Stew in a little water 15-20 min.','Blend until smooth.'],tags:['deti-6m','baby','prvé jedlo'],tagsEn:['baby-6m','baby','first food'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:50,protein:1,fat:0,carbs:12}},
+  {id:69,name:'Batatové pyré',nameEn:'Sweet potato puree',category:'Detské',time:25,image:'',imageData:'',ingredients:['2 bataty','trocha vody'],ingredientsEn:['2 sweet potatoes','a little water'],steps:['Bataty ošúpte a nakrájajte na kocky.','Varte v malom množstve vody 15 minút.','Rozmixujte dohladka.'],stepsEn:['Peel and dice sweet potatoes.','Boil in a little water for 15 min.','Blend until smooth.'],tags:['deti-6m','baby','prvé jedlo'],tagsEn:['baby-6m','baby','first food'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:90,protein:1,fat:0,carbs:21}},
+  {id:70,name:'Banánové pyré',nameEn:'Banana puree',category:'Detské',time:2,image:'',imageData:'',ingredients:['1 zrelý banán'],ingredientsEn:['1 ripe banana'],steps:['Banán roztlačte vidličkou dohladka.'],stepsEn:['Mash banana with a fork until smooth.'],tags:['deti-6m','baby','prvé jedlo','rýchle'],tagsEn:['baby-6m','baby','first food','quick'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:90,protein:1,fat:0,carbs:22}},
+  {id:71,name:'Zeleninová zmes (mrkva, zemiak, hrášok)',nameEn:'Mixed vegetable puree',category:'Detské',time:30,image:'',imageData:'',ingredients:['2 mrkvy','1 zemiak','hrsť hrášku','trocha vody','kvapka oleja'],ingredientsEn:['2 carrots','1 potato','handful peas','a little water','drop of oil'],steps:['Zeleninu ošúpte a nakrájajte na kocky.','Varte v malom množstve vody 20 minút.','Rozmixujte dohladka s olejom.'],stepsEn:['Peel and dice vegetables.','Boil in a little water for 20 min.','Blend until smooth with oil.'],tags:['deti-8m','baby'],tagsEn:['baby-8m','baby'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:100,protein:2,fat:1,carbs:20}},
+  {id:72,name:'Kuracie pyré so zeleninou',nameEn:'Chicken and vegetable puree',category:'Detské',time:30,image:'',imageData:'',ingredients:['100g kuracieho mäsa','1 mrkva','1 zemiak','trocha vody'],ingredientsEn:['100g chicken meat','1 carrot','1 potato','a little water'],steps:['Mäso a zeleninu nakrájajte na kocky.','Varte vo vode 20-25 minút.','Rozmixujte dohladka aj s vývarom.'],stepsEn:['Dice meat and vegetables.','Boil in water for 20-25 min.','Blend until smooth with the broth.'],tags:['deti-8m','baby','mäso'],tagsEn:['baby-8m','baby','meat'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:140,protein:12,fat:3,carbs:16}},
+  // === DETSKÉ RECEPTY (1 year+) ===
+  {id:73,name:'Banánové lievance (deti 1r+)',nameEn:'Banana pancakes (toddler)',category:'Detské',time:15,image:'',imageData:'',ingredients:['1 zrelý banán','1 vajce','2 lyžice ovsených vločiek','trocha masla'],ingredientsEn:['1 ripe banana','1 egg','2 tbsp rolled oats','little butter'],steps:['Banán roztlačte.','Zmiešajte s vajcom a pomletými ovsenými vločkami.','Opekajte malé lievance z oboch strán.'],stepsEn:['Mash banana.','Mix with egg and ground oats.','Fry small pancakes both sides.'],tags:['deti-1','raňajky','sladké'],tagsEn:['baby-1y','breakfast','sweet'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:180,protein:6,fat:6,carbs:26}},
+  {id:74,name:'Zemiaková kaša s mrkvou',nameEn:'Mashed potatoes with carrot',category:'Detské',time:25,image:'',imageData:'',ingredients:['2 zemiaky','1 mrkva','trocha masla','trocha mlieka','soľ'],ingredientsEn:['2 potatoes','1 carrot','little butter','little milk','salt'],steps:['Zeleninu ošúpte a nakrájajte.','Uvarte domäkka.','Roztlačte s maslom a mliekom.'],stepsEn:['Peel and dice.','Boil until soft.','Mash with butter and milk.'],tags:['deti-1','príloha'],tagsEn:['baby-1y','side'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:160,protein:3,fat:4,carbs:28}},
+  {id:75,name:'Dusená mrkva s hráškom',nameEn:'Steamed carrots with peas',category:'Detské',time:20,image:'',imageData:'',ingredients:['2 mrkvy','hrsť hrášku','trocha masla','soľ'],ingredientsEn:['2 carrots','handful peas','little butter','salt'],steps:['Mrkvu nakrájajte.','Duste s hráškom 15 minút.','Pridajte maslo.'],stepsEn:['Slice carrots.','Steam with peas 15 min.','Add butter.'],tags:['deti-1','zelenina'],tagsEn:['baby-1y','vegetable'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:90,protein:3,fat:3,carbs:14}},
+  {id:76,name:'Kuracie fašírky v pare',nameEn:'Steamed chicken patties',category:'Detské',time:25,image:'',imageData:'',ingredients:['200g mletého kura','1 vajce','2 lyžice strúhanky','1 mrkva'],ingredientsEn:['200g ground chicken','1 egg','2 tbsp breadcrumbs','1 carrot'],steps:['Zmiešajte mäso s vajcom, strúhankou a mrkvou.','Vytvarujte malé fašírky.','Parenie 15 minút.'],stepsEn:['Mix meat with egg, breadcrumbs and carrot.','Shape patties.','Steam 15 min.'],tags:['deti-1','mäso'],tagsEn:['baby-1y','meat'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:180,protein:20,fat:8,carbs:6}},
+  {id:77,name:'Tvarohová nátierka',nameEn:'Cottage cheese spread',category:'Detské',time:5,image:'',imageData:'',ingredients:['200g jemného tvarohu','2 lyžice mlieka','soľ'],ingredientsEn:['200g cottage cheese','2 tbsp milk','salt'],steps:['Tvaroh zmiešajte s mliekom.','Dochuťte.'],stepsEn:['Mix cheese with milk.','Season.'],tags:['deti-1','rýchle','nátierka'],tagsEn:['baby-1y','quick','spread'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:120,protein:12,fat:6,carbs:4}},
+  {id:78,name:'Cestoviny s jemnou omáčkou',nameEn:'Pasta with mild sauce',category:'Detské',time:20,image:'',imageData:'',ingredients:['200g malých cestovín','4 paradajky','1 mrkva','1 cibuľa','olivový olej'],ingredientsEn:['200g small pasta','4 tomatoes','1 carrot','1 onion','olive oil'],steps:['Cestoviny uvarte.','Opečte cibuľu, pridajte mrkvu a paradajky.','Duste 10 minút, rozmixujte.','Zmiešajte s cestovinami.'],stepsEn:['Cook pasta.','Sauté onion, add carrot and tomatoes.','Simmer 10 min, blend.','Mix with pasta.'],tags:['deti-1','cestoviny'],tagsEn:['baby-1y','pasta'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:280,protein:8,fat:4,carbs:54}},
+  {id:79,name:'Tvarohový dezert s ovocím',nameEn:'Cottage cheese dessert',category:'Detské',time:5,image:'',imageData:'',ingredients:['200g tvarohu','2 lyžice jogurtu','1 lyžica medu','ovocie'],ingredientsEn:['200g cottage cheese','2 tbsp yogurt','1 tbsp honey','fruit'],steps:['Zmiešajte tvaroh s jogurtom a medom.','Ozdobte ovocím.'],stepsEn:['Mix cheese with yogurt and honey.','Top with fruit.'],tags:['deti-1','rýchle','sladké'],tagsEn:['baby-1y','quick','sweet'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:180,protein:14,fat:6,carbs:20}},
+  // === DETSKÉ RECEPTY (2 years+) ===
+  {id:80,name:'Rybie prsty domáce',nameEn:'Homemade fish sticks',category:'Detské',time:25,image:'',imageData:'',ingredients:['400g tresky','1 vajce','100g strúhanky','soľ'],ingredientsEn:['400g cod','1 egg','100g breadcrumbs','salt'],steps:['Rybu nakrájajte na prúžky.','Obaľte vo vajci a strúhanke.','Pečte na 200°C 15 minút.'],stepsEn:['Cut fish into strips.','Coat in egg and breadcrumbs.','Bake at 200°C 15 min.'],tags:['deti-2','ryba'],tagsEn:['baby-2y','fish'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:220,protein:24,fat:8,carbs:12}},
+  {id:81,name:'Pečené kuracie nugetky',nameEn:'Baked chicken nuggets',category:'Detské',time:25,image:'',imageData:'',ingredients:['300g kuracích pŕs','1 vajce','100g strúhanky','soľ'],ingredientsEn:['300g chicken','1 egg','100g breadcrumbs','salt'],steps:['Kura nakrájajte na kocky.','Obaľte vo vajci a strúhanke.','Pečte na 200°C 15 minút.'],stepsEn:['Cube chicken.','Coat in egg and breadcrumbs.','Bake at 200°C 15 min.'],tags:['deti-2','kura'],tagsEn:['baby-2y','chicken'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:250,protein:26,fat:8,carbs:16}},
+  {id:82,name:'Brokolica v pare so syrom',nameEn:'Steamed broccoli with cheese',category:'Detské',time:15,image:'',imageData:'',ingredients:['1 brokolica','50g syra','maslo'],ingredientsEn:['1 broccoli','50g cheese','butter'],steps:['Brokolicu rozdeľte na ružičky.','Varte v pare 8-10 minút.','Posypte syrom.'],stepsEn:['Cut broccoli into florets.','Steam 8-10 min.','Top with cheese.'],tags:['deti-2','zelenina'],tagsEn:['baby-2y','vegetable'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:120,protein:8,fat:6,carbs:8}},
+  {id:83,name:'Zapekané cestoviny so syrom',nameEn:'Baked mac and cheese',category:'Detské',time:35,image:'',imageData:'',ingredients:['300g cestovín','300ml smotany','200g syru','2 lyžice masla'],ingredientsEn:['300g pasta','300ml cream','200g cheese','2 tbsp butter'],steps:['Cestoviny uvarte.','Zmiešajte so smotanou a syrom.','Zapečte na 180°C 15 minút.'],stepsEn:['Cook pasta.','Mix with cream and cheese.','Bake at 180°C 15 min.'],tags:['deti-2','rúra'],tagsEn:['baby-2y','baked'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:450,protein:18,fat:22,carbs:44}},
+  // === DETSKÉ (3 years+) ===
+  {id:84,name:'Mini pizza',nameEn:'Mini pizza',category:'Detské',time:20,image:'',imageData:'',ingredients:['4 pita chleby','4 lyžice paradajkovej omáčky','100g mozzarelly'],ingredientsEn:['4 pita breads','4 tbsp tomato sauce','100g mozzarella'],steps:['Potrite omáčkou.','Posypte syrom.','Pečte na 200°C 10 minút.'],stepsEn:['Spread sauce.','Top with cheese.','Bake at 200°C 10 min.'],tags:['deti-3','rýchle'],tagsEn:['baby-3y','quick'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:250,protein:10,fat:8,carbs:34}},
+  {id:85,name:'Vajíčková nátierka',nameEn:'Egg spread',category:'Detské',time:10,image:'',imageData:'',ingredients:['4 vajcia','2 lyžice masla','soľ'],ingredientsEn:['4 eggs','2 tbsp butter','salt'],steps:['Vajcia uvarte natvrdo.','Nastrúhajte a zmiešajte s maslom.'],stepsEn:['Hard-boil eggs.','Grate and mix with butter.'],tags:['deti-3','rýchle'],tagsEn:['baby-3y','quick'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:220,protein:12,fat:18,carbs:2}},
+  {id:86,name:'Krupicová kaša s ovocím',nameEn:'Semolina pudding',category:'Detské',time:15,image:'',imageData:'',ingredients:['500ml mlieka','4 lyžice krupice','2 lyžice cukru','maslo'],ingredientsEn:['500ml milk','4 tbsp semolina','2 tbsp sugar','butter'],steps:['Mlieko zohrejte.','Za stáleho miešania vsypte krupicu.','Varte 2 minúty, pridajte cukor a maslo.'],stepsEn:['Heat milk.','Whisk in semolina.','Cook 2 min, add sugar and butter.'],tags:['deti-1','raňajky','sladké'],tagsEn:['baby-1y','breakfast','sweet'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:280,protein:8,fat:8,carbs:44}},
+  {id:87,name:'Ovsená kaša s ovocím',nameEn:'Oatmeal with fruit',category:'Detské',time:10,image:'',imageData:'',ingredients:['50g ovsených vločiek','200ml mlieka','banán','ovocie'],ingredientsEn:['50g oats','200ml milk','banana','fruit'],steps:['Vločky zalejte mliekom a varte 5 minút.','Podávajte s ovocím.'],stepsEn:['Cook oats with milk 5 min.','Serve with fruit.'],tags:['deti-1','raňajky','zdravé'],tagsEn:['baby-1y','breakfast','healthy'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:280,protein:10,fat:6,carbs:46}},
+  {id:88,name:'Jogurt s ovocím',nameEn:'Yogurt with fruit',category:'Detské',time:2,image:'',imageData:'',ingredients:['200g bieleho jogurtu','ovocie','med'],ingredientsEn:['200g yogurt','fruit','honey'],steps:['Jogurt dajte do misky.','Pridajte ovocie a med.'],stepsEn:['Put yogurt in bowl.','Add fruit and honey.'],tags:['deti-1','rýchle','raňajky'],tagsEn:['baby-1y','quick','breakfast'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:180,protein:8,fat:4,carbs:28}},
+  {id:89,name:'Zelené smoothie',nameEn:'Green smoothie',category:'Detské',time:5,image:'',imageData:'',ingredients:['1 banán','hrsť špenátu','1 jablko','200ml mlieka'],ingredientsEn:['1 banana','spinach','1 apple','200ml milk'],steps:['Všetko rozmixujte dohladka.'],stepsEn:['Blend until smooth.'],tags:['deti-1','nápoj','zdravé'],tagsEn:['baby-1y','drink','healthy'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:160,protein:4,fat:2,carbs:32}},
 ];
 
 let recipes = JSON.parse(localStorage.getItem('recipes') || 'null') || DEFAULT_RECIPES.map(r => ({...r}));
@@ -464,6 +507,19 @@ function switchLang() {
   render();
 }
 
+function setAgeFilter(age) {
+  ageFilter = age;
+  document.querySelectorAll('#age-filter .age-btn').forEach(b => b.classList.toggle('active', b.dataset.age === age));
+  render();
+}
+
+function matchesAgeFilter(recipe) {
+  if (!ageFilter) return true;
+  const map = { 'baby-6m': ['deti-6m','baby-6m'], 'baby-1': ['deti-1','baby-1y'], 'baby-2': ['deti-2','baby-2y'], 'baby-3': ['deti-3','baby-3y'] };
+  const targets = map[ageFilter] || []; const rtags = [...(recipe.tags||[]), ...(recipe.tagsEn||[])];
+  return targets.some(t => rtags.includes(t));
+}
+
 // ======================== THEME ========================
 function toggleDark() {
   document.body.classList.toggle('dark');
@@ -491,7 +547,8 @@ function render() {
     const matchSearch = name.toLowerCase().includes(search) || tags.some(t => t.toLowerCase().includes(search));
     const matchCat = !cat || r.category === cat;
     const matchFav = !showFav || r.favorite;
-    return matchSearch && matchCat && matchFav;
+    const matchAge = matchesAgeFilter(r);
+    return matchSearch && matchCat && matchFav && matchAge;
   });
   if (!filtered.length) {
     grid.innerHTML = `<div class="empty-state"><h3>😕 ${t('noRecipes')}</h3><p>${t('noRecipesHint')}</p></div>`;
@@ -510,7 +567,7 @@ function render() {
         <div class="meta"><span>📂 ${r.category}</span><span>⏱ ${r.time} ${lang==='en'?'min':'min'}</span></div>
         ${r.rating > 0 ? `<div class="stars">${'★'.repeat(Math.round(r.rating))}${'☆'.repeat(5-Math.round(r.rating))}</div>` : ''}
         ${r.nutrition ? `<div class="meta">🔥 ${r.nutrition.kcal || '?'} kcal</div>` : ''}
-        <div class="tags">${tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+        <div class="tags">${tags.map(t => `<span class="tag${t.startsWith('deti-')||t.startsWith('baby')?' baby-tag':''}">${t}</span>`).join('')}</div>
       </div>
     </div>`;
   }).join('');
