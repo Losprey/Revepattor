@@ -4,6 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#e67e22">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -209,6 +210,7 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--p
     <button class="btn btn-secondary" onclick="openCollections()" data-lang="btnCollections">📁 Kolekcie</button>
     <button class="btn btn-secondary" onclick="openHistory()" data-lang="btnHistory">📜 História</button>
     <input type="file" id="import-file" class="import-hidden" accept=".json" onchange="importRecipes(event)">
+    <button class="btn btn-secondary" onclick="showImportUrlModal()">🌐 <span data-lang="btnImportUrl">Import z URL</span></button>
   </div>
   <div class="age-filter" id="age-filter">
     <button class="age-btn active" data-age="" onclick="setAgeFilter('')"><span data-lang="allAges">Všetky veky</span></button>
@@ -358,6 +360,19 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--p
   </div>
 </div>
 
+<div class="modal-overlay" id="import-url-modal">
+  <div class="modal" style="max-width:480px;">
+    <h2 data-lang="importUrlTitle">🌐 Importovať recept z URL</h2>
+    <p style="color:var(--text2);margin-bottom:.5rem;font-size:.85rem;" data-lang="importUrlHint">Vlož odkaz na recept z Varecha.sk, Recepty.sk, NajRecept.sk – appka ho stiahne a predvyplní formulár.</p>
+    <input type="url" id="import-url-input" placeholder="https://varecha.pravda.sk/recept/..." style="width:100%;padding:.55rem 1rem;border:1px solid var(--border);border-radius:var(--radius-lg);font-size:.85rem;background:var(--input-bg);color:var(--text);backdrop-filter:blur(8px);">
+    <div id="import-url-status" style="margin-top:.5rem;font-size:.85rem;color:var(--text2);"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('import-url-modal')" data-lang="cancel">Zrušiť</button>
+      <button class="btn btn-primary" onclick="importFromUrl()" id="import-url-btn" data-lang="importUrlDo">📥 Importovať</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ======================== TRANSLATIONS ========================
 const LANG = {
@@ -397,6 +412,7 @@ const LANG = {
     btnCollections: '📁 Kolekcie', collections: '📁 Kolekcie', colAdd: '+ Vytvoriť', colEmpty: 'Zatiaľ žiadne kolekcie.',
     tipOfDay: 'Tip dňa:',
     btnHistory: '📜 História', cookingHistory: '📜 História varenia', historyClear: '🗑 Vymazať históriu', historyEmpty: 'Zatiaľ žiadna história.',
+    btnImportUrl:'Import z URL', importUrlTitle:'🌐 Importovať recept z URL', importUrlHint:'Vlož odkaz na recept z Varecha.sk, Recepty.sk, NajRecept.sk – appka ho stiahne a predvyplní formulár.', importUrlDo:'📥 Importovať', importUrlOk:'✅ Recept načítaný! Skontroluj a ulož.', importUrlFail:'❌ Nepodarilo sa načítať recept. Skús iný odkaz.', importUrlBad:'❌ Nenašiel sa žiadny recept na tejto URL. Skús iný odkaz.',
 
   },
   en: {
@@ -435,6 +451,7 @@ const LANG = {
     btnCollections: '📁 Collections', collections: '📁 Collections', colAdd: '+ Create', colEmpty: 'No collections yet.',
     tipOfDay: 'Tip of the day:',
     btnHistory: '📜 History', cookingHistory: '📜 Cooking history', historyClear: '🗑 Clear history', historyEmpty: 'No history yet.',
+    btnImportUrl:'Import from URL', importUrlTitle:'🌐 Import recipe from URL', importUrlHint:'Paste a link from Varecha.sk, Recepty.sk, NajRecept.sk – the app will fetch and prefill the form.', importUrlDo:'📥 Import', importUrlOk:'✅ Recipe loaded! Check and save.', importUrlFail:'❌ Failed to load recipe. Try a different link.', importUrlBad:'❌ No recipe found at this URL. Try another link.',
 
   }
  };
@@ -1369,10 +1386,96 @@ function applyIngredientSearch() {
   }
 }
 
+// ======================== IMPORT FROM URL ========================
+function showImportUrlModal() {
+  document.getElementById('import-url-input').value = '';
+  document.getElementById('import-url-status').textContent = '';
+  openModal('import-url-modal');
+}
+
+function importFromUrl() {
+  const url = document.getElementById('import-url-input').value.trim();
+  if (!url) return;
+  const status = document.getElementById('import-url-status');
+  const btn = document.getElementById('import-url-btn');
+  status.textContent = '⏳ Načítavam...';
+  btn.disabled = true;
+  const proxy = 'https://api.allorigins.win/raw?url=';
+  fetch(proxy + encodeURIComponent(url))
+    .then(r => r.text())
+    .then(html => {
+      const jsonlds = [];
+      const re = /<script\s+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
+      let m;
+      while ((m = re.exec(html)) !== null) {
+        try { jsonlds.push(JSON.parse(m[1])); } catch(e) {}
+      }
+      let recipe = null;
+      for (const item of jsonlds) {
+        if (item['@type'] === 'Recipe' || (Array.isArray(item['@type']) && item['@type'].includes('Recipe'))) {
+          recipe = item; break;
+        }
+        if (item['@graph']) {
+          for (const g of item['@graph']) {
+            if (g['@type'] === 'Recipe' || (Array.isArray(g['@type']) && g['@type'].includes('Recipe'))) {
+              recipe = g; break;
+            }
+          }
+        }
+        if (recipe) break;
+      }
+      if (!recipe) { status.textContent = t('importUrlBad'); btn.disabled = false; return; }
+      const name = recipe.name || '';
+      const ingr = recipe.recipeIngredient || [];
+      const steps = recipe.recipeInstructions || [];
+      const time = recipe.totalTime || recipe.cookTime || '';
+      const image = recipe.image ? (typeof recipe.image === 'string' ? recipe.image : recipe.image.url || '') : '';
+      const yield_ = recipe.recipeYield || '';
+      const cuisine = recipe.recipeCuisine || '';
+      const category = recipe.recipeCategory || '';
+      const calories = recipe.nutrition && recipe.nutrition.calories ? recipe.nutrition.calories.replace(/[^0-9]/g,'') : '';
+      const ingrText = (Array.isArray(ingr) ? ingr : []).join('\n');
+      const stepsArr = Array.isArray(steps) ? steps.map(s => typeof s === 'string' ? s : s.text || s.name || '') :
+        typeof steps === 'string' ? steps.split('\n') : [];
+      const stepText = stepsArr.join('\n');
+      let timeNum = parseInt(time.replace(/[^0-9]/g,'')) || 30;
+      if (time.includes('H') || time.includes('h')) timeNum = timeNum * 60;
+      const cats = ['Hlavné jedlá','Polievky','Šaláty','Dezerty','Pečivo','Nápoje','Predjedlá','Raňajky','Prílohy','Detské'];
+      const catMatch = cats.find(c => category.toLowerCase().includes(c.toLowerCase()) || c.toLowerCase().includes(category.toLowerCase()));
+      let yieldNum = parseInt(yield_) || 4;
+      openFormModal();
+      document.getElementById('r-name').value = name;
+      document.getElementById('r-image').value = image;
+      document.getElementById('r-ingredients').value = ingrText;
+      document.getElementById('r-steps').value = stepText;
+      document.getElementById('r-time').value = timeNum;
+      if (catMatch) document.getElementById('r-category').value = catMatch;
+      const tags = [];
+      if (cuisine) { const t = cuisine.split(',').map(s => s.trim().toLowerCase()); tags.push(...t); }
+      if (recipe.keywords) { const t = (typeof recipe.keywords === 'string' ? recipe.keywords : (Array.isArray(recipe.keywords) ? recipe.keywords.join(',') : '')).split(',').map(s => s.trim().toLowerCase()); tags.push(...t); }
+      document.getElementById('r-tags').value = [...new Set(tags)].join(', ');
+      if (calories) {
+        const n = parseInt(calories);
+        const k = Math.round(n / yieldNum);
+        document.getElementById('r-kcal').value = k || n;
+      }
+      document.getElementById('r-image').dispatchEvent(new Event('input'));
+      status.textContent = t('importUrlOk');
+      closeModal('import-url-modal');
+    })
+    .catch(() => { status.textContent = t('importUrlFail'); })
+    .finally(() => { btn.disabled = false; });
+}
+
 // ======================== INIT ========================
 applyLang();
 render();
 showTipOfDay();
+
+// Register service worker for PWA
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
 
 
 </script>
