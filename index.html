@@ -3,6 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#e67e22">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Receptár">
 <title data-lang="appTitle">Receptár</title>
 <style>
 :root {
@@ -58,6 +63,9 @@ input, select, textarea { background: var(--input-bg); color: var(--text); borde
 .age-btn { padding: .3rem .7rem; border-radius: 20px; border: 1px solid var(--border); background: var(--surface); color: var(--text2); font-size: .8rem; cursor: pointer; font-weight: 500; transition: .15s; }
 .age-btn:hover { border-color: #f472b6; color: #f472b6; }
 .age-btn.active { background: #f472b6; color: #fff; border-color: #f472b6; }
+.diet-btn { padding:.25rem .55rem; border-radius:20px; border:1px solid var(--border); background:var(--surface); color:var(--text2); font-size:.75rem; cursor:pointer; font-weight:500; transition:.15s; }
+.diet-btn:hover { border-color:var(--success); color:var(--success); }
+.diet-btn.active { background:var(--success); color:#fff; border-color:var(--success); }
 .tag.baby-tag { background: #fce7f3; color: #be185d; }
 .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text2); }
 .empty-state h3 { color: var(--text); }
@@ -147,7 +155,10 @@ input, select, textarea { background: var(--input-bg); color: var(--text); borde
     <button class="btn btn-secondary" onclick="event.stopPropagation();dismissTip()" style="padding:.1rem .4rem;font-size:.7rem;">✕</button>
   </div>
   <div class="controls">
-    <input type="text" id="search" data-lang="searchPlaceholder" placeholder="Hľadať...">
+    <div style="display:flex;gap:.3rem;flex:1;min-width:130px;">
+      <input type="text" id="search" data-lang="searchPlaceholder" placeholder="" style="flex:1;padding:.5rem .75rem;border:1px solid var(--border);border-radius:8px;font-size:.83rem;background:var(--input-bg);color:var(--text);">
+      <button class="btn btn-secondary" id="voice-search-btn" onclick="toggleVoiceSearch()" style="padding:.3rem .5rem;font-size:.9rem;" title="Hlasové vyhľadávanie">🎤</button>
+    </div>
     <select id="filter-category">
       <option value="" data-lang="allCategories">Všetky</option>
       <option>Hlavné jedlá</option><option>Polievky</option><option>Šaláty</option><option>Dezerty</option><option>Pečivo</option><option>Nápoje</option><option>Predjedlá</option><option>Raňajky</option><option>Prílohy</option><option>Detské</option>
@@ -171,6 +182,13 @@ input, select, textarea { background: var(--input-bg); color: var(--text); borde
     <button class="age-btn" data-age="baby-2" onclick="setAgeFilter('baby-2')">👶 <span data-lang="age2">2r+</span></button>
     <button class="age-btn" data-age="baby-3" onclick="setAgeFilter('baby-3')">👶 <span data-lang="age3">3r+</span></button>
   </div>
+  <div class="diet-filter" id="diet-filter" style="display:flex;gap:.3rem;margin-bottom:.6rem;flex-wrap:wrap;">
+    <button class="diet-btn active" data-diet="" onclick="setDietFilter('')" data-lang="allDiets">Všetky</button>
+    <button class="diet-btn" data-diet="vegan" onclick="setDietFilter('vegan')">🌱 Vegan</button>
+    <button class="diet-btn" data-diet="vegetarian" onclick="setDietFilter('vegetarian')">🥬 Vegetarián</button>
+    <button class="diet-btn" data-diet="gluten-free" onclick="setDietFilter('gluten-free')">🌾 Bez lepku</button>
+    <button class="diet-btn" data-diet="lactose-free" onclick="setDietFilter('lactose-free')">🥛 Bez laktózy</button>
+  </div>
   <div class="recipe-grid" id="recipe-grid"></div>
 </div>
 
@@ -188,6 +206,14 @@ input, select, textarea { background: var(--input-bg); color: var(--text); borde
         </select>
       </div>
       <div class="form-group"><label>⏱ <span data-lang="formTime">Čas (min)</span></label><input id="r-time" type="number" placeholder="30" min="1"></div>
+      <div class="form-group">
+        <label data-lang="difficulty">Obtiažnosť</label>
+        <select id="r-difficulty">
+          <option value="1">⚪⚪⚪ <span data-lang="diffEasy">Ľahké</span></option>
+          <option value="2" selected>⚪⚪⚫ <span data-lang="diffMedium">Stredné</span></option>
+          <option value="3">⚪⚫⚫ <span data-lang="diffHard">Ťažké</span></option>
+        </select>
+      </div>
     </div>
     <div class="form-group">
       <label>🖼 <span data-lang="formImage">Obrázok</span></label>
@@ -224,6 +250,7 @@ input, select, textarea { background: var(--input-bg); color: var(--text); borde
     <div class="modal-footer">
       <button class="btn btn-primary" onclick="openCookingMode()">👨‍🍳 <span data-lang="btnCook">Variť</span></button>
       <button class="btn btn-secondary" onclick="printRecipe()">🖨️ <span data-lang="btnPrint">Tlačiť</span></button>
+      <button class="btn btn-secondary" onclick="copyRecipe()" data-lang="btnCopy">📋 Kopírovať</button>
       <button class="btn btn-secondary" onclick="shareRecipe()">📤 <span data-lang="btnShare">Zdieľať</span></button>
       <button class="btn btn-primary" onclick="editCurrent()">✏️ <span data-lang="btnEdit">Upraviť</span></button>
       <button class="btn btn-danger" onclick="deleteCurrent()">🗑 <span data-lang="btnDelete">Zmazať</span></button>
@@ -328,6 +355,9 @@ const LANG = {
     recipeNutri: 'Nutričné hodnoty', kcal: 'kcal', protein: 'bielkoviny', fat: 'tuky', carbs: 'sacharidy',
     perPortion: 'na porciu',
     allAges: 'Všetky veky', age6m: '6m+', age1: '1r+', age2: '2r+', age3: '3r+',
+    allDiets:'Všetky diéty', difficulty:'Obtiažnosť',
+    diffEasy:'Ľahké', diffMedium:'Stredné', diffHard:'Ťažké',
+    btnCopy:'📋 Kopírovať',
     portions: 'Porcie:',
     btnCollections: '📁 Kolekcie', collections: '📁 Kolekcie', colAdd: '+ Vytvoriť', colEmpty: 'Zatiaľ žiadne kolekcie.',
     tipOfDay: 'Tip dňa:',
@@ -363,6 +393,9 @@ const LANG = {
     recipeNutri: 'Nutrition', kcal: 'kcal', protein: 'protein', fat: 'fat', carbs: 'carbs',
     perPortion: 'per serving',
     allAges: 'All ages', age6m: '6m+', age1: '1y+', age2: '2y+', age3: '3y+',
+    allDiets:'All diets', difficulty:'Difficulty',
+    diffEasy:'Easy', diffMedium:'Medium', diffHard:'Hard',
+    btnCopy:'📋 Copy',
     portions: 'Servings:',
     btnCollections: '📁 Collections', collections: '📁 Collections', colAdd: '+ Create', colEmpty: 'No collections yet.',
     tipOfDay: 'Tip of the day:',
@@ -372,6 +405,8 @@ const LANG = {
  };
  let lang = localStorage.getItem('lang') || 'sk';
 let ageFilter = '';
+let dietFilter = '';
+let voiceSearch = null, voiceSearchListening = false;
 
 // ======================== DATA ========================
 const DEFAULT_RECIPES = [
@@ -472,6 +507,21 @@ const DEFAULT_RECIPES = [
 ];
 
 let recipes = JSON.parse(localStorage.getItem('recipes') || 'null') || DEFAULT_RECIPES.map(r => ({...r}));
+// Migrate: add allergens/diets/difficulty if missing
+recipes = recipes.map(r => ({
+  ...r,
+  allergens: r.allergens || [],
+  diets: r.diets || (() => {
+    const d = [];
+    const tags = [...(r.tags||[]), ...(r.tagsEn||[])];
+    if (tags.some(t => t.includes('vegan') || t === 'vegánske')) d.push('vegan');
+    if (tags.some(t => t.includes('vegetarian') || t === 'vegetariánske')) d.push('vegetarian');
+    if (tags.some(t => t.includes('gluten') || t === 'bezlepkové')) d.push('gluten-free');
+    if (tags.some(t => t.includes('lactose') || t === 'bezlaktózové')) d.push('lactose-free');
+    return d;
+  })(),
+  difficulty: r.difficulty || (r.time <= 15 ? 1 : r.time <= 35 ? 2 : 3),
+}));
 let editingId = null, viewingId = null;
 let cookingStep = 0, cookingRecipeId = null, cookingTimer = null, cookingTimerRunning = false, cookingTimerSeconds = 0;
 let voiceRecognition = null, voiceListening = false;
@@ -535,6 +585,17 @@ function matchesAgeFilter(recipe) {
   return targets.some(t => rtags.includes(t));
 }
 
+function setDietFilter(diet) {
+  dietFilter = diet;
+  document.querySelectorAll('#diet-filter .diet-btn').forEach(b => b.classList.toggle('active', b.dataset.diet === diet));
+  render();
+}
+
+function matchesDiet(recipe) {
+  if (!dietFilter) return true;
+  return (recipe.diets || []).includes(dietFilter);
+}
+
 // ======================== THEME ========================
 function toggleDark() {
   document.body.classList.toggle('dark');
@@ -561,7 +622,8 @@ function render() {
     const matchCat = !cat || r.category === cat;
     const matchFav = !showFav || r.favorite;
     const matchAge = matchesAgeFilter(r);
-    return matchSearch && matchCat && matchFav && matchAge;
+    const matchDiet = matchesDiet(r);
+    return matchSearch && matchCat && matchFav && matchAge && matchDiet;
   });
   const colFilter = document.getElementById('filter-collection')?.value;
   if (colFilter) {
@@ -581,10 +643,14 @@ function render() {
         ? `<img class="recipe-card-img" src="${r.imageData || r.image}" alt="${name}" onerror="this.outerHTML='<div class=\\'recipe-card-img\\'>🍽️</div>'">`
         : `<div class="recipe-card-img">🍽️</div>`}
       <div class="recipe-card-body" onclick="viewRecipe(${r.id})">
-        <h3>${name}</h3>
+        <div style="display:flex;align-items:center;gap:.35rem;">
+          <h3>${name}</h3>
+          <span style="font-size:.7rem;">${'⚪'.repeat(r.difficulty||1)}${'⚫'.repeat(3-(r.difficulty||1))}</span>
+        </div>
         <div class="meta"><span>📂 ${r.category}</span><span>⏱ ${r.time} ${lang==='en'?'min':'min'}</span></div>
         ${r.rating > 0 ? `<div class="stars">${'★'.repeat(Math.round(r.rating))}${'☆'.repeat(5-Math.round(r.rating))}</div>` : ''}
         ${r.nutrition ? `<div class="meta">🔥 ${r.nutrition.kcal || '?'} kcal</div>` : ''}
+        ${(r.allergens||[]).length ? `<div class="meta" style="margin-top:2px;">⚠️ ${(r.allergens||[]).join(', ')}</div>` : ''}
         <div class="tags">${tags.map(t => `<span class="tag${t.startsWith('deti-')||t.startsWith('baby')?' baby-tag':''}">${t}</span>`).join('')}</div>
       </div>
     </div>`;
@@ -638,6 +704,7 @@ function openFormModal(recipe) {
   document.getElementById('r-name').value = recipe ? recipe.name : '';
   document.getElementById('r-nameEn').value = recipe && recipe.nameEn ? recipe.nameEn : '';
   document.getElementById('r-category').value = recipe ? recipe.category : 'Hlavné jedlá';
+  document.getElementById('r-difficulty').value = recipe ? (recipe.difficulty || 1) : 1;
   document.getElementById('r-time').value = recipe ? recipe.time : '';
   document.getElementById('r-image').value = recipe && recipe.image && !recipe.imageData ? recipe.image : '';
   document.getElementById('r-ingredients').value = recipe ? recipe.ingredients.join('\n') : '';
@@ -679,6 +746,7 @@ function saveRecipe() {
   const ingredients = document.getElementById('r-ingredients').value.split('\n').map(s => s.trim()).filter(Boolean);
   const steps = document.getElementById('r-steps').value.split('\n').map(s => s.trim()).filter(Boolean);
   const tags = document.getElementById('r-tags').value.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+  const difficulty = parseInt(document.getElementById('r-difficulty').value) || 1;
   const kcal = parseInt(document.getElementById('r-kcal').value) || 0;
   const protein = parseInt(document.getElementById('r-protein').value) || 0;
   const fat = parseInt(document.getElementById('r-fat').value) || 0;
@@ -689,10 +757,10 @@ function saveRecipe() {
   const nutrition = {kcal,protein,fat,carbs};
   if (editingId) {
     const idx = recipes.findIndex(r => r.id === editingId);
-    if (idx !== -1) recipes[idx] = {...recipes[idx], name, nameEn, category, time, image, imageData, ingredients, steps, tags, nutrition};
+    if (idx !== -1) recipes[idx] = {...recipes[idx], name, nameEn, category, time, image, imageData, ingredients, steps, tags, nutrition, difficulty};
     editingId = null;
   } else {
-    recipes.push({id:Date.now(), name, nameEn, category, time, image, imageData, ingredients, steps, tags, rating:0, notes:'', notesEn:'', favorite:false, nutrition});
+    recipes.push({id:Date.now(), name, nameEn, category, time, image, imageData, ingredients, steps, tags, rating:0, notes:'', notesEn:'', favorite:false, nutrition, difficulty, allergens: [], diets: []});
   }
   saveToLS();
   closeModal('form-modal');
@@ -714,8 +782,8 @@ function viewRecipe(id) {
   const el = document.getElementById('recipe-detail');
   el.innerHTML = `
     ${r.image || r.imageData ? `<img class="detail-img" src="${r.imageData||r.image}" onerror="this.outerHTML='<div class=\\'detail-img\\'>🍽️</div>'">` : `<div class="detail-img">🍽️</div>`}
-    <h2>${name} <span style="font-size:.85rem;color:var(--text2);font-weight:400;">(⏱ ${r.time} ${lang==='en'?'min':'min'})</span></h2>
-    <div class="detail-meta"><span>📂 ${r.category}</span><span>🏷 ${tgs.join(', ')}</span></div>
+    <h2>${name} <span style="font-size:.7rem;">${'⚪'.repeat(r.difficulty||1)}${'⚫'.repeat(3-(r.difficulty||1))}</span> <span style="font-size:.85rem;color:var(--text2);font-weight:400;">(⏱ ${r.time} ${lang==='en'?'min':'min'})</span></h2>
+    <div class="detail-meta"><span>📂 ${r.category}</span><span>🏷 ${tgs.join(', ')}</span>${(r.allergens||[]).length ? `<span>⚠️ ${(r.allergens||[]).join(', ')}</span>` : ''}</div>
     <div class="detail-actions">
       <button class="btn btn-secondary" onclick="addToCollectionPrompt(${id})" style="padding:.25rem .6rem;font-size:.8rem;">📁 +</button>
     </div>
@@ -831,6 +899,21 @@ function shareRecipe() {
 
 function copyText(text) {
   navigator.clipboard.writeText(text).then(() => alert('Copied!')).catch(() => prompt('Copy:', text));
+}
+
+// ======================== COPY RECIPE ========================
+function copyRecipe() {
+  const r = recipes.find(rec => rec.id === viewingId);
+  if (!r) return;
+  const name = lang==='en'&&r.nameEn?r.nameEn:r.name;
+  const ingr = lang==='en'&&r.ingredientsEn?r.ingredientsEn:r.ingredients;
+  const stps = lang==='en'&&r.stepsEn?r.stepsEn:r.steps;
+  const tgs = lang==='en'&&r.tagsEn?r.tagsEn:r.tags;
+  const text = `🍽️ ${name}\n⏱ ${r.time} min\n\nSuroviny:\n${ingr.map(i=>`• ${i}`).join('\n')}\n\nPostup:\n${stps.map((s,i)=>`${i+1}. ${s}`).join('\n')}\n\n🏷 ${tgs.join(', ')}`;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = event.target.closest('.btn') || document.querySelector('.modal-footer .btn:last-child');
+    if (btn) { const orig = btn.textContent; btn.textContent = '✓ OK!'; setTimeout(() => btn.textContent = orig, 1500); }
+  }).catch(() => prompt('Copy:', text));
 }
 
 // ======================== EXPORT/IMPORT ========================
@@ -999,6 +1082,35 @@ function stopVoice() {
 }
 
 
+
+// ======================== VOICE SEARCH ========================
+function toggleVoiceSearch() {
+  if (voiceSearchListening) { stopVoiceSearch(); return; }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { alert(lang==='en'?'Voice search not supported.':'Hlasové vyhľadávanie nie je podporované.'); return; }
+  voiceSearch = new SR();
+  voiceSearch.lang = lang === 'en' ? 'en-US' : 'sk-SK';
+  voiceSearch.interimResults = false;
+  voiceSearch.onresult = function(e) {
+    const txt = e.results[0][0].transcript;
+    document.getElementById('search').value = txt;
+    render();
+    stopVoiceSearch();
+  };
+  voiceSearch.onerror = function() { stopVoiceSearch(); };
+  voiceSearch.start();
+  voiceSearchListening = true;
+  document.getElementById('voice-search-btn').textContent = '🎤🔴';
+  document.getElementById('voice-search-btn').style.background = '#ef4444';
+  document.getElementById('voice-search-btn').style.color = '#fff';
+}
+
+function stopVoiceSearch() {
+  if (voiceSearch) { try { voiceSearch.stop(); } catch(e) {} voiceSearch = null; }
+  voiceSearchListening = false;
+  const btn = document.getElementById('voice-search-btn');
+  if (btn) { btn.textContent = '🎤'; btn.style.background = ''; btn.style.color = ''; }
+}
 
 // ======================== INGREDIENT SEARCH ========================
 function openIngredientSearch() {
@@ -1210,8 +1322,11 @@ function applyIngredientSearch() {
       const tags = lang==='en'&&r.tagsEn?r.tagsEn:r.tags;
       return `<div class="recipe-card"><button class="fav-btn" onclick="event.stopPropagation();toggleFav(${r.id})">${r.favorite?'❤️':'🤍'}</button>
         ${r.image||r.imageData?`<img class="recipe-card-img" src="${r.imageData||r.image}" onerror="this.outerHTML='<div class=\\'recipe-card-img\\'>🍽️</div>'">`:`<div class="recipe-card-img">🍽️</div>`}
-        <div class="recipe-card-body" onclick="viewRecipe(${r.id})"><h3>${name}</h3>
+        <div class="recipe-card-body" onclick="viewRecipe(${r.id})">
+        <div style="display:flex;align-items:center;gap:.35rem;"><h3>${name}</h3>
+        <span style="font-size:.7rem;">${'⚪'.repeat(r.difficulty||1)}${'⚫'.repeat(3-(r.difficulty||1))}</span></div>
         <div class="meta"><span>📂 ${r.category}</span><span>⏱ ${r.time} min</span></div>
+        ${(r.allergens||[]).length ? `<div class="meta" style="margin-top:2px;">⚠️ ${(r.allergens||[]).join(', ')}</div>` : ''}
         <div class="tags">${tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div></div></div>`;
     }).join('');
   } else {
@@ -1223,6 +1338,11 @@ function applyIngredientSearch() {
 applyLang();
 render();
 showTipOfDay();
+
+// Register service worker for PWA
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
 </script>
 </body>
 </html>
