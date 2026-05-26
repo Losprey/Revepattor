@@ -4,11 +4,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#e67e22">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Receptár">
+<meta name="apple-mobile-web-app-title" content="Receptoár">
 <title data-lang="appTitle">Receptár</title>
 <style>
 :root {
@@ -363,7 +362,7 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--p
 // ======================== TRANSLATIONS ========================
 const LANG = {
   sk: {
-    appTitle: 'Receptár', appSubtitle: 'Zbierka nápadov na varenie a pečenie',
+    appTitle: 'Receptoár', appSubtitle: 'Zbierka nápadov na varenie a pečenie',
     tabRecipes: '📖 Recepty',
     searchPlaceholder: 'Hľadať...', allCategories: 'Všetky kategórie',
     btnAdd: '+ Nový', btnByIngr: '🥕 Suroviny', btnRandom: 'Náhodný',
@@ -385,7 +384,7 @@ const LANG = {
     matchCount: 'receptov sedí', matchPart: 'receptov sedí čiastočne',
     shareWhatsApp: 'WhatsApp', shareMessenger: 'Messenger', shareEmail: 'Email',
     cookingDone: 'Hotovo! Dobrú chuť! 🎉', cookingTimerStart: 'Spustiť', cookingTimerStop: 'Stop',
-    exportError: 'Neplatný súbor. Vyber JSON exportovaný z Receptára.',
+    exportError: 'Neplatný súbor. Vyber JSON exportovaný z Receptoára.',
     importConfirm: 'Naozaj chcete importovať', importOk: 'Importovaných',
     deleteConfirm: 'Naozaj chcete zmazať tento recept?',
     recipeNutri: 'Nutričné hodnoty', kcal: 'kcal', protein: 'bielkoviny', fat: 'tuky', carbs: 'sacharidy',
@@ -1375,10 +1374,7 @@ applyLang();
 render();
 showTipOfDay();
 
-// Register service worker for PWA
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(() => {});
-}
+
 </script>
 </body>
 </html>
