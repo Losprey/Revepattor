@@ -3,376 +3,575 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Receptár</title>
+<title data-lang="appTitle">Receptár</title>
 <style>
+:root {
+  --bg: #f8fafc; --surface: #fff; --text: #1e293b; --text2: #64748b;
+  --border: #e2e8f0; --input-bg: #fff; --tag-bg: #fef3c7; --tag-text: #92400e;
+  --primary: #e67e22; --primary-hover: #d35400; --danger: #ef4444; --success: #10b981;
+  --cooking-bg: #1e293b; --cooking-text: #fff; --hover-bg: #f1f5f9;
+  --modal-overlay: rgba(0,0,0,.45); --card-shadow: 0 1px 3px rgba(0,0,0,.08);
+  --planner-bg: #f8fafc;
+}
+body.dark {
+  --bg: #0f172a; --surface: #1e293b; --text: #e2e8f0; --text2: #94a3b8;
+  --border: #334155; --input-bg: #1e293b; --tag-bg: #422006; --tag-text: #fbbf24;
+  --primary: #f59e0b; --primary-hover: #d97706;
+  --cooking-bg: #020617; --hover-bg: #334155;
+  --modal-overlay: rgba(0,0,0,.75); --card-shadow: 0 1px 3px rgba(0,0,0,.3);
+  --planner-bg: #1e293b;
+}
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: system-ui, -apple-system, sans-serif; background: #f8fafc; color: #1e293b; line-height: 1.6; }
-header { background: linear-gradient(135deg, #e67e22, #f39c12); color: #fff; padding: 1.5rem 2rem; text-align: center; position: relative; }
-header h1 { font-size: 1.8rem; }
-header p { opacity: .9; font-size: .95rem; }
-.tabs { display: flex; gap: 0; background: #fff; border-bottom: 2px solid #e2e8f0; }
-.tab-btn { flex: 1; padding: .85rem; border: none; background: none; font-size: .9rem; font-weight: 600; cursor: pointer; color: #64748b; transition: .15s; position: relative; }
-.tab-btn:hover { color: #e67e22; }
-.tab-btn.active { color: #e67e22; }
-.tab-btn.active::after { content: ''; position: absolute; bottom: -2px; left: 10%; right: 10%; height: 3px; background: #e67e22; border-radius: 3px; }
+body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; transition: background .2s, color .2s; }
+header { background: linear-gradient(135deg, var(--primary), #f39c12); color: #fff; padding: 1.25rem 2rem; text-align: center; position: relative; display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: .5rem; }
+header h1 { font-size: 1.6rem; }
+header p { font-size: .9rem; opacity: .9; width:100%; }
+.header-actions { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); display: flex; gap: .4rem; }
+.topbar-btn { background: rgba(255,255,255,.2); border: none; color: #fff; padding: .35rem .65rem; border-radius: 6px; cursor: pointer; font-size: .8rem; backdrop-filter: blur(4px); }
+.topbar-btn:hover { background: rgba(255,255,255,.35); }
+.tabs { display: flex; background: var(--surface); border-bottom: 2px solid var(--border); }
+.tab-btn { flex: 1; padding: .75rem .5rem; border: none; background: none; font-size: .85rem; font-weight: 600; cursor: pointer; color: var(--text2); transition: .15s; position: relative; }
+.tab-btn:hover { color: var(--primary); }
+.tab-btn.active { color: var(--primary); }
+.tab-btn.active::after { content: ''; position: absolute; bottom: -2px; left: 10%; right: 10%; height: 3px; background: var(--primary); border-radius: 3px; }
 .container { max-width: 960px; margin: 0 auto; padding: 1rem; }
 .tab-content { display: none; }
 .tab-content.active { display: block; }
-
-/* Controls */
-.controls { display: flex; gap: .6rem; flex-wrap: wrap; margin-bottom: 1rem; align-items: center; }
-.controls input, .controls select { flex: 1; min-width: 150px; padding: .6rem .85rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: .9rem; }
-.btn { padding: .6rem 1.1rem; border: none; border-radius: 8px; font-size: .88rem; cursor: pointer; font-weight: 600; transition: .15s; display: inline-flex; align-items: center; gap: .4rem; white-space: nowrap; }
-.btn-primary { background: #e67e22; color: #fff; }
-.btn-primary:hover { background: #d35400; }
-.btn-secondary { background: #e2e8f0; color: #1e293b; }
-.btn-secondary:hover { background: #cbd5e1; }
-.btn-success { background: #10b981; color: #fff; }
+.controls { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1rem; align-items: center; }
+.controls input, .controls select { flex: 1; min-width: 130px; padding: .55rem .8rem; border: 1px solid var(--border); border-radius: 8px; font-size: .85rem; background: var(--input-bg); color: var(--text); }
+.btn { padding: .55rem 1rem; border: none; border-radius: 8px; font-size: .83rem; cursor: pointer; font-weight: 600; transition: .15s; display: inline-flex; align-items: center; gap: .35rem; white-space: nowrap; }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-hover); }
+.btn-secondary { background: var(--border); color: var(--text); }
+.btn-secondary:hover { background: var(--text2); color: #fff; }
+.btn-success { background: var(--success); color: #fff; }
 .btn-success:hover { background: #059669; }
-.btn-danger { background: #ef4444; color: #fff; }
+.btn-danger { background: var(--danger); color: #fff; }
 .btn-danger:hover { background: #dc2626; }
-
-/* Recipe Grid */
-.recipe-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; }
-.recipe-card { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.08); transition: .2s; cursor: pointer; border: 1px solid #e2e8f0; }
+input, select, textarea { background: var(--input-bg); color: var(--text); border-color: var(--border); }
+.recipe-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; }
+.recipe-card { background: var(--surface); border-radius: 12px; overflow: hidden; box-shadow: var(--card-shadow); transition: .2s; cursor: pointer; border: 1px solid var(--border); position: relative; }
 .recipe-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,.12); }
-.recipe-card-img { width: 100%; height: 150px; object-fit: cover; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 2.8rem; color: #94a3b8; }
-.recipe-card-body { padding: .85rem; }
-.recipe-card-body h3 { font-size: 1rem; margin-bottom: .2rem; }
-.recipe-card-body .meta { font-size: .82rem; color: #64748b; display: flex; gap: .6rem; flex-wrap: wrap; }
-.recipe-card-body .stars { color: #f59e0b; font-size: .85rem; margin-top: .25rem; }
-.recipe-card-body .tags { margin-top: .4rem; display: flex; flex-wrap: wrap; gap: .3rem; }
-.tag { background: #fef3c7; color: #92400e; padding: .1rem .5rem; border-radius: 20px; font-size: .7rem; font-weight: 500; }
-
-/* Empty state */
-.empty-state { text-align: center; padding: 3rem 1rem; color: #94a3b8; }
-.empty-state h3 { font-size: 1.1rem; color: #64748b; }
-.empty-state .btn { margin-top: .75rem; }
-
-/* Modal */
-.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 1000; align-items: center; justify-content: center; padding: 1rem; }
+.recipe-card .fav-btn { position: absolute; top: .5rem; right: .5rem; background: rgba(255,255,255,.85); border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 1.1rem; cursor: pointer; z-index: 2; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+.recipe-card .fav-btn:hover { transform: scale(1.15); }
+.recipe-card-img { width: 100%; height: 140px; object-fit: cover; background: var(--border); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: var(--text2); }
+.recipe-card-body { padding: .75rem; }
+.recipe-card-body h3 { font-size: .95rem; }
+.recipe-card-body .meta { font-size: .78rem; color: var(--text2); display: flex; gap: .5rem; flex-wrap: wrap; }
+.recipe-card-body .stars { color: #f59e0b; font-size: .8rem; margin-top: .2rem; }
+.recipe-card-body .tags { margin-top: .35rem; display: flex; flex-wrap: wrap; gap: .25rem; }
+.tag { background: var(--tag-bg); color: var(--tag-text); padding: .1rem .45rem; border-radius: 20px; font-size: .68rem; font-weight: 500; }
+.empty-state { text-align: center; padding: 3rem 1rem; color: var(--text2); }
+.empty-state h3 { color: var(--text); }
+.modal-overlay { display: none; position: fixed; inset: 0; background: var(--modal-overlay); z-index: 1000; align-items: center; justify-content: center; padding: 1rem; }
 .modal-overlay.active { display: flex; }
-.modal { background: #fff; border-radius: 16px; max-width: 620px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 1.5rem; }
-.modal h2 { margin-bottom: 1rem; font-size: 1.3rem; }
-.form-group { margin-bottom: .9rem; }
-.form-group label { display: block; font-weight: 600; margin-bottom: .25rem; font-size: .85rem; color: #475569; }
-.form-group input, .form-group textarea, .form-group select { width: 100%; padding: .55rem .8rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: .88rem; font-family: inherit; }
-.form-group textarea { resize: vertical; min-height: 60px; }
-.form-row { display: flex; gap: .75rem; }
+.modal { background: var(--surface); border-radius: 16px; max-width: 640px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 1.25rem; }
+.modal h2 { margin-bottom: .75rem; font-size: 1.2rem; }
+.form-group { margin-bottom: .8rem; }
+.form-group label { display: block; font-weight: 600; margin-bottom: .2rem; font-size: .82rem; color: var(--text2); }
+.form-group input, .form-group textarea, .form-group select { width: 100%; padding: .5rem .75rem; border: 1px solid var(--border); border-radius: 8px; font-size: .85rem; font-family: inherit; }
+.form-group textarea { resize: vertical; min-height: 55px; }
+.form-row { display: flex; gap: .7rem; }
 .form-row > * { flex: 1; }
-.modal-footer { display: flex; gap: .6rem; justify-content: flex-end; flex-wrap: wrap; margin-top: 1rem; }
-
-/* Detail modal */
-.detail-img { width: 100%; height: 220px; object-fit: cover; border-radius: 12px; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 4rem; color: #94a3b8; margin-bottom: 1rem; }
-.detail-meta { display: flex; gap: 1rem; font-size: .88rem; color: #64748b; margin-bottom: .75rem; flex-wrap: wrap; }
-.detail-actions { display: flex; gap: .5rem; margin-bottom: 1rem; flex-wrap: wrap; }
-.detail-section h3 { margin: 1rem 0 .4rem; font-size: 1.05rem; border-bottom: 2px solid #fef3c7; padding-bottom: .25rem; }
-.detail-section ul, .detail-section ol { padding-left: 1.25rem; margin-bottom: .5rem; }
-.detail-section li { margin-bottom: .3rem; }
-
-/* Star rating */
-.star-rating { display: inline-flex; gap: .25rem; font-size: 1.5rem; cursor: pointer; }
-.star-rating .star { color: #d1d5db; transition: .1s; }
+.modal-footer { display: flex; gap: .5rem; justify-content: flex-end; flex-wrap: wrap; margin-top: .8rem; }
+.detail-img { width: 100%; height: 200px; object-fit: cover; border-radius: 12px; background: var(--border); display: flex; align-items: center; justify-content: center; font-size: 3.5rem; margin-bottom: .8rem; color: var(--text2); }
+.detail-meta { display: flex; gap: .8rem; font-size: .85rem; color: var(--text2); margin-bottom: .6rem; flex-wrap: wrap; }
+.detail-actions { display: flex; gap: .4rem; margin-bottom: .8rem; flex-wrap: wrap; }
+.detail-section h3 { margin: .8rem 0 .35rem; font-size: 1rem; border-bottom: 2px solid var(--tag-bg); padding-bottom: .2rem; }
+.detail-section ul, .detail-section ol { padding-left: 1.2rem; }
+.detail-section li { margin-bottom: .25rem; }
+.star-rating { display: inline-flex; gap: .2rem; font-size: 1.4rem; cursor: pointer; }
+.star-rating .star { color: var(--border); transition: .1s; }
 .star-rating .star.active { color: #f59e0b; }
 .star-rating .star:hover { color: #f59e0b; transform: scale(1.15); }
-
-/* Cooking mode */
-.cooking-overlay { display: none; position: fixed; inset: 0; background: #1e293b; z-index: 2000; flex-direction: column; color: #fff; padding: 1.5rem; }
+.cooking-overlay { display: none; position: fixed; inset: 0; background: var(--cooking-bg); z-index: 2000; flex-direction: column; color: var(--cooking-text); padding: 1.25rem; }
 .cooking-overlay.active { display: flex; }
-.cooking-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-.cooking-header h2 { font-size: 1.3rem; }
-.cooking-step-indicator { text-align: center; font-size: .9rem; color: #94a3b8; margin-bottom: .5rem; }
-.cooking-img { width: 100%; max-height: 300px; object-fit: cover; border-radius: 12px; margin-bottom: 1rem; background: #334155; display: flex; align-items: center; justify-content: center; font-size: 3rem; }
-.cooking-step-text { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; text-align: center; padding: 1rem; cursor: pointer; line-height: 1.5; }
-.cooking-nav { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; gap: 1rem; }
-.cooking-nav button { background: #334155; color: #fff; border: none; padding: .8rem 1.5rem; border-radius: 12px; font-size: 1rem; cursor: pointer; font-weight: 600; }
+.cooking-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: .8rem; flex-wrap: wrap; gap: .5rem; }
+.cooking-header h2 { font-size: 1.2rem; }
+.cooking-top-actions { display: flex; gap: .4rem; }
+.cooking-timer { background: #334155; padding: .4rem .9rem; border-radius: 8px; font-size: 1.1rem; font-weight: 700; display: inline-flex; align-items: center; gap: .5rem; }
+.cooking-timer.running { color: #f59e0b; }
+.cooking-img { width: 100%; max-height: 260px; object-fit: contain; border-radius: 10px; margin-bottom: .8rem; background: #334155; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; }
+.cooking-step-indicator { text-align: center; font-size: .85rem; color: #94a3b8; margin-bottom: .4rem; }
+.cooking-step-text { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; text-align: center; padding: .8rem; cursor: pointer; line-height: 1.5; }
+.cooking-nav { display: flex; justify-content: space-between; align-items: center; padding: .8rem 0; gap: .8rem; }
+.cooking-nav button { background: #334155; color: #fff; border: none; padding: .7rem 1.3rem; border-radius: 10px; font-size: .95rem; cursor: pointer; font-weight: 600; }
 .cooking-nav button:hover { background: #475569; }
 .cooking-nav button:disabled { opacity: .3; cursor: not-allowed; }
-.cooking-progress { height: 4px; background: #334155; border-radius: 4px; margin-top: .5rem; }
-.cooking-progress-bar { height: 100%; background: #e67e22; border-radius: 4px; transition: width .3s; }
-
-/* Planner */
-.planner-grid { display: grid; grid-template-columns: 100px repeat(3, 1fr); gap: 2px; background: #e2e8f0; border-radius: 10px; overflow: hidden; }
-.planner-header { background: #e67e22; color: #fff; padding: .6rem; text-align: center; font-weight: 600; font-size: .85rem; }
-.planner-day { background: #fff; padding: .6rem; min-height: 70px; cursor: pointer; transition: .1s; }
-.planner-day:hover { background: #fef3c7; }
-.planner-day-label { background: #f8fafc; padding: .6rem; font-weight: 600; font-size: .85rem; color: #475569; display: flex; align-items: center; }
-.planner-recipe { font-size: .78rem; padding: .2rem .4rem; margin: .15rem 0; border-radius: 4px; background: #fef3c7; display: inline-block; }
-.planner-recipe:hover { background: #fde68a; }
-.planner-empty { color: #94a3b8; font-size: .78rem; }
-
-/* Shopping list */
-.shop-recipes { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1rem; }
-.shop-recipe-tag { background: #e2e8f0; padding: .4rem .85rem; border-radius: 20px; font-size: .85rem; cursor: pointer; font-weight: 500; transition: .15s; user-select: none; }
-.shop-recipe-tag.selected { background: #e67e22; color: #fff; }
-.shop-recipe-tag:hover { background: #cbd5e1; }
-.shop-recipe-tag.selected:hover { background: #d35400; }
+.cooking-progress { height: 4px; background: #334155; border-radius: 4px; }
+.cooking-progress-bar { height: 100%; background: var(--primary); border-radius: 4px; transition: width .3s; }
+.planner-grid { display: grid; grid-template-columns: 95px repeat(3, 1fr); gap: 2px; background: var(--border); border-radius: 10px; overflow: hidden; }
+.planner-header { background: var(--primary); color: #fff; padding: .5rem; text-align: center; font-weight: 600; font-size: .8rem; }
+.planner-day { background: var(--surface); padding: .5rem; min-height: 60px; cursor: pointer; transition: .1s; }
+.planner-day:hover { background: var(--tag-bg); }
+.planner-day-label { background: var(--planner-bg); padding: .5rem; font-weight: 600; font-size: .8rem; color: var(--text); display: flex; align-items: center; }
+.planner-recipe { font-size: .75rem; padding: .15rem .35rem; margin: .12rem 0; border-radius: 4px; background: var(--tag-bg); display: inline-block; }
+.planner-empty { color: var(--text2); font-size: .75rem; }
+.shop-recipes { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .8rem; }
+.shop-recipe-tag { background: var(--border); padding: .35rem .8rem; border-radius: 20px; font-size: .82rem; cursor: pointer; font-weight: 500; transition: .15s; user-select: none; }
+.shop-recipe-tag.selected { background: var(--primary); color: #fff; }
+.shop-recipe-tag:hover { opacity: .8; }
 .shop-list { list-style: none; }
-.shop-list li { padding: .35rem .5rem; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; gap: .5rem; }
-.shop-list li input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
-.shop-list li.checked { text-decoration: line-through; color: #94a3b8; }
-
-/* Import */
+.shop-list li { padding: .3rem .4rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: .5rem; }
+.shop-list li input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
+.shop-list li.checked { text-decoration: line-through; color: var(--text2); }
 .import-hidden { display: none; }
-
-/* Responsive */
+.fav-btn-active { color: #ef4444 !important; }
+.nutrition-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: .5rem; margin: .5rem 0; }
+.nutrition-item { text-align: center; background: var(--border); border-radius: 8px; padding: .5rem .3rem; }
+.nutrition-item .val { font-weight: 700; font-size: 1.1rem; }
+.nutrition-item .lbl { font-size: .7rem; color: var(--text2); }
+.ingredient-search-modal .ingr-list { max-height: 300px; overflow-y: auto; display: flex; flex-wrap: wrap; gap: .35rem; padding: .5rem 0; }
+.ingr-tag { background: var(--border); padding: .3rem .65rem; border-radius: 20px; font-size: .8rem; cursor: pointer; user-select: none; transition: .1s; }
+.ingr-tag.selected { background: var(--primary); color: #fff; }
+.ingr-match { font-size: .8rem; color: var(--text2); margin-top: .5rem; }
+.voice-btn.listening { background: var(--danger); animation: pulse 1s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }
 @media (max-width: 600px) {
   .recipe-grid { grid-template-columns: 1fr; }
-  .planner-grid { grid-template-columns: 70px repeat(3, 1fr); font-size: .8rem; }
+  .planner-grid { grid-template-columns: 65px repeat(3, 1fr); font-size: .75rem; }
   .cooking-step-text { font-size: 1.2rem; }
-  .controls input, .controls select { min-width: 100px; }
+  .controls input, .controls select { min-width: 90px; }
+  .header-actions { position: static; transform: none; margin-top: .3rem; }
+  header { flex-direction: column; }
+}
+@media print {
+  .tabs,.controls,.modal-overlay,.cooking-overlay,.btn,.header-actions,.tabs,.topbar-btn { display: none !important; }
+  .tab-content { display: block !important; }
+  body { background: #fff; color: #000; }
+  .recipe-card { break-inside: avoid; }
 }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>🍽️ Receptár</h1>
-  <p>Zbierka nápadov na varenie a pečenie</p>
+  <div style="text-align:center;">
+    <h1>🍽️ <span data-lang="appTitle">Receptár</span></h1>
+    <p data-lang="appSubtitle">Zbierka nápadov na varenie a pečenie</p>
+  </div>
+  <div class="header-actions">
+    <button class="topbar-btn" onclick="toggleDark()" id="dark-toggle" title="Tmavý režim">🌙</button>
+    <button class="topbar-btn" onclick="switchLang()" id="lang-toggle">🇬🇧 EN</button>
+  </div>
 </header>
 
 <div class="tabs">
-  <button class="tab-btn active" data-tab="recipes">📖 Recepty</button>
-  <button class="tab-btn" data-tab="planner">📅 Plánovač</button>
-  <button class="tab-btn" data-tab="shopping">🛒 Nákupy</button>
+  <button class="tab-btn active" data-tab="recipes" data-lang="tabRecipes">📖 Recepty</button>
+  <button class="tab-btn" data-tab="planner" data-lang="tabPlanner">📅 Plánovač</button>
+  <button class="tab-btn" data-tab="shopping" data-lang="tabShopping">🛒 Nákupy</button>
 </div>
 
 <div class="container">
-  <!-- RECIPES TAB -->
+  <!-- RECIPES -->
   <div class="tab-content active" id="tab-recipes">
     <div class="controls">
-      <input type="text" id="search" placeholder="Hľadať recept...">
+      <input type="text" id="search" data-lang="searchPlaceholder" placeholder="Hľadať...">
       <select id="filter-category">
-        <option value="">Všetky kategórie</option>
-        <option>Hlavné jedlá</option><option>Polievky</option><option>Šaláty</option><option>Dezerty</option><option>Pečivo</option><option>Nápoje</option><option>Predjedlá</option><option>Raňajky</option>
+        <option value="" data-lang="allCategories">Všetky</option>
+        <option>Hlavné jedlá</option><option>Polievky</option><option>Šaláty</option><option>Dezerty</option><option>Pečivo</option><option>Nápoje</option><option>Predjedlá</option><option>Raňajky</option><option>Prílohy</option>
       </select>
-      <button class="btn btn-primary" onclick="openFormModal()">+ Nový</button>
-      <button class="btn btn-secondary" onclick="randomRecipe()">🎲 Náhodný</button>
-      <button class="btn btn-secondary" onclick="document.getElementById('import-file').click()">📥 Import</button>
-      <button class="btn btn-secondary" onclick="exportRecipes()">📤 Export</button>
+      <button class="btn btn-primary" onclick="openFormModal()" data-lang="btnAdd">+ Nový</button>
+      <button class="btn btn-secondary" onclick="openIngredientSearch()" data-lang="btnByIngr">🥕 Suroviny</button>
+      <button class="btn btn-secondary" onclick="randomRecipe()">🎲 <span data-lang="btnRandom">Náhodný</span></button>
+      <button class="btn btn-secondary" onclick="document.getElementById('import-file').click()">📥</button>
+      <button class="btn btn-secondary" onclick="exportRecipes()">📤</button>
       <input type="file" id="import-file" class="import-hidden" accept=".json" onchange="importRecipes(event)">
     </div>
     <div class="recipe-grid" id="recipe-grid"></div>
   </div>
 
-  <!-- PLANNER TAB -->
+  <!-- PLANNER -->
   <div class="tab-content" id="tab-planner">
-    <p style="margin-bottom:.75rem;color:#64748b;">Kliknutím na políčko pridáš recept na daný deň a jedlo.</p>
+    <p style="margin-bottom:.6rem;color:var(--text2);" data-lang="plannerHint">Kliknutím na políčko pridáš recept.</p>
     <div class="planner-grid" id="planner-grid"></div>
-    <div style="margin-top:1rem;display:flex;gap:.5rem;flex-wrap:wrap;">
-      <button class="btn btn-secondary" onclick="clearPlanner()">🗑 Vyčistiť plán</button>
-      <button class="btn btn-success" onclick="generateShoppingFromPlanner()">🛒 Nákupný zoznam z plánu</button>
+    <div style="margin-top:.8rem;display:flex;gap:.5rem;flex-wrap:wrap;">
+      <button class="btn btn-secondary" onclick="clearPlanner()" data-lang="plannerClear">🗑 Vyčistiť</button>
+      <button class="btn btn-success" onclick="generateShoppingFromPlanner()" data-lang="plannerShop">🛒 Zoznam z plánu</button>
     </div>
   </div>
 
-  <!-- SHOPPING TAB -->
+  <!-- SHOPPING -->
   <div class="tab-content" id="tab-shopping">
-    <p style="margin-bottom:.75rem;color:#64748b;">Vyber recepty – suroviny sa spoja do nákupného zoznamu.</p>
+    <p style="margin-bottom:.6rem;color:var(--text2);" data-lang="shopHint">Vyber recepty – suroviny sa spoja do zoznamu.</p>
     <div id="shop-recipe-select" class="shop-recipes"></div>
-    <button class="btn btn-primary" onclick="generateShoppingList()" style="margin-bottom:1rem;">🔄 Vygenerovať zoznam</button>
-    <button class="btn btn-secondary" onclick="clearShoppingChecks()" style="margin-bottom:1rem;">☑ Reset</button>
+    <button class="btn btn-primary" onclick="generateShoppingList()" style="margin-bottom:.8rem;" data-lang="shopGenerate">🔄 Vygenerovať</button>
+    <button class="btn btn-secondary" onclick="clearShoppingChecks()" style="margin-bottom:.8rem;" data-lang="shopReset">☑ Reset</button>
     <ul class="shop-list" id="shop-list"></ul>
   </div>
 </div>
 
-<!-- ADD/EDIT MODAL -->
+<!-- FORM MODAL -->
 <div class="modal-overlay" id="form-modal">
   <div class="modal">
-    <h2 id="form-title">Nový recept</h2>
-    <div class="form-group">
-      <label>Názov</label>
-      <input id="r-name" placeholder="Názov receptu">
-    </div>
+    <h2 data-lang="formTitle" id="form-title">Nový recept</h2>
+    <div class="form-group"><label data-lang="formName">Názov</label><input id="r-name" data-lang="formNamePlace" placeholder="Názov"></div>
+    <div class="form-group" id="name-en-group" style="display:none;"><label>Name (EN)</label><input id="r-nameEn" placeholder="Recipe name"></div>
     <div class="form-row">
       <div class="form-group">
-        <label>Kategória</label>
+        <label data-lang="formCategory">Kategória</label>
         <select id="r-category">
-          <option>Hlavné jedlá</option><option>Polievky</option><option>Šaláty</option><option>Dezerty</option><option>Pečivo</option><option>Nápoje</option><option>Predjedlá</option><option>Raňajky</option>
+          <option>Hlavné jedlá</option><option>Polievky</option><option>Šaláty</option><option>Dezerty</option><option>Pečivo</option><option>Nápoje</option><option>Predjedlá</option><option>Raňajky</option><option>Prílohy</option>
         </select>
       </div>
-      <div class="form-group">
-        <label>⏱ Čas (min)</label>
-        <input id="r-time" type="number" placeholder="30" min="1">
-      </div>
+      <div class="form-group"><label>⏱ <span data-lang="formTime">Čas (min)</span></label><input id="r-time" type="number" placeholder="30" min="1"></div>
     </div>
     <div class="form-group">
-      <label>🖼 Obrázok</label>
+      <label>🖼 <span data-lang="formImage">Obrázok</span></label>
       <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
-        <input id="r-image" placeholder="alebo URL obrázka" style="flex:1;">
+        <input id="r-image" data-lang="formImagePlace" placeholder="URL" style="flex:1;">
         <input type="file" id="r-image-file" accept="image/*" style="display:none">
-        <button class="btn btn-secondary" onclick="document.getElementById('r-image-file').click()">Nahrať</button>
+        <button class="btn btn-secondary" onclick="document.getElementById('r-image-file').click()" data-lang="formUpload">Nahrať</button>
       </div>
-      <img id="r-image-preview" style="max-width:120px;max-height:90px;margin-top:.4rem;border-radius:6px;display:none;object-fit:cover;">
+      <img id="r-image-preview" style="max-width:100px;max-height:75px;margin-top:.35rem;border-radius:6px;display:none;object-fit:cover;">
     </div>
     <div class="form-group">
-      <label>Suroviny (každá na nový riadok)</label>
-      <textarea id="r-ingredients" placeholder="200g múky&#10;2 vajcia&#10;100ml mlieka"></textarea>
+      <label data-lang="formNutrition">Nutričné hodnoty (na porciu)</label>
+      <div class="form-row">
+        <div class="form-group"><label>🔥 kcal</label><input id="r-kcal" type="number" placeholder="350"></div>
+        <div class="form-group"><label>💪 bielkoviny (g)</label><input id="r-protein" type="number" placeholder="20"></div>
+        <div class="form-group"><label>🧈 tuky (g)</label><input id="r-fat" type="number" placeholder="15"></div>
+        <div class="form-group"><label>🍚 sacharidy (g)</label><input id="r-carbs" type="number" placeholder="40"></div>
+      </div>
     </div>
-    <div class="form-group">
-      <label>Postup (každý krok na nový riadok)</label>
-      <textarea id="r-steps" placeholder="1. Zmiešajte suché suroviny&#10;2. Pridajte vajcia a mlieko&#10;3. Pečte 20 minút"></textarea>
-    </div>
-    <div class="form-group">
-      <label>Štítky (oddelené čiarkou)</label>
-      <input id="r-tags" placeholder="rýchle, lacné, vegetariánske">
-    </div>
+    <div class="form-group"><label data-lang="formIngredients">Suroviny (každá na nový riadok)</label><textarea id="r-ingredients" data-lang="formIngrPlace" placeholder="200g múky"></textarea></div>
+    <div class="form-group"><label data-lang="formSteps">Postup (každý krok na nový riadok)</label><textarea id="r-steps" data-lang="formStepsPlace" placeholder="1. Zmiešajte..."></textarea></div>
+    <div class="form-group"><label data-lang="formTags">Štítky (oddelené čiarkou)</label><input id="r-tags" data-lang="formTagsPlace" placeholder="rýchle, lacné"></div>
     <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeModal('form-modal')">Zrušiť</button>
-      <button class="btn btn-primary" id="form-submit-btn" onclick="saveRecipe()">Uložiť</button>
+      <button class="btn btn-secondary" onclick="closeModal('form-modal')" data-lang="cancel">Zrušiť</button>
+      <button class="btn btn-primary" id="form-submit-btn" data-lang="save" onclick="saveRecipe()">Uložiť</button>
     </div>
   </div>
 </div>
 
-<!-- DETAIL MODAL -->
+<!-- DETAIL -->
 <div class="modal-overlay" id="detail-modal">
   <div class="modal">
     <div id="recipe-detail"></div>
     <div class="modal-footer">
-      <button class="btn btn-primary" onclick="openCookingMode()">👨‍🍳 Variť</button>
-      <button class="btn btn-secondary" onclick="shareRecipe()">📤 Zdieľať</button>
-      <button class="btn btn-primary" onclick="editCurrent()">✏ Upraviť</button>
-      <button class="btn btn-danger" onclick="deleteCurrent()">🗑 Zmazať</button>
-      <button class="btn btn-secondary" onclick="closeModal('detail-modal')">Zavrieť</button>
+      <button class="btn btn-primary" onclick="openCookingMode()">👨‍🍳 <span data-lang="btnCook">Variť</span></button>
+      <button class="btn btn-secondary" onclick="printRecipe()">🖨️ <span data-lang="btnPrint">Tlačiť</span></button>
+      <button class="btn btn-secondary" onclick="shareRecipe()">📤 <span data-lang="btnShare">Zdieľať</span></button>
+      <button class="btn btn-primary" onclick="editCurrent()">✏️ <span data-lang="btnEdit">Upraviť</span></button>
+      <button class="btn btn-danger" onclick="deleteCurrent()">🗑 <span data-lang="btnDelete">Zmazať</span></button>
+      <button class="btn btn-secondary" onclick="closeModal('detail-modal')" data-lang="close">Zavrieť</button>
     </div>
   </div>
 </div>
 
-<!-- COOKING MODE -->
+<!-- COOKING -->
 <div class="cooking-overlay" id="cooking-mode">
   <div class="cooking-header">
-    <button class="btn btn-secondary" onclick="closeCookingMode()" style="background:#475569;color:#fff;">✕ Zavrieť</button>
+    <div class="cooking-top-actions">
+      <button class="btn btn-secondary" onclick="closeCookingMode()" style="background:#475569;color:#fff;">✕ <span data-lang="cookingClose">Zavrieť</span></button>
+      <button class="btn btn-secondary" id="voice-btn" onclick="toggleVoice()" style="background:#475569;color:#fff;">🎤</button>
+    </div>
     <h2 id="cooking-title"></h2>
-    <div></div>
+    <div class="cooking-timer" id="cooking-timer" onclick="toggleTimer()">⏱️ 00:00</div>
   </div>
   <div id="cooking-img" class="cooking-img">🍽️</div>
   <div class="cooking-step-indicator" id="cooking-step-indicator"></div>
   <div class="cooking-step-text" id="cooking-step-text" onclick="cookingNext()"></div>
   <div class="cooking-progress"><div class="cooking-progress-bar" id="cooking-progress-bar"></div></div>
   <div class="cooking-nav">
-    <button id="cooking-prev" onclick="cookingPrev()">← Predošlý</button>
+    <button id="cooking-prev" onclick="cookingPrev()">← <span data-lang="cookingPrev">Predošlý</span></button>
     <span id="cooking-step-count"></span>
-    <button id="cooking-next" onclick="cookingNext()">Ďalší →</button>
+    <button id="cooking-next" onclick="cookingNext()"><span data-lang="cookingNext">Ďalší</span> →</button>
   </div>
 </div>
 
-<!-- PLANNER PICK MODAL -->
+<!-- PLANNER PICK -->
 <div class="modal-overlay" id="planner-pick-modal">
   <div class="modal">
     <h2 id="planner-pick-title">Vyber recept</h2>
-    <input type="text" id="planner-pick-search" placeholder="Hľadať..." oninput="renderPlannerPick()">
-    <div id="planner-pick-list" style="max-height:300px;overflow-y:auto;margin:1rem 0;"></div>
+    <input type="text" id="planner-pick-search" data-lang="searchPlaceholder" placeholder="Hľadať..." oninput="renderPlannerPick()">
+    <div id="planner-pick-list" style="max-height:300px;overflow-y:auto;margin:.8rem 0;"></div>
     <div class="modal-footer">
-      <button class="btn btn-danger" id="planner-remove-btn" onclick="plannerRemove()" style="display:none;">Odstrániť</button>
-      <button class="btn btn-secondary" onclick="closeModal('planner-pick-modal')">Zrušiť</button>
+      <button class="btn btn-danger" id="planner-remove-btn" onclick="plannerRemove()" style="display:none;" data-lang="plannerRemove">Odstrániť</button>
+      <button class="btn btn-secondary" onclick="closeModal('planner-pick-modal')" data-lang="cancel">Zrušiť</button>
+    </div>
+  </div>
+</div>
+
+<!-- INGREDIENT SEARCH -->
+<div class="modal-overlay" id="ingredient-modal">
+  <div class="modal">
+    <h2 data-lang="ingrTitle">🔍 Čo máš doma?</h2>
+    <p style="color:var(--text2);margin-bottom:.5rem;" data-lang="ingrHint">Označ suroviny, ktoré máš – zobrazia sa recepty, čo z nich uvaríš.</p>
+    <input type="text" id="ingr-search" data-lang="ingrFilter" placeholder="Filtrovať suroviny..." oninput="renderIngredientSearch()" style="width:100%;padding:.5rem .8rem;border:1px solid var(--border);border-radius:8px;font-size:.85rem;margin-bottom:.5rem;background:var(--input-bg);color:var(--text);">
+    <div class="ingr-list" id="ingr-list"></div>
+    <div class="ingr-match" id="ingr-match"></div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.5rem;">
+      <button class="btn btn-secondary" onclick="clearIngredientSearch()" data-lang="ingrClear">Vyčistiť</button>
+      <button class="btn btn-primary" onclick="closeModal('ingredient-modal');render()" data-lang="ingrDone">Hotovo</button>
     </div>
   </div>
 </div>
 
 <script>
-// ============= DATA =============
+// ======================== TRANSLATIONS ========================
+const LANG = {
+  sk: {
+    appTitle: 'Receptár', appSubtitle: 'Zbierka nápadov na varenie a pečenie',
+    tabRecipes: '📖 Recepty', tabPlanner: '📅 Plánovač', tabShopping: '🛒 Nákupy',
+    searchPlaceholder: 'Hľadať...', allCategories: 'Všetky kategórie',
+    btnAdd: '+ Nový', btnByIngr: '🥕 Suroviny', btnRandom: 'Náhodný',
+    plannerHint: 'Kliknutím na políčko pridáš recept.',
+    plannerClear: '🗑 Vyčistiť', plannerShop: '🛒 Zoznam z plánu',
+    shopHint: 'Vyber recepty – suroviny sa spoja do zoznamu.',
+    shopGenerate: '🔄 Vygenerovať', shopReset: '☑ Reset',
+    formTitle: 'Nový recept', formName: 'Názov', formNamePlace: 'Názov',
+    formCategory: 'Kategória', formTime: 'Čas (min)', formImage: 'Obrázok',
+    formImagePlace: 'URL', formUpload: 'Nahrať', formNutrition: 'Nutričné hodnoty (na porciu)',
+    formIngredients: 'Suroviny (každá na nový riadok)', formIngrPlace: '200g múky',
+    formSteps: 'Postup (každý krok na nový riadok)', formStepsPlace: '1. Zmiešajte...',
+    formTags: 'Štítky (oddelené čiarkou)', formTagsPlace: 'rýchle, lacné',
+    cancel: 'Zrušiť', save: 'Uložiť',
+    btnCook: 'Variť', btnPrint: 'Tlačiť', btnShare: 'Zdieľať', btnEdit: 'Upraviť',
+    btnDelete: 'Zmazať', close: 'Zavrieť',
+    cookingClose: 'Zavrieť', cookingPrev: 'Predošlý', cookingNext: 'Ďalší',
+    plannerRemove: 'Odstrániť',
+    ingrTitle: '🔍 Čo máš doma?', ingrHint: 'Označ suroviny, ktoré máš – zobrazia sa recepty, čo z nich uvaríš.',
+    ingrFilter: 'Filtrovať suroviny...', ingrClear: 'Vyčistiť', ingrDone: 'Hotovo',
+    noRecipes: 'Žiadne recepty', noRecipesHint: 'Skúste iný filter alebo pridajte nový recept.',
+    noMatch: 'Žiadne recepty neobsahujú všetky vybrané suroviny. Skús označiť menej surovín.',
+    matchCount: 'receptov sedí', matchPart: 'receptov sedí čiastočne',
+    shareWhatsApp: 'WhatsApp', shareMessenger: 'Messenger', shareEmail: 'Email',
+    cookingDone: 'Hotovo! Dobrú chuť! 🎉', cookingTimerStart: 'Spustiť', cookingTimerStop: 'Stop',
+    exportError: 'Neplatný súbor. Vyber JSON exportovaný z Receptára.',
+    importConfirm: 'Naozaj chcete importovať', importOk: 'Importovaných',
+    deleteConfirm: 'Naozaj chcete zmazať tento recept?', plannerClearConfirm: 'Vyčistiť celý plánovač?',
+    plannerEmpty: 'Plánovač je prázdny. Najprv naplánuj jedlá.',
+    recipeNutri: 'Nutričné hodnoty', kcal: 'kcal', protein: 'bielkoviny', fat: 'tuky', carbs: 'sacharidy',
+    perPortion: 'na porciu',
+  },
+  en: {
+    appTitle: 'Recipe Book', appSubtitle: 'Collection of cooking & baking ideas',
+    tabRecipes: '📖 Recipes', tabPlanner: '📅 Planner', tabShopping: '🛒 Shopping',
+    searchPlaceholder: 'Search...', allCategories: 'All categories',
+    btnAdd: '+ New', btnByIngr: '🥕 Ingredients', btnRandom: 'Random',
+    plannerHint: 'Click a cell to add a recipe.',
+    plannerClear: '🗑 Clear', plannerShop: '🛒 List from plan',
+    shopHint: 'Select recipes to merge ingredients.',
+    shopGenerate: '🔄 Generate', shopReset: '☑ Reset',
+    formTitle: 'New Recipe', formName: 'Name', formNamePlace: 'Recipe name',
+    formCategory: 'Category', formTime: 'Time (min)', formImage: 'Image',
+    formImagePlace: 'URL', formUpload: 'Upload', formNutrition: 'Nutrition (per serving)',
+    formIngredients: 'Ingredients (one per line)', formIngrPlace: '200g flour',
+    formSteps: 'Steps (one per line)', formStepsPlace: '1. Mix together...',
+    formTags: 'Tags (comma separated)', formTagsPlace: 'quick, cheap, vegetarian',
+    cancel: 'Cancel', save: 'Save',
+    btnCook: 'Cook', btnPrint: 'Print', btnShare: 'Share', btnEdit: 'Edit',
+    btnDelete: 'Delete', close: 'Close',
+    cookingClose: 'Close', cookingPrev: 'Previous', cookingNext: 'Next',
+    plannerRemove: 'Remove',
+    ingrTitle: '🔍 What do you have?', ingrHint: 'Check ingredients you have at home – recipes you can make will show up.',
+    ingrFilter: 'Filter ingredients...', ingrClear: 'Clear', ingrDone: 'Done',
+    noRecipes: 'No recipes', noRecipesHint: 'Try a different filter or add a new recipe.',
+    noMatch: 'No recipes match all selected ingredients. Try selecting fewer.',
+    matchCount: 'recipes match', matchPart: 'recipes partially match',
+    shareWhatsApp: 'WhatsApp', shareMessenger: 'Messenger', shareEmail: 'Email',
+    cookingDone: 'Done! Enjoy your meal! 🎉', cookingTimerStart: 'Start', cookingTimerStop: 'Stop',
+    exportError: 'Invalid file. Select a JSON exported from Recipe Book.',
+    importConfirm: 'Import', importOk: 'Imported',
+    deleteConfirm: 'Really delete this recipe?', plannerClearConfirm: 'Clear entire planner?',
+    plannerEmpty: 'Planner is empty. Plan some meals first.',
+    recipeNutri: 'Nutrition', kcal: 'kcal', protein: 'protein', fat: 'fat', carbs: 'carbs',
+    perPortion: 'per serving',
+  }
+};
+let lang = localStorage.getItem('lang') || 'sk';
+
+// ======================== DATA ========================
 const DEFAULT_RECIPES = [
-  { id: 1, name: 'Špagety aglio e olio', category: 'Hlavné jedlá', time: 20, image: '', imageData: '', ingredients: ['200g špagiet','4 strúčiky cesnaku','5 lyžíc olivového oleja','1 čili paprička','soľ','petržlenová vňať'], steps: ['Dajte variť osolenú vodu a uvarte cestoviny al dente.','Na panvici zohrejte olivový olej a pridajte na tenké plátky nakrájaný cesnak a čili.','Keď cesnak začne zlatnúť, pridajte uvarené cestoviny a premiešajte.','Ozdobte petržlenom a podávajte.'], tags: ['rýchle','taliančina'], rating: 0, notes: '' },
-  { id: 2, name: 'Mrkvová polievka', category: 'Polievky', time: 35, image: '', imageData: '', ingredients: ['500g mrkvy','1 cibuľa','1 zemiak','2 strúčiky cesnaku','1l zeleninového vývaru','smotana na ozdobenie','soľ, korenie, rasca'], steps: ['Mrkvu, zemiak a cibuľu ošúpte a nakrájajte na kocky.','Na troche oleja opečte cibuľu a cesnak, pridajte mrkvu a zemiak.','Zalejte vývarom a varte 20 minút do zmäknutia.','Rozmixujte do hladka, dochuťte soľou, korením a rascou.','Podávajte s kvapkou smotany.'], tags: ['zdravé','jednoduché'], rating: 0, notes: '' },
-  { id: 3, name: 'Čokoládový fondant', category: 'Dezerty', time: 25, image: '', imageData: '', ingredients: ['200g horkej čokolády','100g masla','2 vajcia','2 žĺtky','80g cukru','40g hladkej múky'], steps: ['Rúru predhrejte na 200°C a vymastite 4 formičky.','Vo vodnom kúpeli roztopte čokoládu s maslom.','Vyšľahajte vajcia, žĺtky a cukor do peny.','Jemne vmiešajte čokoládovú zmes a múku.','Rozdeľte do formičiek a pečte 10-12 minút.','Vnútri by mal byť tekutý – podávajte ihneď.'], tags: ['dezert','čokoláda'], rating: 0, notes: '' },
-  { id: 4, name: 'Cézar šalát', category: 'Šaláty', time: 15, image: '', imageData: '', ingredients: ['1 hlávka rímskeho šalátu','2 kuracie prsia','50g parmezánu','krutóny','3 lyžice olivového oleja','1 lyžica citrónu','1 strúčik cesnaku','1ČL horčice','soľ, korenie'], steps: ['Kuracie prsia osoľte, okoreňte a opečte dozlatista.','Šalát natrhajte na menšie kúsky.','Zmiešajte olej, citrón, cesnak, horčicu, soľ a korenie – dressing.','Zmiešajte šalát s dressingom, pridajte kura, krutóny a parmezán.'], tags: ['rýchle','zdravé','šalát'], rating: 0, notes: '' },
-  { id: 5, name: 'Lievance s jahodami', category: 'Raňajky', time: 25, image: '', imageData: '', ingredients: ['250g hladkej múky','2 vajcia','300ml mlieka','1 prášok do pečiva','2 lyžice cukru','štipka soli','maslo na pečenie','jahody na ozdobenie'], steps: ['Zmiešajte múku, prášok do pečiva, cukor a soľ.','V druhej miske rozšľahajte vajcia s mliekom.','Spojte suché a mokré ingrediencie a vymiešajte hladké cesto.','Na panvici roztopte maslo a lyžicou dávkujte cesto.','Opekajte z oboch strán dozlatista.','Podávajte s jahodami a javorovým sirupom.'], tags: ['raňajky','sladké'], rating: 0, notes: '' },
-  { id: 6, name: 'Bryndzové halušky', category: 'Hlavné jedlá', time: 40, image: '', imageData: '', ingredients: ['500g zemiakov','250g hladkej múky','1 vajce','soľ','250g bryndze','100g slaniny','kyslá smotana'], steps: ['Zemiaky ošúpte a nastrúhajte najemno.','Zmiešajte s múkou, vajcom a soľou na cesto.','Cesto pretláčajte cez sitko do vriacej osolenej vody.','Halušky vyberte keď vyplávajú na povrch.','Slaninu nakrájajte a opečte do chrumkava.','Zmiešajte halušky s bryndzou, posypte slaninou a ozdobte smotanou.'], tags: ['slovenské','tradičné'], rating: 0, notes: '' },
-  { id: 7, name: 'Kuracie prsia na smotane', category: 'Hlavné jedlá', time: 30, image: '', imageData: '', ingredients: ['2 kuracie prsia','1 cibuľa','200ml smotany na varenie','1ČL horčice','soľ, korenie','olej','kôpor na ozdobenie'], steps: ['Kuracie prsia nakrájajte na plátky, osoľte a okoreňte.','Opečte z oboch strán dozlatista a vyberte.','Na výpeku opečte cibuľu dosklovita, pridajte horčicu.','Zalejte smotanou, vráťte kura a duste 10 minút.','Ozdobte kôprom a podávajte s ryžou.'], tags: ['rýchle','smotanové'], rating: 0, notes: '' },
-  { id: 8, name: 'Zeleninové rizoto', category: 'Hlavné jedlá', time: 35, image: '', imageData: '', ingredients: ['300g ryže arborio','1 cibuľa','2 mrkvy','1 cuketa','1 červená paprika','1l zeleninového vývaru','50g parmezánu','soľ, korenie, bylinky'], steps: ['Cibuľu nakrájajte a opečte na olivovom oleji.','Pridajte na kocky nakrájanú zeleninu a opekajte 5 minút.','Pridajte ryžu, premiešajte a zalejte dvoma naberačkami vývaru.','Za stáleho miešania postupne pridávajte vývar, kým ryža nezmäkne.','Zmiešajte s parmezánom, dochuťte soľou a korením.'], tags: ['vegetariánske','taliančina'], rating: 0, notes: '' },
-  { id: 9, name: 'Kapustnica', category: 'Polievky', time: 90, image: '', imageData: '', ingredients: ['500g kyslej kapusty','200g údeného mäsa','100g klobásy','1 cibuľa','2 strúčiky cesnaku','soľ, korenie, bobkový list','200ml smotany','hľbka sušených húb'], steps: ['Huby namočte na 30 minút do teplej vody.','Kapustu, mäso, cibuľu a huby dajte variť do hrnca.','Pridajte bobkový list, korenie a varte 45 minút.','Pridajte nakrájanú klobásu a varte ďalších 15 minút.','Závar zahustite smotanou a dochuťte cesnakom.'], tags: ['slovenské','vianoce','sýta'], rating: 0, notes: '' },
-  { id: 10, name: 'Slepačí vývar', category: 'Polievky', time: 120, image: '', imageData: '', ingredients: ['1 kura alebo slepica','3 mrkvy','2 petržleny','1 zeler','1 cibuľa','soľ, celé korenie, bobkový list','domáce rezance'], steps: ['Kura umyte, dajte do hrnca a zalejte studenou vodou.','Priveďte do varu, zbavte peny.','Pridajte očistenú zeleninu, soľ, korenie a bobkový list.','Varte na miernom ohni 1,5-2 hodiny.','Vývar precedte, mäso a zeleninu nakrájajte.','Podávajte s domácimi rezancami.'], tags: ['tradičné','polievka','zdravé'], rating: 0, notes: '' },
-  { id: 11, name: 'Losos na bylinkovom masle', category: 'Hlavné jedlá', time: 25, image: '', imageData: '', ingredients: ['4 filety lososa','80g masla','3 strúčiky cesnaku','bylinky (kôpor, petržlen)','citrón','soľ, korenie'], steps: ['Maslo nechajte zmäknúť, zmiešajte s nasekanými bylinkami a cesnakom.','Lososa osoľte, okoreňte a pokvapkajte citrónom.','Na panvici roztopte bylinkové maslo a opečte lososa 3-4 minúty z každej strany.','Podávajte so zeleninovým šalátom alebo pečenými zemiakmi.'], tags: ['ryba','rýchle'], rating: 0, notes: '' },
-  { id: 12, name: 'Hovädzí guláš', category: 'Hlavné jedlá', time: 120, image: '', imageData: '', ingredients: ['500g hovädzieho mäsa','2 cibule','3 strúčiky cesnaku','2 lyžice mletej červenej papriky','1 paradajka','1 zemiak','soľ, korenie, majorán','500ml vývaru'], steps: ['Cibuľu nakrájajte nadrobno a opečte dozlatista na masti.','Pridajte na kocky nakrájané mäso a opečte.','Zaprášte paprikou, rýchlo premiešajte a zalejte vývarom.','Pridajte nakrájanú paradajku, cesnak, soľ a korenie.','Duste domäkka asi 1,5 hodiny.','Zahustite nastrúhaným zemiakom a dochuťte majoránom.'], tags: ['slovenské','sýte','pomalé'], rating: 0, notes: '' },
-  { id: 13, name: 'Vyprážaný syr', category: 'Hlavné jedlá', time: 15, image: '', imageData: '', ingredients: ['4 plátky eidamu','2 vajcia','100g strúhanky','100g hladkej múky','soľ','olej na vyprážanie'], steps: ['Syr nakrájajte na hrubšie plátky.','Obaľte v múke, potom v rozšľahaných vajciach a nakoniec v strúhanke.','Olej rozohrejte na 170°C.','Smažte 2-3 minúty z každej strany dozlatista.','Podávajte s hranolkami a tatárskou omáčkou.'], tags: ['rýchle','slovenské'], rating: 0, notes: '' },
-  { id: 14, name: 'Šalát Caprese', category: 'Šaláty', time: 10, image: '', imageData: '', ingredients: ['2 veľké paradajky','200g mozzarelly','čerstvá bazalka','olivový olej','balzamikový ocot','soľ, korenie'], steps: ['Paradajky a mozzarellu nakrájajte na plátky.','Striedavo ukladajte na tanier: paradajka, mozzarella, bazalka.','Pokvapkajte olivovým olejom a balzamikom.','Osoľte, okoreňte a podávajte.'], tags: ['rýchle','taliančina','predjedlo'], rating: 0, notes: '' },
-  { id: 15, name: 'Tvarohové koláče', category: 'Dezerty', time: 45, image: '', imageData: '', ingredients: ['500g tvarohu','2 vajcia','100g cukru','1 vanilkový cukor','200g hladkej múky','1 prášok do pečiva','100g masla','štipka soli'], steps: ['Z múky, masla, prášku a soli vypracujte krehké cesto.','Tvaroh zmiešajte s vajcami, cukrom a vanilkovým cukrom.','Cesto rozvaľkajte, vykrajujte kolieska.','Na každé dajte trochu tvarohovej plnky a preložte.','Pečte na 180°C 20-25 minút dozlatista.'], tags: ['sladké','jednoduché'], rating: 0, notes: '' },
-  { id: 16, name: 'Medovník', category: 'Dezerty', time: 90, image: '', imageData: '', ingredients: ['400g hladkej múky','150g cukru','100g masla','3 lyžice medu','3 vajcia','1 prášok do pečiva','500ml šľahačkovej smotany','1 kyslá smotana'], steps: ['Z múky, cukru, masla, medu, vajec a prášku vypracujte cesto.','Rozdeľte na 8 častí, vyvaľkajte na tenké pláty.','Pečte na 180°C 5-7 minút každý plát.','Vyšľahajte smotanu s kyslou smotanou na plnku.','Vrstvite: plát, krém, plát, krém.','Nechajte v chlade odstáť aspoň 4 hodiny.'], tags: ['sladké','tradičné'], rating: 0, notes: '' },
-  { id: 17, name: 'Brownies', category: 'Dezerty', time: 35, image: '', imageData: '', ingredients: ['200g horkej čokolády','150g masla','200g cukru','3 vajcia','100g hladkej múky','1ČL vanilkového extraktu','štipka soli'], steps: ['Rúru predhrejte na 180°C a vymastite formu.','Čokoládu s maslom roztopte vo vodnom kúpeli.','Vyšľahajte vajcia s cukrom do peny.','Vmiešajte čokoládovú zmes, múku, vanilku a soľ.','Pečte 25-30 minút – vnútri má byť vláčne.'], tags: ['sladké','čokoláda','rýchle'], rating: 0, notes: '' },
-  { id: 18, name: 'Domáci chlieb', category: 'Pečivo', time: 180, image: '', imageData: '', ingredients: ['500g hladkej múky','300ml vlažnej vody','1 kocka droždia (42g)','1ČL cukru','1ČL soli','2 lyžice oleja'], steps: ['Z droždia, cukru a trochy vody urobte kvások (10 minút nechajte stáť).','Zmiešajte múku, soľ, kvások, olej a zvyšok vody.','Vypracujte hladké cesto a nechajte kysnúť 1 hodinu.','Cesto preložte do formy a nechajte kysnúť ďalších 30 minút.','Pečte na 200°C 40-45 minút.'], tags: ['pečivo','tradičné'], rating: 0, notes: '' },
-  { id: 19, name: 'Pizza Margherita', category: 'Hlavné jedlá', time: 60, image: '', imageData: '', ingredients: ['500g hladkej múky','300ml vlažnej vody','1 kocka droždia','1ČL soli','2 lyžice olivového oleja','200ml paradajkovej omáčky','200g mozzarelly','čerstvá bazalka'], steps: ['Z múky, vody, droždia, soli a oleja vypracujte cesto.','Nechajte kysnúť 1 hodinu.','Cesto rozvaľkajte na tenký kruh.','Natrite paradajkovou omáčkou, poukladajte mozzarellu.','Pečte na 250°C 12-15 minút.','Ozdobte bazalkou a podávajte.'], tags: ['taliančina','rýchle'], rating: 0, notes: '' },
-  { id: 20, name: 'Fazuľová polievka', category: 'Polievky', time: 90, image: '', imageData: '', ingredients: ['300g sušenej fazule','1 cibuľa','2 mrkvy','1 petržlen','2 strúčiky cesnaku','soľ, korenie, majorán, bobkový list','200ml smotany','1 lyžica hladkej múky'], steps: ['Fazuľu namočte deň vopred do studenej vody.','Na druhý deň ju uvarte domäkka (asi 1 hodinu).','Na masti opečte cibuľu, pridajte na kocky nakrájanú zeleninu.','Pridajte k fazuli, ochuťte soľou, korením, majoránom a bobkovým listom.','Závar zahustite smotanou zahustenou múkou.','Podávajte s chlebom.'], tags: ['sýta','tradičné'], rating: 0, notes: '' },
-  { id: 21, name: 'Avokádový toast', category: 'Raňajky', time: 10, image: '', imageData: '', ingredients: ['2 krajce chleba','1 zrelé avokádo','citrónová šťava','soľ, korenie','čili vločky','cesnak (voliteľné)'], steps: ['Chlieb opečte dozlatista.','Avokádo rozpučte vidličkou, zmiešajte s citrónovou šťavou, soľou a korením.','Natrite na toast.','Posypte čili vločkami a podávajte.'], tags: ['rýchle','raňajky','zdravé'], rating: 0, notes: '' },
-  { id: 22, name: 'Smoothie bowl', category: 'Raňajky', time: 10, image: '', imageData: '', ingredients: ['1 banán','hrsť mrazeného ovocia','200ml mandľového mlieka','granola','čerstvé ovocie','chia semienka'], steps: ['Banán, mrazené ovocie a mlieko rozmixujte dohladka.','Nalejte do misky.','Ozdobte granolou, čerstvým ovocím a chia semienkami.'], tags: ['raňajky','zdravé','rýchle'], rating: 0, notes: '' },
-  { id: 23, name: 'Horúca čokoláda', category: 'Nápoje', time: 10, image: '', imageData: '', ingredients: ['500ml mlieka','100g horkej čokolády','1 lyžica kakaa','1 lyžica cukru','šľahačka na ozdobenie'], steps: ['Mlieko zohrejte v hrnci na miernom ohni.','Pridajte nalámanú čokoládu, kakao a cukor.','Miešajte, kým sa čokoláda nerozpustí.','Nalejte do pohárov, ozdobte šľahačkou.'], tags: ['nápoj','sladké','zima'], rating: 0, notes: '' },
-  { id: 24, name: 'Bazová limonáda', category: 'Nápoje', time: 10, image: '', imageData: '', ingredients: ['500ml bazového sirupu','1l perlivej vody','1 citrón','1 limetka','lístky mäty','kocky ľadu'], steps: ['Do džbánu nalejte bazový sirup a perlivú vodu.','Pridajte na plátky nakrájaný citrón a limetku.','Pridajte mätu a kocky ľadu.','Zamiešajte a podávajte.'], tags: ['nápoj','osviežujúce','leto'], rating: 0, notes: '' },
-  { id: 25, name: 'Pečené zemiaky s rozmarínom', category: 'Prílohy', time: 40, image: '', imageData: '', ingredients: ['800g zemiakov','4 lyžice olivového oleja','3 vetvičky rozmarínu','3 strúčiky cesnaku','soľ, korenie, rasca'], steps: ['Zemiaky umyte a nakrájajte na mesiačiky (nešúpte).','Premiešajte s olejom, rozmarínom, prelisovaným cesnakom, soľou a korením.','Rozložte na plech v jednej vrstve.','Pečte na 200°C 30-35 minút dozlatista.'], tags: ['jednoduché','príloha'], rating: 0, notes: '' }
+  {id:1,name:'Špagety aglio e olio',nameEn:'Spaghetti aglio e olio',category:'Hlavné jedlá',time:20,image:'',imageData:'',ingredients:['200g špagiet','4 strúčiky cesnaku','5 lyžíc olivového oleja','1 čili paprička','soľ','petržlenová vňať'],ingredientsEn:['200g spaghetti','4 garlic cloves','5 tbsp olive oil','1 chili pepper','salt','parsley'],steps:['Dajte variť osolenú vodu a uvarte cestoviny al dente.','Na panvici zohrejte olivový olej a pridajte cesnak a čili.','Keď cesnak začne zlatnúť, pridajte uvarené cestoviny.','Ozdobte petržlenom a podávajte.'],stepsEn:['Boil salted water and cook pasta al dente.','Heat olive oil in a pan, add sliced garlic and chili.','When garlic turns golden, add cooked pasta and toss.','Garnish with parsley and serve.'],tags:['rýchle','taliančina'],tagsEn:['quick','italian'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:420,protein:12,fat:18,carbs:55}},
+  {id:2,name:'Mrkvová polievka',nameEn:'Creamy carrot soup',category:'Polievky',time:35,image:'',imageData:'',ingredients:['500g mrkvy','1 cibuľa','1 zemiak','2 strúčiky cesnaku','1l zeleninového vývaru','smotana na ozdobenie','soľ, korenie, rasca'],ingredientsEn:['500g carrots','1 onion','1 potato','2 garlic cloves','1L vegetable broth','cream for garnish','salt, pepper, cumin'],steps:['Mrkvu, zemiak a cibuľu ošúpte a nakrájajte na kocky.','Opečte cibuľu a cesnak, pridajte mrkvu a zemiak.','Zalejte vývarom a varte 20 minút do zmäknutia.','Rozmixujte do hladka, dochuťte soľou, korením a rascou.','Podávajte s kvapkou smotany.'],stepsEn:['Peel and dice carrots, potato and onion.','Sauté onion and garlic, add carrot and potato.','Add broth and boil 20 min until soft.','Blend until smooth, season with salt, pepper, cumin.','Serve with a drizzle of cream.'],tags:['zdravé','jednoduché'],tagsEn:['healthy','easy'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:185,protein:4,fat:7,carbs:28}},
+  {id:3,name:'Čokoládový fondant',nameEn:'Chocolate fondant',category:'Dezerty',time:25,image:'',imageData:'',ingredients:['200g horkej čokolády','100g masla','2 vajcia','2 žĺtky','80g cukru','40g hladkej múky'],ingredientsEn:['200g dark chocolate','100g butter','2 eggs','2 egg yolks','80g sugar','40g flour'],steps:['Rúru predhrejte na 200°C a vymastite 4 formičky.','Vo vodnom kúpeli roztopte čokoládu s maslom.','Vyšľahajte vajcia, žĺtky a cukor do peny.','Vmiešajte čokoládovú zmes a múku.','Rozdeľte do formičiek a pečte 10-12 minút.'],stepsEn:['Preheat oven to 200°C and grease 4 ramekins.','Melt chocolate and butter in a double boiler.','Whisk eggs, yolks and sugar until fluffy.','Fold in chocolate mixture and flour.','Divide into ramekins and bake 10-12 min.'],tags:['dezert','čokoláda'],tagsEn:['dessert','chocolate'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:480,protein:8,fat:32,carbs:42}},
+  {id:4,name:'Cézar šalát',nameEn:'Caesar salad',category:'Šaláty',time:15,image:'',imageData:'',ingredients:['1 hlávka rímskeho šalátu','2 kuracie prsia','50g parmezánu','krutóny','3 lyžice olivového oleja','1 lyžica citrónu','1 strúčik cesnaku','1ČL horčice','soľ, korenie'],ingredientsEn:['1 romaine lettuce','2 chicken breasts','50g parmesan','croutons','3 tbsp olive oil','1 tbsp lemon juice','1 garlic clove','1 tsp mustard','salt, pepper'],steps:['Kuracie prsia osoľte, okoreňte a opečte dozlatista.','Šalát natrhajte na kúsky.','Zmiešajte dressing z oleja, citrónu, cesnaku a horčice.','Zmiešajte šalát s dressingom, pridajte kura, krutóny a parmezán.'],stepsEn:['Season chicken breasts and pan-fry until golden.','Tear lettuce into pieces.','Mix dressing from oil, lemon, garlic and mustard.','Toss salad with dressing, add chicken, croutons and parmesan.'],tags:['rýchle','zdravé','šalát'],tagsEn:['quick','healthy','salad'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:350,protein:28,fat:22,carbs:12}},
+  {id:5,name:'Lievance s jahodami',nameEn:'Pancakes with strawberries',category:'Raňajky',time:25,image:'',imageData:'',ingredients:['250g hladkej múky','2 vajcia','300ml mlieka','1 prášok do pečiva','2 lyžice cukru','štipka soli','maslo','jahody'],ingredientsEn:['250g flour','2 eggs','300ml milk','1 baking powder','2 tbsp sugar','pinch of salt','butter','strawberries'],steps:['Zmiešajte múku, prášok do pečiva, cukor a soľ.','Rozšľahajte vajcia s mliekom a spojte so suchými surovinami.','Na panvici roztopte maslo a dávkujte cesto.','Opekajte z oboch strán dozlatista.','Podávajte s jahodami a javorovým sirupom.'],stepsEn:['Mix flour, baking powder, sugar and salt.','Whisk eggs with milk and combine with dry ingredients.','Melt butter in a pan and pour batter.','Cook both sides until golden.','Serve with strawberries and maple syrup.'],tags:['raňajky','sladké'],tagsEn:['breakfast','sweet'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:320,protein:10,fat:8,carbs:52}},
+  {id:6,name:'Bryndzové halušky',nameEn:'Bryndza potato dumplings',category:'Hlavné jedlá',time:40,image:'',imageData:'',ingredients:['500g zemiakov','250g hladkej múky','1 vajce','soľ','250g bryndze','100g slaniny','kyslá smotana'],ingredientsEn:['500g potatoes','250g flour','1 egg','salt','250g bryndza cheese','100g bacon','sour cream'],steps:['Zemiaky ošúpte a nastrúhajte najemno.','Zmiešajte s múkou, vajcom a soľou na cesto.','Cesto pretláčajte cez sitko do vriacej osolenej vody.','Halušky vyberte keď vyplávajú na povrch.','Slaninu opečte do chrumkava.','Zmiešajte halušky s bryndzou, posypte slaninou a ozdobte smotanou.'],stepsEn:['Peel and finely grate potatoes.','Mix with flour, egg and salt into a dough.','Press dough through a colander into boiling salted water.','Remove dumplings when they float to surface.','Fry bacon until crispy.','Mix dumplings with bryndza, top with bacon and sour cream.'],tags:['slovenské','tradičné'],tagsEn:['slovak','traditional'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:580,protein:22,fat:28,carbs:58}},
+  {id:7,name:'Kuracie prsia na smotane',nameEn:'Chicken in cream sauce',category:'Hlavné jedlá',time:30,image:'',imageData:'',ingredients:['2 kuracie prsia','1 cibuľa','200ml smotany na varenie','1ČL horčice','soľ, korenie','olej','kôpor'],ingredientsEn:['2 chicken breasts','1 onion','200ml cooking cream','1 tsp mustard','salt, pepper','oil','dill'],steps:['Kuracie prsia nakrájajte na plátky, osoľte a okoreňte.','Opečte z oboch strán a vyberte.','Na výpeku opečte cibuľu, pridajte horčicu.','Zalejte smotanou, vráťte kura a duste 10 minút.','Ozdobte kôprom a podávajte s ryžou.'],stepsEn:['Slice chicken breasts, season with salt and pepper.','Sear both sides until golden, set aside.','Sauté onion in the pan, add mustard.','Add cream, return chicken and simmer 10 min.','Garnish with dill and serve with rice.'],tags:['rýchle','smotanové'],tagsEn:['quick','creamy'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:380,protein:32,fat:24,carbs:6}},
+  {id:8,name:'Zeleninové rizoto',nameEn:'Vegetable risotto',category:'Hlavné jedlá',time:35,image:'',imageData:'',ingredients:['300g ryže arborio','1 cibuľa','2 mrkvy','1 cuketa','1 červená paprika','1l zeleninového vývaru','50g parmezánu','soľ, korenie, bylinky'],ingredientsEn:['300g arborio rice','1 onion','2 carrots','1 zucchini','1 red bell pepper','1L vegetable broth','50g parmesan','salt, pepper, herbs'],steps:['Cibuľu opečte na olivovom oleji.','Pridajte na kocky nakrájanú zeleninu a opekajte 5 minút.','Pridajte ryžu, zalejte naberačkou vývaru a miešajte.','Postupne pridávajte vývar, kým ryža nezmäkne.','Zmiešajte s parmezánom a dochuťte.'],stepsEn:['Sauté onion in olive oil.','Add diced vegetables and cook 5 minutes.','Add rice, pour in a ladle of broth and stir.','Gradually add broth until rice is tender.','Stir in parmesan and season.'],tags:['vegetariánske','taliančina'],tagsEn:['vegetarian','italian'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:320,protein:10,fat:8,carbs:54}},
+  {id:9,name:'Kapustnica',nameEn:'Sauerkraut soup',category:'Polievky',time:90,image:'',imageData:'',ingredients:['500g kyslej kapusty','200g údeného mäsa','100g klobásy','1 cibuľa','2 strúčiky cesnaku','soľ, korenie, bobkový list','200ml smotany','hrsť sušených húb'],ingredientsEn:['500g sauerkraut','200g smoked meat','100g sausage','1 onion','2 garlic cloves','salt, pepper, bay leaf','200ml cream','handful dried mushrooms'],steps:['Huby namočte na 30 minút.','Kapustu, mäso, cibuľu a huby dajte variť.','Pridajte bobkový list a varte 45 minút.','Pridajte nakrájanú klobásu a varte 15 minút.','Zahustite smotanou a dochuťte cesnakom.'],stepsEn:['Soak mushrooms for 30 min.','Boil sauerkraut, meat, onion and mushrooms.','Add bay leaf and cook 45 minutes.','Add sliced sausage and cook 15 more minutes.','Stir in cream and season with garlic.'],tags:['slovenské','vianoce','sýta'],tagsEn:['slovak','christmas','hearty'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:290,protein:16,fat:18,carbs:14}},
+  {id:10,name:'Slepačí vývar',nameEn:'Chicken broth',category:'Polievky',time:120,image:'',imageData:'',ingredients:['1 kura','3 mrkvy','2 petržleny','1 zeler','1 cibuľa','soľ, celé korenie, bobkový list','domáce rezance'],ingredientsEn:['1 chicken','3 carrots','2 parsley roots','1 celeriac','1 onion','salt, peppercorns, bay leaf','homemade noodles'],steps:['Kura dajte do hrnca a zalejte studenou vodou.','Priveďte do varu, zbavte peny.','Pridajte zeleninu, soľ, korenie a bobkový list.','Varte na miernom ohni 1,5 hodiny.','Vývar precedte a podávajte s rezancami.'],stepsEn:['Place chicken in a pot and cover with cold water.','Bring to a boil, skim off foam.','Add vegetables, salt, pepper and bay leaf.','Simmer gently for 1.5 hours.','Strain and serve with noodles.'],tags:['tradičné','polievka','zdravé'],tagsEn:['traditional','soup','healthy'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:120,protein:10,fat:5,carbs:8}},
+  {id:11,name:'Losos na bylinkovom masle',nameEn:'Salmon with herb butter',category:'Hlavné jedlá',time:25,image:'',imageData:'',ingredients:['4 filety lososa','80g masla','3 strúčiky cesnaku','bylinky (kôpor, petržlen)','citrón','soľ, korenie'],ingredientsEn:['4 salmon fillets','80g butter','3 garlic cloves','herbs (dill, parsley)','lemon','salt, pepper'],steps:['Maslo zmiešajte s nasekanými bylinkami a cesnakom.','Lososa osoľte, okoreňte a pokvapkajte citrónom.','Opečte na bylinkovom masle 3-4 min z každej strany.','Podávajte so šalátom.'],stepsEn:['Mix butter with chopped herbs and garlic.','Season salmon with salt, pepper and lemon juice.','Pan-fry in herb butter 3-4 min per side.','Serve with a green salad.'],tags:['ryba','rýchle'],tagsEn:['fish','quick'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:410,protein:34,fat:28,carbs:2}},
+  {id:12,name:'Hovädzí guláš',nameEn:'Beef goulash',category:'Hlavné jedlá',time:120,image:'',imageData:'',ingredients:['500g hovädzieho mäsa','2 cibule','3 strúčiky cesnaku','2 lyžice mletej červenej papriky','1 paradajka','1 zemiak','soľ, korenie, majorán','500ml vývaru'],ingredientsEn:['500g beef','2 onions','3 garlic cloves','2 tbsp paprika powder','1 tomato','1 potato','salt, pepper, marjoram','500ml broth'],steps:['Cibuľu nakrájajte a opečte dozlatista na masti.','Pridajte na kocky nakrájané mäso a opečte.','Zaprášte paprikou, zalejte vývarom.','Pridajte paradajku, cesnak, soľ a korenie.','Duste domäkka asi 1,5 hodiny.','Zahustite nastrúhaným zemiakom a dochuťte majoránom.'],stepsEn:['Chop onion and fry until golden in lard.','Add diced beef and brown.','Sprinkle with paprika, pour in broth.','Add tomato, garlic, salt and pepper.','Stew until tender, about 1.5 hours.','Thicken with grated potato, season with marjoram.'],tags:['slovenské','sýte','pomalé'],tagsEn:['slovak','hearty','slow'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:450,protein:32,fat:26,carbs:15}},
+  {id:13,name:'Vyprážaný syr',nameEn:'Fried cheese',category:'Hlavné jedlá',time:15,image:'',imageData:'',ingredients:['4 plátky eidamu','2 vajcia','100g strúhanky','100g hladkej múky','soľ','olej na vyprážanie'],ingredientsEn:['4 slices edam cheese','2 eggs','100g breadcrumbs','100g flour','salt','frying oil'],steps:['Syr nakrájajte na hrubšie plátky.','Obaľte v múke, vajci a strúhanke.','Smažte na oleji 2-3 min z každej strany.','Podávajte s hranolkami a tatárskou omáčkou.'],stepsEn:['Cut cheese into thick slices.','Coat in flour, egg and breadcrumbs.','Deep fry in oil 2-3 min per side.','Serve with fries and tartar sauce.'],tags:['rýchle','slovenské'],tagsEn:['quick','slovak'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:520,protein:24,fat:34,carbs:28}},
+  {id:14,name:'Šalát Caprese',nameEn:'Caprese salad',category:'Šaláty',time:10,image:'',imageData:'',ingredients:['2 veľké paradajky','200g mozzarelly','čerstvá bazalka','olivový olej','balzamikový ocot','soľ, korenie'],ingredientsEn:['2 large tomatoes','200g mozzarella','fresh basil','olive oil','balsamic vinegar','salt, pepper'],steps:['Paradajky a mozzarellu nakrájajte na plátky.','Striedavo ukladajte na tanier s bazalkou.','Pokvapkajte olejom a balzamikom.','Osoľte a okoreňte.'],stepsEn:['Slice tomatoes and mozzarella.','Layer alternately with basil on a plate.','Drizzle with oil and balsamic vinegar.','Season with salt and pepper.'],tags:['rýchle','taliančina','predjedlo'],tagsEn:['quick','italian','starter'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:280,protein:18,fat:20,carbs:6}},
+  {id:15,name:'Tvarohové koláče',nameEn:'Cottage cheese pastries',category:'Dezerty',time:45,image:'',imageData:'',ingredients:['500g tvarohu','2 vajcia','100g cukru','200g hladkej múky','1 prášok do pečiva','100g masla','štipka soli'],ingredientsEn:['500g cottage cheese','2 eggs','100g sugar','200g flour','1 baking powder','100g butter','pinch of salt'],steps:['Z múky, masla, prášku a soli vypracujte cesto.','Tvaroh zmiešajte s vajcami a cukrom.','Cesto rozvaľkajte, vykrajujte kolieska.','Naplňte tvarohom a preložte.','Pečte na 180°C 20-25 minút.'],stepsEn:['Make dough from flour, butter, baking powder and salt.','Mix cottage cheese with eggs and sugar.','Roll out dough, cut into circles.','Fill with cheese mixture and fold.','Bake at 180°C for 20-25 min.'],tags:['sladké','jednoduché'],tagsEn:['sweet','easy'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:340,protein:14,fat:14,carbs:40}},
+  {id:16,name:'Medovník',nameEn:'Honey cake',category:'Dezerty',time:90,image:'',imageData:'',ingredients:['400g hladkej múky','150g cukru','100g masla','3 lyžice medu','3 vajcia','1 prášok do pečiva','500ml šľahačkovej smotany','1 kyslá smotana'],ingredientsEn:['400g flour','150g sugar','100g butter','3 tbsp honey','3 eggs','1 baking powder','500ml whipping cream','1 sour cream'],steps:['Z múky, cukru, masla, medu, vajec a prášku vypracujte cesto.','Rozdeľte na 8 častí, vyvaľkajte na tenké pláty.','Pečte na 180°C 5-7 minút každý plát.','Vyšľahajte smotanu s kyslou smotanou.','Vrstvite: plát, krém, plát, krém.','Nechajte v chlade odstáť aspoň 4 hodiny.'],stepsEn:['Make dough from flour, sugar, butter, honey, eggs and baking powder.','Divide into 8 pieces, roll into thin sheets.','Bake each sheet at 180°C for 5-7 min.','Whip cream with sour cream.','Layer: sheet, cream, sheet, cream.','Refrigerate for at least 4 hours.'],tags:['sladké','tradičné'],tagsEn:['sweet','traditional'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:380,protein:6,fat:20,carbs:46}},
+  {id:17,name:'Brownies',nameEn:'Brownies',category:'Dezerty',time:35,image:'',imageData:'',ingredients:['200g horkej čokolády','150g masla','200g cukru','3 vajcia','100g hladkej múky','1ČL vanilkového extraktu','štipka soli'],ingredientsEn:['200g dark chocolate','150g butter','200g sugar','3 eggs','100g flour','1 tsp vanilla extract','pinch of salt'],steps:['Rúru predhrejte na 180°C.','Čokoládu s maslom roztopte vo vodnom kúpeli.','Vyšľahajte vajcia s cukrom do peny.','Vmiešajte čokoládovú zmes, múku, vanilku a soľ.','Pečte 25-30 minút – vnútri má byť vláčne.'],stepsEn:['Preheat oven to 180°C.','Melt chocolate and butter in a double boiler.','Whisk eggs and sugar until fluffy.','Fold in chocolate mixture, flour, vanilla and salt.','Bake 25-30 min – should be fudgy inside.'],tags:['sladké','čokoláda','rýchle'],tagsEn:['sweet','chocolate','quick'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:420,protein:6,fat:24,carbs:48}},
+  {id:18,name:'Domáci chlieb',nameEn:'Homemade bread',category:'Pečivo',time:180,image:'',imageData:'',ingredients:['500g hladkej múky','300ml vlažnej vody','1 kocka droždia (42g)','1ČL cukru','1ČL soli','2 lyžice oleja'],ingredientsEn:['500g flour','300ml warm water','42g fresh yeast','1 tsp sugar','1 tsp salt','2 tbsp oil'],steps:['Z droždia, cukru a trochy vody urobte kvások (10 minút).','Zmiešajte múku, soľ, kvások, olej a vodu.','Vypracujte cesto a nechajte kysnúť 1 hodinu.','Prelejte do formy a nechajte kysnúť 30 minút.','Pečte na 200°C 40-45 minút.'],stepsEn:['Mix yeast, sugar and a bit of water (10 min starter).','Combine flour, salt, starter, oil and water.','Knead into dough and let rise 1 hour.','Transfer to a loaf pan and let rise 30 min.','Bake at 200°C for 40-45 min.'],tags:['pečivo','tradičné'],tagsEn:['baking','traditional'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:180,protein:5,fat:2,carbs:35}},
+  {id:19,name:'Pizza Margherita',nameEn:'Pizza Margherita',category:'Hlavné jedlá',time:60,image:'',imageData:'',ingredients:['500g hladkej múky','300ml vlažnej vody','1 kocka droždia','1ČL soli','2 lyžice olivového oleja','200ml paradajkovej omáčky','200g mozzarelly','čerstvá bazalka'],ingredientsEn:['500g flour','300ml warm water','42g fresh yeast','1 tsp salt','2 tbsp olive oil','200ml tomato sauce','200g mozzarella','fresh basil'],steps:['Z múky, vody, droždia, soli a oleja vypracujte cesto.','Nechajte kysnúť 1 hodinu.','Rozvaľkajte na tenký kruh.','Natrite omáčkou a poukladajte mozzarellu.','Pečte na 250°C 12-15 minút.','Ozdobte bazalkou.'],stepsEn:['Make dough from flour, water, yeast, salt and oil.','Let rise for 1 hour.','Roll out into a thin circle.','Spread sauce and top with mozzarella.','Bake at 250°C for 12-15 min.','Garnish with basil.'],tags:['taliančina','rýchle'],tagsEn:['italian','quick'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:280,protein:12,fat:8,carbs:40}},
+  {id:20,name:'Fazuľová polievka',nameEn:'Bean soup',category:'Polievky',time:90,image:'',imageData:'',ingredients:['300g sušenej fazule','1 cibuľa','2 mrkvy','1 petržlen','2 strúčiky cesnaku','soľ, korenie, majorán','200ml smotany','1 lyžica hladkej múky'],ingredientsEn:['300g dried beans','1 onion','2 carrots','1 parsley root','2 garlic cloves','salt, pepper, marjoram','200ml cream','1 tbsp flour'],steps:['Fazuľu namočte deň vopred.','Uvarte domäkka (asi 1 hodinu).','Opečte cibuľu, pridajte na kocky nakrájanú zeleninu.','Pridajte k fazuli a ochuťte.','Zahustite smotanou s múkou.'],stepsEn:['Soak beans overnight.','Cook until tender (about 1 hour).','Sauté onion, add diced vegetables.','Add to beans and season.','Thicken with cream and flour mixture.'],tags:['sýta','tradičné'],tagsEn:['hearty','traditional'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:250,protein:12,fat:10,carbs:28}},
+  {id:21,name:'Avokádový toast',nameEn:'Avocado toast',category:'Raňajky',time:10,image:'',imageData:'',ingredients:['2 krajce chleba','1 zrelé avokádo','citrónová šťava','soľ, korenie','čili vločky'],ingredientsEn:['2 slices bread','1 ripe avocado','lemon juice','salt, pepper','chili flakes'],steps:['Chlieb opečte dozlatista.','Avokádo rozpučte s citrónovou šťavou, soľou a korením.','Natrite na toast.','Posypte čili vločkami.'],stepsEn:['Toast bread until golden.','Mash avocado with lemon juice, salt and pepper.','Spread on toast.','Sprinkle with chili flakes.'],tags:['rýchle','raňajky','zdravé'],tagsEn:['quick','breakfast','healthy'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:220,protein:5,fat:14,carbs:20}},
+  {id:22,name:'Smoothie bowl',nameEn:'Smoothie bowl',category:'Raňajky',time:10,image:'',imageData:'',ingredients:['1 banán','hrsť mrazeného ovocia','200ml mandľového mlieka','granola','čerstvé ovocie','chia semienka'],ingredientsEn:['1 banana','handful frozen fruit','200ml almond milk','granola','fresh fruit','chia seeds'],steps:['Banán, ovocie a mlieko rozmixujte dohladka.','Nalejte do misky.','Ozdobte granolou, ovocím a chia semienkami.'],stepsEn:['Blend banana, frozen fruit and milk until smooth.','Pour into a bowl.','Top with granola, fresh fruit and chia seeds.'],tags:['raňajky','zdravé','rýchle'],tagsEn:['breakfast','healthy','quick'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:280,protein:6,fat:8,carbs:48}},
+  {id:23,name:'Horúca čokoláda',nameEn:'Hot chocolate',category:'Nápoje',time:10,image:'',imageData:'',ingredients:['500ml mlieka','100g horkej čokolády','1 lyžica kakaa','1 lyžica cukru','šľahačka'],ingredientsEn:['500ml milk','100g dark chocolate','1 tbsp cocoa','1 tbsp sugar','whipped cream'],steps:['Mlieko zohrejte v hrnci.','Pridajte čokoládu, kakao a cukor.','Miešajte, kým sa čokoláda nerozpustí.','Nalejte do pohárov a ozdobte šľahačkou.'],stepsEn:['Heat milk in a pot.','Add chocolate, cocoa and sugar.','Stir until chocolate melts.','Pour into mugs and top with whipped cream.'],tags:['nápoj','sladké','zima'],tagsEn:['drink','sweet','winter'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:350,protein:10,fat:20,carbs:36}},
+  {id:24,name:'Bazová limonáda',nameEn:'Elderflower lemonade',category:'Nápoje',time:10,image:'',imageData:'',ingredients:['500ml bazového sirupu','1l perlivej vody','1 citrón','1 limetka','lístky mäty','kocky ľadu'],ingredientsEn:['500ml elderflower syrup','1L sparkling water','1 lemon','1 lime','mint leaves','ice cubes'],steps:['Zmiešajte sirup s perlivou vodou.','Pridajte na plátky nakrájaný citrón a limetku.','Pridajte mätu a ľad.'],stepsEn:['Mix syrup with sparkling water.','Add sliced lemon and lime.','Add mint and ice.'],tags:['nápoj','osviežujúce','leto'],tagsEn:['drink','refreshing','summer'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:120,protein:0,fat:0,carbs:30}},
+  {id:25,name:'Pečené zemiaky s rozmarínom',nameEn:'Roasted rosemary potatoes',category:'Prílohy',time:40,image:'',imageData:'',ingredients:['800g zemiakov','4 lyžice olivového oleja','3 vetvičky rozmarínu','3 strúčiky cesnaku','soľ, korenie, rasca'],ingredientsEn:['800g potatoes','4 tbsp olive oil','3 rosemary sprigs','3 garlic cloves','salt, pepper, cumin'],steps:['Zemiaky nakrájajte na mesiačiky (nešúpte).','Premiešajte s olejom, rozmarínom, cesnakom, soľou a korením.','Rozložte na plech a pečte 30-35 minút na 200°C.'],stepsEn:['Cut potatoes into wedges (unpeeled).','Toss with oil, rosemary, garlic, salt and pepper.','Spread on a baking sheet and roast at 200°C for 30-35 min.'],tags:['jednoduché','príloha'],tagsEn:['easy','side'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:220,protein:4,fat:8,carbs:34}},
 ];
 
-let recipes = JSON.parse(localStorage.getItem('recipes') || 'null') || [...DEFAULT_RECIPES.map(r => ({...r}))];
+let recipes = JSON.parse(localStorage.getItem('recipes') || 'null') || DEFAULT_RECIPES.map(r => ({...r}));
 let mealPlan = JSON.parse(localStorage.getItem('mealPlan') || '{}');
-let editingId = null;
-let viewingId = null;
-let cookingStep = 0;
-let cookingRecipeId = null;
-let plannerPickDay = '';
-let plannerPickMeal = '';
-let shopChecked = new Set();
+let editingId = null, viewingId = null;
+let cookingStep = 0, cookingRecipeId = null, cookingTimer = null, cookingTimerRunning = false, cookingTimerSeconds = 0;
+let plannerPickDay = '', plannerPickMeal = '';
+let shopChecked = new Set(JSON.parse(localStorage.getItem('shopChecked') || '[]'));
+let voiceRecognition = null, voiceListening = false;
+let ingredientSearchSelected = new Set();
 
-// ============= PERSISTENCE =============
+// ======================== LANGUAGE ========================
+function t(key) { return (LANG[lang] && LANG[lang][key]) || LANG.sk[key] || key; }
+
+function applyLang() {
+  document.documentElement.lang = lang === 'en' ? 'en' : 'sk';
+  document.querySelectorAll('[data-lang]').forEach(el => {
+    const key = el.dataset.lang;
+    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+      if (el.placeholder) el.placeholder = t(key);
+    } else {
+      // preserve leading emoji/icons
+      const txt = t(key);
+      if (el.children.length === 0 || (el.children.length === 1 && el.querySelector('span'))) {
+        el.textContent = txt;
+      } else {
+        // Set text on text nodes only or last child
+        const spans = el.querySelectorAll('span');
+        if (spans.length === 1 && spans[0].dataset.lang) {
+          spans[0].textContent = txt.replace(/^[^\w]*\s*/,'');
+        }
+      }
+    }
+  });
+  document.getElementById('lang-toggle').textContent = lang === 'en' ? '🇸🇰 SK' : '🇬🇧 EN';
+  // Show/hide English name field in form
+  document.getElementById('name-en-group').style.display = lang === 'en' ? 'block' : 'none';
+  // Update form title
+  if (editingId !== null) {
+    document.getElementById('form-title').textContent = t('formTitle') + ' (edit)';
+  } else {
+    document.getElementById('form-title').textContent = t('formTitle');
+  }
+  // Re-render
+  renderPlanner();
+  generateShoppingList();
+}
+
+function switchLang() {
+  lang = lang === 'en' ? 'sk' : 'en';
+  localStorage.setItem('lang', lang);
+  applyLang();
+  render();
+}
+
+// ======================== THEME ========================
+function toggleDark() {
+  document.body.classList.toggle('dark');
+  localStorage.setItem('dark', document.body.classList.contains('dark') ? '1' : '');
+  document.getElementById('dark-toggle').textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
+}
+if (localStorage.getItem('dark')) { document.body.classList.add('dark'); document.getElementById('dark-toggle').textContent = '☀️'; }
+
+// ======================== PERSISTENCE ========================
 function saveToLS() {
   localStorage.setItem('recipes', JSON.stringify(recipes));
   localStorage.setItem('mealPlan', JSON.stringify(mealPlan));
+  localStorage.setItem('shopChecked', JSON.stringify([...shopChecked]));
 }
 
-// ============= RECIPES TAB =============
+// ======================== RECIPES TAB ========================
 function render() {
   const grid = document.getElementById('recipe-grid');
   const search = document.getElementById('search').value.toLowerCase();
   const cat = document.getElementById('filter-category').value;
-  let filtered = recipes.filter(r =>
-    (r.name.toLowerCase().includes(search) || r.tags.some(t => t.toLowerCase().includes(search))) &&
-    (!cat || r.category === cat)
-  );
+  const showFav = document.getElementById('filter-fav')?.checked;
+  let filtered = recipes.filter(r => {
+    const name = lang === 'en' && r.nameEn ? r.nameEn : r.name;
+    const tags = lang === 'en' && r.tagsEn ? r.tagsEn : r.tags;
+    const matchSearch = name.toLowerCase().includes(search) || tags.some(t => t.toLowerCase().includes(search));
+    const matchCat = !cat || r.category === cat;
+    const matchFav = !showFav || r.favorite;
+    return matchSearch && matchCat && matchFav;
+  });
   if (!filtered.length) {
-    grid.innerHTML = `<div class="empty-state"><h3>😕 Žiadne recepty</h3><p>Skúste iný filter alebo pridajte nový recept.</p></div>`;
+    grid.innerHTML = `<div class="empty-state"><h3>😕 ${t('noRecipes')}</h3><p>${t('noRecipesHint')}</p></div>`;
     return;
   }
-  grid.innerHTML = filtered.map(r => `
-    <div class="recipe-card" onclick="viewRecipe(${r.id})">
+  grid.innerHTML = filtered.map(r => {
+    const name = lang === 'en' && r.nameEn ? r.nameEn : r.name;
+    const tags = lang === 'en' && r.tagsEn ? r.tagsEn : r.tags;
+    return `<div class="recipe-card">
+      <button class="fav-btn" onclick="event.stopPropagation();toggleFav(${r.id})">${r.favorite ? '❤️' : '🤍'}</button>
       ${r.image || r.imageData
-        ? `<img class="recipe-card-img" src="${r.imageData || r.image}" alt="${r.name}" onerror="this.src='';this.onerror=null">`
+        ? `<img class="recipe-card-img" src="${r.imageData || r.image}" alt="${name}" onerror="this.outerHTML='<div class=\\'recipe-card-img\\'>🍽️</div>'">`
         : `<div class="recipe-card-img">🍽️</div>`}
-      <div class="recipe-card-body">
-        <h3>${r.name}</h3>
-        <div class="meta"><span>📂 ${r.category}</span><span>⏱ ${r.time} min</span></div>
+      <div class="recipe-card-body" onclick="viewRecipe(${r.id})">
+        <h3>${name}</h3>
+        <div class="meta"><span>📂 ${r.category}</span><span>⏱ ${r.time} ${lang==='en'?'min':'min'}</span></div>
         ${r.rating > 0 ? `<div class="stars">${'★'.repeat(Math.round(r.rating))}${'☆'.repeat(5-Math.round(r.rating))}</div>` : ''}
-        <div class="tags">${r.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+        ${r.nutrition ? `<div class="meta">🔥 ${r.nutrition.kcal || '?'} kcal</div>` : ''}
+        <div class="tags">${tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
       </div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
   renderShopRecipes();
+  updateFavFilter();
 }
 
 document.getElementById('search').addEventListener('input', render);
 document.getElementById('filter-category').addEventListener('change', render);
 
-// ============= RANDOM RECIPE =============
+function toggleFav(id) {
+  const r = recipes.find(rec => rec.id === id);
+  if (!r) return;
+  r.favorite = !r.favorite;
+  saveToLS();
+  render();
+}
+
+function updateFavFilter() {
+  let el = document.getElementById('filter-fav');
+  if (!el) {
+    const controls = document.querySelector('#tab-recipes .controls');
+    const lbl = document.createElement('label');
+    lbl.style.cssText = 'display:flex;align-items:center;gap:.3rem;font-size:.82rem;white-space:nowrap;color:var(--text2);cursor:pointer;';
+    lbl.innerHTML = `<input type="checkbox" id="filter-fav" onchange="render()"> ❤️`;
+    controls.appendChild(lbl);
+    el = document.getElementById('filter-fav');
+  }
+}
+
+// ======================== RANDOM ========================
 function randomRecipe() {
   if (!recipes.length) return;
   const r = recipes[Math.floor(Math.random() * recipes.length)];
   viewRecipe(r.id);
 }
 
-// ============= MODALS =============
+// ======================== MODALS ========================
 function openModal(id) { document.getElementById(id).classList.add('active'); }
-function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-
+function closeModal(id) { document.getElementById(id).classList.remove('active'); renderPlanner(); }
 document.querySelectorAll('.modal-overlay').forEach(el => {
   el.addEventListener('click', e => { if (e.target === el) { el.classList.remove('active'); renderPlanner(); } });
 });
 
-// ============= FORM =============
+// ======================== FORM ========================
 function openFormModal(recipe) {
   editingId = recipe ? recipe.id : null;
-  document.getElementById('form-title').textContent = recipe ? 'Upraviť recept' : 'Nový recept';
-  document.getElementById('form-submit-btn').textContent = recipe ? 'Uložiť zmeny' : 'Pridať';
+  document.getElementById('form-title').textContent = recipe ? t('formTitle') + ' (edit)' : t('formTitle');
+  document.getElementById('form-submit-btn').textContent = recipe ? t('save') : t('btnAdd');
   document.getElementById('r-name').value = recipe ? recipe.name : '';
+  document.getElementById('r-nameEn').value = recipe && recipe.nameEn ? recipe.nameEn : '';
   document.getElementById('r-category').value = recipe ? recipe.category : 'Hlavné jedlá';
   document.getElementById('r-time').value = recipe ? recipe.time : '';
   document.getElementById('r-image').value = recipe && recipe.image && !recipe.imageData ? recipe.image : '';
   document.getElementById('r-ingredients').value = recipe ? recipe.ingredients.join('\n') : '';
   document.getElementById('r-steps').value = recipe ? recipe.steps.join('\n') : '';
   document.getElementById('r-tags').value = recipe ? recipe.tags.join(', ') : '';
+  document.getElementById('r-kcal').value = recipe && recipe.nutrition ? recipe.nutrition.kcal || '' : '';
+  document.getElementById('r-protein').value = recipe && recipe.nutrition ? recipe.nutrition.protein || '' : '';
+  document.getElementById('r-fat').value = recipe && recipe.nutrition ? recipe.nutrition.fat || '' : '';
+  document.getElementById('r-carbs').value = recipe && recipe.nutrition ? recipe.nutrition.carbs || '' : '';
   document.getElementById('r-image-preview').style.display = 'none';
   if (recipe && recipe.imageData) {
     document.getElementById('r-image-preview').src = recipe.imageData;
@@ -396,63 +595,65 @@ document.getElementById('r-image-file').addEventListener('change', function(e) {
 
 function saveRecipe() {
   const name = document.getElementById('r-name').value.trim();
+  const nameEn = document.getElementById('r-nameEn').value.trim() || '';
   const category = document.getElementById('r-category').value;
   const time = parseInt(document.getElementById('r-time').value) || 0;
   const image = document.getElementById('r-image').value.trim();
   const imageData = document.getElementById('r-image-preview').src && document.getElementById('r-image-preview').style.display !== 'none'
-    ? (document.getElementById('r-image-preview').src.startsWith('data:') ? document.getElementById('r-image-preview').src : '')
-    : '';
+    ? (document.getElementById('r-image-preview').src.startsWith('data:') ? document.getElementById('r-image-preview').src : '') : '';
   const ingredients = document.getElementById('r-ingredients').value.split('\n').map(s => s.trim()).filter(Boolean);
   const steps = document.getElementById('r-steps').value.split('\n').map(s => s.trim()).filter(Boolean);
   const tags = document.getElementById('r-tags').value.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
-  if (!name) return alert('Zadajte názov receptu.');
-  if (!ingredients.length) return alert('Zadajte aspoň jednu surovinu.');
-  if (!steps.length) return alert('Zadajte aspoň jeden krok postupu.');
+  const kcal = parseInt(document.getElementById('r-kcal').value) || 0;
+  const protein = parseInt(document.getElementById('r-protein').value) || 0;
+  const fat = parseInt(document.getElementById('r-fat').value) || 0;
+  const carbs = parseInt(document.getElementById('r-carbs').value) || 0;
+  if (!name) return alert(t('formName') + ' je povinný.');
+  if (!ingredients.length) return alert(t('formIngredients') + ' je povinná.');
+  if (!steps.length) return alert(t('formSteps') + ' je povinný.');
+  const nutrition = {kcal,protein,fat,carbs};
   if (editingId) {
     const idx = recipes.findIndex(r => r.id === editingId);
-    if (idx !== -1) recipes[idx] = { ...recipes[idx], name, category, time, image, imageData, ingredients, steps, tags };
+    if (idx !== -1) recipes[idx] = {...recipes[idx], name, nameEn, category, time, image, imageData, ingredients, steps, tags, nutrition};
     editingId = null;
   } else {
-    recipes.push({ id: Date.now(), name, category, time, image, imageData, ingredients, steps, tags, rating: 0, notes: '' });
+    recipes.push({id:Date.now(), name, nameEn, category, time, image, imageData, ingredients, steps, tags, rating:0, notes:'', notesEn:'', favorite:false, nutrition});
   }
   saveToLS();
   closeModal('form-modal');
   render();
 }
 
-// ============= DETAIL =============
+// ======================== DETAIL ========================
 function viewRecipe(id) {
   viewingId = id;
   const r = recipes.find(rec => rec.id === id);
   if (!r) return;
+  const name = lang === 'en' && r.nameEn ? r.nameEn : r.name;
+  const ingr = lang === 'en' && r.ingredientsEn ? r.ingredientsEn : r.ingredients;
+  const stps = lang === 'en' && r.stepsEn ? r.stepsEn : r.steps;
+  const tgs = lang === 'en' && r.tagsEn ? r.tagsEn : r.tags;
+  const n = r.nutrition;
   const el = document.getElementById('recipe-detail');
   el.innerHTML = `
-    ${r.image || r.imageData
-      ? `<img class="detail-img" src="${r.imageData || r.image}" onerror="this.src='';this.onerror=null">`
-      : `<div class="detail-img">🍽️</div>`}
-    <h2>${r.name} <span style="font-size:.9rem;color:#94a3b8;font-weight:400;">(⏱ ${r.time} min)</span></h2>
-    <div class="detail-meta">
-      <span>📂 ${r.category}</span>
-      <span>🏷 ${r.tags.join(', ')}</span>
-    </div>
+    ${r.image || r.imageData ? `<img class="detail-img" src="${r.imageData||r.image}" onerror="this.outerHTML='<div class=\\'detail-img\\'>🍽️</div>'">` : `<div class="detail-img">🍽️</div>`}
+    <h2>${name} <span style="font-size:.85rem;color:var(--text2);font-weight:400;">(⏱ ${r.time} ${lang==='en'?'min':'min'})</span></h2>
+    <div class="detail-meta"><span>📂 ${r.category}</span><span>🏷 ${tgs.join(', ')}</span></div>
     <div class="detail-section">
-      <h3>Hodnotenie</h3>
-      <div class="star-rating" id="star-rating">
-        ${[1,2,3,4,5].map(i => `<span class="star ${i <= Math.round(r.rating) ? 'active' : ''}" data-star="${i}" onclick="setRating(${id},${i})">★</span>`).join('')}
-      </div>
+      <h3>⭐ ${t('formTitle') === 'New Recipe' ? 'Rating' : 'Hodnotenie'}</h3>
+      <div class="star-rating">${[1,2,3,4,5].map(i => `<span class="star ${i<=Math.round(r.rating)?'active':''}" onclick="setRating(${id},${i})">★</span>`).join('')}</div>
     </div>
-    <div class="detail-section">
-      <h3>Suroviny</h3>
-      <ul>${r.ingredients.map(i => `<li>${i}</li>`).join('')}</ul>
-    </div>
-    <div class="detail-section">
-      <h3>Postup</h3>
-      <ol>${r.steps.map(s => `<li>${s}</li>`).join('')}</ol>
-    </div>
-    <div class="detail-section">
-      <h3>Poznámky</h3>
-      <textarea id="recipe-notes" style="width:100%;padding:.5rem;border:1px solid #d1d5db;border-radius:8px;min-height:60px;font-family:inherit;font-size:.88rem;" onchange="saveNotes(${id},this.value)">${r.notes || ''}</textarea>
-    </div>
+    ${n && (n.kcal||n.protein||n.fat||n.carbs) ? `<div class="detail-section"><h3>🥗 ${t('recipeNutri')} (${t('perPortion')})</h3>
+      <div class="nutrition-grid">
+        <div class="nutrition-item"><div class="val">🔥 ${n.kcal||'?'}</div><div class="lbl">${t('kcal')}</div></div>
+        <div class="nutrition-item"><div class="val">💪 ${n.protein||'?'}g</div><div class="lbl">${t('protein')}</div></div>
+        <div class="nutrition-item"><div class="val">🧈 ${n.fat||'?'}g</div><div class="lbl">${t('fat')}</div></div>
+        <div class="nutrition-item"><div class="val">🍚 ${n.carbs||'?'}g</div><div class="lbl">${t('carbs')}</div></div>
+      </div></div>` : ''}
+    <div class="detail-section"><h3>🥕 ${t('formIngredients')}</h3><ul>${ingr.map(i=>`<li>${i}</li>`).join('')}</ul></div>
+    <div class="detail-section"><h3>📝 ${t('formSteps')}</h3><ol>${stps.map(s=>`<li>${s}</li>`).join('')}</ol></div>
+    <div class="detail-section"><h3>📓 ${t('formTitle')==='New Recipe'?'Notes':'Poznámky'}</h3>
+      <textarea id="recipe-notes" style="width:100%;padding:.5rem;border:1px solid var(--border);border-radius:8px;min-height:55px;font-family:inherit;font-size:.85rem;background:var(--input-bg);color:var(--text);" onchange="saveNotes(${id},this.value)">${(lang==='en'&&r.notesEn?r.notesEn:r.notes)||''}</textarea></div>
   `;
   openModal('detail-modal');
 }
@@ -469,7 +670,8 @@ function setRating(id, val) {
 function saveNotes(id, val) {
   const r = recipes.find(rec => rec.id === id);
   if (!r) return;
-  r.notes = val;
+  if (lang === 'en') r.notesEn = val;
+  else r.notes = val;
   saveToLS();
 }
 
@@ -481,37 +683,75 @@ function editCurrent() {
 }
 
 function deleteCurrent() {
-  if (!confirm('Naozaj chcete zmazať tento recept?')) return;
+  if (!confirm(t('deleteConfirm'))) return;
   recipes = recipes.filter(r => r.id !== viewingId);
-  Object.keys(mealPlan).forEach(k => {
-    Object.keys(mealPlan[k]).forEach(m => {
-      if (mealPlan[k][m] === viewingId) delete mealPlan[k][m];
-    });
-  });
+  Object.keys(mealPlan).forEach(k => { Object.keys(mealPlan[k]).forEach(m => { if (mealPlan[k][m] === viewingId) delete mealPlan[k][m]; }); });
   saveToLS();
   closeModal('detail-modal');
   render();
   renderPlanner();
 }
 
-// ============= SHARE =============
+// ======================== PRINT ========================
+function printRecipe() {
+  const r = recipes.find(rec => rec.id === viewingId);
+  if (!r) return;
+  const name = lang === 'en' && r.nameEn ? r.nameEn : r.name;
+  const ingr = lang === 'en' && r.ingredientsEn ? r.ingredientsEn : r.ingredients;
+  const stps = lang === 'en' && r.stepsEn ? r.stepsEn : r.steps;
+  const win = window.open('', '_blank');
+  win.document.write(`<!DOCTYPE html><html><head><title>${name}</title><style>
+    body{font-family:system-ui,sans-serif;padding:2rem;max-width:700px;margin:0 auto;color:#1e293b;}
+    h1{font-size:1.8rem;} .meta{color:#64748b;} h2{border-bottom:2px solid #fef3c7;padding-bottom:.3rem;margin-top:1.5rem;}
+    ul,ol{padding-left:1.25rem;} li{margin-bottom:.3rem;}
+    @media print{body{padding:0;}}
+  </style></head><body>
+    <h1>🍽️ ${name}</h1>
+    <p class="meta">⏱ ${r.time} min | 📂 ${r.category}${r.nutrition&&r.nutrition.kcal ? ' | 🔥 '+r.nutrition.kcal+' kcal' : ''}</p>
+    <h2>🥕 Ingredients / Suroviny</h2><ul>${ingr.map(i=>`<li>${i}</li>`).join('')}</ul>
+    <h2>📝 Steps / Postup</h2><ol>${stps.map(s=>`<li>${s}</li>`).join('')}</ol>
+    <script>window.print();window.close();<\/script>
+  </body></html>`);
+  win.document.close();
+}
+
+// ======================== SHARE ========================
 function shareRecipe() {
   const r = recipes.find(rec => rec.id === viewingId);
   if (!r) return;
-  const text = `🍽️ ${r.name}\n⏱ ${r.time} min | 📂 ${r.category}\n\nSuroviny:\n${r.ingredients.map(i => `• ${i}`).join('\n')}\n\nPostup:\n${r.steps.map((s,j) => `${j+1}. ${s}`).join('\n')}\n\n🏷 ${r.tags.join(', ')}`;
-  navigator.clipboard.writeText(text).then(() => {
-    alert('Recept skopírovaný do schránky!');
-  }).catch(() => {
-    prompt('Skopírujte text:', text);
-  });
+  const name = lang === 'en' && r.nameEn ? r.nameEn : r.name;
+  const ingr = lang === 'en' && r.ingredientsEn ? r.ingredientsEn : r.ingredients;
+  const stps = lang === 'en' && r.stepsEn ? r.stepsEn : r.steps;
+  const tgs = lang === 'en' && r.tagsEn ? r.tagsEn : r.tags;
+  const text = `🍽️ ${name}\n⏱ ${r.time} min | 📂 ${r.category}\n\n🥕 ${t('formIngredients')}:\n${ingr.map(i=>`• ${i}`).join('\n')}\n\n📝 ${t('formSteps')}:\n${stps.map((s,j)=>`${j+1}. ${s}`).join('\n')}\n\n🏷 ${tgs.join(', ')}`;
+  // Use Web Share API if available
+  if (navigator.share) {
+    navigator.share({title: name, text: text}).catch(() => {});
+  } else {
+    // Fallback: show share options
+    const a = document.createElement('div');
+    a.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--surface);padding:1rem;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.2);z-index:3000;display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center;border:1px solid var(--border);';
+    a.innerHTML = `
+      <button class="btn btn-secondary" onclick="copyText(\`${text.replace(/`/g,'\\`')}\`)">📋 Copy</button>
+      <button class="btn btn-secondary" onclick="window.open('https://api.whatsapp.com/send?text='+encodeURIComponent(\`${text.replace(/`/g,'\\`')}\`),'_blank')">📱 ${t('shareWhatsApp')}</button>
+      <button class="btn btn-secondary" onclick="window.open('https://www.facebook.com/sharer/sharer.php?quote='+encodeURIComponent(\`${text.replace(/`/g,'\\`')}\`),'_blank')">💬 ${t('shareMessenger')}</button>
+      <button class="btn btn-secondary" onclick="window.location.href='mailto:?subject='+encodeURIComponent('${name}')+'&body='+encodeURIComponent(\`${text.replace(/`/g,'\\`')}\`)">✉️ ${t('shareEmail')}</button>
+      <button class="btn btn-primary" onclick="this.parentElement.remove()">✕</button>
+    `;
+    document.body.appendChild(a);
+  }
 }
 
-// ============= EXPORT / IMPORT =============
+function copyText(text) {
+  navigator.clipboard.writeText(text).then(() => alert('Copied!')).catch(() => prompt('Copy:', text));
+}
+
+// ======================== EXPORT/IMPORT ========================
 function exportRecipes() {
-  const blob = new Blob([JSON.stringify(recipes, null, 2)], {type: 'application/json'});
+  const blob = new Blob([JSON.stringify(recipes.map(r => ({...r, imageData: ''})), null, 2)], {type:'application/json'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `receptar-export-${new Date().toISOString().slice(0,10)}.json`;
+  a.download = `receptar-${new Date().toISOString().slice(0,10)}.json`;
   a.click();
 }
 
@@ -522,28 +762,24 @@ function importRecipes(e) {
   reader.onload = function(ev) {
     try {
       const data = JSON.parse(ev.target.result);
-      if (!Array.isArray(data) || !data.length || !data[0].name) throw new Error('neplatný formát');
-      if (confirm(`Naozaj chcete importovať ${data.length} receptov? Existujúce recepty ostanú zachované (v prípade rovnakého ID sa prepíšu).`)) {
+      if (!Array.isArray(data) || !data.length || !data[0].name) throw new Error('bad');
+      if (confirm(`${t('importConfirm')} ${data.length} receptov?`)) {
         data.forEach(imp => {
           const idx = recipes.findIndex(r => r.id === imp.id);
           if (idx !== -1) recipes[idx] = imp;
           else recipes.push(imp);
         });
         saveToLS();
-        render();
-        renderPlanner();
-        renderShopRecipes();
-        alert(`Importovaných ${data.length} receptov.`);
+        render(); renderPlanner(); renderShopRecipes();
+        alert(`${t('importOk')} ${data.length}.`);
       }
-    } catch(err) {
-      alert('Neplatný súbor. Vyber JSON exportovaný z Receptára.');
-    }
+    } catch(err) { alert(t('exportError')); }
   };
   reader.readAsText(file);
   e.target.value = '';
 }
 
-// ============= COOKING MODE =============
+// ======================== COOKING MODE ========================
 function openCookingMode() {
   cookingRecipeId = viewingId;
   cookingStep = 0;
@@ -558,31 +794,28 @@ function renderCookingStep() {
   const r = recipes.find(rec => rec.id === cookingRecipeId);
   if (!r) return;
   const total = r.steps.length;
-  document.getElementById('cooking-title').textContent = r.name;
+  const name = lang === 'en' && r.nameEn ? r.nameEn : r.name;
+  const stps = lang === 'en' && r.stepsEn ? r.stepsEn : r.steps;
+  document.getElementById('cooking-title').textContent = name;
   const imgEl = document.getElementById('cooking-img');
   if (r.image || r.imageData) {
-    imgEl.innerHTML = `<img src="${r.imageData || r.image}" style="width:100%;height:100%;object-fit:contain;" onerror="this.outerHTML='🍽️'">`;
-  } else {
-    imgEl.textContent = '🍽️';
-  }
-  document.getElementById('cooking-step-indicator').textContent = `Krok ${cookingStep + 1} z ${total}`;
-  document.getElementById('cooking-step-text').textContent = r.steps[cookingStep];
-  document.getElementById('cooking-step-count').textContent = `${cookingStep + 1} / ${total}`;
-  document.getElementById('cooking-progress-bar').style.width = `${((cookingStep + 1) / total) * 100}%`;
+    imgEl.innerHTML = `<img src="${r.imageData||r.image}" style="width:100%;height:100%;object-fit:contain;" onerror="this.outerHTML='🍽️'">`;
+  } else { imgEl.textContent = '🍽️'; }
+  document.getElementById('cooking-step-indicator').textContent = `${lang==='en'?'Step':'Krok'} ${cookingStep+1}/${total}`;
+  document.getElementById('cooking-step-text').textContent = stps[cookingStep];
+  document.getElementById('cooking-step-count').textContent = `${cookingStep+1}/${total}`;
+  document.getElementById('cooking-progress-bar').style.width = `${((cookingStep+1)/total)*100}%`;
   document.getElementById('cooking-prev').disabled = cookingStep === 0;
-  document.getElementById('cooking-next').textContent = cookingStep === total - 1 ? '✓ Hotovo' : 'Ďalší →';
+  document.getElementById('cooking-next').innerHTML = cookingStep === total-1 ? `✓ ${lang==='en'?'Done':'Hotovo'}` : `${lang==='en'?'Next':'Ďalší'} →`;
 }
 
 function cookingNext() {
   const r = recipes.find(rec => rec.id === cookingRecipeId);
   if (!r) return;
   if (cookingStep < r.steps.length - 1) { cookingStep++; renderCookingStep(); }
-  else { closeCookingMode(); alert('🎉 Hotovo! Dobrú chuť!'); }
+  else { closeCookingMode(); alert(t('cookingDone')); }
 }
-
-function cookingPrev() {
-  if (cookingStep > 0) { cookingStep--; renderCookingStep(); }
-}
+function cookingPrev() { if (cookingStep > 0) { cookingStep--; renderCookingStep(); } }
 
 document.addEventListener('keydown', function(e) {
   if (!document.getElementById('cooking-mode').classList.contains('active')) return;
@@ -593,27 +826,105 @@ document.addEventListener('keydown', function(e) {
 
 function closeCookingMode() {
   document.getElementById('cooking-mode').classList.remove('active');
+  stopTimer();
+  stopVoice();
 }
 
-// ============= PLANNER =============
+// ======================== TIMER ========================
+function toggleTimer() {
+  if (cookingTimerRunning) { stopTimer(); }
+  else {
+    const mins = prompt(lang==='en'?'Timer (minutes):' : 'Timer (minúty):', '5');
+    if (mins === null) return;
+    cookingTimerSeconds = parseInt(mins) * 60 || 300;
+    startTimer();
+  }
+}
+
+function startTimer() {
+  cookingTimerRunning = true;
+  document.getElementById('cooking-timer').classList.add('running');
+  updateTimerDisplay();
+  cookingTimer = setInterval(() => {
+    cookingTimerSeconds--;
+    if (cookingTimerSeconds <= 0) { stopTimer(); alert('⏰ ' + (lang==='en'?'Time\'s up!':'Timer dobehol!')); }
+    else updateTimerDisplay();
+  }, 1000);
+}
+
+function stopTimer() {
+  cookingTimerRunning = false;
+  document.getElementById('cooking-timer').classList.remove('running');
+  if (cookingTimer) { clearInterval(cookingTimer); cookingTimer = null; }
+  document.getElementById('cooking-timer').textContent = '⏱️ 00:00';
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(cookingTimerSeconds / 60);
+  const s = cookingTimerSeconds % 60;
+  document.getElementById('cooking-timer').textContent = `⏱️ ${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  if (cookingTimerSeconds <= 60) document.getElementById('cooking-timer').style.color = '#ef4444';
+  else document.getElementById('cooking-timer').style.color = '';
+}
+
+// ======================== VOICE ========================
+function toggleVoice() {
+  if (voiceListening) { stopVoice(); return; }
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) { alert(lang==='en'?'Voice control not supported in this browser.' : 'Hlasové ovládanie nie je podporované v tomto prehliadači.'); return; }
+  voiceRecognition = new SpeechRecognition();
+  voiceRecognition.lang = lang === 'en' ? 'en-US' : 'sk-SK';
+  voiceRecognition.continuous = true;
+  voiceRecognition.interimResults = false;
+  voiceRecognition.onresult = function(e) {
+    const txt = e.results[e.results.length-1][0].transcript.toLowerCase();
+    if (txt.includes('next') || txt.includes('ďalší') || txt.includes('dalej') || txt.includes('hotovo') || txt.includes('done')) cookingNext();
+    if (txt.includes('previous') || txt.includes('predošlý') || txt.includes('späť') || txt.includes('back')) cookingPrev();
+    if (txt.includes('close') || txt.includes('zavrieť') || txt.includes('koniec') || txt.includes('exit')) closeCookingMode();
+    if (txt.includes('timer') || txt.includes('časovač')) toggleTimer();
+    if (txt.includes('stop') || txt.includes('halt')) stopTimer();
+  };
+  voiceRecognition.onerror = function() { stopVoice(); };
+  voiceRecognition.start();
+  voiceListening = true;
+  document.getElementById('voice-btn').classList.add('listening');
+  document.getElementById('voice-btn').textContent = '🎤🔴';
+}
+
+function stopVoice() {
+  if (voiceRecognition) { try { voiceRecognition.stop(); } catch(e) {} voiceRecognition = null; }
+  voiceListening = false;
+  document.getElementById('voice-btn').classList.remove('listening');
+  document.getElementById('voice-btn').textContent = '🎤';
+}
+
+// ======================== PLANNER ========================
 const DAYS = ['Pondelok','Utorok','Streda','Štvrtok','Piatok','Sobota','Nedeľa'];
+const DAYS_EN = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
 const MEALS = ['Raňajky','Obed','Večera'];
+const MEALS_EN = ['Breakfast','Lunch','Dinner'];
+
+function getDays() { return lang === 'en' ? DAYS_EN : DAYS; }
+function getMeals() { return lang === 'en' ? MEALS_EN : MEALS; }
 
 function renderPlanner() {
   const grid = document.getElementById('planner-grid');
-  let html = `<div class="planner-header">Deň</div>${MEALS.map(m => `<div class="planner-header">${m}</div>`).join('')}`;
-  DAYS.forEach(day => {
+  const days = getDays();
+  const meals = getMeals();
+  let html = `<div class="planner-header">${lang==='en'?'Day':'Deň'}</div>${meals.map(m=>`<div class="planner-header">${m}</div>`).join('')}`;
+  days.forEach((day, di) => {
+    const dayKey = DAYS[di];
     html += `<div class="planner-day-label">${day}</div>`;
-    MEALS.forEach(meal => {
-      const key = `${day}-${meal}`;
+    meals.forEach((meal, mi) => {
+      const mealKey = MEALS[mi];
+      const key = `${dayKey}-${mealKey}`;
       const rid = mealPlan[key];
       const r = rid ? recipes.find(rec => rec.id === rid) : null;
-      html += `<div class="planner-day" onclick="openPlannerPick('${day}','${meal}')">`;
+      html += `<div class="planner-day" onclick="openPlannerPick('${dayKey}','${mealKey}')">`;
       if (r) {
-        html += `<div class="planner-recipe" title="${r.name}">${r.name}</div>`;
-      } else {
-        html += `<span class="planner-empty">+ pridať</span>`;
-      }
+        const n = lang==='en' && r.nameEn ? r.nameEn : r.name;
+        html += `<div class="planner-recipe">${n}</div>`;
+      } else { html += `<span class="planner-empty">+</span>`; }
       html += `</div>`;
     });
   });
@@ -621,14 +932,14 @@ function renderPlanner() {
 }
 
 function openPlannerPick(day, meal) {
-  plannerPickDay = day;
-  plannerPickMeal = meal;
+  plannerPickDay = day; plannerPickMeal = meal;
   const key = `${day}-${meal}`;
   const rid = mealPlan[key];
-  document.getElementById('planner-pick-title').textContent = `${day} – ${meal}`;
+  const days = getDays(); const meals = getMeals();
+  const di = DAYS.indexOf(day); const mi = MEALS.indexOf(meal);
+  document.getElementById('planner-pick-title').textContent = `${days[di]} – ${meals[mi]}`;
   document.getElementById('planner-pick-search').value = '';
-  const rmBtn = document.getElementById('planner-remove-btn');
-  rmBtn.style.display = rid ? 'inline-flex' : 'none';
+  document.getElementById('planner-remove-btn').style.display = rid ? 'inline-flex' : 'none';
   renderPlannerPick();
   openModal('planner-pick-modal');
 }
@@ -636,16 +947,20 @@ function openPlannerPick(day, meal) {
 function renderPlannerPick() {
   const search = document.getElementById('planner-pick-search').value.toLowerCase();
   const list = document.getElementById('planner-pick-list');
-  const filtered = recipes.filter(r => r.name.toLowerCase().includes(search));
-  if (!filtered.length) { list.innerHTML = '<p style="color:#94a3b8;">Žiadne recepty.</p>'; return; }
-  list.innerHTML = filtered.map(r => `
-    <div style="padding:.5rem;cursor:pointer;border-radius:6px;display:flex;align-items:center;gap:.5rem;${r.name.toLowerCase().includes(search) ? '' : ''}"
-         onmouseenter="this.style.background='#f1f5f9'" onmouseleave="this.style.background=''"
+  const filtered = recipes.filter(r => {
+    const n = lang === 'en' && r.nameEn ? r.nameEn : r.name;
+    return n.toLowerCase().includes(search);
+  });
+  if (!filtered.length) { list.innerHTML = `<p style="color:var(--text2);">—</p>`; return; }
+  list.innerHTML = filtered.map(r => {
+    const n = lang === 'en' && r.nameEn ? r.nameEn : r.name;
+    return `<div style="padding:.45rem;cursor:pointer;border-radius:6px;display:flex;align-items:center;gap:.5rem;"
+         onmouseenter="this.style.background='var(--hover-bg)'" onmouseleave="this.style.background=''"
          onclick="plannerSelect(${r.id})">
-      ${r.image || r.imageData ? `<img src="${r.imageData || r.image}" style="width:40px;height:30px;object-fit:cover;border-radius:4px;" onerror="this.style.display='none'">` : '<span style="font-size:1.3rem;">🍽️</span>'}
-      <span>${r.name}</span>
-    </div>
-  `).join('');
+      ${r.image||r.imageData ? `<img src="${r.imageData||r.image}" style="width:36px;height:28px;object-fit:cover;border-radius:4px;" onerror="this.style.display='none'">` : '<span style="font-size:1.2rem;">🍽️</span>'}
+      <span>${n}</span>
+    </div>`;
+  }).join('');
 }
 
 function plannerSelect(id) {
@@ -665,33 +980,34 @@ function plannerRemove() {
 }
 
 function clearPlanner() {
-  if (!confirm('Vyčistiť celý plánovač?')) return;
+  if (!confirm(t('plannerClearConfirm'))) return;
   mealPlan = {};
   saveToLS();
   renderPlanner();
 }
 
-// ============= SHOPPING LIST =============
+// ======================== SHOPPING ========================
 function renderShopRecipes() {
   const el = document.getElementById('shop-recipe-select');
-  el.innerHTML = recipes.map(r => `
-    <span class="shop-recipe-tag ${shopChecked.has(r.id) ? 'selected' : ''}" onclick="toggleShopRecipe(${r.id})">
-      ${r.name}
-    </span>
-  `).join('');
+  el.innerHTML = recipes.map(r => {
+    const n = lang==='en' && r.nameEn ? r.nameEn : r.name;
+    return `<span class="shop-recipe-tag ${shopChecked.has(r.id)?'selected':''}" onclick="toggleShopRecipe(${r.id})">${n}</span>`;
+  }).join('');
 }
 
 function toggleShopRecipe(id) {
   if (shopChecked.has(id)) shopChecked.delete(id);
   else shopChecked.add(id);
+  saveToLS();
   renderShopRecipes();
   generateShoppingList();
 }
 
 function generateShoppingFromPlanner() {
   const ids = new Set(Object.values(mealPlan).filter(Boolean));
-  if (!ids.size) return alert('Plánovač je prázdny. Najprv naplánuj jedlá.');
+  if (!ids.size) return alert(t('plannerEmpty'));
   shopChecked = ids;
+  saveToLS();
   switchTab('shopping');
   renderShopRecipes();
   generateShoppingList();
@@ -702,34 +1018,103 @@ function generateShoppingList() {
   const all = [];
   shopChecked.forEach(id => {
     const r = recipes.find(rec => rec.id === id);
-    if (r) r.ingredients.forEach(i => all.push(i));
+    if (r) {
+      const ingr = lang === 'en' && r.ingredientsEn ? r.ingredientsEn : r.ingredients;
+      ingr.forEach(i => all.push(i));
+    }
   });
-  if (!all.length) { el.innerHTML = '<li style="color:#94a3b8;padding:1rem;">Vyber aspoň jeden recept.</li>'; return; }
-  // Group ingredients: count duplicates
+  if (!all.length) { el.innerHTML = `<li style="color:var(--text2);padding:.8rem;">—</li>`; return; }
   const counts = {};
-  all.forEach(i => {
-    const key = i.toLowerCase().replace(/^\d+[gml]+\s*/,'').trim();
-    counts[key] = counts[key] || { text: i, count: 0 };
-    counts[key].count++;
-  });
-  el.innerHTML = Object.values(counts).map(c => `
-    <li><input type="checkbox"><span>${c.text}${c.count > 1 ? ` <span style="color:#94a3b8;font-size:.8rem;">(×${c.count})</span>` : ''}</span></li>
-  `).join('');
-  // restore checked state from session
+  all.forEach(i => { const k = i.toLowerCase().replace(/^\d+[gml]\s*/,'').trim(); counts[k] = counts[k]||{text:i,count:0}; counts[k].count++; });
+  el.innerHTML = Object.values(counts).map(c =>
+    `<li><input type="checkbox"><span>${c.text}${c.count>1?` <span style="color:var(--text2);font-size:.78rem;">(×${c.count})</span>`:''}</span></li>`
+  ).join('');
   el.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-    cb.addEventListener('change', function() {
-      this.closest('li').classList.toggle('checked', this.checked);
-    });
+    cb.addEventListener('change', function() { this.closest('li').classList.toggle('checked', this.checked); });
   });
 }
 
 function clearShoppingChecks() {
   shopChecked.clear();
+  saveToLS();
   renderShopRecipes();
-  document.getElementById('shop-list').innerHTML = '<li style="color:#94a3b8;padding:1rem;">Vyber aspoň jeden recept.</li>';
+  document.getElementById('shop-list').innerHTML = `<li style="color:var(--text2);padding:.8rem;">—</li>`;
 }
 
-// ============= TABS =============
+// ======================== INGREDIENT SEARCH ========================
+function openIngredientSearch() {
+  const allIngrs = [...new Set(recipes.flatMap(r => {
+    const ingr = lang === 'en' && r.ingredientsEn ? r.ingredientsEn : r.ingredients;
+    return ingr;
+  }))].sort();
+  document.getElementById('ingredient-modal').dataset.all = JSON.stringify(allIngrs);
+  renderIngredientSearch();
+  openModal('ingredient-modal');
+}
+
+function renderIngredientSearch() {
+  const all = JSON.parse(document.getElementById('ingredient-modal').dataset.all || '[]');
+  const filter = document.getElementById('ingr-search').value.toLowerCase();
+  const visible = filter ? all.filter(i => i.toLowerCase().includes(filter)) : all;
+  const list = document.getElementById('ingr-list');
+  list.innerHTML = visible.map(i =>
+    `<span class="ingr-tag ${ingredientSearchSelected.has(i)?'selected':''}" onclick="toggleIngrSearch('${i.replace(/'/g,"\\'")}')">${i}</span>`
+  ).join('');
+  // Show match count
+  const matchEl = document.getElementById('ingr-match');
+  if (ingredientSearchSelected.size === 0) { matchEl.innerHTML = ''; return; }
+  const sel = [...ingredientSearchSelected];
+  const fullMatch = recipes.filter(r => {
+    const ingr = lang === 'en' && r.ingredientsEn ? r.ingredientsEn : r.ingredients;
+    return sel.every(s => ingr.some(i => i.toLowerCase().includes(s.toLowerCase())));
+  });
+  const partialMatch = recipes.filter(r => {
+    const ingr = lang === 'en' && r.ingredientsEn ? r.ingredientsEn : r.ingredients;
+    return !fullMatch.includes(r) && sel.some(s => ingr.some(i => i.toLowerCase().includes(s.toLowerCase())));
+  });
+  let html = '';
+  if (fullMatch.length) html += `<div style="color:var(--success);">✅ ${fullMatch.length} ${t('matchCount')}</div>`;
+  else html += `<div style="color:var(--danger);">❌ ${t('noMatch')}</div>`;
+  if (partialMatch.length) html += `<div style="color:var(--text2);">⚠️ ${partialMatch.length} ${t('matchPart')}</div>`;
+  matchEl.innerHTML = html;
+}
+
+function toggleIngrSearch(ingr) {
+  if (ingredientSearchSelected.has(ingr)) ingredientSearchSelected.delete(ingr);
+  else ingredientSearchSelected.add(ingr);
+  renderIngredientSearch();
+}
+
+function clearIngredientSearch() { ingredientSearchSelected.clear(); renderIngredientSearch(); }
+
+// Close ingredient modal -> update recipe grid
+document.getElementById('ingredient-modal').addEventListener('click', function(e) {
+  if (e.target === this) {
+    closeModal('ingredient-modal');
+    if (ingredientSearchSelected.size > 0) {
+      // Filter grid by selected ingredients
+      const sel = [...ingredientSearchSelected];
+      const matching = recipes.filter(r => {
+        const ingr = lang === 'en' && r.ingredientsEn ? r.ingredientsEn : r.ingredients;
+        return sel.some(s => ingr.some(i => i.toLowerCase().includes(s.toLowerCase())));
+      });
+      // Temporarily override grid
+      const grid = document.getElementById('recipe-grid');
+      if (!matching.length) { grid.innerHTML = `<div class="empty-state"><h3>😕 ${t('noRecipes')}</h3></div>`; return; }
+      grid.innerHTML = matching.map(r => {
+        const name = lang==='en'&&r.nameEn?r.nameEn:r.name;
+        const tags = lang==='en'&&r.tagsEn?r.tagsEn:r.tags;
+        return `<div class="recipe-card"><button class="fav-btn" onclick="event.stopPropagation();toggleFav(${r.id})">${r.favorite?'❤️':'🤍'}</button>
+          ${r.image||r.imageData?`<img class="recipe-card-img" src="${r.imageData||r.image}" onerror="this.outerHTML='<div class=\\'recipe-card-img\\'>🍽️</div>'">`:`<div class="recipe-card-img">🍽️</div>`}
+          <div class="recipe-card-body" onclick="viewRecipe(${r.id})"><h3>${name}</h3>
+          <div class="meta"><span>📂 ${r.category}</span><span>⏱ ${r.time} min</span></div>
+          <div class="tags">${tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div></div></div>`;
+      }).join('');
+    }
+  }
+});
+
+// ======================== TABS ========================
 function switchTab(name) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
   document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.id === `tab-${name}`));
@@ -741,7 +1126,8 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => switchTab(btn.dataset.tab));
 });
 
-// ============= INIT =============
+// ======================== INIT ========================
+applyLang();
 render();
 renderPlanner();
 </script>
