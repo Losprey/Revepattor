@@ -140,6 +140,12 @@ input, select, textarea { background: var(--input-bg); color: var(--text); borde
 </header>
 
 <div class="container">
+  <div id="tip-banner" style="display:none;background:var(--tag-bg);border-radius:10px;padding:.5rem .75rem;margin-bottom:.75rem;cursor:pointer;align-items:center;gap:.5rem;" onclick="viewRecipe(parseInt(this.dataset.id))">
+    <span style="font-size:.85rem;">💡 <span data-lang="tipOfDay">Tip dňa:</span></span>
+    <span id="tip-name" style="font-weight:600;font-size:.88rem;"></span>
+    <span style="margin-left:auto;font-size:.75rem;color:var(--text2);">→</span>
+    <button class="btn btn-secondary" onclick="event.stopPropagation();dismissTip()" style="padding:.1rem .4rem;font-size:.7rem;">✕</button>
+  </div>
   <div class="controls">
     <input type="text" id="search" data-lang="searchPlaceholder" placeholder="Hľadať...">
     <select id="filter-category">
@@ -151,6 +157,11 @@ input, select, textarea { background: var(--input-bg); color: var(--text); borde
     <button class="btn btn-secondary" onclick="randomRecipe()">🎲 <span data-lang="btnRandom">Náhodný</span></button>
     <button class="btn btn-secondary" onclick="document.getElementById('import-file').click()">📥</button>
     <button class="btn btn-secondary" onclick="exportRecipes()">📤</button>
+    <select id="filter-collection" onchange="render()" style="min-width:100px;">
+      <option value="">📁 Všetky</option>
+    </select>
+    <button class="btn btn-secondary" onclick="openCollections()" data-lang="btnCollections">📁 Kolekcie</button>
+    <button class="btn btn-secondary" onclick="openHistory()" data-lang="btnHistory">📜 História</button>
     <input type="file" id="import-file" class="import-hidden" accept=".json" onchange="importRecipes(event)">
   </div>
   <div class="age-filter" id="age-filter">
@@ -221,12 +232,25 @@ input, select, textarea { background: var(--input-bg); color: var(--text); borde
   </div>
 </div>
 
+<div class="modal-overlay" id="collection-modal">
+  <div class="modal" style="max-width:480px;">
+    <h2 data-lang="collections">📁 Kolekcie</h2>
+    <div style="display:flex;gap:.4rem;margin-bottom:.75rem;">
+      <input type="text" id="collection-name" placeholder="" style="flex:1;padding:.45rem .7rem;border:1px solid var(--border);border-radius:8px;font-size:.85rem;background:var(--input-bg);color:var(--text);">
+      <button class="btn btn-primary" onclick="addCollection()" data-lang="colAdd">+ Vytvoriť</button>
+    </div>
+    <div id="collection-list"></div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('collection-modal')" data-lang="close">Zavrieť</button></div>
+  </div>
+</div>
+
 <!-- COOKING -->
 <div class="cooking-overlay" id="cooking-mode">
   <div class="cooking-header">
     <div class="cooking-top-actions">
       <button class="btn btn-secondary" onclick="closeCookingMode()" style="background:#475569;color:#fff;">✕ <span data-lang="cookingClose">Zavrieť</span></button>
       <button class="btn btn-secondary" id="voice-btn" onclick="toggleVoice()" style="background:#475569;color:#fff;">🎤</button>
+      <button class="btn btn-secondary" id="cooking-timer-btn" style="background:#475569;color:#fff;display:none;">⏱</button>
     </div>
     <h2 id="cooking-title"></h2>
     <div class="cooking-timer" id="cooking-timer" onclick="toggleTimer()">⏱️ 00:00</div>
@@ -248,11 +272,26 @@ input, select, textarea { background: var(--input-bg); color: var(--text); borde
     <h2 data-lang="ingrTitle">🔍 Čo máš doma?</h2>
     <p style="color:var(--text2);margin-bottom:.5rem;" data-lang="ingrHint">Označ suroviny, ktoré máš – zobrazia sa recepty, čo z nich uvaríš.</p>
     <input type="text" id="ingr-search" data-lang="ingrFilter" placeholder="Filtrovať suroviny..." oninput="renderIngredientSearch()" style="width:100%;padding:.5rem .8rem;border:1px solid var(--border);border-radius:8px;font-size:.85rem;margin-bottom:.5rem;background:var(--input-bg);color:var(--text);">
+    <select id="ingr-category" style="width:100%;padding:.45rem .7rem;border:1px solid var(--border);border-radius:8px;font-size:.82rem;margin-bottom:.4rem;background:var(--input-bg);color:var(--text);" onchange="renderIngredientSearch()">
+      <option value="" data-lang="allCategories">Všetky kategórie</option>
+      <option>Hlavné jedlá</option><option>Polievky</option><option>Šaláty</option><option>Dezerty</option><option>Pečivo</option><option>Nápoje</option><option>Predjedlá</option><option>Raňajky</option><option>Prílohy</option><option>Detské</option>
+    </select>
     <div class="ingr-list" id="ingr-list"></div>
     <div class="ingr-match" id="ingr-match"></div>
     <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.5rem;">
       <button class="btn btn-secondary" onclick="clearIngredientSearch()" data-lang="ingrClear">Vyčistiť</button>
-      <button class="btn btn-primary" onclick="closeModal('ingredient-modal');render()" data-lang="ingrDone">Hotovo</button>
+      <button class="btn btn-primary" onclick="closeModal('ingredient-modal');applyIngredientSearch()" data-lang="ingrDone">Hotovo</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="history-modal">
+  <div class="modal" style="max-width:480px;">
+    <h2 data-lang="cookingHistory">📜 História varenia</h2>
+    <div id="history-list"></div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="clearHistory()" data-lang="historyClear">🗑 Vymazať históriu</button>
+      <button class="btn btn-secondary" onclick="closeModal('history-modal')" data-lang="close">Zavrieť</button>
     </div>
   </div>
 </div>
@@ -289,6 +328,10 @@ const LANG = {
     recipeNutri: 'Nutričné hodnoty', kcal: 'kcal', protein: 'bielkoviny', fat: 'tuky', carbs: 'sacharidy',
     perPortion: 'na porciu',
     allAges: 'Všetky veky', age6m: '6m+', age1: '1r+', age2: '2r+', age3: '3r+',
+    portions: 'Porcie:',
+    btnCollections: '📁 Kolekcie', collections: '📁 Kolekcie', colAdd: '+ Vytvoriť', colEmpty: 'Zatiaľ žiadne kolekcie.',
+    tipOfDay: 'Tip dňa:',
+    btnHistory: '📜 História', cookingHistory: '📜 História varenia', historyClear: '🗑 Vymazať históriu', historyEmpty: 'Zatiaľ žiadna história.',
 
   },
   en: {
@@ -320,10 +363,14 @@ const LANG = {
     recipeNutri: 'Nutrition', kcal: 'kcal', protein: 'protein', fat: 'fat', carbs: 'carbs',
     perPortion: 'per serving',
     allAges: 'All ages', age6m: '6m+', age1: '1y+', age2: '2y+', age3: '3y+',
+    portions: 'Servings:',
+    btnCollections: '📁 Collections', collections: '📁 Collections', colAdd: '+ Create', colEmpty: 'No collections yet.',
+    tipOfDay: 'Tip of the day:',
+    btnHistory: '📜 History', cookingHistory: '📜 Cooking history', historyClear: '🗑 Clear history', historyEmpty: 'No history yet.',
 
   }
-};
-let lang = localStorage.getItem('lang') || 'sk';
+ };
+ let lang = localStorage.getItem('lang') || 'sk';
 let ageFilter = '';
 
 // ======================== DATA ========================
@@ -429,6 +476,9 @@ let editingId = null, viewingId = null;
 let cookingStep = 0, cookingRecipeId = null, cookingTimer = null, cookingTimerRunning = false, cookingTimerSeconds = 0;
 let voiceRecognition = null, voiceListening = false;
 let ingredientSearchSelected = new Set();
+let currentPortion = 2, basePortion = 2;
+let collections = JSON.parse(localStorage.getItem('collections') || '[]');
+let cookingHistory = JSON.parse(localStorage.getItem('cookingHistory') || '[]');
 
 // ======================== LANGUAGE ========================
 function t(key) { return (LANG[lang] && LANG[lang][key]) || LANG.sk[key] || key; }
@@ -469,6 +519,7 @@ function switchLang() {
   localStorage.setItem('lang', lang);
   applyLang();
   render();
+  showTipOfDay();
 }
 
 function setAgeFilter(age) {
@@ -512,6 +563,11 @@ function render() {
     const matchAge = matchesAgeFilter(r);
     return matchSearch && matchCat && matchFav && matchAge;
   });
+  const colFilter = document.getElementById('filter-collection')?.value;
+  if (colFilter) {
+    const col = collections.find(c => c.id == colFilter);
+    if (col) filtered = filtered.filter(r => col.recipeIds.includes(r.id));
+  }
   if (!filtered.length) {
     grid.innerHTML = `<div class="empty-state"><h3>😕 ${t('noRecipes')}</h3><p>${t('noRecipesHint')}</p></div>`;
     return;
@@ -534,6 +590,7 @@ function render() {
     </div>`;
   }).join('');
   updateFavFilter();
+  updateCollectionFilter();
 }
 
 document.getElementById('search').addEventListener('input', render);
@@ -645,6 +702,8 @@ function saveRecipe() {
 // ======================== DETAIL ========================
 function viewRecipe(id) {
   viewingId = id;
+  basePortion = 2;
+  currentPortion = basePortion;
   const r = recipes.find(rec => rec.id === id);
   if (!r) return;
   const name = lang === 'en' && r.nameEn ? r.nameEn : r.name;
@@ -657,6 +716,9 @@ function viewRecipe(id) {
     ${r.image || r.imageData ? `<img class="detail-img" src="${r.imageData||r.image}" onerror="this.outerHTML='<div class=\\'detail-img\\'>🍽️</div>'">` : `<div class="detail-img">🍽️</div>`}
     <h2>${name} <span style="font-size:.85rem;color:var(--text2);font-weight:400;">(⏱ ${r.time} ${lang==='en'?'min':'min'})</span></h2>
     <div class="detail-meta"><span>📂 ${r.category}</span><span>🏷 ${tgs.join(', ')}</span></div>
+    <div class="detail-actions">
+      <button class="btn btn-secondary" onclick="addToCollectionPrompt(${id})" style="padding:.25rem .6rem;font-size:.8rem;">📁 +</button>
+    </div>
     <div class="detail-section">
       <h3>⭐ ${t('formTitle') === 'New Recipe' ? 'Rating' : 'Hodnotenie'}</h3>
       <div class="star-rating">${[1,2,3,4,5].map(i => `<span class="star ${i<=Math.round(r.rating)?'active':''}" onclick="setRating(${id},${i})">★</span>`).join('')}</div>
@@ -668,7 +730,16 @@ function viewRecipe(id) {
         <div class="nutrition-item"><div class="val">🧈 ${n.fat||'?'}g</div><div class="lbl">${t('fat')}</div></div>
         <div class="nutrition-item"><div class="val">🍚 ${n.carbs||'?'}g</div><div class="lbl">${t('carbs')}</div></div>
       </div></div>` : ''}
-    <div class="detail-section"><h3>🥕 ${t('formIngredients')}</h3><ul>${ingr.map(i=>`<li>${i}</li>`).join('')}</ul></div>
+    <div class="detail-section">
+      <h3>🥕 ${t('formIngredients')}</h3>
+      <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem;">
+        <span style="font-size:.85rem;font-weight:600;" data-lang="portions">${lang==='en'?'Servings:':'Porcie:'}</span>
+        <button class="btn btn-secondary" onclick="changePortion(-1)" style="padding:.15rem .5rem;font-size:.9rem;">−</button>
+        <span id="portion-num" style="font-weight:700;font-size:1rem;">${basePortion}</span>
+        <button class="btn btn-secondary" onclick="changePortion(1)" style="padding:.15rem .5rem;font-size:.9rem;">+</button>
+      </div>
+      <ul id="ingredient-list">${ingr.map(i=>`<li>${i}</li>`).join('')}</ul>
+    </div>
     <div class="detail-section"><h3>📝 ${t('formSteps')}</h3><ol>${stps.map(s=>`<li>${s}</li>`).join('')}</ol></div>
     <div class="detail-section"><h3>📓 ${t('formTitle')==='New Recipe'?'Notes':'Poznámky'}</h3>
       <textarea id="recipe-notes" style="width:100%;padding:.5rem;border:1px solid var(--border);border-radius:8px;min-height:55px;font-family:inherit;font-size:.85rem;background:var(--input-bg);color:var(--text);" onchange="saveNotes(${id},this.value)">${(lang==='en'&&r.notesEn?r.notesEn:r.notes)||''}</textarea></div>
@@ -823,13 +894,26 @@ function renderCookingStep() {
   document.getElementById('cooking-progress-bar').style.width = `${((cookingStep+1)/total)*100}%`;
   document.getElementById('cooking-prev').disabled = cookingStep === 0;
   document.getElementById('cooking-next').innerHTML = cookingStep === total-1 ? `✓ ${lang==='en'?'Done':'Hotovo'}` : `${lang==='en'?'Next':'Ďalší'} →`;
+  const timeMatch = stps[cookingStep].match(/(\d+)\s*(minút|min|minutes|hodín|hour|hours)/i);
+  const timerBtn = document.getElementById('cooking-timer-btn');
+  if (timeMatch) {
+    const mins = parseInt(timeMatch[1]);
+    timerBtn.style.display = 'inline-flex';
+    timerBtn.textContent = `⏱ ${mins} ${lang==='en'?'min':'min'}`;
+    timerBtn.onclick = () => {
+      cookingTimerSeconds = mins * 60;
+      startTimer();
+    };
+  } else {
+    timerBtn.style.display = 'none';
+  }
 }
 
 function cookingNext() {
   const r = recipes.find(rec => rec.id === cookingRecipeId);
   if (!r) return;
   if (cookingStep < r.steps.length - 1) { cookingStep++; renderCookingStep(); }
-  else { closeCookingMode(); alert(t('cookingDone')); }
+  else { logCooking(cookingRecipeId); closeCookingMode(); alert(t('cookingDone')); }
 }
 function cookingPrev() { if (cookingStep > 0) { cookingStep--; renderCookingStep(); } }
 
@@ -939,13 +1023,14 @@ function renderIngredientSearch() {
   const matchEl = document.getElementById('ingr-match');
   if (ingredientSearchSelected.size === 0) { matchEl.innerHTML = ''; return; }
   const sel = [...ingredientSearchSelected];
+  const cat = document.getElementById('ingr-category').value;
   const fullMatch = recipes.filter(r => {
     const ingr = lang === 'en' && r.ingredientsEn ? r.ingredientsEn : r.ingredients;
-    return sel.every(s => ingr.some(i => i.toLowerCase().includes(s.toLowerCase())));
+    return (!cat || r.category === cat) && sel.every(s => ingr.some(i => i.toLowerCase().includes(s.toLowerCase())));
   });
   const partialMatch = recipes.filter(r => {
     const ingr = lang === 'en' && r.ingredientsEn ? r.ingredientsEn : r.ingredients;
-    return !fullMatch.includes(r) && sel.some(s => ingr.some(i => i.toLowerCase().includes(s.toLowerCase())));
+    return (!cat || r.category === cat) && !fullMatch.includes(r) && sel.some(s => ingr.some(i => i.toLowerCase().includes(s.toLowerCase())));
   });
   let html = '';
   if (fullMatch.length) html += `<div style="color:var(--success);">✅ ${fullMatch.length} ${t('matchCount')}</div>`;
@@ -966,32 +1051,178 @@ function clearIngredientSearch() { ingredientSearchSelected.clear(); renderIngre
 document.getElementById('ingredient-modal').addEventListener('click', function(e) {
   if (e.target === this) {
     closeModal('ingredient-modal');
-    if (ingredientSearchSelected.size > 0) {
-      // Filter grid by selected ingredients
-      const sel = [...ingredientSearchSelected];
-      const matching = recipes.filter(r => {
-        const ingr = lang === 'en' && r.ingredientsEn ? r.ingredientsEn : r.ingredients;
-        return sel.some(s => ingr.some(i => i.toLowerCase().includes(s.toLowerCase())));
-      });
-      // Temporarily override grid
-      const grid = document.getElementById('recipe-grid');
-      if (!matching.length) { grid.innerHTML = `<div class="empty-state"><h3>😕 ${t('noRecipes')}</h3></div>`; return; }
-      grid.innerHTML = matching.map(r => {
-        const name = lang==='en'&&r.nameEn?r.nameEn:r.name;
-        const tags = lang==='en'&&r.tagsEn?r.tagsEn:r.tags;
-        return `<div class="recipe-card"><button class="fav-btn" onclick="event.stopPropagation();toggleFav(${r.id})">${r.favorite?'❤️':'🤍'}</button>
-          ${r.image||r.imageData?`<img class="recipe-card-img" src="${r.imageData||r.image}" onerror="this.outerHTML='<div class=\\'recipe-card-img\\'>🍽️</div>'">`:`<div class="recipe-card-img">🍽️</div>`}
-          <div class="recipe-card-body" onclick="viewRecipe(${r.id})"><h3>${name}</h3>
-          <div class="meta"><span>📂 ${r.category}</span><span>⏱ ${r.time} min</span></div>
-          <div class="tags">${tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div></div></div>`;
-      }).join('');
-    }
+    applyIngredientSearch();
   }
 });
+
+// ======================== PORTION SCALING ========================
+function changePortion(delta) {
+  currentPortion = Math.max(1, currentPortion + delta);
+  document.getElementById('portion-num').textContent = currentPortion;
+  const r = recipes.find(rec => rec.id === viewingId);
+  if (!r) return;
+  const ingr = (lang === 'en' && r.ingredientsEn ? r.ingredientsEn : r.ingredients);
+  const ratio = currentPortion / basePortion;
+  const list = document.getElementById('ingredient-list');
+  if (list) {
+    list.innerHTML = ingr.map(i => `<li>${scaleIngredient(i, ratio)}</li>`).join('');
+  }
+}
+
+function scaleIngredient(text, ratio) {
+  return text.replace(/^(\d+)([gmlkGLM]|[gG]ramov|[mM]l)?\s*/g, (match, num, unit) => {
+    const scaled = Math.round(parseInt(num) * ratio);
+    if (scaled === 0) return '';
+    return `${scaled}${unit || ''} `;
+  });
+}
+
+// ======================== COLLECTIONS ========================
+function saveCollections() { localStorage.setItem('collections', JSON.stringify(collections)); }
+
+function openCollections() {
+  renderCollections();
+  openModal('collection-modal');
+}
+
+function renderCollections() {
+  const el = document.getElementById('collection-list');
+  if (!collections.length) { el.innerHTML = `<p style="color:var(--text2);padding:.5rem 0;" data-lang="colEmpty">Zatiaľ žiadne kolekcie.</p>`; return; }
+  el.innerHTML = collections.map((c, i) => `
+    <div style="display:flex;align-items:center;gap:.4rem;padding:.35rem .4rem;border-bottom:1px solid var(--border);">
+      <span style="flex:1;font-size:.88rem;"><strong>${c.name}</strong> (${c.recipeIds.length})</span>
+      <button class="btn btn-danger" onclick="deleteCollection(${i})" style="padding:.15rem .4rem;font-size:.7rem;">✕</button>
+    </div>
+  `).join('');
+}
+
+function addCollection() {
+  const name = document.getElementById('collection-name').value.trim();
+  if (!name) return;
+  collections.push({ id: Date.now(), name, recipeIds: [] });
+  document.getElementById('collection-name').value = '';
+  saveCollections();
+  renderCollections();
+}
+
+function deleteCollection(idx) {
+  collections.splice(idx, 1);
+  saveCollections();
+  renderCollections();
+  render();
+}
+
+function addToCollectionPrompt(recipeId) {
+  if (!collections.length) {
+    if (confirm((lang==='en'?'No collections yet. Create one?':'Žiadne kolekcie. Vytvoriť?')) && (document.getElementById('collection-name').value = prompt(lang==='en'?'Collection name:':'Názov kolekcie:') || '')) {
+      addCollection();
+    }
+    return;
+  }
+  const names = collections.map((c,i) => `${i+1}. ${c.name}`);
+  const choice = prompt(`${lang==='en'?'Add to collection (number):':'Pridať do kolekcie (číslo):'}\n${names.join('\n')}`);
+  if (choice) {
+    const idx = parseInt(choice) - 1;
+    if (idx >= 0 && idx < collections.length) {
+      if (!collections[idx].recipeIds.includes(recipeId)) {
+        collections[idx].recipeIds.push(recipeId);
+        saveCollections();
+      }
+    }
+  }
+}
+
+function updateCollectionFilter() {
+  let sel = document.getElementById('filter-collection');
+  if (!sel) return;
+  const current = sel.value;
+  sel.innerHTML = `<option value="">📁 ${lang==='en'?'All':'Všetky'}</option>${collections.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}`;
+  sel.value = current;
+}
+
+// ======================== TIP OF THE DAY ========================
+function showTipOfDay() {
+  if (localStorage.getItem('tipDismissed') === new Date().toISOString().slice(0,10)) return;
+  if (!recipes.length) return;
+  const daySeed = new Date().toISOString().slice(0,10).split('-').reduce((a,b) => a + parseInt(b), 0);
+  const r = recipes[daySeed % recipes.length];
+  const banner = document.getElementById('tip-banner');
+  const name = lang === 'en' && r.nameEn ? r.nameEn : r.name;
+  document.getElementById('tip-name').textContent = name;
+  banner.dataset.id = r.id;
+  banner.style.display = 'flex';
+}
+
+function dismissTip() {
+  document.getElementById('tip-banner').style.display = 'none';
+  localStorage.setItem('tipDismissed', new Date().toISOString().slice(0,10));
+}
+
+// ======================== COOKING HISTORY ========================
+function logCooking(recipeId) {
+  const existing = cookingHistory.find(h => h.recipeId === recipeId && h.date === new Date().toISOString().slice(0,10));
+  if (existing) {
+    existing.count = (existing.count || 1) + 1;
+  } else {
+    cookingHistory.push({ recipeId, date: new Date().toISOString().slice(0,10), notes: '', count: 1 });
+  }
+  localStorage.setItem('cookingHistory', JSON.stringify(cookingHistory));
+}
+
+function openHistory() {
+  const el = document.getElementById('history-list');
+  const sorted = [...cookingHistory].sort((a,b) => b.date.localeCompare(a.date));
+  if (!sorted.length) {
+    el.innerHTML = `<p style="color:var(--text2);padding:.5rem 0;" data-lang="historyEmpty">Zatiaľ žiadna história.</p>`;
+  } else {
+    el.innerHTML = sorted.slice(0, 50).map(h => {
+      const r = recipes.find(rec => rec.id === h.recipeId);
+      const name = r ? (lang==='en'&&r.nameEn?r.nameEn:r.name) : '?';
+      return `<div style="display:flex;align-items:center;gap:.4rem;padding:.3rem .4rem;border-bottom:1px solid var(--border);font-size:.85rem;">
+        <span style="flex:1;">${name}${h.count > 1 ? ` <span style="color:var(--text2);font-size:.75rem;">×${h.count}</span>` : ''}</span>
+        <span style="color:var(--text2);font-size:.75rem;">${h.date}</span>
+      </div>`;
+    }).join('');
+  }
+  openModal('history-modal');
+}
+
+function clearHistory() {
+  if (!confirm(lang==='en'?'Clear cooking history?':'Vymazať celú históriu?')) return;
+  cookingHistory = [];
+  localStorage.setItem('cookingHistory', JSON.stringify(cookingHistory));
+  openHistory();
+}
+
+// ======================== DEEP SEARCH ========================
+function applyIngredientSearch() {
+  if (ingredientSearchSelected.size > 0) {
+    const sel = [...ingredientSearchSelected];
+    const cat = document.getElementById('ingr-category').value;
+    const matching = recipes.filter(r => {
+      const ingr = lang === 'en' && r.ingredientsEn ? r.ingredientsEn : r.ingredients;
+      return sel.some(s => ingr.some(i => i.toLowerCase().includes(s.toLowerCase()))) && (!cat || r.category === cat);
+    });
+    const grid = document.getElementById('recipe-grid');
+    if (!matching.length) { grid.innerHTML = `<div class="empty-state"><h3>😕 ${t('noRecipes')}</h3></div>`; return; }
+    grid.innerHTML = matching.map(r => {
+      const name = lang==='en'&&r.nameEn?r.nameEn:r.name;
+      const tags = lang==='en'&&r.tagsEn?r.tagsEn:r.tags;
+      return `<div class="recipe-card"><button class="fav-btn" onclick="event.stopPropagation();toggleFav(${r.id})">${r.favorite?'❤️':'🤍'}</button>
+        ${r.image||r.imageData?`<img class="recipe-card-img" src="${r.imageData||r.image}" onerror="this.outerHTML='<div class=\\'recipe-card-img\\'>🍽️</div>'">`:`<div class="recipe-card-img">🍽️</div>`}
+        <div class="recipe-card-body" onclick="viewRecipe(${r.id})"><h3>${name}</h3>
+        <div class="meta"><span>📂 ${r.category}</span><span>⏱ ${r.time} min</span></div>
+        <div class="tags">${tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div></div></div>`;
+    }).join('');
+  } else {
+    render();
+  }
+}
 
 // ======================== INIT ========================
 applyLang();
 render();
+showTipOfDay();
 </script>
 </body>
 </html>
