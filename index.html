@@ -546,6 +546,58 @@ body[data-tab="dashboard"] #app-header { display: none; }
   .shop-item .si-btn { width: 24px; height: 24px; font-size: .58rem; }
 }
 
+/* ===== TASKS ===== */
+.tasks-widget { background: var(--surface); border-radius: var(--radius-md); padding: .5rem .55rem; margin-bottom: .55rem; border: 1px solid var(--border); }
+.tw-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: .3rem; }
+.tw-title { font-size: .78rem; font-weight: 800; display: flex; align-items: center; gap: .25rem; }
+.tw-progress { display: flex; align-items: center; gap: .3rem; }
+.tw-progress-circle { width: 32px; height: 32px; position: relative; flex-shrink: 0; }
+.tw-progress-circle svg { width: 32px; height: 32px; transform: rotate(-90deg); }
+.tw-progress-circle .bg { fill: none; stroke: var(--border); stroke-width: 3; }
+.tw-progress-circle .fg { fill: none; stroke: var(--primary-light); stroke-width: 3; stroke-linecap: round; transition: stroke-dashoffset .6s var(--ease-out-expo); }
+.tw-progress-circle .center { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: .6rem; font-weight: 800; color: var(--text); }
+.tw-items { display: flex; flex-direction: column; gap: .2rem; }
+.tw-item { display: flex; align-items: center; gap: .3rem; padding: .22rem .3rem; border-radius: var(--radius-sm); transition: all .2s ease; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.tw-item:active { background: var(--hover-bg); }
+.tw-item .tw-check { width: 18px; height: 18px; border-radius: 4px; border: 2px solid var(--text3); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .25s var(--ease-spring); font-size: .5rem; color: transparent; cursor: pointer; }
+.tw-item .tw-check.done { background: var(--primary-light); border-color: var(--primary-light); color: #fff; }
+.tw-item .tw-text { flex: 1; font-size: .7rem; color: var(--text); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tw-item.done .tw-text { text-decoration: line-through; opacity: .5; }
+.tw-item .tw-cat-icon { font-size: .65rem; flex-shrink: 0; }
+.tw-add-quick { display: flex; align-items: center; gap: .3rem; margin-top: .25rem; padding-top: .25rem; border-top: 1px solid var(--border); }
+.tw-add-quick input { flex: 1; background: var(--input-bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: .25rem .35rem; font-size: .7rem; color: var(--text); }
+.tw-add-quick input:focus { border-color: var(--primary-light); outline: none; }
+.tw-add-quick button { background: var(--primary); color: #fff; border: none; border-radius: var(--radius-sm); padding: .25rem .4rem; font-size: .65rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
+.tw-more { font-size: .65rem; color: var(--primary); font-weight: 600; cursor: pointer; text-align: center; padding: .15rem 0 0; }
+.tw-more:hover { text-decoration: underline; }
+
+.task-container { padding-bottom: 1rem; }
+.task-section-title { font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; color: var(--text3); padding: .5rem .2rem .2rem; display: flex; align-items: center; gap: .3rem; }
+.task-section-count { font-size: .6rem; font-weight: 600; background: var(--input-bg); padding: .02rem .3rem; border-radius: 99px; color: var(--text3); }
+.task-card { background: var(--surface); border-radius: var(--radius-md); border: 1px solid var(--border); margin-bottom: .3rem; overflow: hidden; transition: all .2s ease; }
+.task-card:active { transform: scale(.98); }
+.task-card.done { opacity: .55; }
+.task-card-body { display: flex; align-items: center; gap: .35rem; padding: .4rem .45rem; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.task-card .tc-check { width: 22px; height: 22px; border-radius: 6px; border: 2px solid var(--text3); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .3s var(--ease-spring); font-size: .55rem; color: transparent; cursor: pointer; }
+.task-card .tc-check.done { background: var(--primary-light); border-color: var(--primary-light); color: #fff; box-shadow: 0 0 12px rgba(220,38,38,.3); }
+.task-card .tc-info { flex: 1; min-width: 0; }
+.task-card .tc-title { font-size: .78rem; font-weight: 700; color: var(--text); transition: all .2s; }
+.task-card.done .tc-title { text-decoration: line-through; opacity: .5; }
+.task-card .tc-meta { display: flex; align-items: center; gap: .25rem; margin-top: .05rem; font-size: .6rem; color: var(--text3); flex-wrap: wrap; }
+.task-card .tc-cat { display: flex; align-items: center; gap: .12rem; padding: .02rem .3rem; border-radius: 99px; background: var(--input-bg); font-weight: 600; }
+.task-card .tc-time { opacity: .7; }
+.task-card .tc-priority { font-size: .5rem; }
+.task-card .tc-priority.high { color: var(--danger); }
+.task-card .tc-priority.medium { color: var(--gold); }
+.task-card .tc-actions { display: flex; gap: .1rem; flex-shrink: 0; }
+.task-card .tc-btn { width: 26px; height: 26px; border-radius: 6px; border: none; background: transparent; color: var(--text3); font-size: .62rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .15s ease; }
+.task-card .tc-btn:hover { background: var(--hover-bg); color: var(--text2); }
+.task-card .tc-btn.danger:hover { background: rgba(220,38,38,.1); color: var(--danger); }
+.task-cat-icon { font-size: .8rem; flex-shrink: 0; }
+@media (max-width: 400px) {
+  .task-card-body { padding: .35rem .35rem; }
+  .task-card .tc-title { font-size: .72rem; }
+}
 /* ===== SHOPPING ADD SHEET ===== */
 .shop-sheet-label { display: block; font-size: .68rem; font-weight: 700; color: var(--text2); margin-bottom: .3rem; text-transform: uppercase; letter-spacing: .04em; }
 .shop-cat-chips { display: flex; flex-wrap: wrap; gap: .25rem; margin-bottom: .15rem; }
@@ -838,6 +890,57 @@ body[data-tab="dashboard"] #app-header { display: none; }
   </div>
 </div>
 
+<!-- TASKS -->
+<div class="container" id="tasks-container" style="display:none;">
+  <div class="task-container" id="tasks-view"></div>
+</div>
+
+<!-- ADD TASK SHEET -->
+<div class="sheet-overlay" id="task-sheet">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <h2 id="task-sheet-title">✅ Pridať úlohu</h2>
+      <button class="sheet-close" onclick="closeTaskSheet()">✕</button>
+    </div>
+    <div class="sheet-body">
+      <div class="form-group"><input id="task-title" placeholder="Názov úlohy" style="font-size:.9rem;font-weight:600;"></div>
+      <div class="form-group">
+        <label class="shop-sheet-label" data-lang="tasksCategory" id="tl-cat">Kategória</label>
+        <div class="shop-cat-chips" id="task-cat-chips"></div>
+      </div>
+      <div class="form-row" style="gap:.35rem;">
+        <div class="form-group" style="flex:1;"><input id="task-date" type="date"></div>
+        <div class="form-group" style="flex:1;"><input id="task-time" type="time" placeholder="Čas"></div>
+      </div>
+      <div class="form-row" style="gap:.35rem;">
+        <div class="form-group" style="flex:1;">
+          <label class="shop-sheet-label" data-lang="tasksPriority" id="tl-priority">Priorita</label>
+          <select id="task-priority" style="width:100%;padding:.45rem .5rem;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.8rem;background:var(--input-bg);color:var(--text);">
+            <option value="low">🟢 Nízka</option>
+            <option value="medium" selected>🟡 Stredná</option>
+            <option value="high">🔴 Vysoká</option>
+          </select>
+        </div>
+        <div class="form-group" style="flex:1;">
+          <label class="shop-sheet-label" data-lang="tasksRepeat" id="tl-repeat">Opakovanie</label>
+          <select id="task-repeat" style="width:100%;padding:.45rem .5rem;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.8rem;background:var(--input-bg);color:var(--text);">
+            <option value="none">❌ Žiadne</option>
+            <option value="daily">🔄 Denne</option>
+            <option value="weekly">📅 Týždenne</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><input id="task-note" placeholder="✏️ Poznámka (voliteľné)"></div>
+      <input type="hidden" id="task-edit-id" value="">
+      <div class="form-row" style="gap:.35rem;margin-top:.3rem;">
+        <button class="btn primary" onclick="saveTask()" style="flex:1;font-size:.82rem;" id="task-save-btn">💾 Pridať</button>
+        <button class="btn btn-secondary" onclick="closeTaskSheet()" style="font-size:.82rem;">Zrušiť</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- FORM MODAL -->
 <div class="modal-overlay" id="form-modal">
   <div class="modal">
@@ -1067,6 +1170,10 @@ body[data-tab="dashboard"] #app-header { display: none; }
     <span class="nav-icon">📅</span>
     <span class="nav-label" data-lang="navPlanner">Plánovač</span>
   </button>
+  <button class="nav-item" data-tab="tasks" onclick="switchTab('tasks')">
+    <span class="nav-icon">✅</span>
+    <span class="nav-label" data-lang="navTasks">Úlohy</span>
+  </button>
   <button class="nav-item" onclick="openSettings()">
     <span class="nav-icon">⚙️</span>
     <span class="nav-label" data-lang="navSettings">Nastavenia</span>
@@ -1140,6 +1247,16 @@ const LANG = {
     dry: 'Suché',
     oily: 'Mastné',
     wet: 'Mokré',
+    navTasks: '✅ Úlohy', tasksTitle: 'Úlohy', tasksToday: 'Dnes', tasksTomorrow: 'Zajtra', tasksWeek: 'Tento týždeň', tasksDone: 'Dokončené',
+    tasksEmpty: 'Dnes máš voľnejší deň ✨', tasksEmptyDesc: 'Žiadne úlohy na dnes. Pridaj si nejakú!',
+    tasksAdd: 'Pridať úlohu', tasksEdit: 'Upraviť úlohu', tasksSave: 'Uložiť', tasksDelete: 'Vymazať',
+    tasksCatCooking: 'Varenie', tasksCatShopping: 'Nákup', tasksCatHousehold: 'Domácnosť', tasksCatKid: 'Dieťa', tasksCatCustom: 'Vlastné',
+    tasksPriorityLow: 'Nízka', tasksPriorityMedium: 'Stredná', tasksPriorityHigh: 'Vysoká',
+    tasksRepeatNone: 'Žiadne', tasksRepeatDaily: 'Denne', tasksRepeatWeekly: 'Týždenne',
+    tasksWidgetTitle: 'Dnešné úlohy', tasksWidgetDone: 'dokončené', tasksWidgetRemaining: 'zostáva',
+    tasksHomeTitle: 'Dnešné úlohy', tasksHomeEmpty: 'Dnes voľno ✨', tasksShowAll: 'Zobraziť všetky',
+    tasksQuickAdd: 'Rýchlo pridať...', tasksNote: 'Poznámka', tasksDate: 'Dátum', tasksTime: 'Čas',
+    tasksCategory: 'Kategória', tasksPriority: 'Priorita', tasksRepeat: 'Opakovanie',
 
   },
   en: {
@@ -1192,6 +1309,16 @@ const LANG = {
     settingsTitle: '⚙️ Settings', settingsDark: 'Dark mode', settingsLang: 'Language',
     autoFill: 'Auto-estimate from ingredients',
     unmatchedHint: 'ingredients not exactly matched',
+    navTasks: '✅ Tasks', tasksTitle: 'Tasks', tasksToday: 'Today', tasksTomorrow: 'Tomorrow', tasksWeek: 'This Week', tasksDone: 'Completed',
+    tasksEmpty: 'You have a free day ✨', tasksEmptyDesc: 'No tasks today. Add one!',
+    tasksAdd: 'Add task', tasksEdit: 'Edit task', tasksSave: 'Save', tasksDelete: 'Delete',
+    tasksCatCooking: 'Cooking', tasksCatShopping: 'Shopping', tasksCatHousehold: 'Household', tasksCatKid: 'Kids', tasksCatCustom: 'Custom',
+    tasksPriorityLow: 'Low', tasksPriorityMedium: 'Medium', tasksPriorityHigh: 'High',
+    tasksRepeatNone: 'None', tasksRepeatDaily: 'Daily', tasksRepeatWeekly: 'Weekly',
+    tasksWidgetTitle: 'Today\'s Tasks', tasksWidgetDone: 'done', tasksWidgetRemaining: 'left',
+    tasksHomeTitle: 'Today\'s Tasks', tasksHomeEmpty: 'Free day ✨', tasksShowAll: 'Show all',
+    tasksQuickAdd: 'Quick add...', tasksNote: 'Note', tasksDate: 'Date', tasksTime: 'Time',
+    tasksCategory: 'Category', tasksPriority: 'Priority', tasksRepeat: 'Repeat',
     nutritionPerPortion: 'Per portion',
     nutritionTotal: 'Whole recipe',
     nutritionPortions: 'Servings:',
@@ -2744,12 +2871,14 @@ function switchTab(tab) {
   const recipeContainer = document.getElementById('home');
   const plannerContainer = document.getElementById('planner-container');
   const shoppingContainer = document.getElementById('shopping-container');
-  [dashboard, recipeContainer, plannerContainer, shoppingContainer].forEach(el => { if (el) el.style.display = 'none'; });
+  const tasksContainer = document.getElementById('tasks-container');
+  [dashboard, recipeContainer, plannerContainer, shoppingContainer, tasksContainer].forEach(el => { if (el) el.style.display = 'none'; });
   document.getElementById('main-title').style.display = tab === 'dashboard' ? 'none' : '';
   if (tab === 'dashboard') { dashboard.style.display = ''; renderDashboard(); }
   if (tab === 'home') { recipeContainer.style.display = ''; render(); }
   if (tab === 'shopping') { shoppingContainer.style.display = 'block'; renderShoppingList(); }
   if (tab === 'planner') { plannerContainer.style.display = 'block'; renderPlanner(); }
+  if (tab === 'tasks') { tasksContainer.style.display = 'block'; renderTasks(); }
 }
 
 // ======================== DASHBOARD ========================
@@ -2818,6 +2947,9 @@ function renderDashboard() {
   // Dashboard sections
   let html = '';
 
+  // Task widget
+  html += `<div id="dash-tasks"></div>`;
+
   // Water reminder
   html += `<div class="water-reminder" id="water-reminder">
     <span class="water-icon">💧</span>
@@ -2851,6 +2983,8 @@ function renderDashboard() {
   </div>`;
 
   document.getElementById('dash-content').innerHTML = html;
+  loadTasks();
+  renderTaskWidget();
 }
 
 function getTodayMealCount() {
@@ -3621,6 +3755,359 @@ function guessShopCategory() {
   document.querySelectorAll('#shop-cat-chips .cat-chip').forEach(b => {
     b.classList.toggle('active', b.dataset.cat === cat);
   });
+}
+
+// ======================== TASKS ========================
+const TASK_CATEGORIES = [
+  { id: 'cooking',  icon: '🥘', color: '#dc2626' },
+  { id: 'shopping', icon: '🛒', color: '#f59e0b' },
+  { id: 'household',icon: '🧹', color: '#10b981' },
+  { id: 'kid',     icon: '👶', color: '#8b5cf6' },
+  { id: 'custom',  icon: '⭐', color: '#6b7280' },
+];
+let tasks = [];
+function loadTasks() {
+  try { tasks = JSON.parse(localStorage.getItem('tasks') || '[]'); } catch(e) { tasks = []; }
+  if (!Array.isArray(tasks)) tasks = [];
+  processRecurringTasks();
+}
+function saveTasks() {
+  localStorage.setItem('tasks', JSON.stringify(tasks));
+}
+function processRecurringTasks() {
+  const today = new Date().toISOString().slice(0,10);
+  let changed = false;
+  tasks.forEach(t => {
+    if (!t.completed || t.repeat === 'none') return;
+    const lastDate = t.completedDate || t.date;
+    if (!lastDate) return;
+    if (t.repeat === 'daily') {
+      if (lastDate < today) {
+        t.completed = false;
+        t.completedDate = '';
+        changed = true;
+      }
+    } else if (t.repeat === 'weekly') {
+      const last = new Date(lastDate);
+      const now = new Date(today);
+      const daysDiff = Math.floor((now - last) / (1000*60*60*24));
+      if (daysDiff >= 7) {
+        t.completed = false;
+        t.completedDate = '';
+        changed = true;
+      }
+    }
+  });
+  if (changed) saveTasks();
+}
+function generateTaskId() {
+  return 't_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8);
+}
+function taskCatInfo(catId) {
+  return TASK_CATEGORIES.find(c => c.id === catId) || TASK_CATEGORIES[4];
+}
+
+function getTodayTasks() {
+  const today = new Date().toISOString().slice(0,10);
+  return tasks.filter(t => t.date === today && !t.completed);
+}
+function getDateTasks(dateStr) {
+  return tasks.filter(t => t.date === dateStr && !t.completed);
+}
+function getWeekTasks() {
+  const today = new Date();
+  const start = new Date(today); start.setDate(today.getDate() - today.getDay() + 1);
+  const end = new Date(start); end.setDate(start.getDate() + 6);
+  const dates = [];
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+    dates.push(d.toISOString().slice(0,10));
+  }
+  return tasks.filter(t => !t.completed && dates.includes(t.date));
+}
+function getCompletedTasks() {
+  return tasks.filter(t => t.completed);
+}
+function getTodayProgress() {
+  const today = new Date().toISOString().slice(0,10);
+  const dayTasks = tasks.filter(t => t.date === today);
+  const total = dayTasks.length;
+  const done = dayTasks.filter(t => t.completed).length;
+  return { total, done, remaining: total - done };
+}
+
+function formatTaskDate(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr + (dateStr.includes('T') ? '' : 'T00:00:00'));
+  const today = new Date(); today.setHours(0,0,0,0);
+  const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate() + 1);
+  const diff = Math.floor((d - today) / (1000*60*60*24));
+  if (diff === 0) return lang === 'en' ? 'Today' : 'Dnes';
+  if (diff === 1) return lang === 'en' ? 'Tomorrow' : 'Zajtra';
+  if (diff > 0 && diff < 7) return d.toLocaleDateString(lang === 'en' ? 'en-GB' : 'sk-SK', { weekday: 'long' });
+  return d.toLocaleDateString(lang === 'en' ? 'en-GB' : 'sk-SK', { day: 'numeric', month: 'short' });
+}
+
+// ===== DASHBOARD WIDGET =====
+function renderTaskWidget() {
+  const el = document.getElementById('dash-tasks');
+  if (!el) return;
+  const todayTasks = getTodayTasks();
+  const { total, done, remaining } = getTodayProgress();
+  const maxShow = 5;
+  const showTasks = todayTasks.slice(0, maxShow);
+  const circumference = 2 * Math.PI * 13;
+  const offset = total > 0 ? circumference * (1 - done / total) : circumference;
+
+  let html = `<div class="tasks-widget">
+    <div class="tw-header">
+      <div class="tw-title">✅ <span data-lang="tasksHomeTitle">Dnešné úlohy</span></div>
+      <div class="tw-progress">
+        <span style="font-size:.65rem;color:var(--text3);font-weight:600;">${done}/${total}</span>
+        <div class="tw-progress-circle">
+          <svg viewBox="0 0 32 32"><circle class="bg" cx="16" cy="16" r="13"/><circle class="fg" cx="16" cy="16" r="13" stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"/></svg>
+          <span class="center">${total > 0 ? Math.round(done/total*100) : 0}%</span>
+        </div>
+      </div>
+    </div>`;
+
+  if (!showTasks.length) {
+    html += `<div style="text-align:center;padding:.3rem 0;font-size:.7rem;color:var(--text3);">✨ <span data-lang="tasksHomeEmpty">Dnes voľno ✨</span></div>`;
+  } else {
+    html += `<div class="tw-items">${showTasks.map(t => {
+      const ci = taskCatInfo(t.category);
+      return `<div class="tw-item${t.completed?' done':''}" onclick="toggleTask('${t.id}');renderTaskWidget();">
+        <span class="tw-cat-icon">${ci.icon}</span>
+        <span class="tw-check${t.completed?' done':''}" onclick="event.stopPropagation();toggleTask('${t.id}');renderTaskWidget();">${t.completed?'✓':''}</span>
+        <span class="tw-text">${esc(t.title)}</span>
+      </div>`;
+    }).join('')}</div>`;
+    if (todayTasks.length > maxShow) {
+      html += `<div class="tw-more" onclick="switchTab('tasks')"><span data-lang="tasksShowAll">Zobraziť všetky</span> →</div>`;
+    }
+  }
+
+  // Quick add
+  html += `<div class="tw-add-quick">
+    <input id="tw-quick-input" placeholder="${lang==='en'?'Quick add...':'Rýchlo pridať...'}" onkeydown="if(event.key==='Enter')quickAddTask()">
+    <button onclick="quickAddTask()">+</button>
+  </div></div>`;
+
+  el.innerHTML = html;
+}
+
+function quickAddTask() {
+  const input = document.getElementById('tw-quick-input');
+  const title = input.value.trim();
+  if (!title) return;
+  const today = new Date().toISOString().slice(0,10);
+  const cat = guessTaskCategory(title);
+  tasks.push({ id: generateTaskId(), title, category: cat, completed: false, date: today, time: '', priority: 'medium', repeat: 'none', note: '', source: 'manual', completedDate: '' });
+  saveTasks();
+  input.value = '';
+  renderTaskWidget();
+}
+
+function guessTaskCategory(title) {
+  const n = title.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  if (/var(en|iť|enie)|kuch|pečie|pečte|obed|večer|raňajk|desiat|koláč|recept|uvar/i.test(n)) return 'cooking';
+  if (/nakup|kúpiť|kúp|obchod|mlieko|chlieb|potravin/i.test(n)) return 'shopping';
+  if (/uprat|čist|kuchyn|chladničk|práčka|umy|vysáva/i.test(n)) return 'household';
+  if (/dieťa|baby|deti|plienk|detsk|škol/i.test(n)) return 'kid';
+  return 'custom';
+}
+
+// ===== TASKS SCREEN =====
+function renderTasks() {
+  const container = document.getElementById('tasks-view');
+  loadTasks();
+  const today = new Date().toISOString().slice(0,10);
+  const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1); const tomStr = tomorrow.toISOString().slice(0,10);
+  const weekTasks = getWeekTasks();
+  const todayTasks = getTodayTasks();
+  const tomTasks = getDateTasks(tomStr);
+  const completedList = getCompletedTasks();
+
+  const sections = [
+    { title: lang==='en'?'Today':'Dnes', icon: '📅', tasks: todayTasks },
+    { title: lang==='en'?'Tomorrow':'Zajtra', icon: '🌟', tasks: tomTasks },
+    { title: lang==='en'?'This Week':'Tento týždeň', icon: '📆', tasks: weekTasks.filter(t => t.date !== today && t.date !== tomStr) },
+  ];
+
+  let html = '';
+  sections.forEach(s => {
+    if (!s.tasks.length) return;
+    html += `<div class="task-section-title">${s.icon} ${s.title} <span class="task-section-count">${s.tasks.length}</span></div>`;
+    html += s.tasks.map(t => renderTaskCard(t)).join('');
+  });
+
+  if (completedList.length) {
+    html += `<div class="task-section-title">✅ <span data-lang="tasksDone">Dokončené</span> <span class="task-section-count">${completedList.length}</span></div>`;
+    html += completedList.slice(0, 10).map(t => renderTaskCard(t)).join('');
+  }
+
+  if (!html) {
+    html = `<div class="shop-empty">
+      <div class="shop-empty-icon">✅</div>
+      <div class="shop-empty-title" data-lang="tasksEmpty">Dnes máš voľnejší deň ✨</div>
+      <div class="shop-empty-desc" data-lang="tasksEmptyDesc">Žiadne úlohy na dnes. Pridaj si nejakú!</div>
+      <div class="shop-empty-actions">
+        <button class="btn primary" onclick="openTaskSheet()">✏️ ${lang==='en'?'Add task':'Pridať úlohu'}</button>
+      </div>
+    </div>`;
+  }
+
+  html += `<button class="shop-add-btn" onclick="openTaskSheet()" style="margin-top:.3rem;">➕ ${lang==='en'?'Add task':'Pridať úlohu'}</button>`;
+
+  container.innerHTML = html;
+}
+
+function renderTaskCard(t) {
+  const ci = taskCatInfo(t.category);
+  const done = t.completed;
+  const prioLabel = t.priority === 'high' ? '🔴' : t.priority === 'medium' ? '🟡' : '🟢';
+  const dateLabel = formatTaskDate(t.date);
+  const timeStr = t.time ? ` · 🕐 ${t.time}` : '';
+  return `<div class="task-card${done?' done':''}">
+    <div class="task-card-body">
+      <span class="task-cat-icon">${ci.icon}</span>
+      <div class="tc-check${done?' done':''}" onclick="toggleTask('${t.id}')">${done?'✓':''}</div>
+      <div class="tc-info" onclick="openTaskSheet('${t.id}')">
+        <div class="tc-title">${esc(t.title)}</div>
+        <div class="tc-meta">
+          <span class="tc-cat">${ci.icon} ${taskCatLabel(t.category)}</span>
+          <span class="tc-priority ${t.priority}">${prioLabel}</span>
+          <span class="tc-time">${dateLabel}${timeStr}</span>
+          ${t.note ? `<span>📝 ${esc(t.note)}</span>` : ''}
+          ${t.repeat !== 'none' ? `<span>🔄 ${t.repeat === 'daily' ? (lang==='en'?'daily':'denne') : (lang==='en'?'weekly':'týždenne')}</span>` : ''}
+        </div>
+      </div>
+      <div class="tc-actions">
+        <button class="tc-btn" onclick="event.stopPropagation();openTaskSheet('${t.id}')" title="${lang==='en'?'Edit':'Upraviť'}">✏️</button>
+        <button class="tc-btn danger" onclick="event.stopPropagation();deleteTask('${t.id}')" title="${lang==='en'?'Delete':'Vymazať'}">🗑</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function taskCatLabel(catId) {
+  const map = {
+    cooking: lang==='en'?'Cooking':'Varenie',
+    shopping: lang==='en'?'Shopping':'Nákup',
+    household: lang==='en'?'Household':'Domácnosť',
+    kid: lang==='en'?'Kids':'Dieťa',
+    custom: lang==='en'?'Custom':'Vlastné'
+  };
+  return map[catId] || '—';
+}
+
+// ===== TASK CRUD =====
+function toggleTask(id) {
+  const t = tasks.find(x => x.id === id);
+  if (!t) return;
+  t.completed = !t.completed;
+  t.completedDate = t.completed ? new Date().toISOString().slice(0,10) : '';
+  saveTasks();
+  const inTasks = document.getElementById('tasks-container')?.style.display !== 'none';
+  if (inTasks) renderTasks();
+  else renderTaskWidget();
+}
+
+function deleteTask(id) {
+  if (!confirm(lang === 'en' ? 'Delete this task?' : 'Vymazať túto úlohu?')) return;
+  tasks = tasks.filter(t => t.id !== id);
+  saveTasks();
+  const inTasks = document.getElementById('tasks-container')?.style.display !== 'none';
+  if (inTasks) renderTasks();
+  else { renderTaskWidget(); if (document.getElementById('dashboard')?.style.display !== 'none') renderDashboard(); }
+}
+
+function openTaskSheet(editId) {
+  const sheet = document.getElementById('task-sheet');
+  document.getElementById('task-sheet-title').textContent = editId
+    ? (lang==='en'?'✏️ Edit task':'✏️ Upraviť úlohu')
+    : (lang==='en'?'✅ Add task':'✅ Pridať úlohu');
+  document.getElementById('task-save-btn').textContent = editId
+    ? (lang==='en'?'💾 Save':'💾 Uložiť')
+    : (lang==='en'?'💾 Add':'💾 Pridať');
+
+  // Set date to today if not editing
+  if (!editId) {
+    document.getElementById('task-date').value = new Date().toISOString().slice(0,10);
+    document.getElementById('task-time').value = '';
+    document.getElementById('task-priority').value = 'medium';
+    document.getElementById('task-repeat').value = 'none';
+    document.getElementById('task-note').value = '';
+    document.getElementById('task-title').value = '';
+    document.getElementById('task-edit-id').value = '';
+  }
+
+  // Render category chips
+  const chips = document.getElementById('task-cat-chips');
+  chips.innerHTML = TASK_CATEGORIES.map(c =>
+    `<button class="cat-chip${c.id === 'custom' ? ' active' : ''}" data-cat="${c.id}" onclick="selectTaskCat(this)">${c.icon} ${taskCatLabel(c.id)}</button>`
+  ).join('');
+
+  if (editId) {
+    const t = tasks.find(x => x.id === editId);
+    if (!t) return;
+    document.getElementById('task-title').value = t.title;
+    document.getElementById('task-date').value = t.date;
+    document.getElementById('task-time').value = t.time || '';
+    document.getElementById('task-priority').value = t.priority || 'medium';
+    document.getElementById('task-repeat').value = t.repeat || 'none';
+    document.getElementById('task-note').value = t.note || '';
+    document.getElementById('task-edit-id').value = editId;
+    document.querySelectorAll('#task-cat-chips .cat-chip').forEach(b => b.classList.toggle('active', b.dataset.cat === t.category));
+  }
+
+  sheet.classList.add('active');
+  document.getElementById('task-title').focus();
+}
+
+function selectTaskCat(el) {
+  document.querySelectorAll('#task-cat-chips .cat-chip').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function closeTaskSheet() {
+  document.getElementById('task-sheet').classList.remove('active');
+}
+
+function saveTask() {
+  const title = document.getElementById('task-title').value.trim();
+  if (!title) {
+    document.getElementById('task-title').focus();
+    document.getElementById('task-title').style.borderColor = 'var(--danger)';
+    setTimeout(() => document.getElementById('task-title').style.borderColor = '', 1500);
+    return;
+  }
+  const editId = document.getElementById('task-edit-id').value;
+  const activeChip = document.querySelector('#task-cat-chips .cat-chip.active');
+  const category = activeChip ? activeChip.dataset.cat : 'custom';
+  const date = document.getElementById('task-date').value;
+  const time = document.getElementById('task-time').value;
+  const priority = document.getElementById('task-priority').value;
+  const repeat = document.getElementById('task-repeat').value;
+  const note = document.getElementById('task-note').value.trim();
+
+  if (editId) {
+    const t = tasks.find(x => x.id === editId);
+    if (t) {
+      t.title = title;
+      t.category = category;
+      t.date = date || new Date().toISOString().slice(0,10);
+      t.time = time;
+      t.priority = priority;
+      t.repeat = repeat;
+      t.note = note;
+    }
+  } else {
+    tasks.push({ id: generateTaskId(), title, category, completed: false, date: date || new Date().toISOString().slice(0,10), time, priority, repeat, note, source: 'manual', completedDate: '' });
+  }
+  saveTasks();
+  closeTaskSheet();
+  renderTasks();
+  renderTaskWidget();
 }
 
 // ======================== COOKING HISTORY ========================
