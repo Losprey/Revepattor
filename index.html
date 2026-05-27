@@ -3424,8 +3424,12 @@ switchTab('dashboard');
 render();
 showTipOfDay();
 
-// Assign preloaded images from build-time Pexels fetch
-recipes.forEach(r => { if (!r.image && !r.imageData && PRELOADED_IMAGES[r.id]) r.image = PRELOADED_IMAGES[r.id]; });
+// Assign preloaded images from build-time Pexels fetch (overrides placehold.co placeholders)
+recipes.forEach(r => {
+  if ((!r.image || r.image.includes('placehold.co')) && !r.imageData && PRELOADED_IMAGES[r.id]) {
+    r.image = PRELOADED_IMAGES[r.id];
+  }
+});
 
 // Background image fetch for Pexels – fetches any still-missing images
 batchFetchImages().then(() => { render(); });
