@@ -257,9 +257,31 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: rgba(22
 
 /* ===== PLANNER ===== */
 .planner-container { display: none; padding-top: .3rem; }
-.planner-week { display: grid; grid-template-columns: 1fr; gap: .5rem; margin-bottom: .8rem; }
+.planner-today { margin-bottom: .6rem; }
+.planner-today-header { display: flex; align-items: center; gap: .4rem; margin-bottom: .4rem; font-size: .85rem; font-weight: 700; color: var(--text); }
+.planner-today-header .today-date { font-weight: 400; color: var(--text2); font-size: .75rem; }
+.planner-today-meals { display: grid; grid-template-columns: 1fr 1fr; gap: .3rem; }
+@media (min-width: 580px) { .planner-today-meals { grid-template-columns: repeat(5, 1fr); } }
+.today-meal-card { background: var(--surface); border-radius: var(--radius-md); padding: .45rem .4rem; border: 1px solid var(--border); text-align: center; cursor: pointer; transition: all .15s ease; display: flex; flex-direction: column; align-items: center; gap: .15rem; }
+.today-meal-card:hover { border-color: var(--primary-light); box-shadow: 0 2px 6px rgba(0,0,0,.06); }
+.today-meal-card .meal-icon { font-size: 1.2rem; }
+.today-meal-card .meal-label { font-size: .6rem; text-transform: uppercase; letter-spacing: .04em; color: var(--text3); font-weight: 600; }
+.today-meal-card .meal-name { font-size: .7rem; font-weight: 600; color: var(--text); line-height: 1.2; }
+.today-meal-card .meal-empty { font-size: .65rem; color: var(--text3); opacity: .6; }
+.today-meal-card .meal-remove { font-size: .55rem; cursor: pointer; opacity: .4; margin-top: .05rem; }
+.today-meal-card .meal-remove:hover { opacity: 1; }
+.today-meal-card.filled { border-left: 3px solid var(--primary-light); padding-left: .3rem; }
+.today-meal-card.custom { border-left-color: var(--text3); border-left-style: dashed; }
+.planner-week-section { margin-bottom: .8rem; }
+.planner-week-toggle { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: .45rem .6rem; color: var(--text2); font-size: .72rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: all .15s ease; }
+.planner-week-toggle:hover { color: var(--text); border-color: var(--primary-light); }
+.planner-week-toggle.open { border-radius: var(--radius-md) var(--radius-md) 0 0; border-bottom-color: transparent; margin-bottom: 0; }
+.planner-week-toggle #planner-week-toggle-arrow { transition: transform .2s ease; }
+.planner-week-toggle.open #planner-week-toggle-arrow { transform: rotate(180deg); }
+.planner-week { display: grid; grid-template-columns: 1fr; gap: .5rem; }
 @media (min-width: 480px) { .planner-week { grid-template-columns: 1fr 1fr; } }
 @media (min-width: 768px) { .planner-week { grid-template-columns: repeat(7, 1fr); } }
+
 .planner-day { background: var(--surface); border-radius: var(--radius-md); overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.06); border: 1px solid var(--border); position: relative; }
 .planner-day::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--primary-light); }
 .planner-day.today { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary), 0 2px 8px rgba(180,30,30,.12); }
@@ -458,7 +480,16 @@ body:not(.dark) .recipe-card .fav-btn.fav-active { background: linear-gradient(1
       <button class="btn btn-secondary" onclick="clearPlan()" style="font-size:.65rem;padding:.15rem .4rem;" data-lang="plannerClear">🗑</button>
     </div>
   </div>
-  <div class="planner-week" id="planner-week"></div>
+  <!-- TODAY SECTION -->
+  <div class="planner-today" id="planner-today"></div>
+  <!-- WEEK GRID -->
+  <div class="planner-week-section">
+    <button class="planner-week-toggle" id="planner-week-toggle" onclick="toggleWeekGrid()">
+      📅 <span id="planner-week-toggle-text">Celý týždeň</span>
+      <span id="planner-week-toggle-arrow" style="font-size:.65rem;">▼</span>
+    </button>
+    <div class="planner-week" id="planner-week" style="display:none;"></div>
+  </div>
   <div class="planner-list" id="planner-list">
     <h3 style="font-size:.9rem;font-weight:600;margin-bottom:.35rem;" data-lang="plannerShopping">🛒 Nákupný zoznam</h3>
     <ul id="shopping-list" style="list-style:none;padding:0;font-size:.82rem;"></ul>
@@ -681,6 +712,7 @@ const LANG = {
     plannerShopping: '🛒 Nákupný zoznam', plannerCopy: '📋 Kopírovať',
     plannerPick: 'Vybrať recept', plannerEmpty: '+ pridať',
     plannerEmptyList: 'Zatiaľ žiadne recepty v pláne.',
+    plannerWeek: 'Celý týždeň', plannerWeekHide: 'Skryť týždeň',
 
   },
   en: {
@@ -728,6 +760,7 @@ const LANG = {
     plannerShopping: '🛒 Shopping List', plannerCopy: '📋 Copy',
     plannerPick: 'Pick a recipe', plannerEmpty: '+ add',
     plannerEmptyList: 'No recipes in the plan yet.',
+    plannerWeek: 'Full week', plannerWeekHide: 'Hide week',
 
   }
  };
@@ -1669,16 +1702,40 @@ const MEALS = [
 ];
 
 function renderPlanner() {
-  const week = document.getElementById('planner-week');
+  const todayEl = document.getElementById('planner-today');
+  const weekEl = document.getElementById('planner-week');
   const dayNames = lang === 'en' ? DAYS_EN : DAYS_SK;
   const weekKey = currentWeekKey();
   const weekPlan = getWeekPlan(weekKey);
   const startOfWeek = plannerWeekStart(plannerWeekOffset);
   const totalSlots = MEALS.length;
   const todayStr = new Date().toISOString().slice(0,10);
+  const todayIdx = (new Date().getDay() + 6) % 7;
   // Update week nav
   document.getElementById('planner-week-label').textContent = getWeekLabel(startOfWeek);
-  week.innerHTML = DAYS.map((d, i) => {
+  document.getElementById('planner-week-toggle-text').textContent = t('plannerWeek');
+  // ===== TODAY SECTION ===== 
+  const dayNameToday = dayNames[todayIdx];
+  const todayDate = new Date();
+  const todayDisp = todayDate.getDate() + '. ' + (todayDate.getMonth()+1) + '. ' + todayDate.getFullYear();
+  const todayDay = getWeekPlan(getWeekKey(new Date()))[DAYS[todayIdx]] || {};
+  const todayWk = getWeekKey(new Date());
+  todayEl.innerHTML = `<div class="planner-today-header">📅 ${dayNameToday} <span class="today-date">${todayDisp}</span></div>
+    <div class="planner-today-meals">${MEALS.map(m => {
+      const entry = todayDay[m.id];
+      const r = getSlotRecipe(entry);
+      const name = getSlotName(entry);
+      const isCustom = entry && entry.type === 'custom';
+      return `<div class="today-meal-card${r || isCustom ? ' filled' : ''}${isCustom ? ' custom' : ''}" onclick="pickRecipe('${DAYS[todayIdx]}','${m.id}','${todayWk}')">
+        <span class="meal-icon">${m.icon}</span>
+        <span class="meal-label">${m.id}</span>
+        ${r || isCustom
+          ? `<span class="meal-name">${esc(name)}</span><span class="meal-remove" onclick="event.stopPropagation();removeSlot('${DAYS[todayIdx]}','${m.id}','${todayWk}')">✕</span>`
+          : `<span class="meal-empty">+ pridať</span>`}
+      </div>`;
+    }).join('')}</div>`;
+  // ===== WEEK GRID =====
+  weekEl.innerHTML = DAYS.map((d, i) => {
     const day = weekPlan[d] || {};
     const date = new Date(startOfWeek); date.setDate(startOfWeek.getDate() + i);
     const dateStr = date.toISOString().slice(0,10);
@@ -1707,24 +1764,36 @@ function renderPlanner() {
   renderShoppingList();
 }
 
+function toggleWeekGrid() {
+  const grid = document.getElementById('planner-week');
+  const toggle = document.getElementById('planner-week-toggle');
+  const txt = document.getElementById('planner-week-toggle-text');
+  const showing = grid.style.display !== 'none';
+  grid.style.display = showing ? 'none' : '';
+  toggle.classList.toggle('open', !showing);
+  txt.textContent = showing ? t('plannerWeek') : t('plannerWeekHide');
+}
+
 function prevWeek() { plannerWeekOffset--; renderPlanner(); }
 function nextWeek() { plannerWeekOffset++; renderPlanner(); }
 function resetWeek() { plannerWeekOffset = 0; renderPlanner(); }
 
-function pickRecipe(day, slot) {
+function pickRecipe(day, slot, wk) {
   const el = document.getElementById('planner-picker') || createPickerModal();
   const list = document.getElementById('picker-recipes');
   const customInput = document.getElementById('picker-custom');
   customInput.placeholder = '✍️ ' + (lang==='en' ? 'Type custom meal...' : 'Napíš vlastné jedlo...');
-  // Pre-fill custom input if slot has custom text
-  const weekKey = currentWeekKey();
+  const weekKey = wk || currentWeekKey();
   const weekPlan = getWeekPlan(weekKey);
   const cur = weekPlan[day] && weekPlan[day][slot];
   customInput.value = (cur && cur.type === 'custom') ? cur.text : '';
   customInput.focus();
+  el.dataset.weekKey = weekKey;
+  el.dataset.day = day;
+  el.dataset.slot = slot;
   list.innerHTML = recipes.map(r => {
     const name = lang === 'en' && r.nameEn ? r.nameEn : r.name;
-    return `<div class="picker-item" onclick="selectRecipe('${day}','${slot}',${r.id});closeModal('planner-picker')"><span>${esc(name)}</span><span class="pick-cat">📂 ${esc(r.category)}</span></div>`;
+    return `<div class="picker-item" onclick="selectRecipe('${day}','${slot}',${r.id},'${weekKey}');closeModal('planner-picker')"><span>${esc(name)}</span><span class="pick-cat">📂 ${esc(r.category)}</span></div>`;
   }).join('');
   document.getElementById('picker-search').value = '';
   document.getElementById('picker-search').oninput = function() {
@@ -1733,13 +1802,13 @@ function pickRecipe(day, slot) {
   };
   customInput.onkeydown = function(e) {
     if (e.key === 'Enter' && this.value.trim()) {
-      selectCustomMeal(day, slot, this.value.trim());
+      selectCustomMeal(day, slot, this.value.trim(), weekKey);
       closeModal('planner-picker');
     }
   };
   document.getElementById('picker-custom-btn').onclick = function() {
     const val = customInput.value.trim();
-    if (val) { selectCustomMeal(day, slot, val); closeModal('planner-picker'); }
+    if (val) { selectCustomMeal(day, slot, val, weekKey); closeModal('planner-picker'); }
   };
   openModal('planner-picker');
 }
@@ -1760,8 +1829,8 @@ function createPickerModal() {
   return div;
 }
 
-function selectRecipe(day, slot, id) {
-  const weekKey = currentWeekKey();
+function selectRecipe(day, slot, id, wk) {
+  const weekKey = wk || currentWeekKey();
   const weekPlan = getWeekPlan(weekKey);
   if (!weekPlan[day]) weekPlan[day] = {};
   weekPlan[day][slot] = { type: 'recipe', id };
@@ -1769,8 +1838,8 @@ function selectRecipe(day, slot, id) {
   renderPlanner();
 }
 
-function selectCustomMeal(day, slot, text) {
-  const weekKey = currentWeekKey();
+function selectCustomMeal(day, slot, text, wk) {
+  const weekKey = wk || currentWeekKey();
   const weekPlan = getWeekPlan(weekKey);
   if (!weekPlan[day]) weekPlan[day] = {};
   weekPlan[day][slot] = { type: 'custom', text };
@@ -1799,8 +1868,8 @@ function getSlotName(entry) {
   return '';
 }
 
-function removeSlot(day, slot) {
-  const weekKey = currentWeekKey();
+function removeSlot(day, slot, wk) {
+  const weekKey = wk || currentWeekKey();
   const weekPlan = getWeekPlan(weekKey);
   if (weekPlan[day]) delete weekPlan[day][slot];
   saveWeekPlan();
