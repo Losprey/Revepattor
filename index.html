@@ -2262,8 +2262,7 @@ function loadSettings() {
     mealPlanner: { defaultServings: 4, autoShoppingList: false, showNutrition: true, preferHealthy: false, preferQuick: false, preferKidsMeals: false, preferCheap: false, preferHighProtein: false },
     notifications: { breakfastReminder: false, todayCookingReminder: false, shoppingReminder: false, hydrationReminder: false, childMealReminder: false, eveningPlanningReminder: false },
     family: { householdMembers: 2, childAge: 'none', allergies: '', forbiddenFoods: '', favoriteMeals: '' },
-    smartFeatures: { aiRecipeSuggestions: true, weatherBasedSuggestions: true, autoShoppingCategories: true, ingredientSuggestions: true, autoWeeklyPlanning: false },
-    shopping: { storeMode: false },
+    shopping: { storeMode: false, autoCategories: true },
     quickAdd: { enabled: false },
     notifTimes: { breakfast: '08:00', whatCook: '10:00', shopping: '16:00', water: '12:00', kids: '07:30', evening: '20:00' },
     weather: { enabled: false, location: '', lat: null, lon: null },
@@ -2300,6 +2299,8 @@ function applySettings() {
   if (fab) fab.style.display = appSettings.quickAdd.enabled ? '' : 'none';
   // Re-render if language changed (dynamic content uses t() which depends on lang)
   if (langChanged) { render(); showTipOfDay(); }
+  // Notification scheduler restarts when settings change
+  initNotifications();
 }
 loadSettings();
 applySettings();
@@ -2312,7 +2313,7 @@ function openSettings() {
   const tasksDone = tasks.filter(t => t.completed).length;
   const streak = calcPlanningStreak();
   const s = appSettings;
-  const w = s.homeWidgets, m = s.mealPlanner, n = s.notifications, f = s.family, sm = s.smartFeatures;
+  const w = s.homeWidgets, m = s.mealPlanner, n = s.notifications, f = s.family;
 
   let html = '';
 
@@ -2412,7 +2413,7 @@ function openSettings() {
     ['eveningPlanningReminder','evening','🌙',t('Večerné plánovanie','Evening planning')],
   ];
   html += `<div class="settings-group">
-    <div class="settings-group-title">🔔 ${t('Notifikácie','Notifications')} <span class="badge-prep">Pripravuje sa</span></div>
+    <div class="settings-group-title">🔔 ${t('Notifikácie','Notifications')}</div>
     <div class="settings-card">${notifRows.map(([k,timeK,icon,label]) =>
       `<div class="settings-row">
         <span class="sr-label"><span class="sr-icon">${icon}</span> ${label}</span>
@@ -2451,27 +2452,28 @@ function openSettings() {
     </div>
   </div>`;
 
-  // 6. Smart features
+  // 6. Quick actions
   html += `<div class="settings-group">
-    <div class="settings-group-title">🤖 ${t('Smart funkcie','Smart features')} <span class="badge-prep">Pripravuje sa</span></div>
+    <div class="settings-group-title">⚡ ${t('Rýchle akcie','Quick actions')}</div>
     <div class="settings-card">
-      ${[['aiRecipeSuggestions','🤖',t('AI odporúčania','AI recommendations')],
-         ['weatherBasedSuggestions','🌤️',t('Počasie→jedlá','Weather-based meals')],
-         ['autoShoppingCategories','📦',t('Auto kategórie nákupu','Auto shop categories')],
-         ['ingredientSuggestions','🥕',t('Návrhy z ingrediencií','Ingredient suggestions')],
-         ['autoWeeklyPlanning','📅',t('Auto plánovanie týždňa','Auto week planning')],
-       ].map(([k,icon,label]) =>
-        `<div class="settings-row">
-          <span class="sr-label"><span class="sr-icon">${icon}</span> ${label}</span>
-          <label class="toggle-switch"><input type="checkbox" ${sm[k]?'checked':''} onchange="sm.${k}=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
-        </div>`
-      ).join('')}
+      <div class="settings-row">
+        <span class="sr-label"><span class="sr-icon">🛒</span> ${t('Režim obchodu','Store mode')}</span>
+        <label class="toggle-switch"><input type="checkbox" ${s.shopping.storeMode?'checked':''} onchange="s.shopping.storeMode=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="settings-row">
+        <span class="sr-label"><span class="sr-icon">📦</span> ${t('Auto kategórie nákupu','Auto shop categories')}</span>
+        <label class="toggle-switch"><input type="checkbox" ${s.shopping.autoCategories?'checked':''} onchange="s.shopping.autoCategories=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="settings-row">
+        <span class="sr-label"><span class="sr-icon">➕</span> ${t('Rýchle pridanie','Quick add FAB')}</span>
+        <label class="toggle-switch"><input type="checkbox" ${s.quickAdd.enabled?'checked':''} onchange="s.quickAdd.enabled=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
+      </div>
     </div>
   </div>`;
 
   // 7. Weather settings
   html += `<div class="settings-group">
-    <div class="settings-group-title">🌤️ ${t('Počasie','Weather')} <span class="badge-prep">Pripravuje sa</span></div>
+    <div class="settings-group-title">🌤️ ${t('Počasie','Weather')}</div>
     <div class="settings-card">
       <div class="settings-row">
         <span class="sr-label"><span class="sr-icon">🌤️</span> ${t('Zobraziť počasie','Show weather')}</span>
@@ -2484,22 +2486,7 @@ function openSettings() {
     </div>
   </div>`;
 
-  // 8. Quick actions
-  html += `<div class="settings-group">
-    <div class="settings-group-title">⚡ ${t('Rýchle akcie','Quick actions')}</div>
-    <div class="settings-card">
-      <div class="settings-row">
-        <span class="sr-label"><span class="sr-icon">🛒</span> ${t('Režim obchodu','Shopping mode')}</span>
-        <label class="toggle-switch"><input type="checkbox" ${s.shopping.storeMode?'checked':''} onchange="s.shopping.storeMode=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
-      </div>
-      <div class="settings-row">
-        <span class="sr-label"><span class="sr-icon">➕</span> ${t('Rýchle pridanie','Quick add FAB')}</span>
-        <label class="toggle-switch"><input type="checkbox" ${s.quickAdd.enabled?'checked':''} onchange="s.quickAdd.enabled=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
-      </div>
-    </div>
-  </div>`;
-
-  // 9. Data
+  // 8. Data
   html += `<div class="settings-group">
     <div class="settings-group-title">💾 ${t('Dáta','Data')}</div>
     <div class="settings-card">
@@ -2518,7 +2505,7 @@ function openSettings() {
     </div>
   </div>`;
 
-  // 10. About
+  // 9. About
   html += `<div class="settings-group">
     <div class="settings-group-title">ℹ️ ${t('O aplikácii','About')}</div>
     <div class="settings-card">
@@ -2566,6 +2553,8 @@ function editText(path, label) {
   const val = prompt(label + ':', obj[key] || '');
   if (val === null) return;
   obj[key] = val.trim();
+  // Reset weather cache & coords when location changes
+  if (path === 'weather.location') { weatherCache = null; weatherCacheTs = 0; appSettings.weather.lat = null; appSettings.weather.lon = null; }
   saveSettings();
   openSettings();
 }
@@ -3340,13 +3329,13 @@ function renderDashboard() {
   // Weather widget
   if (w.weather) {
     if (appSettings.weather.enabled && appSettings.weather.location) {
-      html += `<div class="dash-section"><div class="weather-widget" onclick="editText('weather.location','${t('Mesto','City')}')">
+      html += `<div class="dash-section"><div class="weather-widget" id="weather-widget" onclick="editText('weather.location','${t('Mesto','City')}')">
         <span class="weather-icon">🌤️</span>
         <span class="weather-info"><strong>${esc(appSettings.weather.location)}</strong><span class="weather-temp">${t('Počasie nie je pripojené','Weather not connected')}</span></span>
         <span class="weather-cta">${t('Nastaviť','Configure')} ›</span>
       </div></div>`;
     } else {
-      html += `<div class="dash-section"><div class="weather-widget weather-fallback" onclick="editText('weather.location','${t('Mesto','City')}')">
+      html += `<div class="dash-section"><div class="weather-widget weather-fallback" id="weather-widget" onclick="editText('weather.location','${t('Mesto','City')}')">
         <span class="weather-icon">🌤️</span>
         <span class="weather-info"><strong>${t('Počasie','Weather')}</strong><span class="weather-temp">${t('Zadaj mesto pre predpoveď','Enter city for forecast')}</span></span>
         <span class="weather-cta">${t('Nastaviť','Set')} ›</span>
@@ -4267,7 +4256,7 @@ function toggleShopCategory(headerEl) {
 }
 
 function guessShopCategory() {
-  if (!appSettings.smartFeatures.autoShoppingCategories) return;
+  if (!appSettings.shopping.autoCategories) return;
   const name = document.getElementById('shop-item-name').value.trim();
   if (!name) return;
   const cat = guessFoodCategory(name);
@@ -4890,6 +4879,174 @@ if ('serviceWorker' in navigator) {
     });
   }).catch(() => {});
 }
+
+// ======================== NOTIFICATIONS ========================
+const NOTIF_MESSAGES = {
+  breakfastReminder: { sk: ['Raňajky 🌅', 'Čas na raňajky! Čo si dáš dobré?'], en: ['Breakfast time 🌅', 'Time for breakfast! What\'s cooking?'] },
+  todayCookingReminder: { sk: ['Čo uvariť dnes? 🍳', 'Pozri si návrhy na dnešné jedlá.'], en: ['What to cook today? 🍳', 'Check your meal suggestions.'] },
+  shoppingReminder: { sk: ['Nákup 🛒', 'Nezabudni, že máš nákupný zoznam.'], en: ['Shopping 🛒', 'Don\'t forget your shopping list.'] },
+  hydrationReminder: { sk: ['Pitný režim 💧', 'Nezabudni piť vodu!'], en: ['Stay hydrated 💧', 'Remember to drink water!'] },
+  childMealReminder: { sk: ['Jedlo pre dieťa 👶', 'Je čas pripraviť jedlo pre malého.'], en: ['Kid\'s meal 👶', 'Time to prep a meal for the little one.'] },
+  eveningPlanningReminder: { sk: ['Zajtrajší plán 🌙', 'Naplánuj si jedlá na zajtra.'], en: ['Plan tomorrow 🌙', 'Take a minute to plan tomorrow\'s meals.'] },
+};
+
+let notifInterval = null;
+let notifFiredToday = {};
+try { notifFiredToday = JSON.parse(localStorage.getItem('notifFired') || '{}'); } catch(e) { notifFiredToday = {}; }
+
+function saveNotifFired() {
+  localStorage.setItem('notifFired', JSON.stringify(notifFiredToday));
+}
+
+function requestNotifPermission() {
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+}
+
+function initNotifications() {
+  if (!('Notification' in window)) return;
+  if (notifInterval) { clearInterval(notifInterval); notifInterval = null; }
+  const anyEnabled = Object.values(appSettings.notifications).some(v => v);
+  if (!anyEnabled) return;
+  requestNotifPermission();
+  notifInterval = setInterval(checkAndFireNotifications, 60000); // check every 60s
+  checkAndFireNotifications(); // immediate first check
+}
+
+function checkAndFireNotifications() {
+  if (Notification.permission !== 'granted') return;
+  const now = new Date();
+  const today = now.toISOString().slice(0, 10);
+  const hhmm = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+
+  const mapping = [
+    { key: 'breakfastReminder', timeKey: 'breakfast' },
+    { key: 'todayCookingReminder', timeKey: 'whatCook' },
+    { key: 'shoppingReminder', timeKey: 'shopping' },
+    { key: 'hydrationReminder', timeKey: 'water' },
+    { key: 'childMealReminder', timeKey: 'kids' },
+    { key: 'eveningPlanningReminder', timeKey: 'evening' },
+  ];
+
+  // Reset fired state if new day
+  Object.keys(notifFiredToday).forEach(k => {
+    if (notifFiredToday[k] !== today) delete notifFiredToday[k];
+  });
+
+  for (const m of mapping) {
+    if (!appSettings.notifications[m.key]) continue;
+    if (notifFiredToday[m.key] === today) continue;
+    const target = appSettings.notifTimes[m.timeKey];
+    if (target !== hhmm) continue;
+    // Fire!
+    const msg = NOTIF_MESSAGES[m.key];
+    const l = appSettings.lang === 'en' ? 'en' : 'sk';
+    try {
+      new Notification(msg[l][0], { body: msg[l][1], icon: '/icon-192.png', badge: '/icon-192.png' });
+    } catch(e) { /* ignore */ }
+    notifFiredToday[m.key] = today;
+    saveNotifFired();
+  }
+}
+
+// ======================== WEATHER ========================
+let weatherCache = null;
+let weatherCacheTs = 0;
+
+async function fetchWeatherCoords(city) {
+  try {
+    const r = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=${appSettings.lang}`);
+    const data = await r.json();
+    if (data.results && data.results.length) {
+      const loc = data.results[0];
+      appSettings.weather.lat = loc.latitude;
+      appSettings.weather.lon = loc.longitude;
+      appSettings.weather.location = loc.name + (loc.country ? ', ' + loc.country : '');
+      saveSettings();
+      return { lat: loc.latitude, lon: loc.longitude, name: appSettings.weather.location };
+    }
+  } catch(e) { /* ignore */ }
+  return null;
+}
+
+async function fetchWeatherData() {
+  const loc = appSettings.weather.location;
+  if (!loc) return null;
+
+  // Cache for 30 minutes
+  if (weatherCache && (Date.now() - weatherCacheTs) < 30 * 60 * 1000) return weatherCache;
+
+  try {
+    let lat = appSettings.weather.lat;
+    let lon = appSettings.weather.lon;
+    if (!lat || !lon) {
+      const coords = await fetchWeatherCoords(loc);
+      if (!coords) return null;
+      lat = coords.lat;
+      lon = coords.lon;
+    }
+    const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+    const data = await r.json();
+    if (data.current_weather) {
+      weatherCache = data.current_weather;
+      weatherCacheTs = Date.now();
+      return weatherCache;
+    }
+  } catch(e) { /* ignore */ }
+  return null;
+}
+
+const WEATHER_CODES = {
+  0:  { icon: '☀️', labelSk: 'Jasno', labelEn: 'Clear' },
+  1:  { icon: '🌤️', labelSk: 'Polooblačno', labelEn: 'Partly cloudy' },
+  2:  { icon: '⛅', labelSk: 'Oblačno', labelEn: 'Cloudy' },
+  3:  { icon: '☁️', labelSk: 'Zamračené', labelEn: 'Overcast' },
+  45: { icon: '🌫️', labelSk: 'Hmla', labelEn: 'Fog' },
+  51: { icon: '🌦️', labelSk: 'Mrholenie', labelEn: 'Drizzle' },
+  61: { icon: '🌧️', labelSk: 'Dážď', labelEn: 'Rain' },
+  71: { icon: '🌨️', labelSk: 'Sneženie', labelEn: 'Snow' },
+  80: { icon: '🌧️', labelSk: 'Prehánky', labelEn: 'Showers' },
+  95: { icon: '⛈️', labelSk: 'Búrka', labelEn: 'Thunderstorm' },
+};
+
+function getWeatherIcon(code) {
+  const w = WEATHER_CODES[code] || { icon: '🌡️', labelSk: '?', labelEn: '?' };
+  const l = appSettings.lang === 'en' ? 'en' : 'sk';
+  return { icon: w.icon, label: l === 'en' ? w.labelEn : w.labelSk };
+}
+
+async function updateWeatherWidget() {
+  const widgetEl = document.getElementById('weather-widget');
+  if (!widgetEl) return;
+  const w = await fetchWeatherData();
+  const locLabel = appSettings.weather.location || (appSettings.lang === 'en' ? 'Unknown' : 'Neznáme');
+  if (w) {
+    const wi = getWeatherIcon(w.weathercode);
+    widgetEl.innerHTML = `<span class="weather-icon">${wi.icon}</span>
+      <span class="weather-info"><strong>${esc(locLabel)}</strong><span class="weather-temp">${w.temperature}°C · ${wi.label}</span></span>
+      <span class="weather-cta" onclick="event.stopPropagation();openSettings()">${appSettings.lang==='en'?'Edit':'Upraviť'} ›</span>`;
+    widgetEl.classList.remove('weather-fallback');
+  } else {
+    widgetEl.innerHTML = `<span class="weather-icon">🌤️</span>
+      <span class="weather-info"><strong>${esc(locLabel)}</strong><span class="weather-temp">${appSettings.lang==='en'?'Enter city for forecast':'Zadaj mesto pre predpoveď'}</span></span>
+      <span class="weather-cta" onclick="event.stopPropagation();openSettings()">${appSettings.lang==='en'?'Set':'Nastaviť'} ›</span>`;
+    widgetEl.classList.add('weather-fallback');
+  }
+}
+
+// Init notifications on load
+initNotifications();
+
+// Init weather fetch when dashboard renders with weather enabled
+const _origRenderDashboard = renderDashboard;
+renderDashboard = function() {
+  _origRenderDashboard();
+  if (appSettings.homeWidgets.weather) {
+    setTimeout(() => updateWeatherWidget(), 500);
+  }
+};
 
 
 </script>
