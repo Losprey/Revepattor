@@ -104,6 +104,84 @@ async function aiSimplifyRecipe(recipeId) {
     }
   }
 }
+}
+
+async function aiGenerateShoppingList() {
+  if (!appSettings.shopping.aiShoppingList) {
+    alert(t('AI nákupný zoznam je vypnutý. Zapni ho v Nastaveniach → Nákup.','AI shopping list is off. Enable in Settings → Shopping.'));
+    return;
+  }
+  const weekKey = currentWeekKey();
+  const weekPlan = getWeekPlan(weekKey);
+  const allMeals = [];
+  DAYS.forEach(d => {
+    MEALS.forEach(m => {
+      const entry = weekPlan[d] && weekPlan[d][m.id];
+      if (!entry) return;
+      if (entry.type === 'custom' && entry.text) {
+        allMeals.push(t(d,d)+' '+t(m.id,m.id)+': '+entry.text);
+      } else {
+        const r = typeof entry === 'number' ? recipes.find(rec => rec.id === entry) : recipes.find(rec => rec.id === entry.id);
+        if (r) {
+          const rName = lang === 'en' && r.nameEn ? r.nameEn : r.name;
+          const ingr = (r.ingredients || []).join(', ');
+          allMeals.push(t(d,d)+' '+t(m.id,m.id)+': '+rName+' — suroviny: '+ingr);
+        }
+      }
+    });
+  });
+  if (!allMeals.length) { alert(t('Plánovač je prázdny.','Planner is empty.')); return; }
+  const members = (appSettings.family && appSettings.family.householdMembers) || 2;
+  const reply = await aiGenerate([{ role: 'user', content: 'Vytvor nákupný zoznam pre '+members+' člennú domácnosť na tento týždeň. Jedálniček:\n'+allMeals.join('\n')+'\n\nSpoj rovnaké položky, zoraď podľa kategórií (ovocie, zelenina, mliečne, mäso, pečivo, trvanlivé, ostatné). Ku každej položke uveď odhadované množstvo. Odpovedz v slovenčine.' }]);
+  if (reply) {
+    const old = document.getElementById('ai-modal');
+    if (old) old.remove();
+    const div = document.createElement('div');
+    div.id = 'ai-modal';
+    div.className = 'modal-overlay active';
+    div.style.cssText = 'z-index:2000;';
+    div.innerHTML = '<div class="modal" style="max-width:500px;max-height:80vh;overflow-y:auto;"><button class="modal-close" onclick="document.getElementById(\'ai-modal\').remove()">✕</button><h2>🛒 '+t('AI nákupný zoznam','AI shopping list')+'</h2><pre style="white-space:pre-wrap;font-size:.75rem;font-family:inherit;background:var(--bg);padding:.8rem;border-radius:8px;">'+esc(reply)+'</pre><button class="btn btn-primary" onclick="addAIShoppingItems()" style="width:100%;margin-top:.5rem;">📥 '+t('Pridať do nákupného zoznamu','Add to shopping list')+'</button></div>';
+    document.body.appendChild(div);
+    window._aiShoppingReply = reply;
+  }
+}
+
+function addAIShoppingItems() {
+  const text = window._aiShoppingReply || '';
+  if (!text) return;
+  const lines = text.split('\n');
+  let currentCat = 'other';
+  loadShopItems();
+  lines.forEach(line => {
+    const cleaned = line.replace(/^[•\-\*\s]+/, '').trim();
+    if (!cleaned) return;
+    if (cleaned.endsWith(':') && !cleaned.includes('—') && !cleaned.includes('-')) { currentCat = guessFoodCategory(cleaned.replace(':', '')); return; }
+    const parts = cleaned.split(/[—–-]/);
+    if (parts.length >= 2) {
+      const name = parts[0].trim();
+      const qty = parts.slice(1).join('—').trim();
+      const amountMatch = qty.match(/^[\d.,\/]+/);
+      const amount = amountMatch ? amountMatch[0] : '';
+      const unit = amount ? qty.replace(amount, '').trim().replace(/^[gmlkGMLKčČ\s]+/, '') : qty;
+      if (name && name.length > 1) {
+        shopItems.push({
+          id: generateShopId(),
+          name: name,
+          amount: amount,
+          unit: unit || '',
+          category: currentCat === 'other' ? guessFoodCategory(name) : currentCat,
+          checked: false,
+          source: 'manual',
+          note: '',
+          recipeId: ''
+        });
+      }
+    }
+  });
+  saveShopItems();
+  document.getElementById('ai-modal')?.remove();
+  switchTab('shopping');
+}
 
 
 /* ===== HEADER ===== */
@@ -1012,6 +1090,7 @@ body[data-tab="dashboard"] #app-header { display: none; }
     <button class="pa-btn" onclick="copyWeekPlan()">📋 <span data-lang="plannerCopy">Kopírovať</span></button>
     <button class="pa-btn" onclick="handleAIWeeklyPlan()" style="background:linear-gradient(135deg,var(--primary-light),var(--primary));color:#fff;border:none;">🤖 AI týždeň</button>
     <button class="pa-btn" onclick="aiFillEmptySlots()" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:#fff;border:none;">✨ AI doplniť</button>
+    <button class="pa-btn" onclick="aiGenerateShoppingList()" style="background:linear-gradient(135deg,#059669,#047857);color:#fff;border:none;">🛒 AI nákup</button>
   </div>
 </div>
 
@@ -2856,7 +2935,7 @@ function loadSettings() {
     homeWidgets: { weather: true, todayTasks: true, hydration: true, calories: true, quickRecipes: true },
     mealPlanner: { defaultServings: 4, showNutrition: true },
     notifications: { breakfastReminder: false, todayCookingReminder: false, shoppingReminder: false, hydrationReminder: false, childMealReminder: false, eveningPlanningReminder: false },
-    shopping: { storeMode: false, autoCategories: true },
+    shopping: { storeMode: false, autoCategories: true, aiShoppingList: false },
     quickAdd: { enabled: false },
     notifTimes: { breakfast: '08:00', whatCook: '10:00', shopping: '16:00', water: '12:00', kids: '07:30', evening: '20:00' },
     weather: { enabled: true, location: '', lat: null, lon: null },
@@ -3040,6 +3119,10 @@ function openSettings() {
       <div class="settings-row">
         <span class="sr-label"><span class="sr-icon">📦</span> ${t('Auto kategórie','Auto categories')}</span>
         <label class="toggle-switch"><input type="checkbox" ${s.shopping.autoCategories?'checked':''} onchange="s.shopping.autoCategories=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="settings-row">
+        <span class="sr-label"><span class="sr-icon">🤖</span> ${t('AI nákupný zoznam','AI shopping list')}</span>
+        <label class="toggle-switch"><input type="checkbox" ${s.shopping.aiShoppingList?'checked':''} onchange="s.shopping.aiShoppingList=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
       </div>
       <div class="settings-row">
         <span class="sr-label"><span class="sr-icon">➕</span> ${t('Rýchle pridanie','Quick add FAB')}</span>
