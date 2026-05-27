@@ -2282,25 +2282,20 @@ function saveSettings() {
   applySettings();
 }
 function applySettings() {
-  // Theme
-  if (appSettings.theme === 'dark') { document.body.classList.add('dark'); document.getElementById('dark-toggle').textContent = '☀️'; }
-  else { document.body.classList.remove('dark'); document.getElementById('dark-toggle').textContent = '🌙'; }
-  // Lang
+  try {
+    if (appSettings.theme === 'dark') { document.body.classList.add('dark'); document.getElementById('dark-toggle').textContent = '☀️'; }
+    else { document.body.classList.remove('dark'); document.getElementById('dark-toggle').textContent = '🌙'; }
+  } catch(e) {}
   let langChanged = false;
-  if (appSettings.lang !== lang) { lang = appSettings.lang; localStorage.setItem('lang', lang); applyLang(); langChanged = true; }
-  // Accent color
-  applyAccentColor(appSettings.accentColor);
-  // Text size & density via CSS classes
+  if (appSettings.lang !== lang) { lang = appSettings.lang; localStorage.setItem('lang', lang); try { applyLang(); } catch(e) {} langChanged = true; }
+  try { applyAccentColor(appSettings.accentColor); } catch(e) {}
   document.documentElement.dataset.textSize = appSettings.textSize;
   document.documentElement.dataset.uiDensity = appSettings.uiDensity;
-  // Shop mode
   document.body.classList.toggle('store-mode', appSettings.shopping.storeMode);
-  // Quick add floating button
   const fab = document.getElementById('fab-quick-add');
   if (fab) fab.style.display = appSettings.quickAdd.enabled ? '' : 'none';
-  // Re-render if language changed (dynamic content uses t() which depends on lang)
-  if (langChanged) { render(); showTipOfDay(); }
-  initNotifications();
+  if (langChanged) { try { render(); } catch(e) {} try { showTipOfDay(); } catch(e) {} }
+  try { initNotifications(); } catch(e) {}
 }
 
 function resetWidgetsToDefaults() {
@@ -3256,11 +3251,11 @@ function switchTab(tab) {
   const tasksContainer = document.getElementById('tasks-container');
   [dashboard, recipeContainer, plannerContainer, shoppingContainer, tasksContainer].forEach(el => { if (el) el.style.display = 'none'; });
   document.getElementById('main-title').style.display = tab === 'dashboard' ? 'none' : '';
-  if (tab === 'dashboard') { dashboard.style.display = ''; renderDashboard(); }
-  if (tab === 'home') { recipeContainer.style.display = ''; render(); }
-  if (tab === 'shopping') { shoppingContainer.style.display = 'block'; renderShoppingList(); }
-  if (tab === 'planner') { plannerContainer.style.display = 'block'; renderPlanner(); }
-  if (tab === 'tasks') { tasksContainer.style.display = 'block'; renderTasks(); }
+  if (tab === 'dashboard' && dashboard) { dashboard.style.display = ''; try { renderDashboard(); } catch(e) {} }
+  if (tab === 'home' && recipeContainer) { recipeContainer.style.display = ''; try { render(); } catch(e) {} }
+  if (tab === 'shopping' && shoppingContainer) { shoppingContainer.style.display = 'block'; try { renderShoppingList(); } catch(e) {} }
+  if (tab === 'planner' && plannerContainer) { plannerContainer.style.display = 'block'; try { renderPlanner(); } catch(e) {} }
+  if (tab === 'tasks' && tasksContainer) { tasksContainer.style.display = 'block'; try { renderTasks(); } catch(e) {} }
 }
 
 // ======================== DASHBOARD ========================
@@ -3443,9 +3438,9 @@ function renderDashboard() {
     </div>`;
   }
 
-  document.getElementById('dash-content').innerHTML = html;
-  loadTasks();
-  renderTaskWidget();
+  try { document.getElementById('dash-content').innerHTML = html; } catch(e) {}
+  try { loadTasks(); } catch(e) {}
+  try { renderTaskWidget(); } catch(e) {}
 }
 
 function getTodayMealCount() {
@@ -4863,7 +4858,7 @@ document.getElementById('recipe-grid').addEventListener('click', function(e) {
     if (!isNaN(id)) viewRecipe(id);
   }
 });
-applyLang();
+try { applyLang(); } catch(e) {}
 document.body.dataset.tab = 'dashboard';
 switchTab('dashboard');
 
@@ -5051,14 +5046,14 @@ async function updateWeatherWidget() {
 }
 
 // Init notifications on load
-initNotifications();
+try { initNotifications(); } catch(e) {}
 
 // Init weather fetch when dashboard renders with weather enabled
 const _origRenderDashboard = renderDashboard;
 renderDashboard = function() {
-  _origRenderDashboard();
-  if (appSettings.homeWidgets.weather) {
-    setTimeout(() => updateWeatherWidget(), 500);
+  try { _origRenderDashboard(); } catch(e) {}
+  if (appSettings.homeWidgets && appSettings.homeWidgets.weather) {
+    try { setTimeout(() => updateWeatherWidget(), 500); } catch(e) {}
   }
 };
 
