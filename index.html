@@ -561,10 +561,6 @@ body[data-tab="dashboard"] #app-header { display: none; }
 .planner-hero-row { display: flex; align-items: center; justify-content: space-between; gap: .4rem; position: relative; z-index: 1; }
 .planner-week-title { font-size: .85rem; font-weight: 700; color: var(--text); white-space: nowrap; }
 .planner-week-title .wk-sub { font-size: .6rem; font-weight: 400; color: var(--text3); display: block; margin-top: .05rem; }
-.planner-nav-btns { display: flex; gap: .2rem; align-items: center; }
-.planner-nav-btn { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); color: var(--text2); font-size: .85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s var(--ease-out-expo); -webkit-tap-highlight-color: transparent; }
-.planner-nav-btn:active { transform: scale(.88); }
-.planner-nav-btn:hover { border-color: var(--primary-light); color: var(--primary); background: rgba(220,38,38,.06); }
 .planner-quick-row { display: flex; gap: .3rem; margin-top: .45rem; position: relative; z-index: 1; }
 .planner-quick-btn { flex: 1; padding: .4rem .3rem; border-radius: var(--radius-md); border: 1px solid var(--border); background: var(--surface); color: var(--text2); font-size: .65rem; font-weight: 600; cursor: pointer; text-align: center; transition: all .2s var(--ease-out-expo); -webkit-tap-highlight-color: transparent; }
 .planner-quick-btn:active { transform: scale(.95); }
@@ -729,10 +725,6 @@ body[data-tab="dashboard"] #app-header { display: none; }
       <div class="planner-week-title" id="planner-week-title">
         <span id="planner-week-range">25.5 – 31.5.2026</span>
         <span class="wk-sub" id="planner-week-sub">Tento týždeň</span>
-      </div>
-      <div class="planner-nav-btns">
-        <button class="planner-nav-btn" onclick="prevWeek()" aria-label="Predchádzajúci týždeň">◀</button>
-        <button class="planner-nav-btn" onclick="nextWeek()" aria-label="Nasledujúci týždeň">▶</button>
       </div>
     </div>
     <div class="planner-quick-row">
@@ -3086,20 +3078,6 @@ function renderPlanner() {
     <div class="ps-item"><div class="ps-val">${totalMeals > 0 ? Math.round(totalKcal/totalMeals) : 0}</div><div class="ps-label">${lang==='en'?'Avg/meal':'Priemer'}</div></div>`;
 }
 
-function prevWeek() {
-  plannerWeekOffset--;
-  const slider = document.getElementById('planner-week-grid');
-  slider.style.opacity = '.3'; slider.style.transform = 'translateX(-6px)';
-  renderPlanner();
-  requestAnimationFrame(() => { slider.style.opacity = '1'; slider.style.transform = 'translateX(0)'; });
-}
-function nextWeek() {
-  plannerWeekOffset++;
-  const slider = document.getElementById('planner-week-grid');
-  slider.style.opacity = '.3'; slider.style.transform = 'translateX(6px)';
-  renderPlanner();
-  requestAnimationFrame(() => { slider.style.opacity = '1'; slider.style.transform = 'translateX(0)'; });
-}
 function goToWeek(offset) {
   plannerWeekOffset = offset;
   const slider = document.getElementById('planner-week-grid');
