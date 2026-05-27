@@ -91,7 +91,7 @@ header h1 { font-size: 1.1rem; font-weight: 800; color: var(--text); letter-spac
 .hero-dismiss:active { transform: scale(.9); }
 
 /* ===== CONTAINER ===== */
-.container { max-width: 960px; margin: 0 auto; padding: 0 .85rem 5.5rem; }
+.container { max-width: 960px; margin: 0 auto; padding: 0 .85rem calc(5rem + env(safe-area-inset-bottom, 0px)); }
 
 /* ===== SEARCH + CONTROLS ===== */
 .controls-bar { position: sticky; top: 0; z-index: 50; background: var(--bg); padding: .35rem 0 .2rem; }
@@ -250,13 +250,13 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: rgba(22
 .cooking-progress-bar { height: 100%; background: linear-gradient(90deg, var(--primary-light), #f97316); border-radius: 3px; transition: width .4s var(--ease-smooth); }
 
 /* ===== BOTTOM NAV ===== */
-.bottom-nav { position: fixed; bottom: .65rem; left: .65rem; right: .65rem; z-index: 900; display: flex; justify-content: space-around; align-items: center; background: var(--nav-bg); backdrop-filter: blur(24px); border-radius: var(--radius-xl); padding: .35rem 0; border: 1px solid var(--border); box-shadow: 0 4px 32px rgba(0,0,0,.35), 0 1px 4px rgba(0,0,0,.15); max-width: 480px; margin: 0 auto; }
-.nav-item { display: flex; flex-direction: column; align-items: center; gap: .08rem; padding: .18rem .75rem; border: none; background: none; color: var(--text3); font-size: .52rem; cursor: pointer; transition: all .25s ease; -webkit-tap-highlight-color: transparent; position: relative; min-width: 55px; font-weight: 500; }
-.nav-item .nav-icon { font-size: 1.15rem; line-height: 1; transition: all .3s var(--ease-spring); }
-.nav-item .nav-label { font-size: .5rem; text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
-.nav-item.active { color: var(--primary-light); }
-.nav-item.active .nav-icon { transform: translateY(-3px); filter: drop-shadow(0 2px 6px rgba(220,38,38,.35)); }
-.nav-item:active { transform: scale(.85); }
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; z-index: 900; display: flex; justify-content: space-around; align-items: center; background: var(--nav-bg); backdrop-filter: blur(24px); padding: .5rem 0 calc(.5rem + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--border); box-shadow: 0 -2px 16px rgba(0,0,0,.2); }
+.nav-item { display: flex; flex-direction: column; align-items: center; gap: .15rem; padding: .35rem .6rem; border: none; background: none; color: var(--text3); font-size: .65rem; cursor: pointer; transition: all .2s ease; -webkit-tap-highlight-color: transparent; position: relative; min-width: 48px; font-weight: 500; border-radius: 12px; }
+.nav-item .nav-icon { font-size: 1.35rem; line-height: 1; transition: all .2s ease; }
+.nav-item .nav-label { font-size: .62rem; font-weight: 600; white-space: nowrap; }
+.nav-item.active { color: var(--primary-light); background: rgba(220,38,38,.08); }
+.nav-item.active .nav-icon { transform: translateY(-2px); filter: drop-shadow(0 2px 4px rgba(220,38,38,.25)); }
+.nav-item:active { transform: scale(.9); }
 
 /* ===== PLANNER ===== */
 .planner-container { display: none; padding-top: .3rem; }
@@ -359,9 +359,8 @@ body:not(.dark) .recipe-card .fav-btn.fav-active { background: linear-gradient(1
   .hero-content { min-height: 140px; padding: .9rem; }
   .hero-title { font-size: 1.02rem; }
   .controls-bar { padding: .25rem 0 .15rem; }
-  .container { padding: 0 .55rem 4.5rem; }
+  .container { padding: 0 .55rem calc(4.5rem + env(safe-area-inset-bottom, 0px)); }
   .modal { max-width: 100%; border-radius: var(--radius-xl) var(--radius-xl) 0 0; }
-  .bottom-nav { left: .45rem; right: .45rem; bottom: .45rem; border-radius: var(--radius-lg); }
   .nutrition-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (min-width: 701px) {
@@ -371,7 +370,7 @@ body:not(.dark) .recipe-card .fav-btn.fav-active { background: linear-gradient(1
   .recipe-grid { grid-template-columns: 1fr; gap: .55rem; }
   header { padding: .6rem .7rem .25rem; }
   header h1 { font-size: .92rem; }
-  .container { padding: 0 .45rem 4.5rem; }
+  .container { padding: 0 .45rem calc(4rem + env(safe-area-inset-bottom, 0px)); }
   .recipe-card-img { height: 140px; }
   .hero-card { min-height: 115px; }
   .hero-content { min-height: 115px; padding: .75rem; }
@@ -382,10 +381,9 @@ body:not(.dark) .recipe-card .fav-btn.fav-active { background: linear-gradient(1
   .form-row { flex-direction: column; gap: .4rem; }
   .nutrition-grid { grid-template-columns: repeat(2, 1fr); }
   .controls select { padding: .4rem .55rem .4rem .55rem; font-size: .7rem; }
-  .bottom-nav { padding: .28rem 0; gap: 0; }
   .nav-item { min-width: 42px; padding: .18rem .4rem; }
-  .nav-item .nav-icon { font-size: .95rem; }
-  .nav-item .nav-label { font-size: .48rem; }
+  .nav-item .nav-icon { font-size: 1rem; }
+  .nav-item .nav-label { font-size: .55rem; }
 }
 @media print {
   .controls, .controls-bar, .bottom-nav, .modal-overlay, .cooking-overlay, .btn, .header-actions, .topbar-btn, .hero-card { display: none !important; }
@@ -1549,7 +1547,10 @@ function saveWeekPlan() {
 })();
 
 // ======================== LANGUAGE ========================
-function t(key) { return (LANG[lang] && LANG[lang][key]) || LANG.sk[key] || key; }
+function t(key, enFallback) {
+  if (enFallback !== undefined) return appSettings.lang === 'en' ? enFallback : key;
+  return (LANG[lang] && LANG[lang][key]) || LANG.sk[key] || key;
+}
 
 function applyLang() {
   document.documentElement.lang = lang === 'en' ? 'en' : 'sk';
@@ -2258,7 +2259,7 @@ function loadSettings() {
     lang: localStorage.getItem('lang') || 'sk',
     accentColor: localStorage.getItem('accent') || '#dc2626',
     textSize: 'normal', uiDensity: 'normal',
-    homeWidgets: { weather: true, todayTasks: true, tipOfDay: true, hydration: true, calories: true, quickRecipes: true, familyMode: false, aiSuggestions: false },
+    homeWidgets: { weather: true, todayTasks: true, tipOfDay: true, hydration: true, calories: true, quickRecipes: true, familyMode: true, aiSuggestions: true },
     mealPlanner: { defaultServings: 4, autoShoppingList: false, showNutrition: true, preferHealthy: false, preferQuick: false, preferKidsMeals: false, preferCheap: false, preferHighProtein: false },
     notifications: { breakfastReminder: false, todayCookingReminder: false, shoppingReminder: false, hydrationReminder: false, childMealReminder: false, eveningPlanningReminder: false },
     family: { householdMembers: 2, childAge: 'none', allergies: '', forbiddenFoods: '', favoriteMeals: '' },
@@ -2299,8 +2300,13 @@ function applySettings() {
   if (fab) fab.style.display = appSettings.quickAdd.enabled ? '' : 'none';
   // Re-render if language changed (dynamic content uses t() which depends on lang)
   if (langChanged) { render(); showTipOfDay(); }
-  // Notification scheduler restarts when settings change
   initNotifications();
+}
+
+function resetWidgetsToDefaults() {
+  appSettings.homeWidgets = { weather: true, todayTasks: true, tipOfDay: true, hydration: true, calories: true, quickRecipes: true, familyMode: true, aiSuggestions: true };
+  saveSettings();
+  renderDashboard();
 }
 loadSettings();
 applySettings();
@@ -2593,8 +2599,6 @@ function calcPlanningStreak() {
 function closeSettings() {
   document.getElementById('settings-sheet').classList.remove('active');
 }
-function t(sk, en) { return appSettings.lang === 'en' ? en : sk; }
-$L=t;
 
 function toggleFav(id) {
   const r = recipes.find(rec => rec.id === id);
@@ -3426,6 +3430,16 @@ function renderDashboard() {
         <div style="font-size:2.5rem;margin-bottom:8px;">🧠</div>
         <div>${lang==='en'?'AI-powered meal suggestions are coming soon. The app will learn your preferences and suggest perfect meals.':'Jedálniček s umelou inteligenciou už čoskoro. Aplikácia sa naučí vaše preferencie a navrhne ideálne jedlá.'}</div>
       </div>
+    </div>`;
+  }
+
+  // Safe fallback: if no widgets rendered, show restore CTA
+  if (!html.trim()) {
+    html = `<div class="dash-section" style="text-align:center;padding:32px 20px;">
+      <div style="font-size:2.5rem;margin-bottom:8px;">🏠</div>
+      <div style="font-size:.95rem;font-weight:600;margin-bottom:4px;">${lang==='en'?'Home screen is empty':'Domovská obrazovka je prázdna'}</div>
+      <div style="font-size:.8rem;color:var(--text-muted, #888);margin-bottom:14px;">${lang==='en'?'Enable widgets in Settings.':'Povoľ widgety v Nastaveniach.'}</div>
+      <button class="btn btn-primary" onclick="resetWidgetsToDefaults()" style="font-size:.85rem;padding:10px 20px;">${lang==='en'?'🔄 Restore default widgets':'🔄 Obnoviť predvolené widgety'}</button>
     </div>`;
   }
 
@@ -4864,7 +4878,7 @@ render();
 showTipOfDay();
 
 // Background image fetch for Pexels – fetches any still-missing images
-batchFetchImages().then(() => { render(); });
+batchFetchImages().then(() => { render(); renderDashboard(); showTipOfDay(); });
 
 // Register service worker for PWA — auto-reload on update
 if ('serviceWorker' in navigator) {
