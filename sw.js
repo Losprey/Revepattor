@@ -1,4 +1,4 @@
-const CACHE = 'receptar-v3';
+const CACHE = 'receptar-v4';
 const STATIC = ['manifest.json'];
 
 self.addEventListener('install', e => {
