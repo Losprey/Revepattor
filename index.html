@@ -730,7 +730,6 @@ body[data-tab="dashboard"] #app-header { display: none; }
     <div class="planner-quick-row">
       <button class="planner-quick-btn" onclick="goToWeek(0)" id="qw-this"><span class="qb-icon">📅</span>Tento týždeň</button>
       <button class="planner-quick-btn" onclick="goToWeek(1)" id="qw-next"><span class="qb-icon">➡️</span>Budúci týždeň</button>
-      <button class="planner-quick-btn" onclick="goToWeek(0);switchTab('planner')" id="qw-today"><span class="qb-icon">📍</span>Dnes</button>
     </div>
   </div>
 
@@ -2981,7 +2980,6 @@ function renderPlanner() {
   document.querySelectorAll('.planner-quick-btn').forEach(b => b.classList.remove('active'));
   if (plannerWeekOffset === 0) document.getElementById('qw-this').classList.add('active');
   else if (plannerWeekOffset === 1) document.getElementById('qw-next').classList.add('active');
-  else document.getElementById('qw-today').classList.add('active');
 
   // Plan type switcher
   const pts = document.getElementById('plan-type-switch');
