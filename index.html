@@ -893,10 +893,6 @@ body[data-tab="dashboard"] #app-header { display: none; }
     <span class="nav-icon">🛒</span>
     <span class="nav-label" data-lang="navShopping">Nákup</span>
   </button>
-  <button class="nav-item" data-tab="favorites" onclick="switchTab('favorites')">
-    <span class="nav-icon">❤️</span>
-    <span class="nav-label" data-lang="navFavs">Obľúbené</span>
-  </button>
   <button class="nav-item" onclick="openSettings()">
     <span class="nav-icon">⚙️</span>
     <span class="nav-label" data-lang="navSettings">Nastavenia</span>
@@ -2572,7 +2568,7 @@ function switchTab(tab) {
   [dashboard, recipeContainer, plannerContainer, shoppingContainer].forEach(el => { if (el) el.style.display = 'none'; });
   document.getElementById('main-title').style.display = tab === 'dashboard' ? 'none' : '';
   if (tab === 'dashboard') { dashboard.style.display = ''; renderDashboard(); }
-  if (tab === 'home' || tab === 'favorites') { document.getElementById('filter-fav').checked = tab === 'favorites'; recipeContainer.style.display = ''; render(); }
+  if (tab === 'home') { recipeContainer.style.display = ''; render(); }
   if (tab === 'shopping') { shoppingContainer.style.display = 'block'; renderShoppingList(); }
   if (tab === 'planner') { plannerContainer.style.display = 'block'; renderPlanner(); }
 }
