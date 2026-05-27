@@ -2254,7 +2254,7 @@ function loadSettings() {
     lang: localStorage.getItem('lang') || 'sk',
     accentColor: localStorage.getItem('accent') || '#dc2626',
     textSize: 'normal', uiDensity: 'normal',
-    homeWidgets: { weather: true, todayTasks: true, tipOfDay: true, hydration: true, calories: true, quickRecipes: true },
+    homeWidgets: { weather: true, todayTasks: true, hydration: true, calories: true, quickRecipes: true },
     mealPlanner: { defaultServings: 4, showNutrition: true },
     notifications: { breakfastReminder: false, todayCookingReminder: false, shoppingReminder: false, hydrationReminder: false, childMealReminder: false, eveningPlanningReminder: false },
     shopping: { storeMode: false, autoCategories: true },
@@ -2293,7 +2293,7 @@ function applySettings() {
 }
 
 function resetWidgetsToDefaults() {
-  appSettings.homeWidgets = { weather: true, todayTasks: true, tipOfDay: true, hydration: true, calories: true, quickRecipes: true };
+  appSettings.homeWidgets = { weather: true, todayTasks: true, hydration: true, calories: true, quickRecipes: true };
   saveSettings();
   renderDashboard();
 }
@@ -2351,7 +2351,6 @@ function openSettings() {
   const widgets = [
     ['weather','🌤️',t('Počasie','Weather')],
     ['todayTasks','✅',t('Dnešné úlohy','Tasks')],
-    ['tipOfDay','💡',t('Tip dňa','Tip of the day')],
     ['hydration','💧',t('Pitný režim','Hydration')],
     ['calories','🔥',t('Kalórie','Calories')],
     ['quickRecipes','🍽️',t('Rýchle recepty','Quick recipes')],
@@ -3283,11 +3282,6 @@ function renderDashboard() {
       <span class="water-text">${lang === 'en' ? 'Don\'t forget to drink water! 🚰' : 'Nezabudni na pitný režim! 🚰'}</span>
       <button class="water-btn" onclick="dismissWaterReminder()">${lang === 'en' ? 'OK ✓' : 'OK ✓'}</button>
     </div>`;
-  }
-
-  // Tip of the day
-  if (w.tipOfDay) {
-    html += `<div id="dash-tip-placeholder"></div>`;
   }
 
   // Today's meals timeline
