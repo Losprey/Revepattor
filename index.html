@@ -3421,15 +3421,16 @@ document.getElementById('recipe-grid').addEventListener('click', function(e) {
 applyLang();
 document.body.dataset.tab = 'dashboard';
 switchTab('dashboard');
-render();
-showTipOfDay();
 
-// Assign preloaded images from build-time Pexels fetch (overrides placehold.co placeholders)
+// Assign preloaded images from build-time Pexels fetch BEFORE first render
 recipes.forEach(r => {
   if ((!r.image || r.image.includes('placehold.co')) && !r.imageData && PRELOADED_IMAGES[r.id]) {
     r.image = PRELOADED_IMAGES[r.id];
   }
 });
+
+render();
+showTipOfDay();
 
 // Background image fetch for Pexels – fetches any still-missing images
 batchFetchImages().then(() => { render(); });
