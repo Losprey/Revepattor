@@ -104,83 +104,55 @@ async function aiSimplifyRecipe(recipeId) {
     }
   }
 }
-}
 
-async function aiGenerateShoppingList() {
-  if (!appSettings.shopping.aiShoppingList) {
-    alert(t('AI nákupný zoznam je vypnutý. Zapni ho v Nastaveniach → Nákup.','AI shopping list is off. Enable in Settings → Shopping.'));
-    return;
-  }
-  const weekKey = currentWeekKey();
-  const weekPlan = getWeekPlan(weekKey);
-  const allMeals = [];
-  DAYS.forEach(d => {
-    MEALS.forEach(m => {
-      const entry = weekPlan[d] && weekPlan[d][m.id];
-      if (!entry) return;
-      if (entry.type === 'custom' && entry.text) {
-        allMeals.push(t(d,d)+' '+t(m.id,m.id)+': '+entry.text);
-      } else {
-        const r = typeof entry === 'number' ? recipes.find(rec => rec.id === entry) : recipes.find(rec => rec.id === entry.id);
-        if (r) {
-          const rName = lang === 'en' && r.nameEn ? r.nameEn : r.name;
-          const ingr = (r.ingredients || []).join(', ');
-          allMeals.push(t(d,d)+' '+t(m.id,m.id)+': '+rName+' — suroviny: '+ingr);
-        }
-      }
-    });
-  });
-  if (!allMeals.length) { alert(t('Plánovač je prázdny.','Planner is empty.')); return; }
-  const members = (appSettings.family && appSettings.family.householdMembers) || 2;
-  const reply = await aiGenerate([{ role: 'user', content: 'Vytvor nákupný zoznam pre '+members+' člennú domácnosť na tento týždeň. Jedálniček:\n'+allMeals.join('\n')+'\n\nSpoj rovnaké položky, zoraď podľa kategórií (ovocie, zelenina, mliečne, mäso, pečivo, trvanlivé, ostatné). Ku každej položke uveď odhadované množstvo. Odpovedz v slovenčine.' }]);
+async function aiEstimateNutrition(recipeId) {
+  const r = recipes.find(rec => rec.id === recipeId);
+  if (!r) return;
+  const name = lang === 'en' && r.nameEn ? r.nameEn : r.name;
+  const ingr = (lang === 'en' && r.ingredientsEn ? r.ingredientsEn : r.ingredients).join('\n');
+  const portions = r.portions || 4;
+  const reply = await aiGenerate([{ role: 'user', content: 'Odhadni nutričné hodnoty tohto receptu na JEDNU PORCIU ('+portions+' porcií celkovo). Recept: '+name+'\nIngrediencie:\n'+ingr+'\n\nOdpovedz IBA v tomto formáte (jedno číslo na riadok):\nkcal: [číslo]\nprotein: [číslo g]\nfat: [číslo g]\ncarbs: [číslo g]\n\nNič iné nepíš.' }]);
   if (reply) {
-    const old = document.getElementById('ai-modal');
-    if (old) old.remove();
-    const div = document.createElement('div');
-    div.id = 'ai-modal';
-    div.className = 'modal-overlay active';
-    div.style.cssText = 'z-index:2000;';
-    div.innerHTML = '<div class="modal" style="max-width:500px;max-height:80vh;overflow-y:auto;"><button class="modal-close" onclick="document.getElementById(\'ai-modal\').remove()">✕</button><h2>🛒 '+t('AI nákupný zoznam','AI shopping list')+'</h2><pre style="white-space:pre-wrap;font-size:.75rem;font-family:inherit;background:var(--bg);padding:.8rem;border-radius:8px;">'+esc(reply)+'</pre><button class="btn btn-primary" onclick="addAIShoppingItems()" style="width:100%;margin-top:.5rem;">📥 '+t('Pridať do nákupného zoznamu','Add to shopping list')+'</button></div>';
-    document.body.appendChild(div);
-    window._aiShoppingReply = reply;
+    const kcal = parseInt((reply.match(/kcal[:\s]*(\d+)/i) || [])[1]) || 0;
+    const protein = parseInt((reply.match(/protein[:\s]*(\d+)/i) || [])[1]) || 0;
+    const fat = parseInt((reply.match(/fat[:\s]*(\d+)/i) || [])[1]) || 0;
+    const carbs = parseInt((reply.match(/carbs[:\s]*(\d+)/i) || [])[1]) || 0;
+    if (kcal > 0) {
+      r.nutrition = { kcal, protein, fat, carbs };
+      r.portions = portions;
+      saveRecipes();
+      viewRecipe(recipeId);
+    }
   }
 }
 
-function addAIShoppingItems() {
-  const text = window._aiShoppingReply || '';
-  if (!text) return;
-  const lines = text.split('\n');
-  let currentCat = 'other';
-  loadShopItems();
-  lines.forEach(line => {
-    const cleaned = line.replace(/^[•\-\*\s]+/, '').trim();
-    if (!cleaned) return;
-    if (cleaned.endsWith(':') && !cleaned.includes('—') && !cleaned.includes('-')) { currentCat = guessFoodCategory(cleaned.replace(':', '')); return; }
-    const parts = cleaned.split(/[—–-]/);
-    if (parts.length >= 2) {
-      const name = parts[0].trim();
-      const qty = parts.slice(1).join('—').trim();
-      const amountMatch = qty.match(/^[\d.,\/]+/);
-      const amount = amountMatch ? amountMatch[0] : '';
-      const unit = amount ? qty.replace(amount, '').trim().replace(/^[gmlkGMLKčČ\s]+/, '') : qty;
-      if (name && name.length > 1) {
-        shopItems.push({
-          id: generateShopId(),
-          name: name,
-          amount: amount,
-          unit: unit || '',
-          category: currentCat === 'other' ? guessFoodCategory(name) : currentCat,
-          checked: false,
-          source: 'manual',
-          note: '',
-          recipeId: ''
-        });
+async function aiBatchNutrition() {
+  if (!confirm(t('Aktualizovať nutričné hodnoty pre VŠETKY recepty cez AI? Môže to chvíľu trvať.','Update nutrition for ALL recipes via AI? This may take a while.'))) return;
+  const needUpdate = recipes.filter(r => !r.nutrition || !r.nutrition.kcal || r.nutrition.kcal < 10);
+  if (!needUpdate.length) { alert(t('Všetky recepty už majú nutričné hodnoty.','All recipes already have nutrition data.')); return; }
+  let count = 0;
+  const total = needUpdate.length;
+  for (const r of needUpdate) {
+    const name = lang === 'en' && r.nameEn ? r.nameEn : r.name;
+    const ingr = (lang === 'en' && r.ingredientsEn ? r.ingredientsEn : r.ingredients).join('\n');
+    const portions = r.portions || 4;
+    const reply = await aiGenerate([{ role: 'user', content: 'Odhadni nutričné hodnoty tohto receptu na JEDNU PORCIU ('+portions+' porcií celkovo). Recept: '+name+'\nIngrediencie:\n'+ingr+'\n\nOdpovedz IBA v tomto formáte:\nkcal: [číslo]\nprotein: [číslo g]\nfat: [číslo g]\ncarbs: [číslo g]' }]);
+    if (reply) {
+      const kcal = parseInt((reply.match(/kcal[:\s]*(\d+)/i) || [])[1]) || 0;
+      const protein = parseInt((reply.match(/protein[:\s]*(\d+)/i) || [])[1]) || 0;
+      const fat = parseInt((reply.match(/fat[:\s]*(\d+)/i) || [])[1]) || 0;
+      const carbs = parseInt((reply.match(/carbs[:\s]*(\d+)/i) || [])[1]) || 0;
+      if (kcal > 0) {
+        r.nutrition = { kcal, protein, fat, carbs };
+        r.portions = portions;
+        count++;
       }
     }
-  });
-  saveShopItems();
-  document.getElementById('ai-modal')?.remove();
-  switchTab('shopping');
+    if (count % 5 === 0) saveRecipes();
+  }
+  saveRecipes();
+  render();
+  alert(t('Hotovo! Aktualizovaných '+count+' z '+total+' receptov.','Done! Updated '+count+' of '+total+' recipes.'));
 }
 
 
@@ -1287,6 +1259,7 @@ body[data-tab="dashboard"] #app-header { display: none; }
       <button class="btn btn-secondary" onclick="aiAdjustPortions(viewingId)" style="font-size:.7rem;" title="Upraviť počet porcií">🍽️ Porcie</button>
       <button class="btn btn-secondary" onclick="aiSimplifyRecipe(viewingId)" style="font-size:.7rem;" title="Zjednodušiť postup">📝 Skrátiť</button>
       <button class="btn btn-secondary" onclick="aiSubstituteIngredient()" style="font-size:.7rem;" title="Čím nahradiť surovinu">🔄 Náhrada</button>
+      <button class="btn btn-secondary" onclick="aiEstimateNutrition(viewingId)" style="font-size:.7rem;" title="Odhadnúť nutričné hodnoty cez AI">🔥 Nutri</button>
       <button class="btn btn-danger" onclick="deleteCurrent()">🗑</button>
       <button class="btn btn-secondary" onclick="closeModal('detail-modal')" data-lang="close">Zavrieť</button>
     </div>
@@ -3174,6 +3147,10 @@ function openSettings() {
       </div>
       <div class="settings-row" onclick="if(confirm('${t('Naozaj obnoviť demo recepty? Všetky existujúce sa stratia.','Reset to demo recipes? All existing recipes will be lost.')}')){resetRecipes();closeSettings()}">
         <span class="sr-label"><span class="sr-icon">🔄</span> ${t('Obnoviť demo','Reset demo')}</span>
+        <span class="sr-value"><span class="sr-arrow">›</span></span>
+      </div>
+      <div class="settings-row" onclick="aiBatchNutrition()">
+        <span class="sr-label"><span class="sr-icon">🤖</span> ${t('AI nutričné hodnoty','AI nutrition estimates')}</span>
         <span class="sr-value"><span class="sr-arrow">›</span></span>
       </div>
       <div class="settings-row" onclick="if(confirm('${t('Naozaj vymazať všetky dáta? Táto akcia je nenávratná.','Delete all data? This cannot be undone.')}')){deleteAllData()}">
