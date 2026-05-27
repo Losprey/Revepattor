@@ -2266,7 +2266,7 @@ function loadSettings() {
     shopping: { storeMode: false, autoCategories: true },
     quickAdd: { enabled: false },
     notifTimes: { breakfast: '08:00', whatCook: '10:00', shopping: '16:00', water: '12:00', kids: '07:30', evening: '20:00' },
-    weather: { enabled: false, location: '', lat: null, lon: null },
+    weather: { enabled: true, location: '', lat: null, lon: null },
   };
   // Deep merge defaults
   function deepMerge(obj, def) {
@@ -2374,14 +2374,11 @@ function openSettings() {
         </div>`
       ).join('')}
       <div style="font-size:.65rem;font-weight:600;color:var(--text3);margin:.6rem 0 .2rem;text-transform:uppercase;letter-spacing:.05em;">🌤️ ${t('Počasie','Weather')}</div>
-      <div class="settings-row">
-        <span class="sr-label"><span class="sr-icon">🌤️</span> ${t('Zobraziť počasie','Show weather')}</span>
-        <label class="toggle-switch"><input type="checkbox" ${s.weather.enabled?'checked':''} onchange="s.weather.enabled=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
-      </div>
       <div class="settings-row" onclick="editText('weather.location','Mesto')">
         <span class="sr-label"><span class="sr-icon">📍</span> ${t('Mesto','City')}</span>
         <span class="sr-value">${s.weather.location||t('Nenastavené','Not set')} <span class="sr-arrow">›</span></span>
       </div>
+      <div style="font-size:.6rem;color:var(--text3);padding:.2rem 0 0;">${t('Widget Počasie musí byť zapnutý vyššie.','Weather widget must be enabled above.')}</div>
       <div style="font-size:.65rem;font-weight:600;color:var(--text3);margin:.6rem 0 .2rem;text-transform:uppercase;letter-spacing:.05em;">👨‍👩‍👧 ${t('Rodina','Family')}</div>
       <div class="settings-row" onclick="promptNumber('family.householdMembers',1,10)">
         <span class="sr-label"><span class="sr-icon">👥</span> ${t('Počet členov domácnosti','Household members')}</span>
@@ -3280,17 +3277,15 @@ function renderDashboard() {
 
   // Weather widget
   if (w.weather) {
-    if (appSettings.weather.enabled && appSettings.weather.location) {
+    if (appSettings.weather.location) {
       html += `<div class="dash-section"><div class="weather-widget" id="weather-widget" onclick="editText('weather.location','${t('Mesto','City')}')">
         <span class="weather-icon">🌤️</span>
-        <span class="weather-info"><strong>${esc(appSettings.weather.location)}</strong><span class="weather-temp">${t('Počasie nie je pripojené','Weather not connected')}</span></span>
-        <span class="weather-cta">${t('Nastaviť','Configure')} ›</span>
+        <span class="weather-info"><strong>${esc(appSettings.weather.location)}</strong><span class="weather-temp">${t('Načítavam...','Loading...')}</span></span>
       </div></div>`;
     } else {
       html += `<div class="dash-section"><div class="weather-widget weather-fallback" id="weather-widget" onclick="editText('weather.location','${t('Mesto','City')}')">
         <span class="weather-icon">🌤️</span>
-        <span class="weather-info"><strong>${t('Počasie','Weather')}</strong><span class="weather-temp">${t('Zadaj mesto pre predpoveď','Enter city for forecast')}</span></span>
-        <span class="weather-cta">${t('Nastaviť','Set')} ›</span>
+        <span class="weather-info"><strong>${t('Počasie','Weather')}</strong><span class="weather-temp">${t('Zadaj mesto','Enter city')}</span></span>
       </div></div>`;
     }
   }
