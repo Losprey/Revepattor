@@ -872,6 +872,7 @@ body[data-tab="dashboard"] #app-header { display: none; }
       <div class="dash-date" id="dash-date"></div>
       <div class="dash-message" id="dash-message">Vitaj späť!</div>
       <div class="dash-message-sub" id="dash-message-sub"></div>
+      <button id="dash-ai-tip-btn" onclick="aiDailyTip()" style="margin-top:.4rem;padding:.3rem .7rem;border-radius:99px;border:1px solid var(--primary-light);background:rgba(220,38,38,.1);color:var(--primary-light);font-size:.65rem;font-weight:600;cursor:pointer;transition:all .2s;">🤖 AI tip dňa</button>
       <div class="dash-stats-row" id="dash-stats-row"></div>
     </div>
   </div>
@@ -906,6 +907,7 @@ body[data-tab="dashboard"] #app-header { display: none; }
         <option>Hlavné jedlá</option><option>Polievky</option><option>Šaláty</option><option>Dezerty</option><option>Pečivo</option><option>Nápoje</option><option>Predjedlá</option><option>Raňajky</option><option>Prílohy</option><option>Detské</option>
       </select>
       <button class="btn btn-primary" onclick="openFormModal()" data-lang="btnAdd">➕</button>
+      <button class="btn" onclick="aiIngredientSuggest()" style="background:linear-gradient(135deg,var(--primary-light),var(--primary));color:#fff;border:none;padding:.35rem .55rem;border-radius:var(--radius-sm);font-size:.7rem;font-weight:600;cursor:pointer;" title="AI návrh z vašich surovín">🤖 Čo uvariť?</button>
     </div>
     <div class="controls-sub">
       <select id="sort-by" onchange="render()" style="padding:.3rem .5rem;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.72rem;background:var(--input-bg);color:var(--text);">
@@ -965,6 +967,7 @@ body[data-tab="dashboard"] #app-header { display: none; }
     <button class="pa-btn" onclick="switchTab('shopping')">🛒 <span data-lang="plannerShopping">Nákupný zoznam</span></button>
     <button class="pa-btn" onclick="copyWeekPlan()">📋 <span data-lang="plannerCopy">Kopírovať</span></button>
     <button class="pa-btn" onclick="handleAIWeeklyPlan()" style="background:linear-gradient(135deg,var(--primary-light),var(--primary));color:#fff;border:none;">🤖 AI týždeň</button>
+    <button class="pa-btn" onclick="aiFillEmptySlots()" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:#fff;border:none;">✨ AI doplniť</button>
   </div>
 </div>
 
@@ -1687,6 +1690,67 @@ function parseAndFillAIPlan() {
   saveWeekPlan();
   renderPlanner();
   renderDashboard();
+}
+
+async function aiIngredientSuggest() {
+  const ingr = prompt(lang==='en'?'What ingredients do you have? (comma separated)':'Aké suroviny máš doma? (oddeľ čiarkou)', '');
+  if (!ingr) return;
+  const prompt = 'Mám tieto suroviny: '+ingr+'. Navrhni 3 recepty ktoré z nich môžem uvariť. Pre každý uveď: názov, čas prípravy, postup v 3 bodoch. Odpovedaj v slovenčine.';
+  const reply = await aiGenerate([{ role: 'user', content: prompt }]);
+  if (reply) {
+    const old = document.getElementById('ai-modal');
+    if (old) old.remove();
+    const div = document.createElement('div');
+    div.id = 'ai-modal';
+    div.className = 'modal-overlay active';
+    div.style.cssText = 'z-index:2000;';
+    div.innerHTML = '<div class="modal" style="max-width:500px;max-height:80vh;overflow-y:auto;"><button class="modal-close" onclick="document.getElementById(\'ai-modal\').remove()">✕</button><h2>🤖 '+t('Čo uvariť','What to cook')+'</h2><pre style="white-space:pre-wrap;font-size:.78rem;font-family:inherit;background:var(--bg);padding:.8rem;border-radius:8px;">'+esc(reply)+'</pre></div>';
+    document.body.appendChild(div);
+  }
+}
+
+async function aiDailyTip() {
+  const season = ['jar','jar','jar','leto','leto','leto','leto','leto','jeseň','jeseň','jeseň','zima'][new Date().getMonth()];
+  const reply = await aiGenerate([{ role: 'user', content: 'Daj mi jeden krátky tip na dnešné varenie. Sezóna: '+season+'. Buď vtipný, originálny, max 2 vety. Odpovedaj v slovenčine.' }]);
+  if (reply) {
+    document.getElementById('dash-message').textContent = reply;
+    document.getElementById('dash-message-sub').textContent = '🤖 Vygenerované AI';
+  }
+}
+
+async function aiSuggestForSlot(dayKey, slotKey) {
+  const existing = getWeekPlan(currentWeekKey());
+  const dayPlan = existing[dayKey] || {};
+  const slotEntry = dayPlan[slotKey];
+  if (slotEntry) return;
+  const mealsInDay = Object.values(dayPlan).filter(Boolean).map(e => typeof e === 'object' ? (e.text || '') : '').filter(Boolean).join(', ');
+  const prompt = 'Navrhni jedno '+t(slotKey,slotKey)+' na '+t(dayKey,dayKey)+'. '+(mealsInDay?'Ostatné jedlá v tento deň: '+mealsInDay+'. ':'')+'Odpoveď len názov jedla (max 5 slov). Odpovedaj v slovenčine.';
+  const reply = await aiGenerate([{ role: 'user', content: prompt }]);
+  if (reply) {
+    const weekPlan = getWeekPlan(currentWeekKey());
+    if (!weekPlan[dayKey]) weekPlan[dayKey] = {};
+    weekPlan[dayKey][slotKey] = { type: 'custom', text: reply.trim() };
+    saveWeekPlan();
+    renderPlanner();
+    renderDashboard();
+  }
+}
+
+async function aiFillEmptySlots() {
+  const weekKey = currentWeekKey();
+  const weekPlan = getWeekPlan(weekKey);
+  const emptySlots = [];
+  DAYS.forEach(d => {
+    MEALS.forEach(m => {
+      if (!weekPlan[d] || !weekPlan[d][m.id]) emptySlots.push({ day: d, slot: m.id });
+    });
+  });
+  if (!emptySlots.length) { alert(t('Všetky sloty sú vyplnené.','All slots are filled.')); return; }
+  // Fill up to 10 empty slots
+  const toFill = emptySlots.slice(0, 10);
+  for (const { day, slot } of toFill) {
+    await aiSuggestForSlot(day, slot);
+  }
 }
 
  let lang = localStorage.getItem('lang') || 'sk';
