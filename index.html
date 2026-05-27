@@ -273,6 +273,7 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: rgba(22
 .planner-slot { display: flex; align-items: center; gap: .2rem; padding: .2rem .3rem; border-radius: var(--radius-sm); border: 1px dashed var(--border); font-size: .65rem; cursor: pointer; transition: all .15s ease; color: var(--text3); background: var(--input-bg); min-height: 1.6rem; }
 .planner-slot:hover { border-color: var(--primary-light); color: var(--text); }
 .planner-slot.filled { border-style: solid; border-color: var(--border); color: var(--text); background: var(--surface); border-left: 3px solid var(--primary-light); padding-left: .2rem; }
+.planner-slot.filled.custom { border-left-color: var(--text3); border-style: dashed; }
 .planner-slot.filled .slot-icon { flex-shrink: 0; font-size: .6rem; }
 .planner-slot.filled .slot-name { flex: 1; font-weight: 600; font-size: .65rem; line-height: 1.15; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .planner-slot .slot-remove { display: none; font-size: .6rem; cursor: pointer; opacity: .4; padding: .1rem .15rem; border-radius: 4px; }
@@ -704,7 +705,7 @@ const LANG = {
     btnImportUrl:'Import z URL', importUrlTitle:'🌐 Importovať recept z URL', importUrlHint:'Vlož odkaz na recept (varecha.pravda.sk) – appka ho stiahne a predvyplní formulár.', importUrlDo:'📥 Importovať', importUrlOk:'✅ Recept načítaný! Skontroluj a ulož.', importUrlFail:'❌ Nepodarilo sa načítať recept. Skús iný odkaz.', importUrlBad:'❌ Nenašiel sa žiadny recept na tejto URL. Skús iný odkaz.',
     moreLabelTools: 'NÁSTROJE', moreLabelData: 'DÁTA', moreLabelWeb: 'WEB',
     btnExport: 'Export', btnImport: 'Import',
-    navPlanner: 'Plánovač', plannerTitle: '📅 Plánovač jedál', plannerClear: '🗑', plannerToday: 'dnes',
+    navPlanner: 'Plánovač', plannerTitle: '📅 Plánovač jedál', plannerClear: '🗑', plannerToday: 'dnes', plannerCustom: '✍️ Napíš vlastné jedlo...',
     plannerShopping: '🛒 Nákupný zoznam', plannerCopy: '📋 Kopírovať',
     plannerPick: 'Vybrať recept', plannerEmpty: '+ pridať',
     plannerEmptyList: 'Zatiaľ žiadne recepty v pláne.',
@@ -752,7 +753,7 @@ const LANG = {
     btnImportUrl:'Import from URL', importUrlTitle:'🌐 Import recipe from URL', importUrlHint:'Paste a recipe link (varecha.pravda.sk) – the app will fetch and prefill the form.', importUrlDo:'📥 Import', importUrlOk:'✅ Recipe loaded! Check and save.', importUrlFail:'❌ Failed to load recipe. Try a different link.', importUrlBad:'❌ No recipe found at this URL. Try another link.',
     moreLabelTools: 'TOOLS', moreLabelData: 'DATA', moreLabelWeb: 'WEB',
     btnExport: 'Export', btnImport: 'Import',
-    navPlanner: 'Planner', plannerTitle: '📅 Meal Planner', plannerClear: '🗑', plannerToday: 'today',
+    navPlanner: 'Planner', plannerTitle: '📅 Meal Planner', plannerClear: '🗑', plannerToday: 'today', plannerCustom: '✍️ Type custom meal...',
     plannerShopping: '🛒 Shopping List', plannerCopy: '📋 Copy',
     plannerPick: 'Pick a recipe', plannerEmpty: '+ add',
     plannerEmptyList: 'No recipes in the plan yet.',
@@ -1797,10 +1798,12 @@ function renderPlanner() {
         <span class="day-count">${filled}/${totalSlots}</span>
       </div>
       <div class="planner-slots">${MEALS.map(m => {
-        const recipe = day[m.id] ? recipes.find(r => r.id === day[m.id]) : null;
-        const name = recipe ? (lang === 'en' && recipe.nameEn ? recipe.nameEn : recipe.name) : '';
-        return `<div class="planner-slot${recipe ? ' filled' : ''}" onclick="pickRecipe('${d}','${m.id}')">
-          ${recipe
+        const entry = day[m.id];
+        const r = getSlotRecipe(entry);
+        const name = getSlotName(entry);
+        const isCustom = entry && entry.type === 'custom';
+        return `<div class="planner-slot${r || isCustom ? ' filled' : ''}${isCustom ? ' custom' : ''}" onclick="pickRecipe('${d}','${m.id}')">
+          ${r || isCustom
             ? `<span class="slot-icon">${m.icon}</span><span class="slot-name">${esc(name)}</span><span class="slot-remove" onclick="event.stopPropagation();removeSlot('${d}','${m.id}')">✕</span>`
             : `<span class="slot-icon">${m.icon}</span><span data-lang="plannerEmpty" style="opacity:.6">+ pridať</span>`}
         </div>`;
@@ -1817,6 +1820,14 @@ function resetWeek() { plannerWeekOffset = 0; renderPlanner(); }
 function pickRecipe(day, slot) {
   const el = document.getElementById('planner-picker') || createPickerModal();
   const list = document.getElementById('picker-recipes');
+  const customInput = document.getElementById('picker-custom');
+  customInput.placeholder = '✍️ ' + (lang==='en' ? 'Type custom meal...' : 'Napíš vlastné jedlo...');
+  // Pre-fill custom input if slot has custom text
+  const weekKey = currentWeekKey();
+  const weekPlan = getWeekPlan(weekKey);
+  const cur = weekPlan[day] && weekPlan[day][slot];
+  customInput.value = (cur && cur.type === 'custom') ? cur.text : '';
+  customInput.focus();
   list.innerHTML = recipes.map(r => {
     const name = lang === 'en' && r.nameEn ? r.nameEn : r.name;
     return `<div class="picker-item" onclick="selectRecipe('${day}','${slot}',${r.id});closeModal('planner-picker')"><span>${esc(name)}</span><span class="pick-cat">📂 ${esc(r.category)}</span></div>`;
@@ -1825,6 +1836,12 @@ function pickRecipe(day, slot) {
   document.getElementById('picker-search').oninput = function() {
     const q = norm(this.value);
     list.querySelectorAll('.picker-item').forEach(el => { el.style.display = norm(el.textContent).includes(q) ? '' : 'none'; });
+  };
+  customInput.onkeydown = function(e) {
+    if (e.key === 'Enter' && this.value.trim()) {
+      selectCustomMeal(day, slot, this.value.trim());
+      closeModal('planner-picker');
+    }
   };
   openModal('planner-picker');
 }
@@ -1835,6 +1852,7 @@ function createPickerModal() {
   div.id = 'planner-picker';
   div.innerHTML = `<div class="modal"><button class="modal-close" onclick="closeModal('planner-picker')">✕</button>
     <h3 style="font-size:.95rem;margin-bottom:.4rem;" data-lang="plannerPick">Vybrať recept</h3>
+    <input id="picker-custom" placeholder="✍️" style="width:100%;padding:.5rem .6rem;border:1px dashed var(--border);border-radius:var(--radius-sm);font-size:.82rem;background:var(--input-bg);color:var(--text);margin-bottom:.35rem;box-sizing:border-box;">
     <input class="picker-search" id="picker-search" placeholder="🔍 ${t('searchPlaceholder')}">
     <div class="picker-recipes" id="picker-recipes"></div></div>`;
   document.body.appendChild(div);
@@ -1845,9 +1863,39 @@ function selectRecipe(day, slot, id) {
   const weekKey = currentWeekKey();
   const weekPlan = getWeekPlan(weekKey);
   if (!weekPlan[day]) weekPlan[day] = {};
-  weekPlan[day][slot] = id;
+  weekPlan[day][slot] = { type: 'recipe', id };
   saveWeekPlan();
   renderPlanner();
+}
+
+function selectCustomMeal(day, slot, text) {
+  const weekKey = currentWeekKey();
+  const weekPlan = getWeekPlan(weekKey);
+  if (!weekPlan[day]) weekPlan[day] = {};
+  weekPlan[day][slot] = { type: 'custom', text };
+  saveWeekPlan();
+  renderPlanner();
+}
+
+function getSlotRecipe(entry) {
+  if (!entry) return null;
+  if (typeof entry === 'number') return recipes.find(r => r.id === entry);
+  if (entry.type === 'recipe') return recipes.find(r => r.id === entry.id);
+  return null;
+}
+
+function getSlotName(entry) {
+  if (!entry) return '';
+  if (typeof entry === 'number') {
+    const r = recipes.find(rec => rec.id === entry);
+    return r ? (lang === 'en' && r.nameEn ? r.nameEn : r.name) : '';
+  }
+  if (entry.type === 'recipe') {
+    const r = recipes.find(rec => rec.id === entry.id);
+    return r ? (lang === 'en' && r.nameEn ? r.nameEn : r.name) : '';
+  }
+  if (entry.type === 'custom') return entry.text;
+  return '';
 }
 
 function removeSlot(day, slot) {
@@ -1874,8 +1922,10 @@ function renderShoppingList() {
   const weekPlan = getWeekPlan(weekKey);
   DAYS.forEach(d => {
     const day = weekPlan[d] || {};
-    Object.values(day).filter(Boolean).forEach(id => {
-      const r = recipes.find(rec => rec.id === id);
+    Object.values(day).filter(Boolean).forEach(entry => {
+      let r = null;
+      if (typeof entry === 'number') r = recipes.find(rec => rec.id === entry);
+      else if (entry.type === 'recipe') r = recipes.find(rec => rec.id === entry.id);
       if (r) {
         const ingr = lang === 'en' && r.ingredientsEn ? r.ingredientsEn : r.ingredients;
         ingr.forEach(i => {
