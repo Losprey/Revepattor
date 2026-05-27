@@ -847,7 +847,7 @@ const DEFAULT_RECIPES = [
   {id:89,name:'Zelené smoothie',nameEn:'Green smoothie',category:'Detské',time:5,image:'https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Zelen%C3%A9%20smoothie',imageData:'',ingredients:['1 banán','hrsť špenátu','1 jablko','200ml mlieka'],ingredientsEn:['1 banana','spinach','1 apple','200ml milk'],steps:['Všetko rozmixujte dohladka.'],stepsEn:['Blend until smooth.'],tags:['deti-1','nápoj','zdravé'],tagsEn:['baby-1y','drink','healthy'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:160,protein:4,fat:2,carbs:32}},
 ];
 
-let recipes = JSON.parse(localStorage.getItem('recipes') || 'null') || DEFAULT_RECIPES.map(r => ({...r}));
+let recipes = JSON.parse(localStorage.getItem('recipes') || 'null') || JSON.parse(JSON.stringify(DEFAULT_RECIPES));
 // Migrate: add allergens/difficulty if missing
 recipes = recipes.map(r => ({
   ...r,
@@ -873,7 +873,7 @@ function applyLang() {
   document.querySelectorAll('[data-lang]').forEach(el => {
     const key = el.dataset.lang;
     if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-      if (el.placeholder) el.placeholder = t(key);
+      if ('placeholder' in el) el.placeholder = t(key);
     } else {
       // preserve leading emoji/icons
       const txt = t(key);
@@ -937,6 +937,10 @@ function norm(s) {
   return (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 }
 
+function esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+function escAttr(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
 // ======================== RECIPES TAB ========================
 function render() {
   const grid = document.getElementById('recipe-grid');
@@ -979,24 +983,25 @@ function render() {
     const name = lang === 'en' && r.nameEn ? r.nameEn : r.name;
     const tags = lang === 'en' && r.tagsEn ? r.tagsEn : r.tags;
     const diff = r.difficulty || 1;
+    const san = esc(name), sanCat = esc(r.category), sanTime = esc(r.time);
     return `<div class="recipe-card" style="animation-delay:${Math.random()*.25}s" data-id="${r.id}">
       <button class="fav-btn ${r.favorite?'fav-active':''}" onclick="event.stopPropagation();toggleFav(${r.id})">${r.favorite ? '❤️' : '🤍'}</button>
       ${r.image || r.imageData
-        ? `<div class="recipe-card-img"><img src="${r.imageData || r.image}" alt="${name}" loading="lazy" style="width:100%;height:100%;object-fit:cover" onerror="this.outerHTML='<span style=\\'font-size:2.4rem\\'>🍽️</span>'"></div>`
+        ? `<div class="recipe-card-img"><img src="${escAttr(r.imageData || r.image)}" alt="${san}" loading="lazy" style="width:100%;height:100%;object-fit:cover" onerror="this.outerHTML='<span style=\\'font-size:2.4rem\\'>🍽️</span>'"></div>`
         : `<div class="recipe-card-img">🍽️</div>`}
       <div class="recipe-card-body">
-        <h3>${name}</h3>
+        <h3>${san}</h3>
         <div class="meta-line">
-          <span>📂 ${r.category}</span>
-          <span>⏱ ${r.time}</span>
-          ${r.nutrition ? `<span class="kcal-badge">🔥 ${r.nutrition.kcal||'?'}</span>` : ''}
+          <span>📂 ${sanCat}</span>
+          <span>⏱ ${sanTime}</span>
+          ${r.nutrition ? `<span class="kcal-badge">🔥 ${esc(r.nutrition.kcal||'?')}</span>` : ''}
         </div>
         ${r.rating > 0 ? `<div class="stars" style="margin-top:.1rem;">${'★'.repeat(Math.round(r.rating))}${'☆'.repeat(5-Math.round(r.rating))}</div>` : ''}
         <div style="display:flex;align-items:center;gap:.15rem;margin-top:.15rem;">
           ${[1,2,3].map(i => `<span class="difficulty-dot ${i<=diff?'filled':'empty'}"></span>`).join('')}
           <span style="font-size:.6rem;color:var(--text3);margin-left:.15rem;">Obtiažnosť</span>
         </div>
-        <div class="tags">${tags.map(t => `<span class="tag${t.startsWith('deti-')||t.startsWith('baby')?' baby-tag':''}${t==='vegan'||t==='vegetarian'?' vegan-tag':''}">${t}</span>`).join('')}</div>
+        <div class="tags">${tags.map(t => `<span class="tag${t.startsWith('deti-')||t.startsWith('baby')?' baby-tag':''}${t==='vegan'||t==='vegetarian'?' vegan-tag':''}">${esc(t)}</span>`).join('')}</div>
       </div>
     </div>`;
   }).join('');
@@ -1026,7 +1031,24 @@ function toggleFav(id) {
   if (!r) return;
   r.favorite = !r.favorite;
   saveToLS();
-  render();
+  const card = document.querySelector(`.recipe-card[data-id="${id}"]`);
+  if (card) {
+    const btn = card.querySelector('.fav-btn');
+    if (btn) {
+      btn.classList.toggle('fav-active', r.favorite);
+      btn.textContent = r.favorite ? '❤️' : '🤍';
+    }
+  }
+  const grid = document.getElementById('recipe-grid');
+  const ff = document.getElementById('filter-fav');
+  if (ff && ff.checked) {
+    if (!r.favorite) {
+      if (card) card.remove();
+      const remaining = grid.querySelectorAll('.recipe-card');
+      document.getElementById('recipe-count').textContent = remaining.length ? `(${remaining.length})` : '';
+      if (!remaining.length) grid.innerHTML = `<div class="empty-state"><h3>😕 ${t('noRecipes')}</h3><p>${t('noRecipesHint')}</p></div>`;
+    }
+  }
 }
 
 function updateFavFilter() {}
@@ -1129,19 +1151,20 @@ function viewRecipe(id) {
   const tgs = lang === 'en' && r.tagsEn ? r.tagsEn : r.tags;
   const n = r.nutrition;
   const el = document.getElementById('recipe-detail');
+  const san = esc(name), sanCat = esc(r.category), sanTime = esc(r.time);
   el.innerHTML = `
-    ${r.image || r.imageData ? `<img class="detail-img" src="${r.imageData||r.image}" onerror="this.outerHTML='<div class=\\'detail-img\\'>🍽️</div>'">` : `<div class="detail-img">🍽️</div>`}
+    ${r.image || r.imageData ? `<img class="detail-img" src="${escAttr(r.imageData||r.image)}" alt="${san}" onerror="this.outerHTML='<div class=\\'detail-img\\'>🍽️</div>'">` : `<div class="detail-img">🍽️</div>`}
     <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.4rem;">
-      <h2 style="font-size:1.05rem;flex:1;">${name}</h2>
+      <h2 style="font-size:1.05rem;flex:1;">${san}</h2>
       <div style="display:flex;align-items:center;gap:.3rem;flex-shrink:0;">
-        ${'●'.repeat(r.difficulty||1)}${'○'.repeat(3-(r.difficulty||1))}
-        <span style="font-size:.75rem;color:var(--text2);">⏱ ${r.time}</span>
+        ${'●'.repeat(r.difficulty||1)}${Math.max(0,3-(r.difficulty||1)) > 0 ? '○'.repeat(Math.max(0,3-(r.difficulty||1))) : ''}
+        <span style="font-size:.75rem;color:var(--text2);">⏱ ${sanTime}</span>
       </div>
     </div>
     <div class="detail-meta">
-      <span>📂 ${r.category}</span>
-      <span>🏷 ${tgs.join(', ')}</span>
-      ${(r.allergens||[]).length ? `<span>⚠️ ${(r.allergens||[]).join(', ')}</span>` : ''}
+      <span>📂 ${sanCat}</span>
+      <span>🏷 ${tgs.map(esc).join(', ')}</span>
+      ${(r.allergens||[]).length ? `<span>⚠️ ${r.allergens.map(esc).join(', ')}</span>` : ''}
     </div>
     <div style="display:flex;gap:.3rem;margin-bottom:.5rem;flex-wrap:wrap;">
       <button class="btn btn-secondary" onclick="addToCollectionPrompt(${id})" style="padding:.2rem .5rem;font-size:.75rem;">📁 + Kolekcia</button>
@@ -1151,15 +1174,15 @@ function viewRecipe(id) {
     <div class="detail-section">
       <div style="display:flex;align-items:center;justify-content:space-between;">
         <h3>⭐ ${t('formTitle') === 'New Recipe' ? 'Rating' : 'Hodnotenie'}</h3>
-        <div class="star-rating">${[1,2,3,4,5].map(i => `<span class="star ${i<=Math.round(r.rating)?'active':''}" onclick="setRating(${id},${i})">★</span>`).join('')}</div>
+        <div class="star-rating">${[1,2,3,4,5].map(i => `<span class="star ${i<=Math.round(r.rating)?'active':''}" tabindex="0" role="button" onclick="setRating(${id},${i})" onkeydown="if(event.key==='Enter'||event.key===' ')event.preventDefault(),setRating(${id},${i})">★</span>`).join('')}</div>
       </div>
     </div>
     ${n && (n.kcal||n.protein||n.fat||n.carbs) ? `<div class="detail-section"><h3>🥗 ${t('recipeNutri')}</h3>
       <div class="nutrition-grid">
-        <div class="nutrition-item"><div class="val">🔥 ${n.kcal||'?'}</div><div class="lbl">${t('kcal')}</div></div>
-        <div class="nutrition-item"><div class="val">💪 ${n.protein||'?'}g</div><div class="lbl">${t('protein')}</div></div>
-        <div class="nutrition-item"><div class="val">🧈 ${n.fat||'?'}g</div><div class="lbl">${t('fat')}</div></div>
-        <div class="nutrition-item"><div class="val">🍚 ${n.carbs||'?'}g</div><div class="lbl">${t('carbs')}</div></div>
+        <div class="nutrition-item"><div class="val">🔥 ${esc(n.kcal||'?')}</div><div class="lbl">${t('kcal')}</div></div>
+        <div class="nutrition-item"><div class="val">💪 ${esc(n.protein||'?')}g</div><div class="lbl">${t('protein')}</div></div>
+        <div class="nutrition-item"><div class="val">🧈 ${esc(n.fat||'?')}g</div><div class="lbl">${t('fat')}</div></div>
+        <div class="nutrition-item"><div class="val">🍚 ${esc(n.carbs||'?')}g</div><div class="lbl">${t('carbs')}</div></div>
       </div></div>` : ''}
     <div class="detail-section">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.3rem;">
@@ -1170,11 +1193,11 @@ function viewRecipe(id) {
           <button class="btn btn-secondary" onclick="changePortion(1)" style="padding:.1rem .45rem;font-size:.85rem;">+</button>
         </div>
       </div>
-      <ul id="ingredient-list" style="margin-top:.3rem;">${ingr.map(i=>`<li>${i}</li>`).join('')}</ul>
+      <ul id="ingredient-list" style="margin-top:.3rem;">${ingr.map(i=>`<li>${esc(i)}</li>`).join('')}</ul>
     </div>
-    <div class="detail-section"><h3>📝 ${t('formSteps')}</h3><ol>${stps.map(s=>`<li>${s}</li>`).join('')}</ol></div>
+    <div class="detail-section"><h3>📝 ${t('formSteps')}</h3><ol>${stps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol></div>
     <div class="detail-section"><h3>📓 ${t('formTitle')==='New Recipe'?'Notes':'Poznámky'}</h3>
-      <textarea id="recipe-notes" style="width:100%;padding:.45rem;border:1px solid var(--border);border-radius:6px;min-height:45px;font-family:inherit;font-size:.82rem;background:var(--input-bg);color:var(--text);" onchange="saveNotes(${id},this.value)">${(lang==='en'&&r.notesEn?r.notesEn:r.notes)||''}</textarea></div>
+      <textarea id="recipe-notes" style="width:100%;padding:.45rem;border:1px solid var(--border);border-radius:6px;min-height:45px;font-family:inherit;font-size:.82rem;background:var(--input-bg);color:var(--text);" onchange="saveNotes(${id},this.value)">${esc((lang==='en'&&r.notesEn?r.notesEn:r.notes)||'')}</textarea></div>
   `;
   openModal('detail-modal');
 }
@@ -1218,17 +1241,19 @@ function printRecipe() {
   const name = lang === 'en' && r.nameEn ? r.nameEn : r.name;
   const ingr = lang === 'en' && r.ingredientsEn ? r.ingredientsEn : r.ingredients;
   const stps = lang === 'en' && r.stepsEn ? r.stepsEn : r.steps;
+  const san = esc(name), sanCat = esc(r.category), sanTime = esc(r.time);
+  const kcalHtml = r.nutrition && r.nutrition.kcal ? ` | 🔥 ${esc(r.nutrition.kcal)} kcal` : '';
   const win = window.open('', '_blank');
-  win.document.write(`<!DOCTYPE html><html><head><title>${name}</title><style>
+  win.document.write(`<!DOCTYPE html><html><head><title>${san}</title><style>
     body{font-family:system-ui,sans-serif;padding:2rem;max-width:700px;margin:0 auto;color:#1e293b;}
     h1{font-size:1.8rem;} .meta{color:#64748b;} h2{border-bottom:2px solid #fef3c7;padding-bottom:.3rem;margin-top:1.5rem;}
     ul,ol{padding-left:1.25rem;} li{margin-bottom:.3rem;}
     @media print{body{padding:0;}}
   </style></head><body>
-    <h1>🍽️ ${name}</h1>
-    <p class="meta">⏱ ${r.time} min | 📂 ${r.category}${r.nutrition&&r.nutrition.kcal ? ' | 🔥 '+r.nutrition.kcal+' kcal' : ''}</p>
-    <h2>🥕 Ingredients / Suroviny</h2><ul>${ingr.map(i=>`<li>${i}</li>`).join('')}</ul>
-    <h2>📝 Steps / Postup</h2><ol>${stps.map(s=>`<li>${s}</li>`).join('')}</ol>
+    <h1>🍽️ ${san}</h1>
+    <p class="meta">⏱ ${sanTime} min | 📂 ${sanCat}${kcalHtml}</p>
+    <h2>🥕 Ingredients / Suroviny</h2><ul>${ingr.map(i=>`<li>${esc(i)}</li>`).join('')}</ul>
+    <h2>📝 Steps / Postup</h2><ol>${stps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol>
     <script>window.print();window.close();<\/script>
   </body></html>`);
   win.document.close();
@@ -1243,20 +1268,26 @@ function shareRecipe() {
   const stps = lang === 'en' && r.stepsEn ? r.stepsEn : r.steps;
   const tgs = lang === 'en' && r.tagsEn ? r.tagsEn : r.tags;
   const text = `🍽️ ${name}\n⏱ ${r.time} min | 📂 ${r.category}\n\n🥕 ${t('formIngredients')}:\n${ingr.map(i=>`• ${i}`).join('\n')}\n\n📝 ${t('formSteps')}:\n${stps.map((s,j)=>`${j+1}. ${s}`).join('\n')}\n\n🏷 ${tgs.join(', ')}`;
-  // Use Web Share API if available
   if (navigator.share) {
     navigator.share({title: name, text: text}).catch(() => {});
   } else {
-    // Fallback: show share options
     const a = document.createElement('div');
     a.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--surface);padding:1rem;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.2);z-index:3000;display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center;border:1px solid var(--border);';
-    a.innerHTML = `
-      <button class="btn btn-secondary" onclick="copyText(\`${text.replace(/`/g,'\\`')}\`)">📋 Copy</button>
-      <button class="btn btn-secondary" onclick="window.open('https://api.whatsapp.com/send?text='+encodeURIComponent(\`${text.replace(/`/g,'\\`')}\`),'_blank')">📱 ${t('shareWhatsApp')}</button>
-      <button class="btn btn-secondary" onclick="window.open('https://www.facebook.com/sharer/sharer.php?quote='+encodeURIComponent(\`${text.replace(/`/g,'\\`')}\`),'_blank')">💬 ${t('shareMessenger')}</button>
-      <button class="btn btn-secondary" onclick="window.location.href='mailto:?subject='+encodeURIComponent('${name}')+'&body='+encodeURIComponent(\`${text.replace(/`/g,'\\`')}\`)">✉️ ${t('shareEmail')}</button>
-      <button class="btn btn-primary" onclick="this.parentElement.remove()">✕</button>
-    `;
+    a.className = 'share-popup';
+    const btns = [
+      {label:'📋 Copy', fn:()=>{copyText(text)}},
+      {label:`📱 ${t('shareWhatsApp')}`, fn:()=>{window.open('https://api.whatsapp.com/send?text='+encodeURIComponent(text),'_blank')}},
+      {label:`💬 ${t('shareMessenger')}`, fn:()=>{window.open('https://www.facebook.com/sharer/sharer.php?quote='+encodeURIComponent(text),'_blank')}},
+      {label:`✉️ ${t('shareEmail')}`, fn:()=>{window.location.href='mailto:?subject='+encodeURIComponent(name)+'&body='+encodeURIComponent(text)}},
+      {label:'✕', fn:()=>{a.remove()}, cls:'btn-primary'}
+    ];
+    btns.forEach(b => {
+      const btn = document.createElement('button');
+      btn.className = 'btn ' + (b.cls || 'btn-secondary');
+      btn.textContent = b.label;
+      btn.onclick = b.fn;
+      a.appendChild(btn);
+    });
     document.body.appendChild(a);
   }
 }
@@ -1266,7 +1297,7 @@ function copyText(text) {
 }
 
 // ======================== COPY RECIPE ========================
-function copyRecipe() {
+function copyRecipe(e) {
   const r = recipes.find(rec => rec.id === viewingId);
   if (!r) return;
   const name = lang==='en'&&r.nameEn?r.nameEn:r.name;
@@ -1275,7 +1306,7 @@ function copyRecipe() {
   const tgs = lang==='en'&&r.tagsEn?r.tagsEn:r.tags;
   const text = `🍽️ ${name}\n⏱ ${r.time} min\n\nSuroviny:\n${ingr.map(i=>`• ${i}`).join('\n')}\n\nPostup:\n${stps.map((s,i)=>`${i+1}. ${s}`).join('\n')}\n\n🏷 ${tgs.join(', ')}`;
   navigator.clipboard.writeText(text).then(() => {
-    const btn = event.target.closest('.btn') || document.querySelector('.modal-footer .btn:last-child');
+    const btn = (e && e.target) ? e.target.closest('.btn') : document.querySelector('.modal-footer .btn:last-child');
     if (btn) { const orig = btn.textContent; btn.textContent = '✓ OK!'; setTimeout(() => btn.textContent = orig, 1500); }
   }).catch(() => prompt('Copy:', text));
 }
@@ -1333,7 +1364,7 @@ function renderCookingStep() {
   document.getElementById('cooking-title').textContent = name;
   const imgEl = document.getElementById('cooking-img');
   if (r.image || r.imageData) {
-    imgEl.innerHTML = `<img src="${r.imageData||r.image}" style="width:100%;height:100%;object-fit:contain;" onerror="this.outerHTML='🍽️'">`;
+    imgEl.innerHTML = `<img src="${escAttr(r.imageData||r.image)}" style="width:100%;height:100%;object-fit:contain;" onerror="this.outerHTML='🍽️'">`;
   } else { imgEl.textContent = '🍽️'; }
   document.getElementById('cooking-step-indicator').textContent = `${lang==='en'?'Step':'Krok'} ${cookingStep+1}/${total}`;
   document.getElementById('cooking-step-text').textContent = stps[cookingStep];
@@ -1383,7 +1414,9 @@ function toggleTimer() {
   else {
     const mins = prompt(lang==='en'?'Timer (minutes):' : 'Timer (minúty):', '5');
     if (mins === null) return;
-    cookingTimerSeconds = parseInt(mins) * 60 || 300;
+    const val = parseInt(mins);
+    if (isNaN(val) || val < 1 || val > 999) { alert(lang==='en'?'Enter 1-999 minutes.':'Zadajte 1-999 minút.'); return; }
+    cookingTimerSeconds = val * 60;
     startTimer();
   }
 }
@@ -1416,6 +1449,7 @@ function updateTimerDisplay() {
 
 // ======================== VOICE ========================
 function toggleVoice() {
+  if (voiceSearchListening) stopVoiceSearch();
   if (voiceListening) { stopVoice(); return; }
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRecognition) { alert(lang==='en'?'Voice control not supported in this browser.' : 'Hlasové ovládanie nie je podporované v tomto prehliadači.'); return; }
@@ -1449,6 +1483,7 @@ function stopVoice() {
 
 // ======================== VOICE SEARCH ========================
 function toggleVoiceSearch() {
+  if (voiceListening) stopVoice();
   if (voiceSearchListening) { stopVoiceSearch(); return; }
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) { alert(lang==='en'?'Voice search not supported.':'Hlasové vyhľadávanie nie je podporované.'); return; }
@@ -1494,9 +1529,8 @@ function renderIngredientSearch() {
   const visible = filter ? all.filter(i => norm(i).includes(filter)) : all;
   const list = document.getElementById('ingr-list');
   list.innerHTML = visible.map(i =>
-    `<span class="ingr-tag ${ingredientSearchSelected.has(i)?'selected':''}" onclick="toggleIngrSearch('${i.replace(/'/g,"\\'")}')">${i}</span>`
+    `<span class="ingr-tag ${ingredientSearchSelected.has(i)?'selected':''}" data-ingr="${escAttr(i)}">${esc(i)}</span>`
   ).join('');
-  // Show match count
   const matchEl = document.getElementById('ingr-match');
   if (ingredientSearchSelected.size === 0) { matchEl.innerHTML = ''; return; }
   const sel = [...ingredientSearchSelected];
@@ -1531,6 +1565,10 @@ document.getElementById('ingredient-modal').addEventListener('click', function(e
     applyIngredientSearch();
   }
 });
+document.getElementById('ingr-list').addEventListener('click', function(e) {
+  const tag = e.target.closest('.ingr-tag');
+  if (tag) toggleIngrSearch(tag.dataset.ingr);
+});
 
 // ======================== PORTION SCALING ========================
 function changePortion(delta) {
@@ -1542,7 +1580,7 @@ function changePortion(delta) {
   const ratio = currentPortion / basePortion;
   const list = document.getElementById('ingredient-list');
   if (list) {
-    list.innerHTML = ingr.map(i => `<li>${scaleIngredient(i, ratio)}</li>`).join('');
+    list.innerHTML = ingr.map(i => `<li>${esc(scaleIngredient(i, ratio))}</li>`).join('');
   }
 }
 
@@ -1567,14 +1605,14 @@ function renderCollections() {
   if (!collections.length) { el.innerHTML = `<p style="color:var(--text2);padding:.5rem 0;" data-lang="colEmpty">Zatiaľ žiadne kolekcie.</p>`; return; }
   el.innerHTML = collections.map((c, i) => `
     <div style="display:flex;align-items:center;gap:.4rem;padding:.35rem .4rem;border-bottom:1px solid var(--border);">
-      <span style="flex:1;font-size:.88rem;"><strong>${c.name}</strong> (${c.recipeIds.length})</span>
-      <button class="btn btn-danger" onclick="deleteCollection(${i})" style="padding:.15rem .4rem;font-size:.7rem;">✕</button>
+      <span style="flex:1;font-size:.88rem;"><strong>${esc(c.name)}</strong> (${c.recipeIds.length})</span>
+      <button class="btn btn-danger" onclick="deleteCollection(${c.id})" style="padding:.15rem .4rem;font-size:.7rem;">✕</button>
     </div>
   `).join('');
 }
 
-function addCollection() {
-  const name = document.getElementById('collection-name').value.trim();
+function addCollection(name) {
+  name = (name || document.getElementById('collection-name').value || '').trim();
   if (!name) return;
   collections.push({ id: Date.now(), name, recipeIds: [] });
   document.getElementById('collection-name').value = '';
@@ -1582,8 +1620,8 @@ function addCollection() {
   renderCollections();
 }
 
-function deleteCollection(idx) {
-  collections.splice(idx, 1);
+function deleteCollection(id) {
+  collections = collections.filter(c => c.id !== id);
   saveCollections();
   renderCollections();
   render();
@@ -1591,8 +1629,12 @@ function deleteCollection(idx) {
 
 function addToCollectionPrompt(recipeId) {
   if (!collections.length) {
-    if (confirm((lang==='en'?'No collections yet. Create one?':'Žiadne kolekcie. Vytvoriť?')) && (document.getElementById('collection-name').value = prompt(lang==='en'?'Collection name:':'Názov kolekcie:') || '')) {
-      addCollection();
+    const name = prompt(lang==='en'?'New collection name:':'Názov novej kolekcie:');
+    if (!name || !name.trim()) return;
+    addCollection(name.trim());
+    if (collections.length) {
+      collections[0].recipeIds.push(recipeId);
+      saveCollections();
     }
     return;
   }
@@ -1613,7 +1655,7 @@ function updateCollectionFilter() {
   let sel = document.getElementById('filter-collection');
   if (!sel) return;
   const current = sel.value;
-  sel.innerHTML = `<option value="">📁 ${lang==='en'?'All':'Všetky'}</option>${collections.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}`;
+  sel.innerHTML = `<option value="">📁 ${lang==='en'?'All':'Všetky'}</option>${collections.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('')}`;
   sel.value = current;
 }
 
@@ -1630,7 +1672,7 @@ function showTipOfDay() {
   document.getElementById('hero-time').textContent = r.time + ' min';
   document.getElementById('hero-kcal').textContent = (r.nutrition&&r.nutrition.kcal)||'?';
   if (r.imageData || r.image) {
-    bg.style.backgroundImage = `url("${r.imageData || r.image}")`;
+    bg.style.backgroundImage = 'url("' + escAttr(r.imageData || r.image).replace(/[()\\]/g, c => '\\' + c) + '")';
   } else {
     bg.style.background = 'linear-gradient(135deg, var(--primary), #1e1e1e)';
   }
@@ -1672,7 +1714,7 @@ function renderPlanner() {
         const name = recipe ? (lang === 'en' && recipe.nameEn ? recipe.nameEn : recipe.name) : '';
         return `<div class="planner-slot${recipe ? ' filled' : ''}" onclick="pickRecipe('${d}','${s}')">
           <span style="font-size:.6rem;opacity:.6;display:block;">${s === 'obed' ? '🌤' : '🌙'}</span>
-          ${recipe ? `<span class="slot-name">${name}</span><span class="slot-remove" onclick="event.stopPropagation();removeSlot('${d}','${s}')">✕</span>` : `<span data-lang="plannerEmpty">+ pridať</span>`}
+          ${recipe ? `<span class="slot-name">${esc(name)}</span><span class="slot-remove" onclick="event.stopPropagation();removeSlot('${d}','${s}')">✕</span>` : `<span data-lang="plannerEmpty">+ pridať</span>`}
         </div>`;
       }).join('')}</div>
     </div>`;
@@ -1685,12 +1727,12 @@ function pickRecipe(day, slot) {
   const list = document.getElementById('picker-recipes');
   list.innerHTML = recipes.map(r => {
     const name = lang === 'en' && r.nameEn ? r.nameEn : r.name;
-    return `<div class="picker-item" onclick="selectRecipe('${day}','${slot}',${r.id});closeModal('planner-picker')"><span>${name}</span><span class="pick-cat">📂 ${r.category}</span></div>`;
+    return `<div class="picker-item" onclick="selectRecipe('${day}','${slot}',${r.id});closeModal('planner-picker')"><span>${esc(name)}</span><span class="pick-cat">📂 ${esc(r.category)}</span></div>`;
   }).join('');
   document.getElementById('picker-search').value = '';
   document.getElementById('picker-search').oninput = function() {
-    const q = this.value.toLowerCase();
-    list.querySelectorAll('.picker-item').forEach(el => { el.style.display = el.textContent.toLowerCase().includes(q) ? '' : 'none'; });
+    const q = norm(this.value);
+    list.querySelectorAll('.picker-item').forEach(el => { el.style.display = norm(el.textContent).includes(q) ? '' : 'none'; });
   };
   openModal('planner-picker');
 }
@@ -1752,7 +1794,7 @@ function renderShoppingList() {
     ul.innerHTML = '<li style="opacity:.5;font-style:italic;" data-lang="plannerEmptyList">Zatiaľ žiadne recepty v pláne.</li>';
     return;
   }
-  ul.innerHTML = items.map(i => `<li><input type="checkbox" onchange="this.parentElement.classList.toggle('checked')"><span>${i.text}</span></li>`).join('');
+  ul.innerHTML = items.map(i => `<li><input type="checkbox" onchange="this.parentElement.classList.toggle('checked')"><span>${esc(i.text)}</span></li>`).join('');
 }
 
 function copyShoppingList() {
@@ -1783,8 +1825,8 @@ function openHistory() {
       const r = recipes.find(rec => rec.id === h.recipeId);
       const name = r ? (lang==='en'&&r.nameEn?r.nameEn:r.name) : '?';
       return `<div style="display:flex;align-items:center;gap:.4rem;padding:.3rem .4rem;border-bottom:1px solid var(--border);font-size:.85rem;">
-        <span style="flex:1;">${name}${h.count > 1 ? ` <span style="color:var(--text2);font-size:.75rem;">×${h.count}</span>` : ''}</span>
-        <span style="color:var(--text2);font-size:.75rem;">${h.date}</span>
+        <span style="flex:1;">${esc(name)}${h.count > 1 ? ` <span style="color:var(--text2);font-size:.75rem;">×${h.count}</span>` : ''}</span>
+        <span style="color:var(--text2);font-size:.75rem;">${esc(h.date)}</span>
       </div>`;
     }).join('');
   }
@@ -1813,16 +1855,17 @@ function applyIngredientSearch() {
       const name = lang==='en'&&r.nameEn?r.nameEn:r.name;
       const tags = lang==='en'&&r.tagsEn?r.tagsEn:r.tags;
       const diff = r.difficulty||1;
+      const san = esc(name), sanCat = esc(r.category), sanTime = esc(r.time);
       return `<div class="recipe-card" data-id="${r.id}"><button class="fav-btn ${r.favorite?'fav-active':''}" onclick="event.stopPropagation();toggleFav(${r.id})">${r.favorite?'❤️':'🤍'}</button>
-        ${r.image||r.imageData?`<div class="recipe-card-img"><img src="${r.imageData||r.image}" alt="${name}" loading="lazy" style="width:100%;height:100%;object-fit:cover" onerror="this.outerHTML='<span style=\\'font-size:2.4rem\\'>🍽️</span>'"></div>`:`<div class="recipe-card-img">🍽️</div>`}
+        ${r.image||r.imageData?`<div class="recipe-card-img"><img src="${escAttr(r.imageData||r.image)}" alt="${san}" loading="lazy" style="width:100%;height:100%;object-fit:cover" onerror="this.outerHTML='<span style=\\'font-size:2.4rem\\'>🍽️</span>'"></div>`:`<div class="recipe-card-img">🍽️</div>`}
         <div class="recipe-card-body">
-        <h3>${name}</h3>
-        <div class="meta-line"><span>📂 ${r.category}</span><span>⏱ ${r.time}</span>
-        ${r.nutrition?`<span class="kcal-badge">🔥 ${r.nutrition.kcal||'?'}</span>`:''}</div>
+        <h3>${san}</h3>
+        <div class="meta-line"><span>📂 ${sanCat}</span><span>⏱ ${sanTime}</span>
+        ${r.nutrition?`<span class="kcal-badge">🔥 ${esc(r.nutrition.kcal||'?')}</span>`:''}</div>
         <div style="display:flex;align-items:center;gap:.15rem;margin-top:.1rem;">
           ${[1,2,3].map(i=>`<span class="difficulty-dot ${i<=diff?'filled':'empty'}"></span>`).join('')}
         </div>
-        <div class="tags">${tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div></div></div>`;
+        <div class="tags">${tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div></div></div>`;
     }).join('');
   } else {
     render();
@@ -1915,9 +1958,12 @@ function importFromUrl() {
         const stepText = stepsArr.join('\n');
         let timeNum = 30;
         if (time) {
-          timeNum = parseInt(time.replace(/[^0-9]/g,'')) || 30;
-          if (/[Hh]/.test(time)) timeNum = timeNum * 60;
-          if (!/[Hh]/.test(time) && /[Mm]/.test(time)) timeNum = parseInt(time.replace(/[^0-9]/g,'')) || 30;
+          timeNum = 0;
+          const hMatch = time.match(/(\d+)\s*H/i);
+          const mMatch = time.match(/(\d+)\s*M/i);
+          if (hMatch) timeNum += parseInt(hMatch[1]) * 60;
+          if (mMatch) timeNum += parseInt(mMatch[1]);
+          if (!timeNum) timeNum = parseInt(time.replace(/[^0-9]/g,'')) || 30;
         }
         const cats = ['Hlavné jedlá','Polievky','Šaláty','Dezerty','Pečivo','Nápoje','Predjedlá','Raňajky','Prílohy','Detské'];
         const catMatch = cats.find(c => norm(category).includes(norm(c)) || norm(c).includes(norm(category)));
