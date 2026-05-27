@@ -257,17 +257,24 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: rgba(22
 
 /* ===== PLANNER ===== */
 .planner-container { display: none; padding-top: .3rem; }
-.planner-week { display: flex; flex-direction: column; gap: .35rem; margin-bottom: .8rem; }
-.planner-day { background: var(--surface); border-radius: var(--radius-md); padding: .45rem .55rem; border: 1px solid var(--border); }
-.planner-day-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: .25rem; font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--text2); }
-.planner-slots { display: flex; gap: .35rem; flex-wrap: wrap; }
-.planner-slot { flex: 1; min-width: 80px; padding: .25rem .35rem; border-radius: var(--radius-sm); border: 1px dashed var(--border); font-size: .68rem; cursor: pointer; transition: all .15s ease; text-align: center; color: var(--text3); background: var(--input-bg); }
+.planner-week { display: grid; grid-template-columns: 1fr; gap: .5rem; margin-bottom: .8rem; }
+@media (min-width: 480px) { .planner-week { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 768px) { .planner-week { grid-template-columns: repeat(7, 1fr); } }
+.planner-day { background: var(--surface); border-radius: var(--radius-md); overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.06); border: 1px solid var(--border); position: relative; }
+.planner-day::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--primary-light); }
+.planner-day.weekend::before { background: var(--gold); }
+.planner-day-header { padding: .45rem .55rem .25rem; display: flex; align-items: center; justify-content: space-between; font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: var(--text2); }
+.planner-day-header .day-date { font-weight: 400; font-size: .6rem; color: var(--text3); }
+.planner-day-header .day-count { background: var(--input-bg); padding: .05rem .35rem; border-radius: 99px; font-size: .6rem; color: var(--text3); }
+.planner-slots { padding: 0 .35rem .35rem; display: flex; flex-direction: column; gap: .3rem; }
+.planner-slot { display: flex; align-items: center; gap: .3rem; padding: .3rem .35rem; border-radius: var(--radius-sm); border: 1px dashed var(--border); font-size: .68rem; cursor: pointer; transition: all .15s ease; color: var(--text3); background: var(--input-bg); min-height: 2rem; }
 .planner-slot:hover { border-color: var(--primary-light); color: var(--text); }
-.planner-slot.filled { border-style: solid; border-color: var(--border); color: var(--text); background: var(--surface); }
-.planner-slot.filled .slot-name { font-weight: 600; font-size: .72rem; }
-.planner-slot .slot-remove { display: none; margin-left: .2rem; font-size: .6rem; cursor: pointer; opacity: .5; }
-.planner-slot.filled .slot-remove { display: inline; }
-.planner-slot .slot-remove:hover { opacity: 1; }
+.planner-slot.filled { border-style: solid; border-color: var(--border); color: var(--text); background: var(--surface); border-left: 3px solid var(--primary-light); padding-left: .25rem; }
+.planner-slot.filled .slot-icon { flex-shrink: 0; }
+.planner-slot.filled .slot-name { flex: 1; font-weight: 600; font-size: .7rem; line-height: 1.2; }
+.planner-slot .slot-remove { display: none; font-size: .6rem; cursor: pointer; opacity: .4; padding: .1rem .15rem; border-radius: 4px; }
+.planner-slot.filled .slot-remove { display: inline-flex; align-items: center; justify-content: center; }
+.planner-slot .slot-remove:hover { opacity: 1; background: rgba(255,255,255,.08); }
 .planner-list { background: var(--surface); border-radius: var(--radius-md); padding: .55rem .65rem; border: 1px solid var(--border); margin-top: .3rem; }
 #shopping-list li { padding: .22rem 0; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: .35rem; }
 #shopping-list li:last-child { border-bottom: none; }
@@ -1704,17 +1711,26 @@ const DAYS_EN = ['monday','tuesday','wednesday','thursday','friday','saturday','
 function renderPlanner() {
   const week = document.getElementById('planner-week');
   const dayNames = lang === 'en' ? DAYS_EN : DAYS_SK;
+  const now = new Date();
+  const startOfWeek = new Date(now); startOfWeek.setDate(now.getDate() - ((now.getDay() + 6) % 7));
   week.innerHTML = DAYS.map((d, i) => {
     const day = mealPlan[d] || {};
-    const slots = ['obed','večera'];
-    return `<div class="planner-day">
-      <div class="planner-day-header"><span>${dayNames[i]}</span><span class="planner-count" style="color:var(--text3);font-weight:400;">${Object.values(day).filter(Boolean).length}/2</span></div>
-      <div class="planner-slots">${slots.map(s => {
+    const date = new Date(startOfWeek); date.setDate(startOfWeek.getDate() + i);
+    const dateStr = date.getDate() + '.' + (date.getMonth()+1) + '.';
+    const isWeekend = i >= 5;
+    return `<div class="planner-day${isWeekend ? ' weekend' : ''}">
+      <div class="planner-day-header">
+        <span>${dayNames[i]} <span class="day-date">${dateStr}</span></span>
+        <span class="day-count">${Object.values(day).filter(Boolean).length}/2</span>
+      </div>
+      <div class="planner-slots">${['obed','večera'].map(s => {
         const recipe = day[s] ? recipes.find(r => r.id === day[s]) : null;
         const name = recipe ? (lang === 'en' && recipe.nameEn ? recipe.nameEn : recipe.name) : '';
+        const icon = s === 'obed' ? '🌤' : '🌙';
         return `<div class="planner-slot${recipe ? ' filled' : ''}" onclick="pickRecipe('${d}','${s}')">
-          <span style="font-size:.6rem;opacity:.6;display:block;">${s === 'obed' ? '🌤' : '🌙'}</span>
-          ${recipe ? `<span class="slot-name">${esc(name)}</span><span class="slot-remove" onclick="event.stopPropagation();removeSlot('${d}','${s}')">✕</span>` : `<span data-lang="plannerEmpty">+ pridať</span>`}
+          ${recipe
+            ? `<span class="slot-icon">${icon}</span><span class="slot-name">${esc(name)}</span><span class="slot-remove" onclick="event.stopPropagation();removeSlot('${d}','${s}')">✕</span>`
+            : `<span class="slot-icon">${icon}</span><span data-lang="plannerEmpty" style="opacity:.6">+ pridať</span>`}
         </div>`;
       }).join('')}</div>
     </div>`;
