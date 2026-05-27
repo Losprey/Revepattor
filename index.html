@@ -692,9 +692,12 @@ body[data-tab="dashboard"] #app-header { display: none; }
 .task-container { padding-bottom: 1rem; }
 .task-section-title { font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; color: var(--text3); padding: .5rem .2rem .2rem; display: flex; align-items: center; gap: .3rem; }
 .task-section-count { font-size: .6rem; font-weight: 600; background: var(--input-bg); padding: .02rem .3rem; border-radius: 99px; color: var(--text3); }
-.task-card { background: var(--surface); border-radius: var(--radius-md); border: 1px solid var(--border); margin-bottom: .3rem; overflow: hidden; transition: all .2s ease; }
+.task-card { background: var(--surface); border-radius: var(--radius-md); border: 1px solid var(--border); border-left: 3px solid var(--border); margin-bottom: .3rem; overflow: hidden; transition: all .2s ease; }
 .task-card:active { transform: scale(.98); }
 .task-card.done { opacity: .55; }
+.task-card.prio-high { border-left-color: var(--danger); }
+.task-card.prio-medium { border-left-color: var(--gold); }
+.task-card.prio-low { border-left-color: var(--success); }
 .task-card-body { display: flex; align-items: center; gap: .35rem; padding: .4rem .45rem; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .task-card .tc-check { width: 22px; height: 22px; border-radius: 6px; border: 2px solid var(--text3); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .3s var(--ease-spring); font-size: .55rem; color: transparent; cursor: pointer; }
 .task-card .tc-check.done { background: var(--primary-light); border-color: var(--primary-light); color: #fff; box-shadow: 0 0 12px rgba(220,38,38,.3); }
@@ -712,6 +715,11 @@ body[data-tab="dashboard"] #app-header { display: none; }
 .task-card .tc-btn:hover { background: var(--hover-bg); color: var(--text2); }
 .task-card .tc-btn.danger:hover { background: rgba(220,38,38,.1); color: var(--danger); }
 .task-cat-icon { font-size: .8rem; flex-shrink: 0; }
+
+.task-filters { display: flex; gap: .3rem; padding: 0 0 .4rem; flex-wrap: wrap; }
+.task-filter-chip { padding: .28rem .5rem; border-radius: 99px; border: 1px solid var(--border); font-size: .65rem; cursor: pointer; white-space: nowrap; transition: all .15s; background: var(--bg); color: var(--text2); }
+.task-filter-chip:hover { border-color: var(--primary-light); color: var(--text); }
+.task-filter-chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 @media (max-width: 400px) {
   .task-card-body { padding: .35rem .35rem; }
   .task-card .tc-title { font-size: .72rem; }
@@ -5090,18 +5098,55 @@ function renderTasks() {
   ];
 
   let html = '';
-  sections.forEach(s => {
-    if (!s.tasks.length) return;
-    html += `<div class="task-section-title">${s.icon} ${s.title} <span class="task-section-count">${s.tasks.length}</span></div>`;
-    html += s.tasks.map(t => renderTaskCard(t)).join('');
-  });
 
-  if (completedList.length) {
-    html += `<div class="task-section-title">✅ <span data-lang="tasksDone">Dokončené</span> <span class="task-section-count">${completedList.length}</span></div>`;
-    html += completedList.slice(0, 10).map(t => renderTaskCard(t)).join('');
+  // Filter chips
+  html += `<div class="task-filters">
+    <button class="task-filter-chip active" onclick="filterTasksTab(this,'today')">📅 ${lang==='en'?'Today':'Dnes'}</button>
+    <button class="task-filter-chip" onclick="filterTasksTab(this,'tomorrow')">🌟 ${lang==='en'?'Tomorrow':'Zajtra'}</button>
+    <button class="task-filter-chip" onclick="filterTasksTab(this,'week')">📆 ${lang==='en'?'Week':'Týždeň'}</button>
+    <button class="task-filter-chip" onclick="filterTasksTab(this,'all')">📋 ${lang==='en'?'All':'Všetky'}</button>
+    <button class="task-filter-chip" onclick="filterTasksTab(this,'done')">✅ ${lang==='en'?'Done':'Hotové'}</button>
+  </div>`;
+
+  // Top add button
+  html += `<button class="shop-add-btn" onclick="openTaskSheet()" style="margin-bottom:.4rem;">➕ ${lang==='en'?'Add task':'Pridať úlohu'}</button>`;
+  const headerLen = html.length; // track header length for empty state check
+  // Filter-aware section rendering
+  if (_taskFilter === 'today') {
+    if (todayTasks.length) {
+      html += `<div class="task-section-title">📅 ${lang==='en'?'Today':'Dnes'} <span class="task-section-count">${todayTasks.length}</span></div>`;
+      html += todayTasks.map(t => renderTaskCard(t)).join('');
+    }
+  } else if (_taskFilter === 'tomorrow') {
+    if (tomTasks.length) {
+      html += `<div class="task-section-title">🌟 ${lang==='en'?'Tomorrow':'Zajtra'} <span class="task-section-count">${tomTasks.length}</span></div>`;
+      html += tomTasks.map(t => renderTaskCard(t)).join('');
+    }
+  } else if (_taskFilter === 'week') {
+    sections.forEach(s => {
+      const filtered = s.tasks.filter(t => t.date !== today && t.date !== tomStr);
+      if (!filtered.length) return;
+      html += `<div class="task-section-title">${s.icon} ${s.title} <span class="task-section-count">${filtered.length}</span></div>`;
+      html += filtered.map(t => renderTaskCard(t)).join('');
+    });
+  } else if (_taskFilter === 'done') {
+    if (completedList.length) {
+      html += `<div class="task-section-title">✅ ${lang==='en'?'Completed':'Dokončené'} <span class="task-section-count">${completedList.length}</span></div>`;
+      html += completedList.slice(0, 20).map(t => renderTaskCard(t)).join('');
+    }
+  } else {
+    sections.forEach(s => {
+      if (!s.tasks.length) return;
+      html += `<div class="task-section-title">${s.icon} ${s.title} <span class="task-section-count">${s.tasks.length}</span></div>`;
+      html += s.tasks.map(t => renderTaskCard(t)).join('');
+    });
+    if (completedList.length) {
+      html += `<div class="task-section-title">✅ ${lang==='en'?'Completed':'Dokončené'} <span class="task-section-count">${completedList.length}</span></div>`;
+      html += completedList.slice(0, 10).map(t => renderTaskCard(t)).join('');
+    }
   }
 
-  if (!html) {
+  if (html.length === headerLen) {
     html = `<div class="shop-empty">
       <div class="shop-empty-icon">✅</div>
       <div class="shop-empty-title" data-lang="tasksEmpty">Dnes máš voľnejší deň ✨</div>
@@ -5117,13 +5162,21 @@ function renderTasks() {
   container.innerHTML = html;
 }
 
+let _taskFilter = 'today';
+function filterTasksTab(el, filter) {
+  _taskFilter = filter;
+  document.querySelectorAll('.task-filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderTasks();
+}
+
 function renderTaskCard(t) {
   const ci = taskCatInfo(t.category);
   const done = t.completed;
   const prioLabel = t.priority === 'high' ? '🔴' : t.priority === 'medium' ? '🟡' : '🟢';
   const dateLabel = formatTaskDate(t.date);
   const timeStr = t.time ? ` · 🕐 ${t.time}` : '';
-  return `<div class="task-card${done?' done':''}">
+  return `<div class="task-card${done?' done':''} prio-${t.priority}">
     <div class="task-card-body">
       <span class="task-cat-icon">${ci.icon}</span>
       <div class="tc-check${done?' done':''}" onclick="toggleTask('${t.id}')">${done?'✓':''}</div>
