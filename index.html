@@ -1410,12 +1410,13 @@ let authLoading = true;   // waiting for Firebase Auth init
 let storeNs = 'guest_';   // default: guest namespace
 
 // Shared keys that are NOT user-scoped
-const GLOBAL_KEYS = new Set(['lang','dark','accent','appSettings','notifFired','notifFiredToday','familyCode','deviceId','tipDismissed','authUser','authGuest']);
+const GLOBAL_KEYS = new Set(['lang','dark','accent','appSettings','notifFired','notifFiredToday','familyCode','deviceId','tipDismissed','authUser','authGuest','authMigrateFromGuest']);
 
 // Patch localStorage to auto-namespace data keys
 (function patchLocalStorage() {
   const _get = Storage.prototype.getItem;
   const _set = Storage.prototype.setItem;
+  const _remove = Storage.prototype.removeItem;
   Storage.prototype.getItem = function(key) {
     if (GLOBAL_KEYS.has(key)) return _get.call(this, key);
     return _get.call(this, storeNs + key);
@@ -1423,6 +1424,10 @@ const GLOBAL_KEYS = new Set(['lang','dark','accent','appSettings','notifFired','
   Storage.prototype.setItem = function(key, val) {
     if (GLOBAL_KEYS.has(key)) return _set.call(this, key, val);
     return _set.call(this, storeNs + key, val);
+  };
+  Storage.prototype.removeItem = function(key) {
+    if (GLOBAL_KEYS.has(key)) return _remove.call(this, key);
+    return _remove.call(this, storeNs + key);
   };
 })();
 
@@ -1432,11 +1437,10 @@ function setStoreNamespace(ns) { storeNs = ns; }
 function initFirebaseAuth() {
   if (!firebaseReady || typeof firebase.auth !== 'function') return;
   firebase.auth().onAuthStateChanged(user => {
-    authLoading = false;
     if (user) {
-      authLoading = false;
       authUser = user;
       authIsGuest = false;
+      authLoading = false;
       setStoreNamespace('user_' + user.uid + '_');
       localStorage.setItem('authUser', JSON.stringify({ uid: user.uid, name: user.displayName, email: user.email, photo: user.photoURL }));
       localStorage.removeItem('authGuest');
@@ -1447,7 +1451,6 @@ function initFirebaseAuth() {
       renderDashboard();
     } else {
       authLoading = false;
-      // Check if we were previously guest
       if (localStorage.getItem('authGuest') === '1') {
         authUser = null;
         authIsGuest = true;
@@ -1456,14 +1459,12 @@ function initFirebaseAuth() {
         updateAuthUI();
         renderDashboard();
       } else {
-        // First visit — show login
         authUser = null;
         authIsGuest = false;
         setStoreNamespace('guest_');
         document.getElementById('login-overlay').style.display = 'flex';
         updateAuthUI();
       }
-      authLoading = false;
     }
   });
 }
@@ -1495,7 +1496,7 @@ function signOutUser() {
     localStorage.removeItem('authUser');
     localStorage.setItem('authGuest', '1');
     updateAuthUI();
-    renderDashboard();
+    location.reload();
   }).catch(() => {});
 }
 
@@ -1507,28 +1508,32 @@ function continueAsGuest() {
   localStorage.removeItem('authUser');
   document.getElementById('login-overlay').style.display = 'none';
   updateAuthUI();
-  renderDashboard();
+  location.reload();
 }
 
 function migrateGuestToUser() {
   const flag = localStorage.getItem('authMigrateFromGuest');
   if (flag !== '1') return;
   localStorage.removeItem('authMigrateFromGuest');
-  // Copy all guest data to user namespace
   const userNs = 'user_' + authUser.uid + '_';
   const guestKeys = [];
   for (let i = 0; i < localStorage.length; i++) {
     const k = localStorage.key(i);
     if (k.startsWith('guest_')) guestKeys.push(k);
   }
+  // Bypass namespace patch: use raw getItem
+  const rawGet = Storage.prototype.getItem;
   guestKeys.forEach(k => {
     const dataKey = k.replace('guest_', '');
     if (GLOBAL_KEYS.has(dataKey)) return;
-    const val = localStorage.getItem(k);
-    if (val !== null) localStorage.setItem(userNs + dataKey, val);
+    const val = rawGet.call(localStorage, k);
+    if (val !== null) {
+      // Write using current namespace (user_{uid}_ key)
+      localStorage.setItem(dataKey, val);
+    }
   });
-  setStoreNamespace(userNs);
-  renderDashboard();
+  // Reload to pick up migrated data in JS variables
+  setTimeout(() => location.reload(), 300);
 }
 
 function updateAuthUI() {
