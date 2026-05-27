@@ -267,11 +267,11 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: rgba(22
 .planner-day-header .day-date { font-weight: 400; font-size: .6rem; color: var(--text3); }
 .planner-day-header .day-count { background: var(--input-bg); padding: .05rem .35rem; border-radius: 99px; font-size: .6rem; color: var(--text3); }
 .planner-slots { padding: 0 .35rem .35rem; display: flex; flex-direction: column; gap: .3rem; }
-.planner-slot { display: flex; align-items: center; gap: .3rem; padding: .3rem .35rem; border-radius: var(--radius-sm); border: 1px dashed var(--border); font-size: .68rem; cursor: pointer; transition: all .15s ease; color: var(--text3); background: var(--input-bg); min-height: 2rem; }
+.planner-slot { display: flex; align-items: center; gap: .2rem; padding: .2rem .3rem; border-radius: var(--radius-sm); border: 1px dashed var(--border); font-size: .65rem; cursor: pointer; transition: all .15s ease; color: var(--text3); background: var(--input-bg); min-height: 1.6rem; }
 .planner-slot:hover { border-color: var(--primary-light); color: var(--text); }
-.planner-slot.filled { border-style: solid; border-color: var(--border); color: var(--text); background: var(--surface); border-left: 3px solid var(--primary-light); padding-left: .25rem; }
-.planner-slot.filled .slot-icon { flex-shrink: 0; }
-.planner-slot.filled .slot-name { flex: 1; font-weight: 600; font-size: .7rem; line-height: 1.2; }
+.planner-slot.filled { border-style: solid; border-color: var(--border); color: var(--text); background: var(--surface); border-left: 3px solid var(--primary-light); padding-left: .2rem; }
+.planner-slot.filled .slot-icon { flex-shrink: 0; font-size: .6rem; }
+.planner-slot.filled .slot-name { flex: 1; font-weight: 600; font-size: .65rem; line-height: 1.15; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .planner-slot .slot-remove { display: none; font-size: .6rem; cursor: pointer; opacity: .4; padding: .1rem .15rem; border-radius: 4px; }
 .planner-slot.filled .slot-remove { display: inline-flex; align-items: center; justify-content: center; }
 .planner-slot .slot-remove:hover { opacity: 1; background: rgba(255,255,255,.08); }
@@ -1707,30 +1707,38 @@ function switchTab(tab) {
 // ======================== MEAL PLANNER ========================
 const DAYS_SK = ['pondelok','utorok','streda','štvrtok','piatok','sobota','nedeľa'];
 const DAYS_EN = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+const MEALS = [
+  { id: 'raňajky', icon: '🌅' },
+  { id: 'desiata', icon: '🍎' },
+  { id: 'obed',    icon: '🌤' },
+  { id: 'olovrant',icon: '🍪' },
+  { id: 'večera',  icon: '🌙' },
+];
 
 function renderPlanner() {
   const week = document.getElementById('planner-week');
   const dayNames = lang === 'en' ? DAYS_EN : DAYS_SK;
   const now = new Date();
   const startOfWeek = new Date(now); startOfWeek.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+  const totalSlots = MEALS.length;
   week.innerHTML = DAYS.map((d, i) => {
     const day = mealPlan[d] || {};
     const date = new Date(startOfWeek); date.setDate(startOfWeek.getDate() + i);
     const dateStr = date.getDate() + '.' + (date.getMonth()+1) + '.';
     const isWeekend = i >= 5;
+    const filled = Object.values(day).filter(Boolean).length;
     return `<div class="planner-day${isWeekend ? ' weekend' : ''}">
       <div class="planner-day-header">
         <span>${dayNames[i]} <span class="day-date">${dateStr}</span></span>
-        <span class="day-count">${Object.values(day).filter(Boolean).length}/2</span>
+        <span class="day-count">${filled}/${totalSlots}</span>
       </div>
-      <div class="planner-slots">${['obed','večera'].map(s => {
-        const recipe = day[s] ? recipes.find(r => r.id === day[s]) : null;
+      <div class="planner-slots">${MEALS.map(m => {
+        const recipe = day[m.id] ? recipes.find(r => r.id === day[m.id]) : null;
         const name = recipe ? (lang === 'en' && recipe.nameEn ? recipe.nameEn : recipe.name) : '';
-        const icon = s === 'obed' ? '🌤' : '🌙';
-        return `<div class="planner-slot${recipe ? ' filled' : ''}" onclick="pickRecipe('${d}','${s}')">
+        return `<div class="planner-slot${recipe ? ' filled' : ''}" onclick="pickRecipe('${d}','${m.id}')">
           ${recipe
-            ? `<span class="slot-icon">${icon}</span><span class="slot-name">${esc(name)}</span><span class="slot-remove" onclick="event.stopPropagation();removeSlot('${d}','${s}')">✕</span>`
-            : `<span class="slot-icon">${icon}</span><span data-lang="plannerEmpty" style="opacity:.6">+ pridať</span>`}
+            ? `<span class="slot-icon">${m.icon}</span><span class="slot-name">${esc(name)}</span><span class="slot-remove" onclick="event.stopPropagation();removeSlot('${d}','${m.id}')">✕</span>`
+            : `<span class="slot-icon">${m.icon}</span><span data-lang="plannerEmpty" style="opacity:.6">+ pridať</span>`}
         </div>`;
       }).join('')}</div>
     </div>`;
