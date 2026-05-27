@@ -493,18 +493,66 @@ body[data-tab="dashboard"] #app-header { display: none; }
 .suggestion-card .sugg-meta { font-size: .55rem; color: var(--text3); margin-top: .12rem; }
 
 /* ===== SHOPPING REDESIGN ===== */
-.shop-category { margin-bottom: .5rem; }
-.shop-category-header { display: flex; align-items: center; justify-content: space-between; padding: .25rem .35rem; font-size: .6rem; text-transform: uppercase; letter-spacing: .06em; color: var(--text3); font-weight: 700; }
-.shop-category-progress { height: 2px; background: var(--border); border-radius: 2px; overflow: hidden; margin: .2rem .35rem; }
-.shop-category-progress-bar { height: 100%; background: linear-gradient(90deg, var(--success), var(--primary-light)); border-radius: 2px; transition: width .5s var(--ease-out-expo); }
-.shop-item { display: flex; align-items: center; gap: .4rem; padding: .32rem .4rem; border-radius: var(--radius-sm); transition: all .2s ease; cursor: pointer; }
-.shop-item:hover { background: var(--hover-bg); }
-.shop-item .shop-check { width: 16px; height: 16px; border-radius: 4px; border: 2px solid var(--text3); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .2s var(--ease-spring); cursor: pointer; }
-.shop-item.checked .shop-check { background: var(--primary-light); border-color: var(--primary-light); }
-.shop-item .shop-qty { font-size: .6rem; background: var(--border); padding: .02rem .35rem; border-radius: 10px; color: var(--text2); font-weight: 600; margin-left: auto; }
-.shop-item .shop-name { flex: 1; font-size: .73rem; color: var(--text); transition: all .2s; }
-.shop-item.checked .shop-name { text-decoration: line-through; opacity: .5; }
+.shopping-scroll { padding-bottom: 1rem; }
+.shop-summary { background: var(--surface); border-radius: var(--radius-md); padding: .55rem .65rem; margin-bottom: .55rem; border: 1px solid var(--border); }
+.shop-summary-row { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+.shop-summary-stats { display: flex; gap: .6rem; font-size: .72rem; color: var(--text2); }
+.shop-summary-stats strong { color: var(--text); font-weight: 700; }
+.shop-summary-progress { height: 3px; background: var(--border); border-radius: 4px; overflow: hidden; margin-top: .35rem; }
+.shop-summary-progress-bar { height: 100%; background: linear-gradient(90deg, var(--success), var(--primary-light)); border-radius: 4px; transition: width .5s var(--ease-out-expo); }
+.shop-actions { display: flex; gap: .3rem; margin-bottom: .55rem; flex-wrap: wrap; }
+.shop-actions .sa-btn { display: flex; align-items: center; gap: .2rem; padding: .3rem .5rem; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); color: var(--text2); font-size: .68rem; font-weight: 600; cursor: pointer; transition: all .15s ease; white-space: nowrap; }
+.shop-actions .sa-btn:active { transform: scale(.95); }
+.shop-actions .sa-btn:hover { border-color: var(--primary-light); color: var(--text); }
+.shop-actions .sa-btn.danger:hover { border-color: var(--danger); color: var(--danger); }
+.shop-cat-card { background: var(--surface); border-radius: var(--radius-md); margin-bottom: .45rem; border: 1px solid var(--border); overflow: hidden; transition: all .2s ease; }
+.shop-cat-header { display: flex; align-items: center; gap: .4rem; padding: .45rem .5rem; cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; }
+.shop-cat-header:active { background: var(--hover-bg); }
+.shop-cat-icon { font-size: 1.05rem; flex-shrink: 0; }
+.shop-cat-name { font-size: .78rem; font-weight: 700; color: var(--text); flex: 1; }
+.shop-cat-count { font-size: .64rem; color: var(--text3); font-weight: 600; margin-right: .15rem; }
+.shop-cat-progress-wrap { width: 40px; height: 4px; background: var(--border); border-radius: 4px; overflow: hidden; flex-shrink: 0; }
+.shop-cat-progress-bar { height: 100%; background: linear-gradient(90deg, var(--success), var(--primary-light)); border-radius: 4px; transition: width .4s var(--ease-out-expo); }
+.shop-cat-arrow { font-size: .6rem; color: var(--text3); transition: transform .3s var(--ease-smooth); flex-shrink: 0; }
+.shop-cat-card.collapsed .shop-cat-arrow { transform: rotate(-90deg); }
+.shop-cat-body { transition: max-height .35s var(--ease-out-expo), opacity .25s ease; max-height: 2000px; opacity: 1; overflow: hidden; }
+.shop-cat-card.collapsed .shop-cat-body { max-height: 0 !important; opacity: 0; }
+.shop-item { display: flex; align-items: center; gap: .35rem; padding: .38rem .5rem .38rem .5rem; border-top: 1px solid var(--border); transition: all .2s ease; }
+.shop-item:active { background: var(--hover-bg); }
+.shop-item.checked { opacity: .55; }
+.shop-item .si-check { width: 20px; height: 20px; border-radius: 5px; border: 2px solid var(--text3); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .25s var(--ease-spring); cursor: pointer; font-size: .55rem; color: transparent; background: transparent; -webkit-tap-highlight-color: transparent; }
+.shop-item .si-check.checked { background: var(--primary-light); border-color: var(--primary-light); color: #fff; }
+.shop-item .si-info { flex: 1; min-width: 0; }
+.shop-item .si-name { font-size: .77rem; font-weight: 600; color: var(--text); transition: all .2s; }
+.shop-item.checked .si-name { text-decoration: line-through; opacity: .6; }
+.shop-item .si-meta { font-size: .6rem; color: var(--text3); margin-top: .05rem; display: flex; gap: .25rem; align-items: center; flex-wrap: wrap; }
+.shop-item .si-cat-chip { font-size: .52rem; padding: .04rem .32rem; border-radius: 99px; background: var(--input-bg); color: var(--text2); font-weight: 600; white-space: nowrap; }
+.shop-item .si-actions { display: flex; gap: .15rem; flex-shrink: 0; }
+.shop-item .si-btn { width: 28px; height: 28px; border-radius: 6px; border: none; background: transparent; color: var(--text3); font-size: .65rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .15s ease; -webkit-tap-highlight-color: transparent; }
+.shop-item .si-btn:hover { background: var(--hover-bg); color: var(--text2); }
+.shop-item .si-btn.danger:hover { background: rgba(220,38,38,.1); color: var(--danger); }
+.shop-add-btn { display: flex; align-items: center; justify-content: center; gap: .3rem; width: 100%; padding: .5rem; border-radius: var(--radius-md); border: 2px dashed var(--border); background: transparent; color: var(--text2); font-size: .8rem; font-weight: 700; cursor: pointer; transition: all .2s ease; margin-top: .15rem; }
+.shop-add-btn:active { transform: scale(.98); border-color: var(--primary-light); color: var(--primary-light); }
+.shop-empty { text-align: center; padding: 2rem 1rem 1.5rem; }
+.shop-empty-icon { font-size: 3rem; margin-bottom: .3rem; opacity: .6; }
+.shop-empty-title { font-size: .95rem; font-weight: 700; color: var(--text2); margin-bottom: .15rem; }
+.shop-empty-desc { font-size: .72rem; color: var(--text3); max-width: 280px; margin: 0 auto .6rem; line-height: 1.4; }
+.shop-empty-actions { display: flex; flex-direction: column; gap: .35rem; align-items: center; }
+.shop-empty-actions .btn { width: 200px; max-width: 80vw; }
+@media (max-width: 400px) {
+  .shop-summary-stats { font-size: .64rem; gap: .4rem; flex-wrap: wrap; }
+  .shop-item { padding: .35rem .35rem; gap: .25rem; }
+  .shop-item .si-name { font-size: .72rem; }
+  .shop-item .si-btn { width: 24px; height: 24px; font-size: .58rem; }
+}
 
+/* ===== SHOPPING ADD SHEET ===== */
+.shop-sheet-label { display: block; font-size: .68rem; font-weight: 700; color: var(--text2); margin-bottom: .3rem; text-transform: uppercase; letter-spacing: .04em; }
+.shop-cat-chips { display: flex; flex-wrap: wrap; gap: .25rem; margin-bottom: .15rem; }
+.cat-chip { display: flex; align-items: center; gap: .2rem; padding: .3rem .45rem; border-radius: 99px; border: 1.5px solid var(--border); background: var(--surface); color: var(--text2); font-size: .68rem; font-weight: 600; cursor: pointer; transition: all .15s ease; -webkit-tap-highlight-color: transparent; }
+.cat-chip:active { transform: scale(.94); }
+.cat-chip.active { border-color: var(--primary-light); background: rgba(220,38,38,.08); color: var(--primary); }
+.cat-chip:hover:not(.active) { border-color: var(--text3); }
 /* ===== BOTTOM SHEET ===== */
 .sheet-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 1000; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
 .sheet-overlay.active { display: flex; align-items: flex-end; justify-content: center; animation: sheetOverlayIn .3s ease; }
@@ -759,15 +807,35 @@ body[data-tab="dashboard"] #app-header { display: none; }
 
 <!-- SHOPPING -->
 <div class="container" id="shopping-container" style="display:none;">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.4rem;flex-wrap:wrap;gap:.3rem;">
-    <h2 style="font-size:.95rem;font-weight:700;"><span data-lang="plannerShopping">Nákupný zoznam</span></h2>
-    <div style="display:flex;align-items:center;gap:.25rem;">
-      <button class="btn btn-secondary" onclick="copyShoppingList()" style="font-size:.65rem;padding:.18rem .4rem;" data-lang="plannerCopy">📋</button>
-      <button class="btn btn-secondary" onclick="clearCheckedShopping()" style="font-size:.65rem;padding:.18rem .4rem;" data-lang="shopClearChecked">Vyčistiť</button>
-      <button class="btn btn-danger" onclick="confirmClearAllShopping()" style="font-size:.65rem;padding:.18rem .4rem;" data-lang="shopClearAll">Vymazať</button>
+  <div class="shopping-scroll" id="shopping-list-view"></div>
+</div>
+
+<!-- ADD ITEM SHEET -->
+<div class="sheet-overlay" id="shop-sheet">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <h2 id="shop-sheet-title">✏️ Pridať potravinu</h2>
+      <button class="sheet-close" onclick="closeShopSheet()">✕</button>
+    </div>
+    <div class="sheet-body">
+      <div class="form-group"><input id="shop-item-name" placeholder="Názov potraviny" style="font-size:.9rem;font-weight:600;" oninput="guessShopCategory()"></div>
+      <div class="form-row" style="gap:.35rem;">
+        <div class="form-group" style="flex:1;"><input id="shop-item-amount" type="number" step="0.1" min="0" placeholder="Množstvo"></div>
+        <div class="form-group" style="flex:1;"><input id="shop-item-unit" placeholder="Jednotka (g, ks, ml...)"></div>
+      </div>
+      <div class="form-group">
+        <label class="shop-sheet-label">Kategória</label>
+        <div class="shop-cat-chips" id="shop-cat-chips"></div>
+      </div>
+      <div class="form-group"><input id="shop-item-note" placeholder="Poznámka (voliteľné)"></div>
+      <input type="hidden" id="shop-edit-id" value="">
+      <div class="form-row" style="gap:.35rem;margin-top:.3rem;">
+        <button class="btn primary" onclick="saveShopItem()" style="flex:1;font-size:.82rem;" id="shop-save-btn">💾 Pridať</button>
+        <button class="btn btn-secondary" onclick="closeShopSheet()" style="font-size:.82rem;">Zrušiť</button>
+      </div>
     </div>
   </div>
-  <div id="shopping-list-view"></div>
 </div>
 
 <!-- FORM MODAL -->
@@ -3232,62 +3300,80 @@ function toggleWeekGrid() {}
 function resetWeek() { plannerWeekOffset = 0; renderPlanner(); }
 
 // ======================== SHOPPING LIST ========================
-function getShoppingState() {
-  try { return JSON.parse(localStorage.getItem('shoppingState') || '{}'); } catch(e) { return {}; }
+// ======================== SHOPPING LIST ========================
+const SHOP_CATEGORIES = [
+  { id: 'meat',  icon: '🥩', nameSk: 'Mäso a ryby',      nameEn: 'Meat & Fish',      keywords: ['mäso','meat','kura','chicken','kuracie','hovädzie','beef','bravčové','pork','biftek','steak','mleté','minced','salmon','losos','tuniak','tuna','ryba','fish','ryby','slanina','bacon','klobása','sausage','šunka','ham','párky','frankfurter','špek','spek','krkovička','rebro','rib'] },
+  { id: 'dairy',  icon: '🥛', nameSk: 'Mliečne výrobky',  nameEn: 'Dairy',           keywords: ['mlieko','milk','smotana','cream','syr','cheese','maslo','butter','tvaroh','cottage','cottage','jogurt','yogurt','mozzarella','parmezán','parmesan','ricotta','vajce','egg','vajcia','eggs','feta','bryndza','kefír','kefir','cmar','buttermilk'] },
+  { id: 'veg',    icon: '🥦', nameSk: 'Zelenina',         nameEn: 'Vegetables',       keywords: ['mrkva','carrot','zemiak','potato','zemiaky','cibuľa','onion','cesnak','garlic','kapusta','cabbage','paradajka','tomato','paradajky','paprika','pepper','cuketa','zucchini','špenát','spinach','brokolica','broccoli','šalát','lettuce','uhorka','cucumber','tekvica','pumpkin','batat','sweet potato','cvikla','beetroot','fazuľa','bean','hrášok','peas','kukurica','corn','šošovica','lentil','zeler','celeriac','petržlen','parsley','bylinky','herbs','bazalka','basil','kôpor','dill','pažítka','chives','reďkovka','radish','kel','kale','karfiol','cauliflower','špargľa','asparagus','avokádo','avocado','portulaka','huby','mushrooms','šampiňóny'] },
+  { id: 'fruit',  icon: '🍎', nameSk: 'Ovocie',           nameEn: 'Fruit',           keywords: ['jablko','apple','banán','banana','jahody','strawberry','citrón','lemon','limetka','lime','pomaranč','orange','mandarínka','mandarin','hrozienka','raisins','hrozno','grapes','ovocie','fruit','čučoriedky','blueberry','maliny','raspberry','marhuľa','apricot','broskyňa','peach','slivka','plum','melón','melon','ananas','pineapple','kiwi','mango','datle','dates','figy','figs'] },
+  { id: 'grain',  icon: '🍞', nameSk: 'Pečivo a obilniny',nameEn: 'Bread & Grains',   keywords: ['múka','flour','chlieb','bread','cesto','dough','strúhanka','breadcrumb','cestoviny','pasta','špagety','spaghetti','lasagne','ryža','rice','quinoa','granola','ovsené','oats','krupica','semolina','vločky','flakes','müsli','muesli','rožok','roll','bageta','baguette','tortilla','pita','kuskus','couscous','bulgur','ražný','žitný','kváskový','sourdough'] },
+  { id: 'canned', icon: '🥫', nameSk: 'Konzervy a trvanlivé', nameEn: 'Canned & Pantry', keywords: ['konzerva','can','cícer','chickpea','šošovica','lentil','fazuľa','bean','pretlak','passata','vývar','broth','olej','oil','ocot','vinegar','horčica','mustard','kečup','ketchup','med','honey','pyré','puree','omáčka','sauce','majonéza','mayonnaise','dresing','dressing','sojová','soya','pesto','kapary','capers','olivy','olives'] },
+  { id: 'spice',  icon: '🧂', nameSk: 'Koreniny a dochucovadlá', nameEn: 'Spices & Seasonings', keywords: ['soľ','salt','korenie','pepper','paprika','oregano','bazalka','basil','majorán','marjoram','tymian','thyme','rozmarín','rosemary','škorica','cinnamon','vanilka','vanilla','rasca','cumin','kari','curry','bobkový','bay','muškátový','nutmeg','cesnakový','garlic powder','grilovacie','seasoning','bujón','bouillon','kvasnice','yeast','prášok do pečiva','baking'] },
+  { id: 'drink',  icon: '🥤', nameSk: 'Nápoje',           nameEn: 'Drinks',          keywords: ['voda','water','džús','juice','čaj','tea','káva','coffee','sirup','syrup','limonáda','lemonade','kofola','minerálka','mineral','sódovka','soda','pivo','beer','víno','wine','koktail','cocktail'] },
+  { id: 'frozen', icon: '❄️', nameSk: 'Mrazené',          nameEn: 'Frozen',          keywords: ['mrazená','frozen','zmrzlina','ice cream','mrazené','mrazený','lístkové','puff pastry','mrazená zelenina','frozen veg'] },
+  { id: 'sweet',  icon: '🍪', nameSk: 'Sladkosti',        nameEn: 'Sweets',          keywords: ['čokoláda','chocolate','sušienky','cookies','biscuit','keksy','candy','cukríky','lizátko','lollipop','lízanka','koláč','cake','zákusok','dessert','marmeláda','jam','džem','nátierka','spread','nutella','poleva','icing','cukor','sugar'] },
+  { id: 'drug',   icon: '🧴', nameSk: 'Drogéria',         nameEn: 'Drugstore',       keywords: ['obrúsky','napkins','jar','washing','šampón','shampoo','sprcha','gél','mydlo','soap','papier','toilet','utierka','towel','sáčok','bag','alobal','foil','fólia','cling wrap','čistič','cleaner','sóda','baking soda','tableta','dishwasher','aviváž','fabric','dezodorant','deodorant','krém','cream','zubná','toothpaste'] },
+  { id: 'other',  icon: '📦', nameSk: 'Ostatné',          nameEn: 'Other',           keywords: [] },
+];
+
+function guessFoodCategory(name) {
+  const n = name.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  let best = null, bestLen = 0;
+  for (const cat of SHOP_CATEGORIES) {
+    if (!cat.keywords.length) continue;
+    for (const kw of cat.keywords) {
+      if (n.includes(kw) && kw.length > bestLen) {
+        best = cat.id;
+        bestLen = kw.length;
+      }
+    }
+  }
+  return best || 'other';
 }
-function saveShoppingState(state) {
-  localStorage.setItem('shoppingState', JSON.stringify(state));
+
+function shopCatLabel(catId) {
+  const c = SHOP_CATEGORIES.find(x => x.id === catId);
+  if (!c) return lang === 'en' ? 'Other' : 'Ostatné';
+  return lang === 'en' ? c.nameEn : c.nameSk;
 }
-function isShoppingChecked(text) {
-  const state = getShoppingState();
-  const wk = currentWeekKey();
-  return state[wk] && state[wk].checked && state[wk].checked.includes(text);
+
+function shopCatIcon(catId) {
+  const c = SHOP_CATEGORIES.find(x => x.id === catId);
+  return c ? c.icon : '📦';
 }
-function isShoppingHidden(text) {
-  const state = getShoppingState();
-  const wk = currentWeekKey();
-  return state[wk] && state[wk].hidden && state[wk].hidden.includes(text);
+
+let shopItems = [];
+function loadShopItems() {
+  try { shopItems = JSON.parse(localStorage.getItem('shoppingItems') || '[]'); } catch(e) { shopItems = []; }
+  // Migrate from old format
+  if (!Array.isArray(shopItems) || (shopItems.length === 0 && localStorage.getItem('shoppingState'))) {
+    try {
+      const old = JSON.parse(localStorage.getItem('shoppingState') || '{}');
+      const wk = Object.keys(old)[0];
+      if (wk && old[wk]) {
+        shopItems = (old[wk].hidden || []).map(t => ({ id: 'si_' + Date.now() + '_' + Math.random().toString(36).slice(2,8), name: t, amount: '', unit: '', category: guessFoodCategory(t), checked: true, source: 'recipe', note: '' }));
+      }
+    } catch(e) {}
+    saveShopItems();
+  }
 }
-function toggleShoppingItem(text) {
-  const state = getShoppingState();
-  const wk = currentWeekKey();
-  if (!state[wk]) state[wk] = { checked: [], hidden: [] };
-  const idx = state[wk].checked.indexOf(text);
-  if (idx >= 0) state[wk].checked.splice(idx, 1);
-  else state[wk].checked.push(text);
-  saveShoppingState(state);
+function saveShopItems() {
+  localStorage.setItem('shoppingItems', JSON.stringify(shopItems));
 }
-function clearCheckedShopping() {
-  const checked = document.querySelectorAll('#shopping-list-view .shop-item.checked');
-  if (!checked.length) return;
-  const state = getShoppingState();
-  const wk = currentWeekKey();
-  if (!state[wk]) state[wk] = { checked: [], hidden: [] };
-  checked.forEach(el => {
-    const text = el.dataset.item;
-    if (text && !state[wk].hidden.includes(text)) state[wk].hidden.push(text);
-  });
-  state[wk].checked = [];
-  saveShoppingState(state);
-  renderShoppingList();
-}
-function confirmClearAllShopping() {
-  if (!confirm(lang === 'en' ? 'Clear entire shopping list?' : 'Vymazať celý nákupný zoznam?')) return;
-  const state = getShoppingState();
-  const wk = currentWeekKey();
-  const checked = state[wk] ? state[wk].checked || [] : [];
-  state[wk] = { checked: [], hidden: [...(state[wk] ? (state[wk].hidden || []) : []), ...checked] };
-  saveShoppingState(state);
-  renderShoppingList();
+function generateShopId() {
+  return 'si_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8);
 }
 
 function renderShoppingList() {
   const container = document.getElementById('shopping-list-view');
-  const merged = {};
-  const weekKey = currentWeekKey();
-  const weekPlan = getWeekPlan(weekKey);
+  loadShopItems();
+
+  // Gather recipe ingredients
+  const wk = currentWeekKey();
+  const plan = getWeekPlan(wk);
+  const recipeItems = [];
   DAYS.forEach(d => {
-    const day = weekPlan[d] || {};
+    const day = plan[d] || {};
     Object.values(day).filter(Boolean).forEach(entry => {
       let r = null;
       if (typeof entry === 'number') r = recipes.find(rec => rec.id === entry);
@@ -3295,83 +3381,295 @@ function renderShoppingList() {
       if (r) {
         const ingr = lang === 'en' && r.ingredientsEn ? r.ingredientsEn : r.ingredients;
         ingr.forEach(i => {
-          const key = i.toLowerCase().trim();
-          merged[key] = { text: i, count: (merged[key]?.count || 0) + 1 };
+          const text = i.toLowerCase().trim();
+          if (!recipeItems.some(x => x.name.toLowerCase().trim() === text)) {
+            recipeItems.push({ name: i, category: guessFoodCategory(i) });
+          }
         });
       }
     });
   });
-  let items = Object.values(merged).filter(i => !isShoppingHidden(i.text));
-  if (!items.length) {
-    container.innerHTML = `<div style="text-align:center;padding:2rem 1rem;color:var(--text3);">
-      <div style="font-size:2.5rem;margin-bottom:.5rem;">🛒</div>
-      <div style="font-size:.9rem;font-weight:600;color:var(--text2);">${lang === 'en' ? 'Shopping list empty' : 'Nákupný zoznam je prázdny'}</div>
-      <div style="font-size:.7rem;margin-top:.15rem;">${lang === 'en' ? 'Plan your meals and ingredients will appear here.' : 'Naplánuj jedlá a suroviny sa zobrazia tu.'}</div>
+
+  // Merge manual items (preserved across weeks) with current recipe items
+  const manualItems = shopItems.filter(it => it.source === 'manual');
+  const merged = [...recipeItems.map(r => {
+    const key = r.name.toLowerCase().trim();
+    const existing = shopItems.find(s => s.source === 'recipe' && s.name.toLowerCase().trim() === key);
+    if (existing) return existing;
+    return { id: generateShopId(), name: r.name, amount: '', unit: '', category: r.category, checked: false, source: 'recipe', note: '', recipeId: '' };
+  }), ...manualItems];
+
+  // Deduplicate recipe items by name (keep first occurrence)
+  const seen = new Set();
+  shopItems = merged.filter(it => {
+    if (it.source !== 'recipe') return true;
+    const key = it.name.toLowerCase().trim();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+  saveShopItems();
+
+  if (!shopItems.length) {
+    container.innerHTML = `<div class="shop-empty">
+      <div class="shop-empty-icon">🛒</div>
+      <div class="shop-empty-title">${lang === 'en' ? 'Shopping list is empty' : 'Nákupný zoznam je prázdny'}</div>
+      <div class="shop-empty-desc">${lang === 'en' ? 'Plan your meals and ingredients will appear here automatically. You can also add items manually.' : 'Naplánuj jedlá a suroviny sa sem pridajú automaticky. Môžeš aj manuálne pridať položky.'}</div>
+      <div class="shop-empty-actions">
+        <button class="btn primary" onclick="openAddItemSheet()">✏️ ${lang === 'en' ? 'Add item' : 'Pridať potravinu'}</button>
+        <button class="btn btn-secondary" onclick="switchTab('planner')">📅 ${lang === 'en' ? 'Plan a meal' : 'Naplánovať jedlo'}</button>
+      </div>
+      <div style="margin-top:.55rem;font-size:.62rem;color:var(--text3);">💡 ${lang === 'en' ? 'Ingredients from planned recipes appear automatically.' : 'Suroviny z naplánovaných receptov sa sem pridajú automaticky.'}</div>
     </div>`;
     return;
   }
 
-  // Simple category heuristic based on ingredient keywords
-  const categories = {
-    '🥩': { keywords: ['mäso','meat','kura','chicken','hovädzie','beef','bravčové','pork','salmon','losos','tuniak','tuna','ryba','fish','slanina','bacon','klobása','sausage'], items: [] },
-    '🥬': { keywords: ['mrkva','carrot','zemiak','potato','cibuľa','onion','cesnak','garlic','kapusta','paradajka','tomato','paprika','pepper','cuketa','zucchini','špenát','spinach','brokolica','broccoli','šalát','lettuce','uhorka','cucumber','tekvica','pumpkin','batat','sweet potato','cvikla','beetroot','fazuľa','bean','hrášok','peas','kukurica','corn','šošovica','lentil','zeler','celeriac','petržlen','parsley','bylinky','herbs','bazalka','basil','kôpor','dill'], items: [] },
-    '🥛': { keywords: ['mlieko','milk','smotana','cream','syr','cheese','maslo','butter','tvaroh','cottage','jogurt','yogurt','mozzarella','parmezán','parmesan','ricotta','vajce','egg','feta','bryndza'], items: [] },
-    '🍞': { keywords: ['múka','flour','chlieb','bread','cesto','dough','strúhanka','breadcrumb','cestoviny','pasta','špagety','spaghetti','lasagne','ryža','rice','quinoa','granola','ovsené','oats','krupica','semolina'], items: [] },
-    '🥫': { keywords: ['konzerva','can','cícer','chickpea','pretlak','passata','vývar','broth','olej','oil','ocot','vinegar','horčica','mustard','kečup','ketchup','med','honey','čokoláda','chocolate','kakao','cocoa'], items: [] },
-    '🍎': { keywords: ['jablko','apple','banán','banana','jahody','strawberry','citrón','lemon','limetka','lime','pomaranč','orange','hrozienka','raisins','ovocie','fruit'], items: [] },
-    '🌰': { keywords: ['orechy','nuts','chia','semienka','seeds','mandle','almond'], items: [] },
-  };
-
-  // Categorize each item
-  const categorized = { '🧂': { label: lang === 'en' ? 'Other' : 'Ostatné', items: [] } };
-  Object.keys(categories).forEach(k => { categorized[k] = { label: k, items: [] }; });
-
-  items.forEach(item => {
-    const lower = item.text.toLowerCase();
-    let placed = false;
-    for (const [emoji, cat] of Object.entries(categories)) {
-      if (cat.keywords.some(kw => lower.includes(kw))) {
-        categorized[emoji].items.push(item);
-        placed = true; break;
-      }
-    }
-    if (!placed) categorized['🧂'].items.push(item);
+  // Group by category
+  const groups = {};
+  shopItems.forEach(it => {
+    const g = it.category || 'other';
+    if (!groups[g]) groups[g] = [];
+    groups[g].push(it);
   });
 
-  let html = '';
-  const allChecked = (arr) => arr.every(i => isShoppingChecked(i.text));
-  const anyChecked = (arr) => arr.some(i => isShoppingChecked(i.text));
-  const catOrder = ['🥩','🥬','🥛','🍞','🥫','🍎','🌰','🧂'];
+  // Sort within groups: unchecked first, then checked
+  Object.keys(groups).forEach(g => {
+    groups[g].sort((a, b) => {
+      if (a.checked !== b.checked) return a.checked ? 1 : -1;
+      return a.name.localeCompare(b.name);
+    });
+  });
 
-  catOrder.forEach(emoji => {
-    const cat = categorized[emoji];
-    if (!cat || !cat.items || !cat.items.length) return;
-    const total = cat.items.length;
-    const checked = cat.items.filter(i => isShoppingChecked(i.text)).length;
-    const pct = Math.round(checked / total * 100);
-    html += `<div class="shop-category">
-      <div class="shop-category-header">
-        <span>${emoji} ${cat.label||''} <span style="font-weight:400;opacity:.6;">(${checked}/${total})</span></span>
+  // Category order
+  const catOrder = SHOP_CATEGORIES.map(c => c.id);
+  const totalItems = shopItems.length;
+  const checkedItems = shopItems.filter(i => i.checked).length;
+  const remaining = totalItems - checkedItems;
+  const pctAll = totalItems ? Math.round(checkedItems / totalItems * 100) : 0;
+  const catCount = Object.keys(groups).length;
+
+  // Build HTML
+  let html = '';
+
+  // Summary
+  html += `<div class="shop-summary">
+    <div class="shop-summary-row">
+      <div class="shop-summary-stats">
+        <span>📦 <strong>${totalItems}</strong> ${lang==='en'?'items':'položiek'}</span>
+        <span>✅ <strong>${checkedItems}</strong> ${lang==='en'?'bought':'kúpených'}</span>
+        <span>📋 <strong>${remaining}</strong> ${lang==='en'?'left':'zostáva'}</span>
       </div>
-      <div class="shop-category-progress"><div class="shop-category-progress-bar" style="width:${pct}%"></div></div>
-      ${cat.items.map(i => {
-        const ch = isShoppingChecked(i.text);
-        return `<div class="shop-item ${ch?'checked':''}" data-item="${escAttr(i.text)}" onclick="toggleShoppingItem(this.dataset.item);this.classList.toggle('checked');const p=this.closest('.shop-category').querySelector('.shop-category-progress-bar');const all=this.closest('.shop-category').querySelectorAll('.shop-item');const chk=this.closest('.shop-category').querySelectorAll('.shop-item.checked');p.style.width=Math.round(chk.length/all.length*100)+'%'">
-          <span class="shop-check">${ch?'✓':''}</span>
-          <span class="shop-name">${esc(i.text)} ${i.count > 1 ? `<span class="shop-qty">×${i.count}</span>` : ''}</span>
+      <span style="font-size:.64rem;color:var(--text3);">${catCount} ${lang==='en'?'categories':'kategórií'}</span>
+    </div>
+    <div class="shop-summary-progress"><div class="shop-summary-progress-bar" style="width:${pctAll}%"></div></div>
+  </div>`;
+
+  // Top actions
+  html += `<div class="shop-actions">
+    <button class="sa-btn" onclick="copyShopList()">📋 ${lang==='en'?'Copy':'Kopírovať'}</button>
+    <button class="sa-btn" onclick="clearCheckedShopItems()">✅ ${lang==='en'?'Clear checked':'Vyčistiť zaškrtnuté'}</button>
+    <button class="sa-btn danger" onclick="clearAllShopItems()">🗑 ${lang==='en'?'Clear all':'Vymazať všetko'}</button>
+  </div>`;
+
+  // Category cards
+  const allCatIds = [...new Set([...Object.keys(groups).filter(g => catOrder.includes(g)), ...catOrder])];
+  allCatIds.forEach(catId => {
+    const items = groups[catId];
+    if (!items || !items.length) return;
+    const total = items.length;
+    const checked = items.filter(i => i.checked).length;
+    const pct = Math.round(checked / total * 100);
+    html += `<div class="shop-cat-card" data-cat="${catId}">
+      <div class="shop-cat-header" onclick="toggleShopCategory(this)">
+        <span class="shop-cat-icon">${shopCatIcon(catId)}</span>
+        <span class="shop-cat-name">${shopCatLabel(catId)}</span>
+        <span class="shop-cat-count">${checked}/${total}</span>
+        <div class="shop-cat-progress-wrap"><div class="shop-cat-progress-bar" style="width:${pct}%"></div></div>
+        <span class="shop-cat-arrow">▼</span>
+      </div>
+      <div class="shop-cat-body">${items.map(it => {
+        const ch = it.checked ? 'checked' : '';
+        const catLabel = shopCatLabel(it.category);
+        const amount = it.amount ? (it.unit ? `${it.amount} ${it.unit}` : it.amount) : '';
+        return `<div class="shop-item ${ch}" data-id="${it.id}">
+          <div class="si-check ${ch}" onclick="toggleShopItem('${it.id}')">${it.checked?'✓':''}</div>
+          <div class="si-info" onclick="openAddItemSheet('${it.id}')">
+            <div class="si-name">${esc(it.name)}</div>
+            <div class="si-meta">
+              ${amount ? `<span>${esc(amount)}</span>` : ''}
+              <span class="si-cat-chip">${esc(catLabel)}</span>
+              ${it.note ? `<span>📝 ${esc(it.note)}</span>` : ''}
+            </div>
+          </div>
+          <div class="si-actions">
+            <button class="si-btn" onclick="event.stopPropagation();openAddItemSheet('${it.id}')" title="${lang==='en'?'Edit':'Upraviť'}">✏️</button>
+            <button class="si-btn danger" onclick="event.stopPropagation();deleteShopItem('${it.id}')" title="${lang==='en'?'Delete':'Vymazať'}">🗑</button>
+          </div>
         </div>`;
-      }).join('')}
+      }).join('')}</div>
     </div>`;
   });
+
+  // Add item button
+  html += `<button class="shop-add-btn" onclick="openAddItemSheet()">➕ ${lang==='en'?'Add food item':'Pridať potravinu'}</button>`;
 
   container.innerHTML = html;
 }
 
-function copyShoppingList() {
-  const items = document.querySelectorAll('#shopping-list-view .shop-item:not(.checked) .shop-name');
-  const text = Array.from(items).map(el => el.textContent.replace(/\s*×\d+\s*$/,'').trim()).join('\n');
-  if (!text) return;
+function toggleShopItem(id) {
+  const it = shopItems.find(i => i.id === id);
+  if (!it) return;
+  it.checked = !it.checked;
+  saveShopItems();
+  renderShoppingList();
+}
+
+function clearCheckedShopItems() {
+  const checked = shopItems.filter(i => i.checked);
+  if (!checked.length) {
+    if (lang === 'en') alert('No checked items to clear.');
+    else alert('Žiadne zaškrtnuté položky na vyčistenie.');
+    return;
+  }
+  if (!confirm(lang === 'en' ? `Remove ${checked.length} checked items?` : `Odstrániť ${checked.length} zaškrtnutých položiek?`)) return;
+  shopItems = shopItems.filter(i => !i.checked);
+  saveShopItems();
+  renderShoppingList();
+}
+
+function clearAllShopItems() {
+  if (!confirm(lang === 'en' ? 'Clear entire shopping list?' : 'Vymazať celý nákupný zoznam?')) return;
+  shopItems = [];
+  saveShopItems();
+  renderShoppingList();
+}
+
+function copyShopList() {
+  const unchecked = shopItems.filter(i => !i.checked);
+  if (!unchecked.length) return;
+  const text = unchecked.map(i => {
+    const amount = i.amount ? (i.unit ? `${i.amount} ${i.unit}` : i.amount) : '';
+    return `${i.name}${amount ? ' ' + amount : ''}${i.note ? ' — ' + i.note : ''}`;
+  }).join('\n');
   navigator.clipboard.writeText(text).catch(() => {});
+  if (lang === 'en') alert('Copied ' + unchecked.length + ' items to clipboard.');
+  else alert('Skopírovaných ' + unchecked.length + ' položiek do schránky.');
+}
+
+function openAddItemSheet(editId) {
+  const sheet = document.getElementById('shop-sheet');
+  const title = document.getElementById('shop-sheet-title');
+  const nameEl = document.getElementById('shop-item-name');
+  const amountEl = document.getElementById('shop-item-amount');
+  const unitEl = document.getElementById('shop-item-unit');
+  const noteEl = document.getElementById('shop-item-note');
+  const editIdEl = document.getElementById('shop-edit-id');
+  const saveBtn = document.getElementById('shop-save-btn');
+  const chips = document.getElementById('shop-cat-chips');
+
+  if (editId) {
+    const it = shopItems.find(i => i.id === editId);
+    if (!it) return;
+    title.textContent = lang === 'en' ? '✏️ Edit item' : '✏️ Upraviť položku';
+    nameEl.value = it.name;
+    amountEl.value = it.amount || '';
+    unitEl.value = it.unit || '';
+    noteEl.value = it.note || '';
+    editIdEl.value = editId;
+    saveBtn.textContent = lang === 'en' ? '💾 Save' : '💾 Uložiť';
+    renderCategoryChips(it.category);
+  } else {
+    title.textContent = lang === 'en' ? '✏️ Add item' : '✏️ Pridať potravinu';
+    nameEl.value = '';
+    amountEl.value = '';
+    unitEl.value = '';
+    noteEl.value = '';
+    editIdEl.value = '';
+    saveBtn.textContent = lang === 'en' ? '💾 Add' : '💾 Pridať';
+    renderCategoryChips('other');
+  }
+  sheet.classList.add('active');
+  nameEl.focus();
+}
+
+function renderCategoryChips(selected) {
+  const chips = document.getElementById('shop-cat-chips');
+  chips.innerHTML = SHOP_CATEGORIES.map(c =>
+    `<button class="cat-chip${c.id === selected ? ' active' : ''}" data-cat="${c.id}" onclick="selectCatChip(this)">${c.icon} ${lang==='en'?c.nameEn:c.nameSk}</button>`
+  ).join('');
+}
+
+function selectCatChip(el) {
+  document.querySelectorAll('#shop-cat-chips .cat-chip').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function closeShopSheet() {
+  document.getElementById('shop-sheet').classList.remove('active');
+}
+
+function saveShopItem() {
+  const nameEl = document.getElementById('shop-item-name');
+  const amountEl = document.getElementById('shop-item-amount');
+  const unitEl = document.getElementById('shop-item-unit');
+  const noteEl = document.getElementById('shop-item-note');
+  const editIdEl = document.getElementById('shop-edit-id');
+  const activeChip = document.querySelector('#shop-cat-chips .cat-chip.active');
+  const category = activeChip ? activeChip.dataset.cat : 'other';
+  const name = nameEl.value.trim();
+  if (!name) {
+    nameEl.focus();
+    nameEl.style.borderColor = 'var(--danger)';
+    setTimeout(() => nameEl.style.borderColor = '', 1500);
+    return;
+  }
+  const editId = editIdEl.value;
+  if (editId) {
+    const it = shopItems.find(i => i.id === editId);
+    if (it) {
+      it.name = name;
+      it.amount = amountEl.value.trim();
+      it.unit = unitEl.value.trim();
+      it.category = category;
+      it.note = noteEl.value.trim();
+    }
+  } else {
+    shopItems.push({
+      id: generateShopId(),
+      name: name,
+      amount: amountEl.value.trim(),
+      unit: unitEl.value.trim(),
+      category: category,
+      checked: false,
+      source: 'manual',
+      note: noteEl.value.trim(),
+      recipeId: ''
+    });
+  }
+  saveShopItems();
+  closeShopSheet();
+  renderShoppingList();
+}
+
+function deleteShopItem(id) {
+  if (!confirm(lang === 'en' ? 'Delete this item?' : 'Vymazať túto položku?')) return;
+  shopItems = shopItems.filter(i => i.id !== id);
+  saveShopItems();
+  renderShoppingList();
+}
+
+function toggleShopCategory(headerEl) {
+  const card = headerEl.closest('.shop-cat-card');
+  card.classList.toggle('collapsed');
+}
+
+function guessShopCategory() {
+  const name = document.getElementById('shop-item-name').value.trim();
+  if (!name) return;
+  const cat = guessFoodCategory(name);
+  document.querySelectorAll('#shop-cat-chips .cat-chip').forEach(b => {
+    b.classList.toggle('active', b.dataset.cat === cat);
+  });
 }
 
 // ======================== COOKING HISTORY ========================
