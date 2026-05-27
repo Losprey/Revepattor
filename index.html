@@ -262,7 +262,10 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: rgba(22
 @media (min-width: 768px) { .planner-week { grid-template-columns: repeat(7, 1fr); } }
 .planner-day { background: var(--surface); border-radius: var(--radius-md); overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.06); border: 1px solid var(--border); position: relative; }
 .planner-day::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--primary-light); }
+.planner-day.today { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary), 0 2px 8px rgba(180,30,30,.12); }
+.planner-day.today::before { background: var(--primary); height: 3px; }
 .planner-day.weekend::before { background: var(--gold); }
+.planner-day.today.weekend::before { background: var(--primary); }
 .planner-day-header { padding: .45rem .55rem .25rem; display: flex; align-items: center; justify-content: space-between; font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: var(--text2); }
 .planner-day-header .day-date { font-weight: 400; font-size: .6rem; color: var(--text3); }
 .planner-day-header .day-count { background: var(--input-bg); padding: .05rem .35rem; border-radius: 99px; font-size: .6rem; color: var(--text3); }
@@ -450,10 +453,14 @@ body:not(.dark) .recipe-card .fav-btn.fav-active { background: linear-gradient(1
 </div>
 
 <div class="container planner-container" id="planner-container" style="display:none;">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;flex-wrap:wrap;gap:.3rem;">
     <h2 style="font-size:1rem;font-weight:700;" data-lang="plannerTitle">📅 Plánovač jedál</h2>
-    <div style="display:flex;gap:.3rem;">
-      <button class="btn btn-secondary" onclick="clearPlan()" style="font-size:.68rem;padding:.25rem .55rem;" data-lang="plannerClear">Vymazať</button>
+    <div style="display:flex;align-items:center;gap:.25rem;">
+      <button class="btn btn-secondary" onclick="prevWeek()" style="font-size:.75rem;padding:.15rem .4rem;">◀</button>
+      <span id="planner-week-label" style="font-size:.7rem;font-weight:600;min-width:7rem;text-align:center;color:var(--text2);"></span>
+      <button class="btn btn-secondary" onclick="nextWeek()" style="font-size:.75rem;padding:.15rem .4rem;">▶</button>
+      <button class="btn btn-secondary" onclick="resetWeek()" style="font-size:.6rem;padding:.15rem .4rem;" data-lang="plannerToday">dnes</button>
+      <button class="btn btn-secondary" onclick="clearPlan()" style="font-size:.65rem;padding:.15rem .4rem;" data-lang="plannerClear">🗑</button>
     </div>
   </div>
   <div class="planner-week" id="planner-week"></div>
@@ -697,7 +704,7 @@ const LANG = {
     btnImportUrl:'Import z URL', importUrlTitle:'🌐 Importovať recept z URL', importUrlHint:'Vlož odkaz na recept (varecha.pravda.sk) – appka ho stiahne a predvyplní formulár.', importUrlDo:'📥 Importovať', importUrlOk:'✅ Recept načítaný! Skontroluj a ulož.', importUrlFail:'❌ Nepodarilo sa načítať recept. Skús iný odkaz.', importUrlBad:'❌ Nenašiel sa žiadny recept na tejto URL. Skús iný odkaz.',
     moreLabelTools: 'NÁSTROJE', moreLabelData: 'DÁTA', moreLabelWeb: 'WEB',
     btnExport: 'Export', btnImport: 'Import',
-    navPlanner: 'Plánovač', plannerTitle: '📅 Plánovač jedál', plannerClear: '🗑 Vymazať',
+    navPlanner: 'Plánovač', plannerTitle: '📅 Plánovač jedál', plannerClear: '🗑', plannerToday: 'dnes',
     plannerShopping: '🛒 Nákupný zoznam', plannerCopy: '📋 Kopírovať',
     plannerPick: 'Vybrať recept', plannerEmpty: '+ pridať',
     plannerEmptyList: 'Zatiaľ žiadne recepty v pláne.',
@@ -745,7 +752,7 @@ const LANG = {
     btnImportUrl:'Import from URL', importUrlTitle:'🌐 Import recipe from URL', importUrlHint:'Paste a recipe link (varecha.pravda.sk) – the app will fetch and prefill the form.', importUrlDo:'📥 Import', importUrlOk:'✅ Recipe loaded! Check and save.', importUrlFail:'❌ Failed to load recipe. Try a different link.', importUrlBad:'❌ No recipe found at this URL. Try another link.',
     moreLabelTools: 'TOOLS', moreLabelData: 'DATA', moreLabelWeb: 'WEB',
     btnExport: 'Export', btnImport: 'Import',
-    navPlanner: 'Planner', plannerTitle: '📅 Meal Planner', plannerClear: '🗑 Clear',
+    navPlanner: 'Planner', plannerTitle: '📅 Meal Planner', plannerClear: '🗑', plannerToday: 'today',
     plannerShopping: '🛒 Shopping List', plannerCopy: '📋 Copy',
     plannerPick: 'Pick a recipe', plannerEmpty: '+ add',
     plannerEmptyList: 'No recipes in the plan yet.',
@@ -870,7 +877,58 @@ let collections = JSON.parse(localStorage.getItem('collections') || '[]');
 let cookingHistory = JSON.parse(localStorage.getItem('cookingHistory') || '[]');
 const DAYS = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
 let mealPlan = JSON.parse(localStorage.getItem('mealPlan') || '{}');
-if (!Object.keys(mealPlan).length) { DAYS.forEach(d => { mealPlan[d] = {}; }); }
+let plannerWeekOffset = 0;
+
+function getWeekKey(date) {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  d.setDate(diff);
+  return d.toISOString().slice(0, 10);
+}
+
+function getWeekLabel(date) {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  d.setDate(diff);
+  const start = new Date(d);
+  const end = new Date(d); end.setDate(end.getDate() + 6);
+  return `${start.getDate()}.${start.getMonth()+1}. - ${end.getDate()}.${end.getMonth()+1}.${end.getFullYear()}`;
+}
+
+function plannerWeekStart(offset) {
+  const now = new Date();
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - ((now.getDay() + 6) % 7) + offset * 7);
+  return monday;
+}
+
+function currentWeekKey() {
+  return getWeekKey(plannerWeekStart(plannerWeekOffset));
+}
+
+function getWeekPlan(weekKey) {
+  if (!mealPlan[weekKey]) {
+    mealPlan[weekKey] = {};
+    DAYS.forEach(d => { mealPlan[weekKey][d] = {}; });
+  }
+  return mealPlan[weekKey];
+}
+
+function saveWeekPlan() {
+  localStorage.setItem('mealPlan', JSON.stringify(mealPlan));
+}
+
+// Migrate old flat mealPlan to week-based
+(function() {
+  const keys = Object.keys(mealPlan);
+  if (keys.length && DAYS.includes(keys[0])) {
+    const wk = getWeekKey(new Date());
+    mealPlan[wk] = mealPlan;
+    localStorage.setItem('mealPlan', JSON.stringify(mealPlan));
+  }
+})();
 
 // ======================== LANGUAGE ========================
 function t(key) { return (LANG[lang] && LANG[lang][key]) || LANG.sk[key] || key; }
@@ -1718,18 +1776,24 @@ const MEALS = [
 function renderPlanner() {
   const week = document.getElementById('planner-week');
   const dayNames = lang === 'en' ? DAYS_EN : DAYS_SK;
-  const now = new Date();
-  const startOfWeek = new Date(now); startOfWeek.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+  const weekKey = currentWeekKey();
+  const weekPlan = getWeekPlan(weekKey);
+  const startOfWeek = plannerWeekStart(plannerWeekOffset);
   const totalSlots = MEALS.length;
+  const todayStr = new Date().toISOString().slice(0,10);
+  // Update week nav
+  document.getElementById('planner-week-label').textContent = getWeekLabel(startOfWeek);
   week.innerHTML = DAYS.map((d, i) => {
-    const day = mealPlan[d] || {};
+    const day = weekPlan[d] || {};
     const date = new Date(startOfWeek); date.setDate(startOfWeek.getDate() + i);
-    const dateStr = date.getDate() + '.' + (date.getMonth()+1) + '.';
+    const dateStr = date.toISOString().slice(0,10);
+    const dispDate = date.getDate() + '.' + (date.getMonth()+1) + '.';
     const isWeekend = i >= 5;
+    const isToday = dateStr === todayStr;
     const filled = Object.values(day).filter(Boolean).length;
-    return `<div class="planner-day${isWeekend ? ' weekend' : ''}">
+    return `<div class="planner-day${isWeekend ? ' weekend' : ''}${isToday ? ' today' : ''}">
       <div class="planner-day-header">
-        <span>${dayNames[i]} <span class="day-date">${dateStr}</span></span>
+        <span>${dayNames[i]} <span class="day-date">${dispDate}</span></span>
         <span class="day-count">${filled}/${totalSlots}</span>
       </div>
       <div class="planner-slots">${MEALS.map(m => {
@@ -1745,6 +1809,10 @@ function renderPlanner() {
   }).join('');
   renderShoppingList();
 }
+
+function prevWeek() { plannerWeekOffset--; renderPlanner(); }
+function nextWeek() { plannerWeekOffset++; renderPlanner(); }
+function resetWeek() { plannerWeekOffset = 0; renderPlanner(); }
 
 function pickRecipe(day, slot) {
   const el = document.getElementById('planner-picker') || createPickerModal();
@@ -1774,34 +1842,38 @@ function createPickerModal() {
 }
 
 function selectRecipe(day, slot, id) {
-  if (!mealPlan[day]) mealPlan[day] = {};
-  mealPlan[day][slot] = id;
-  saveMealPlan();
+  const weekKey = currentWeekKey();
+  const weekPlan = getWeekPlan(weekKey);
+  if (!weekPlan[day]) weekPlan[day] = {};
+  weekPlan[day][slot] = id;
+  saveWeekPlan();
   renderPlanner();
 }
 
 function removeSlot(day, slot) {
-  if (mealPlan[day]) delete mealPlan[day][slot];
-  saveMealPlan();
+  const weekKey = currentWeekKey();
+  const weekPlan = getWeekPlan(weekKey);
+  if (weekPlan[day]) delete weekPlan[day][slot];
+  saveWeekPlan();
   renderPlanner();
 }
 
 function clearPlan() {
   if (!confirm(lang === 'en' ? 'Clear the whole week?' : 'Vymazať celý týždeň?')) return;
-  DAYS.forEach(d => { mealPlan[d] = {}; });
-  saveMealPlan();
+  const weekKey = currentWeekKey();
+  const weekPlan = getWeekPlan(weekKey);
+  DAYS.forEach(d => { weekPlan[d] = {}; });
+  saveWeekPlan();
   renderPlanner();
-}
-
-function saveMealPlan() {
-  localStorage.setItem('mealPlan', JSON.stringify(mealPlan));
 }
 
 function renderShoppingList() {
   const ul = document.getElementById('shopping-list');
   const merged = {};
+  const weekKey = currentWeekKey();
+  const weekPlan = getWeekPlan(weekKey);
   DAYS.forEach(d => {
-    const day = mealPlan[d] || {};
+    const day = weekPlan[d] || {};
     Object.values(day).filter(Boolean).forEach(id => {
       const r = recipes.find(rec => rec.id === id);
       if (r) {
