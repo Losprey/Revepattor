@@ -305,10 +305,11 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: rgba(22
 .planner-slot.filled .slot-remove { display: inline-flex; align-items: center; justify-content: center; }
 .planner-slot .slot-remove:hover { opacity: 1; background: rgba(255,255,255,.08); }
 .planner-list { background: var(--surface); border-radius: var(--radius-md); padding: .55rem .65rem; border: 1px solid var(--border); margin-top: .3rem; }
-#shopping-list li { padding: .22rem 0; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: .35rem; }
-#shopping-list li:last-child { border-bottom: none; }
-#shopping-list li input[type=checkbox] { accent-color: var(--primary-light); cursor: pointer; }
-#shopping-list li.checked { text-decoration: line-through; opacity: .5; }
+.shopping-list ul { list-style: none; padding: 0; }
+.shopping-list li { padding: .22rem 0; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: .35rem; }
+.shopping-list li:last-child { border-bottom: none; }
+.shopping-list li input[type=checkbox] { accent-color: var(--primary-light); cursor: pointer; }
+.shopping-list li.checked { text-decoration: line-through; opacity: .5; }
 
 /* ===== PICKER MODAL ===== */
 .picker-search { width: 100%; padding: .4rem .55rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: .78rem; background: var(--input-bg); color: var(--text); margin-bottom: .4rem; }
@@ -473,10 +474,20 @@ body:not(.dark) .recipe-card .fav-btn.fav-active { background: linear-gradient(1
     </button>
     <div class="planner-week" id="planner-week" style="display:none;"></div>
   </div>
-  <div class="planner-list" id="planner-list">
-    <h3 style="font-size:.9rem;font-weight:600;margin-bottom:.35rem;" data-lang="plannerShopping">🛒 Nákupný zoznam</h3>
-    <ul id="shopping-list" style="list-style:none;padding:0;font-size:.82rem;"></ul>
-    <button class="btn btn-secondary" onclick="copyShoppingList()" style="margin-top:.35rem;font-size:.72rem;padding:.25rem .6rem;" data-lang="plannerCopy">📋 Kopírovať</button>
+</div>
+
+<!-- SHOPPING -->
+<div class="container" id="shopping-container" style="display:none;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;flex-wrap:wrap;gap:.3rem;">
+    <h2 style="font-size:1rem;font-weight:700;">🛒 <span data-lang="plannerShopping">Nákupný zoznam</span></h2>
+    <div style="display:flex;align-items:center;gap:.25rem;">
+      <button class="btn btn-secondary" onclick="copyShoppingList()" style="font-size:.7rem;padding:.2rem .45rem;" data-lang="plannerCopy">📋</button>
+      <button class="btn btn-secondary" onclick="clearCheckedShopping()" style="font-size:.7rem;padding:.2rem .45rem;" data-lang="shopClearChecked">Vyčistiť</button>
+      <button class="btn btn-danger" onclick="confirmClearAllShopping()" style="font-size:.7rem;padding:.2rem .45rem;" data-lang="shopClearAll">Vymazať</button>
+    </div>
+  </div>
+  <div class="planner-list" style="margin-top:0;">
+    <ul id="shopping-list-view" class="shopping-list" style="list-style:none;padding:0;font-size:.82rem;"></ul>
   </div>
 </div>
 
@@ -680,6 +691,10 @@ body:not(.dark) .recipe-card .fav-btn.fav-active { background: linear-gradient(1
     <span class="nav-icon">📖</span>
     <span class="nav-label" data-lang="navRecipes">Receptár</span>
   </button>
+  <button class="nav-item" data-tab="shopping" onclick="switchTab('shopping')">
+    <span class="nav-icon">🛒</span>
+    <span class="nav-label" data-lang="navShopping">Nákup</span>
+  </button>
   <button class="nav-item" data-tab="favorites" onclick="switchTab('favorites')">
     <span class="nav-icon">❤️</span>
     <span class="nav-label" data-lang="navFavs">Obľúbené</span>
@@ -695,7 +710,7 @@ body:not(.dark) .recipe-card .fav-btn.fav-active { background: linear-gradient(1
 const LANG = {
   sk: {
     appTitle: 'Plánovač jedál', appSubtitle: 'Týždenný plánovač s receptami',
-    navRecipes: 'Receptár', navSettings: 'Nastavenia',
+    navRecipes: 'Receptár', navShopping: 'Nákup', navFavs: 'Obľúbené', navSettings: 'Nastavenia',
     searchPlaceholder: 'Hľadať...', allCategories: 'Všetky kategórie',
     btnAdd: '➕ Nový', btnMore: '⚙️ Viac', btnByIngr: '🥕 Suroviny', btnRandom: 'Náhodný',
     sortName: 'Názov', sortTime: 'Čas', sortRating: 'Hodnotenie',
@@ -739,12 +754,13 @@ const LANG = {
     plannerShopping: '🛒 Nákupný zoznam', plannerCopy: '📋 Kopírovať',
     plannerPick: 'Vybrať recept', plannerEmpty: '+ pridať',
     plannerEmptyList: 'Zatiaľ žiadne recepty v pláne.',
+    shopClearChecked: 'Vyčistiť zaškrtnuté', shopClearAll: 'Vymazať všetko',
     settingsTitle: '⚙️ Nastavenia', settingsDark: 'Tmavý režim', settingsLang: 'Jazyk',
 
   },
   en: {
     appTitle: 'Meal Planner', appSubtitle: 'Weekly meal planner with recipes',
-    navRecipes: 'Recipes', navSettings: 'Settings',
+    navRecipes: 'Recipes', navShopping: 'Shopping', navFavs: 'Favorites', navSettings: 'Settings',
     searchPlaceholder: 'Search...', allCategories: 'All categories',
     btnAdd: '➕ New', btnMore: '⚙️ More', btnByIngr: '🥕 Ingredients', btnRandom: 'Random',
     sortName: 'Name', sortTime: 'Time', sortRating: 'Rating',
@@ -787,6 +803,7 @@ const LANG = {
     plannerShopping: '🛒 Shopping List', plannerCopy: '📋 Copy',
     plannerPick: 'Pick a recipe', plannerEmpty: '+ add',
     plannerEmptyList: 'No recipes in the plan yet.',
+    shopClearChecked: 'Clear checked', shopClearAll: 'Clear all',
     plannerWeek: 'Full week', plannerWeekHide: 'Hide week',
     settingsTitle: '⚙️ Settings', settingsDark: 'Dark mode', settingsLang: 'Language',
 
@@ -1716,11 +1733,15 @@ function switchTab(tab) {
   document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
   const btn = document.querySelector(`.nav-item[data-tab="${tab}"]`);
   if (btn) btn.classList.add('active');
-  document.getElementById('recipe-grid').parentElement.style.display = tab === 'planner' ? 'none' : '';
-  document.getElementById('planner-container').style.display = tab === 'planner' ? 'block' : 'none';
-  if (tab === 'home') { document.getElementById('filter-fav').checked = false; render(); }
-  if (tab === 'favorites') { document.getElementById('filter-fav').checked = true; render(); }
-  if (tab === 'planner') { renderPlanner(); }
+  const gridContainer = document.getElementById('recipe-grid').parentElement;
+  const plannerContainer = document.getElementById('planner-container');
+  const shoppingContainer = document.getElementById('shopping-container');
+  // Hide all
+  [gridContainer, plannerContainer, shoppingContainer].forEach(el => { if (el) el.style.display = 'none'; });
+  // Show active
+  if (tab === 'home' || tab === 'favorites') { document.getElementById('filter-fav').checked = tab === 'favorites'; gridContainer.style.display = ''; render(); }
+  if (tab === 'planner') { plannerContainer.style.display = 'block'; renderPlanner(); }
+  if (tab === 'shopping') { shoppingContainer.style.display = 'block'; renderShoppingList(); }
 }
 
 // ======================== MEAL PLANNER ========================
@@ -1794,7 +1815,6 @@ function renderPlanner() {
       }).join('')}</div>
     </div>`;
   }).join('');
-  renderShoppingList();
 }
 
 function toggleWeekGrid() {
@@ -1904,7 +1924,11 @@ function getSlotName(entry) {
 function removeSlot(day, slot, wk) {
   const weekKey = wk || currentWeekKey();
   const weekPlan = getWeekPlan(weekKey);
-  if (weekPlan[day]) delete weekPlan[day][slot];
+  if (!weekPlan[day] || !weekPlan[day][slot]) return;
+  const entry = weekPlan[day][slot];
+  const name = getSlotName(entry) || (lang==='en'?'this meal':'toto jedlo');
+  if (!confirm((lang==='en'?'Remove ':'Odstrániť ') + name + '?')) return;
+  delete weekPlan[day][slot];
   saveWeekPlan();
   renderPlanner();
 }
@@ -1918,8 +1942,55 @@ function clearPlan() {
   renderPlanner();
 }
 
+// ======================== SHOPPING LIST ========================
+function getShoppingState() {
+  try { return JSON.parse(localStorage.getItem('shoppingState') || '{}'); } catch(e) { return {}; }
+}
+function saveShoppingState(state) {
+  localStorage.setItem('shoppingState', JSON.stringify(state));
+}
+function isShoppingChecked(text) {
+  const state = getShoppingState();
+  const wk = currentWeekKey();
+  return state[wk] && state[wk].checked && state[wk].checked.includes(text);
+}
+function isShoppingHidden(text) {
+  const state = getShoppingState();
+  const wk = currentWeekKey();
+  return state[wk] && state[wk].hidden && state[wk].hidden.includes(text);
+}
+function toggleShoppingItem(text) {
+  const state = getShoppingState();
+  const wk = currentWeekKey();
+  if (!state[wk]) state[wk] = { checked: [], hidden: [] };
+  const idx = state[wk].checked.indexOf(text);
+  if (idx >= 0) state[wk].checked.splice(idx, 1);
+  else state[wk].checked.push(text);
+  saveShoppingState(state);
+}
+function clearCheckedShopping() {
+  if (!document.querySelectorAll('#shopping-list-view .checked').length) return;
+  const state = getShoppingState();
+  const wk = currentWeekKey();
+  const checked = state[wk] ? state[wk].checked || [] : [];
+  if (!state[wk]) state[wk] = { checked: [], hidden: [] };
+  state[wk].hidden = (state[wk].hidden || []).concat(checked);
+  state[wk].checked = [];
+  saveShoppingState(state);
+  renderShoppingList();
+}
+function confirmClearAllShopping() {
+  if (!confirm(lang === 'en' ? 'Clear entire shopping list?' : 'Vymazať celý nákupný zoznam?')) return;
+  const state = getShoppingState();
+  const wk = currentWeekKey();
+  const checked = state[wk] ? state[wk].checked || [] : [];
+  state[wk] = { checked: [], hidden: [...(state[wk] ? (state[wk].hidden || []) : []), ...checked] };
+  saveShoppingState(state);
+  renderShoppingList();
+}
+
 function renderShoppingList() {
-  const ul = document.getElementById('shopping-list');
+  const ul = document.getElementById('shopping-list-view');
   const merged = {};
   const weekKey = currentWeekKey();
   const weekPlan = getWeekPlan(weekKey);
@@ -1938,17 +2009,17 @@ function renderShoppingList() {
       }
     });
   });
-  const items = Object.values(merged);
+  const items = Object.values(merged).filter(i => !isShoppingHidden(i.text));
   if (!items.length) {
     ul.innerHTML = '<li style="opacity:.5;font-style:italic;" data-lang="plannerEmptyList">Zatiaľ žiadne recepty v pláne.</li>';
     return;
   }
-  ul.innerHTML = items.map(i => `<li><input type="checkbox" onchange="this.parentElement.classList.toggle('checked')"><span>${esc(i.text)}</span></li>`).join('');
+  ul.innerHTML = items.map(i => `<li class="${isShoppingChecked(i.text)?'checked':''}" data-item="${escAttr(i.text)}"><input type="checkbox" ${isShoppingChecked(i.text)?'checked':''} onchange="toggleShoppingItem(this.parentElement.dataset.item);this.parentElement.classList.toggle('checked')"><span>${esc(i.text)}${i.count > 1 ? ` <em style="opacity:.5;font-size:.7rem;">×${i.count}</em>` : ''}</span></li>`).join('');
 }
 
 function copyShoppingList() {
-  const items = document.querySelectorAll('#shopping-list li:not(.checked) span');
-  const text = Array.from(items).map(el => el.textContent).join('\n');
+  const items = document.querySelectorAll('#shopping-list-view li:not(.checked) span');
+  const text = Array.from(items).map(el => el.textContent.replace(/\s*×\d+\s*$/,'').trim()).join('\n');
   if (!text) return;
   navigator.clipboard.writeText(text).catch(() => {});
 }
