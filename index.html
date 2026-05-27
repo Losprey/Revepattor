@@ -815,6 +815,8 @@ body[data-tab="dashboard"] #app-header { display: none; }
 .badge-prep { display: inline-block; font-size: .65rem; background: var(--primary-light); color: var(--primary); padding: 2px 7px; border-radius: 8px; margin-left: 6px; font-weight: 600; text-transform: uppercase; }
 
 </style>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 </head>
 <body>
 
@@ -823,6 +825,7 @@ body[data-tab="dashboard"] #app-header { display: none; }
   <div class="header-actions">
     <button class="topbar-btn" onclick="toggleDark()" id="dark-toggle" title="Tmavý režim">🌙</button>
     <button class="topbar-btn" onclick="switchLang()" id="lang-toggle">🇬🇧 EN</button>
+    <button class="topbar-btn" id="sync-indicator" onclick="openSettings()" title="Nie si pripojený k rodine">⚪</button>
   </div>
 </header>
 
@@ -1369,6 +1372,171 @@ const LANG = {
  let lang = localStorage.getItem('lang') || 'sk';
 let ageFilter = '';
 let voiceSearch = null, voiceSearchListening = false;
+
+// ======================== FIREBASE FAMILY SYNC ========================
+// 1. Go to https://console.firebase.google.com → Create project
+// 2. Build → Realtime Database → Create Database → Start in test mode
+// 3. Project settings → Add web app → Copy firebaseConfig below
+const FIREBASE_CONFIG = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "000000000000",
+  appId: "1:000000000000:web:xxxxxxxxxxxxxxxxxxxx"
+};
+
+let firebaseReady = false;
+let familyCode = '';
+let familyDbRef = null;
+let firebaseListeners = []; // track active listeners for cleanup
+
+function initFirebase() {
+  if (firebaseReady) return;
+  if (!FIREBASE_CONFIG.apiKey || FIREBASE_CONFIG.apiKey === 'YOUR_API_KEY') {
+    console.warn('Firebase not configured. Set FIREBASE_CONFIG in index.html.');
+    return;
+  }
+  try {
+    firebase.initializeApp(FIREBASE_CONFIG);
+    firebaseReady = true;
+  } catch(e) {
+    console.warn('Firebase init failed:', e.message);
+  }
+}
+
+function generateFamilyCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for (let i = 0; i < 8; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return code;
+}
+
+function createFamily() {
+  initFirebase();
+  if (!firebaseReady) { alert('Firebase nie je nastavený. Otvor index.html a vyplň FIREBASE_CONFIG.'); return; }
+  const code = generateFamilyCode();
+  familyCode = code;
+  localStorage.setItem('familyCode', code);
+  connectToFamily(code);
+  pushAllLocalData();
+  alert('Rodinný kód: ' + code + '\nZdieľaj tento kód s rodinou.');
+  openSettings();
+  updateSyncIndicator();
+}
+
+function joinFamily(code) {
+  initFirebase();
+  if (!firebaseReady) { alert('Firebase nie je nastavený. Otvor index.html a vyplň FIREBASE_CONFIG.'); return; }
+  code = code.toUpperCase().trim();
+  if (!code) return;
+  familyCode = code;
+  localStorage.setItem('familyCode', code);
+  connectToFamily(code);
+  pushAllLocalData();
+  openSettings();
+  updateSyncIndicator();
+}
+
+function leaveFamily() {
+  if (!confirm('Naozaj opustiť rodinu? Lokálne dáta ostanú.')) return;
+  // Remove all Firebase listeners
+  firebaseListeners.forEach(ref => { try { ref.off(); } catch(e) {} });
+  firebaseListeners = [];
+  familyCode = '';
+  familyDbRef = null;
+  localStorage.removeItem('familyCode');
+  updateSyncIndicator();
+  openSettings();
+}
+
+function connectToFamily(code) {
+  if (!firebaseReady || !code) return;
+  const db = firebase.database();
+  familyDbRef = db.ref('families/' + code);
+  // Clean up old listeners
+  firebaseListeners.forEach(ref => { try { ref.off(); } catch(e) {} });
+  firebaseListeners = [];
+
+  // Listen for remote changes on each data set
+  const bindPath = (path, localKey, mergeFn) => {
+    const ref = familyDbRef.child(path);
+    ref.on('value', snap => {
+      const remoteData = snap.val();
+      if (!remoteData) return;
+      // Save to localStorage (remote overwrites local if timestamp newer, or just merge)
+      if (typeof mergeFn === 'function') {
+        const local = JSON.parse(localStorage.getItem(localKey) || 'null');
+        const merged = mergeFn(local, remoteData);
+        localStorage.setItem(localKey, JSON.stringify(merged));
+      } else {
+        localStorage.setItem(localKey, JSON.stringify(remoteData));
+      }
+      // Re-render active tab
+      refreshActiveTab();
+    });
+    firebaseListeners.push(ref);
+  };
+
+  bindPath('shoppingItems', 'shoppingItems');
+  bindPath('mealPlan', 'mealPlan');
+  bindPath('mealPlanKids', 'mealPlanKids');
+  bindPath('tasks', 'tasks');
+  bindPath('planType', 'planType');
+
+  // Listen for recipe changes (merge by id, keep local-only recipes)
+  bindPath('recipes', 'recipes', (localRecipes, remoteRecipes) => {
+    if (!Array.isArray(localRecipes)) localRecipes = [];
+    if (!Array.isArray(remoteRecipes)) return localRecipes;
+    const map = new Map(localRecipes.map(r => [r.id, r]));
+    remoteRecipes.forEach(r => { map.set(r.id, r); });
+    return Array.from(map.values());
+  });
+
+  // Also push local device presence
+  const presenceRef = familyDbRef.child('members').child(getDeviceId());
+  presenceRef.set({ name: localStorage.getItem('deviceName') || 'Zariadenie', lastSeen: firebase.database.ServerValue.TIMESTAMP, online: true });
+  presenceRef.onDisconnect().update({ online: false, lastSeen: firebase.database.ServerValue.TIMESTAMP });
+}
+
+function pushAllLocalData() { pushToFirebase('shoppingItems', 'shoppingItems'); pushToFirebase('mealPlan', 'mealPlan'); pushToFirebase('mealPlanKids', 'mealPlanKids'); pushToFirebase('tasks', 'tasks'); pushToFirebase('recipes', 'recipes'); pushToFirebase('planType', 'planType'); }
+
+function pushToFirebase(path, localKey) {
+  if (!familyDbRef) return;
+  try {
+    const data = JSON.parse(localStorage.getItem(localKey) || 'null');
+    if (data !== null) {
+      familyDbRef.child(path).set(data);
+    }
+  } catch(e) {}
+}
+
+function getDeviceId() {
+  let id = localStorage.getItem('deviceId');
+  if (!id) { id = 'dev_' + Math.random().toString(36).slice(2,10); localStorage.setItem('deviceId', id); }
+  return id;
+}
+
+function updateSyncIndicator() {
+  const el = document.getElementById('sync-indicator');
+  if (!el) return;
+  if (!familyCode) { el.textContent = '⚪'; el.title = 'Nie si pripojený k rodine'; }
+  else if (firebaseReady) { el.textContent = '🟢'; el.title = 'Synchronizované — kód: ' + familyCode; }
+  else { el.textContent = '🔴'; el.title = 'Firebase nie je pripojený'; }
+}
+
+function refreshActiveTab() {
+  const tab = document.body.dataset.tab;
+  if (tab === 'shopping') renderShoppingList();
+  if (tab === 'planner') renderPlanner();
+  if (tab === 'tasks') renderTasks();
+  if (tab === 'dashboard') renderDashboard();
+}
+
+// Load family code from localStorage on init
+try { familyCode = localStorage.getItem('familyCode') || ''; } catch(e) { familyCode = ''; }
+if (familyCode) { setTimeout(() => { initFirebase(); if (firebaseReady) connectToFamily(familyCode); }, 1500); }
 
 // ======================== DATA ========================
 const DEFAULT_RECIPES = [
@@ -2371,6 +2539,31 @@ function openSettings() {
         <span class="sr-value">${s.weather.location||t('Nenastavené','Not set')} <span class="sr-arrow">›</span></span>
       </div>
       <div style="font-size:.6rem;color:var(--text3);padding:.2rem 0 0;">${t('Widget Počasie musí byť zapnutý vyššie.','Weather widget must be enabled above.')}</div>
+      <div style="font-size:.65rem;font-weight:600;color:var(--text3);margin:.6rem 0 .2rem;text-transform:uppercase;letter-spacing:.05em;">👨‍👩‍👧 ${t('Rodina','Family')}</div>
+      ${familyCode ? `
+        <div class="settings-row" onclick="navigator.clipboard.writeText('${familyCode}').then(()=>alert('${t('Kód skopírovaný!','Code copied!')}'))">
+          <span class="sr-label"><span class="sr-icon">🔗</span> ${t('Rodinný kód','Family code')}</span>
+          <span class="sr-value" style="font-weight:700;letter-spacing:.08em;">${familyCode} 📋</span>
+        </div>
+        <div class="settings-row" onclick="pushAllLocalData();alert('${t('Dáta odoslané.','Data synced.')}')">
+          <span class="sr-label"><span class="sr-icon">🔄</span> ${t('Synchronizovať teraz','Sync now')}</span>
+          <span class="sr-value"><span class="sr-arrow">›</span></span>
+        </div>
+        <div class="settings-row" onclick="leaveFamily()">
+          <span class="sr-label" style="color:var(--danger);"><span class="sr-icon">🚪</span> ${t('Opustiť rodinu','Leave family')}</span>
+          <span class="sr-value" style="color:var(--danger);"><span class="sr-arrow">›</span></span>
+        </div>
+      ` : `
+        <div class="settings-row" onclick="createFamily()">
+          <span class="sr-label"><span class="sr-icon">✨</span> ${t('Vytvoriť rodinu','Create family')}</span>
+          <span class="sr-value"><span class="sr-arrow">›</span></span>
+        </div>
+        <div class="settings-row" onclick="const c=prompt('${t('Zadaj rodinný kód:','Enter family code:')}');if(c)joinFamily(c)">
+          <span class="sr-label"><span class="sr-icon">🔑</span> ${t('Pripojiť sa k rodine','Join family')}</span>
+          <span class="sr-value"><span class="sr-arrow">›</span></span>
+        </div>
+      `}
+      <div style="font-size:.6rem;color:var(--text3);padding:.2rem 0 0;">${t('Nákupný zoznam a plánovač sa zdieľajú v reálnom čase.','Shopping list & planner shared in real-time.')}</div>
       <div style="font-size:.65rem;font-weight:600;color:var(--text3);margin:.6rem 0 .2rem;text-transform:uppercase;letter-spacing:.05em;">🔔 ${t('Notifikácie','Notifications')}</div>
       ${[['breakfastReminder','breakfast','🌅',t('Pripomenutie raňajok','Breakfast reminder')],
          ['todayCookingReminder','whatCook','🍳',t('Čo variť dnes','What to cook today')],
@@ -4879,6 +5072,20 @@ async function updateWeatherWidget() {
 
 // Init notifications on load
 try { initNotifications(); } catch(e) {}
+
+// Firebase sync hooks — always active, they check familyCode internally
+(function hookFirebaseSync() {
+  const _origSSI = saveShopItems;
+  saveShopItems = function() { _origSSI(); if (familyCode) try { pushToFirebase('shoppingItems','shoppingItems'); } catch(e) {} };
+  const _origSWP = saveWeekPlan;
+  saveWeekPlan = function() { _origSWP(); if (familyCode) try { pushToFirebase('mealPlan','mealPlan'); pushToFirebase('mealPlanKids','mealPlanKids'); } catch(e) {} };
+  const _origST = saveTasks;
+  saveTasks = function() { _origST(); if (familyCode) try { pushToFirebase('tasks','tasks'); } catch(e) {} };
+})();
+
+setTimeout(() => {
+  if (familyCode && firebaseReady) updateSyncIndicator();
+}, 2000);
 
 // Init weather fetch when dashboard renders with weather enabled
 const _origRenderDashboard = renderDashboard;
