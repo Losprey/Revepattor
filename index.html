@@ -3345,17 +3345,9 @@ function shopCatIcon(catId) {
 let shopItems = [];
 function loadShopItems() {
   try { shopItems = JSON.parse(localStorage.getItem('shoppingItems') || '[]'); } catch(e) { shopItems = []; }
-  // Migrate from old format
-  if (!Array.isArray(shopItems) || (shopItems.length === 0 && localStorage.getItem('shoppingState'))) {
-    try {
-      const old = JSON.parse(localStorage.getItem('shoppingState') || '{}');
-      const wk = Object.keys(old)[0];
-      if (wk && old[wk]) {
-        shopItems = (old[wk].hidden || []).map(t => ({ id: 'si_' + Date.now() + '_' + Math.random().toString(36).slice(2,8), name: t, amount: '', unit: '', category: guessFoodCategory(t), checked: true, source: 'recipe', note: '' }));
-      }
-    } catch(e) {}
-    saveShopItems();
-  }
+  if (!Array.isArray(shopItems)) shopItems = [];
+  // Keep only manual items (recipe auto-population removed)
+  shopItems = shopItems.filter(it => it.source === 'manual');
 }
 function saveShopItems() {
   localStorage.setItem('shoppingItems', JSON.stringify(shopItems));
@@ -3367,59 +3359,18 @@ function generateShopId() {
 function renderShoppingList() {
   const container = document.getElementById('shopping-list-view');
   loadShopItems();
-
-  // Gather recipe ingredients
-  const wk = currentWeekKey();
-  const plan = getWeekPlan(wk);
-  const recipeItems = [];
-  DAYS.forEach(d => {
-    const day = plan[d] || {};
-    Object.values(day).filter(Boolean).forEach(entry => {
-      let r = null;
-      if (typeof entry === 'number') r = recipes.find(rec => rec.id === entry);
-      else if (entry.type === 'recipe') r = recipes.find(rec => rec.id === entry.id);
-      if (r) {
-        const ingr = lang === 'en' && r.ingredientsEn ? r.ingredientsEn : r.ingredients;
-        ingr.forEach(i => {
-          const text = i.toLowerCase().trim();
-          if (!recipeItems.some(x => x.name.toLowerCase().trim() === text)) {
-            recipeItems.push({ name: i, category: guessFoodCategory(i) });
-          }
-        });
-      }
-    });
-  });
-
-  // Merge manual items (preserved across weeks) with current recipe items
-  const manualItems = shopItems.filter(it => it.source === 'manual');
-  const merged = [...recipeItems.map(r => {
-    const key = r.name.toLowerCase().trim();
-    const existing = shopItems.find(s => s.source === 'recipe' && s.name.toLowerCase().trim() === key);
-    if (existing) return existing;
-    return { id: generateShopId(), name: r.name, amount: '', unit: '', category: r.category, checked: false, source: 'recipe', note: '', recipeId: '' };
-  }), ...manualItems];
-
-  // Deduplicate recipe items by name (keep first occurrence)
-  const seen = new Set();
-  shopItems = merged.filter(it => {
-    if (it.source !== 'recipe') return true;
-    const key = it.name.toLowerCase().trim();
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
+  // Only keep manual items (recipe auto-population removed per user request)
+  shopItems = shopItems.filter(it => it.source === 'manual');
   saveShopItems();
 
   if (!shopItems.length) {
     container.innerHTML = `<div class="shop-empty">
       <div class="shop-empty-icon">🛒</div>
       <div class="shop-empty-title">${lang === 'en' ? 'Shopping list is empty' : 'Nákupný zoznam je prázdny'}</div>
-      <div class="shop-empty-desc">${lang === 'en' ? 'Plan your meals and ingredients will appear here automatically. You can also add items manually.' : 'Naplánuj jedlá a suroviny sa sem pridajú automaticky. Môžeš aj manuálne pridať položky.'}</div>
+      <div class="shop-empty-desc">${lang === 'en' ? 'Add your groceries manually to build your shopping list.' : 'Pridaj potraviny manuálne a vytvor si nákupný zoznam.'}</div>
       <div class="shop-empty-actions">
         <button class="btn primary" onclick="openAddItemSheet()">✏️ ${lang === 'en' ? 'Add item' : 'Pridať potravinu'}</button>
-        <button class="btn btn-secondary" onclick="switchTab('planner')">📅 ${lang === 'en' ? 'Plan a meal' : 'Naplánovať jedlo'}</button>
       </div>
-      <div style="margin-top:.55rem;font-size:.62rem;color:var(--text3);">💡 ${lang === 'en' ? 'Ingredients from planned recipes appear automatically.' : 'Suroviny z naplánovaných receptov sa sem pridajú automaticky.'}</div>
     </div>`;
     return;
   }
