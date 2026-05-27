@@ -3435,9 +3435,18 @@ showTipOfDay();
 // Background image fetch for Pexels – fetches any still-missing images
 batchFetchImages().then(() => { render(); });
 
-// Register service worker for PWA
+// Register service worker for PWA — auto-reload on update
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(() => {});
+  navigator.serviceWorker.register('sw.js').then(reg => {
+    reg.addEventListener('updatefound', () => {
+      const newSW = reg.installing;
+      if (newSW) newSW.addEventListener('statechange', () => {
+        if (newSW.state === 'activated' && navigator.serviceWorker.controller) {
+          location.reload();
+        }
+      });
+    });
+  }).catch(() => {});
 }
 
 
