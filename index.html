@@ -1612,7 +1612,7 @@ function estimateAndFillImport(ingrArray, yieldNum) {
 // NOTE: For production, move the API key to a backend proxy.
 // This is a client-side PWA; the key is visible in source.
 const PEXELS_KEY = 'f0My7j2k4Ede64fRm8dQ5Ie181mtOWBSaVndMUOaJAeDY6ODa6QRAeg2';
-const IMG_CACHE_KEY = 'pexels_cache_v1';
+const IMG_CACHE_KEY = 'pexels_cache_v2';
 
 function getImageCache() {
   try { return JSON.parse(localStorage.getItem(IMG_CACHE_KEY) || '{}'); } catch(e) { return {}; }
