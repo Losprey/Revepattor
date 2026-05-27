@@ -425,13 +425,7 @@ body:not(.dark) .recipe-card .fav-btn.fav-active { background: linear-gradient(1
         </div>
         <span class="controls-more-label"><span data-lang="moreLabelData">DÁTA</span></span>
         <div class="controls-more-row">
-          <button class="btn btn-secondary" onclick="openCollections()">📁 <span data-lang="btnCollections">Kolekcie</span></button>
           <button class="btn btn-secondary" onclick="openHistory()">📜 <span data-lang="btnHistory">História</span></button>
-        </div>
-        <div class="controls-more-row">
-          <select id="filter-collection" onchange="render()">
-            <option value="">📁 <span data-lang="allCategories">Všetky</span></option>
-          </select>
           <button class="btn btn-secondary" onclick="exportRecipes()">📤 <span data-lang="btnExport">Export</span></button>
           <button class="btn btn-secondary" onclick="document.getElementById('import-file').click()">📥 <span data-lang="btnImport">Import</span></button>
         </div>
@@ -551,19 +545,6 @@ body:not(.dark) .recipe-card .fav-btn.fav-active { background: linear-gradient(1
   </div>
 </div>
 
-<div class="modal-overlay" id="collection-modal">
-  <div class="modal" style="max-width:480px;">
-    <button class="modal-close" onclick="closeModal('collection-modal')">✕</button>
-    <h2 data-lang="collections">📁 Kolekcie</h2>
-    <div style="display:flex;gap:.4rem;margin-bottom:.75rem;">
-      <input type="text" id="collection-name" placeholder="" style="flex:1;padding:.52rem .8rem;border:1px solid var(--border);border-radius:var(--radius-lg);font-size:.85rem;background:var(--input-bg);color:var(--text);box-shadow:var(--inner-shadow);">
-      <button class="btn btn-primary" onclick="addCollection()" data-lang="colAdd">+ Vytvoriť</button>
-    </div>
-    <div id="collection-list"></div>
-    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('collection-modal')" data-lang="close">Zavrieť</button></div>
-  </div>
-</div>
-
 <!-- COOKING -->
 <div class="cooking-overlay" id="cooking-mode">
   <div class="cooking-header">
@@ -634,29 +615,21 @@ body:not(.dark) .recipe-card .fav-btn.fav-active { background: linear-gradient(1
 
 <!-- BOTTOM NAV -->
 <nav class="bottom-nav">
-  <button class="nav-item active" data-tab="home" onclick="switchTab('home')">
-    <span class="nav-icon">🍽️</span>
-    <span class="nav-label" data-lang="navHome">Domov</span>
+  <button class="nav-item active" data-tab="planner" onclick="switchTab('planner')">
+    <span class="nav-icon">📅</span>
+    <span class="nav-label" data-lang="navPlanner">Plánovač</span>
   </button>
-  <button class="nav-item" data-tab="search" onclick="switchTab('search')">
-    <span class="nav-icon">🔍</span>
-    <span class="nav-label" data-lang="navSearch">Hľadať</span>
+  <button class="nav-item" data-tab="home" onclick="switchTab('home')">
+    <span class="nav-icon">📖</span>
+    <span class="nav-label" data-lang="navRecipes">Receptár</span>
   </button>
   <button class="nav-item" data-tab="favorites" onclick="switchTab('favorites')">
     <span class="nav-icon">❤️</span>
     <span class="nav-label" data-lang="navFavs">Obľúbené</span>
   </button>
-  <button class="nav-item" data-tab="planner" onclick="switchTab('planner')">
-    <span class="nav-icon">📅</span>
-    <span class="nav-label" data-lang="navPlanner">Plánovač</span>
-  </button>
-  <button class="nav-item" onclick="openCollections()">
-    <span class="nav-icon">📁</span>
-    <span class="nav-label" data-lang="navCollections">Kolekcie</span>
-  </button>
-  <button class="nav-item" onclick="openFormModal()">
-    <span class="nav-icon">➕</span>
-    <span class="nav-label" data-lang="navAdd">Pridať</span>
+  <button class="nav-item" onclick="if(document.getElementById('planner-container').style.display!=='none')switchTab('home');toggleMore()">
+    <span class="nav-icon">⚙️</span>
+    <span class="nav-label" data-lang="btnMore">Viac</span>
   </button>
 </nav>
 
@@ -664,13 +637,13 @@ body:not(.dark) .recipe-card .fav-btn.fav-active { background: linear-gradient(1
 // ======================== TRANSLATIONS ========================
 const LANG = {
   sk: {
-    appTitle: 'Receptár', appSubtitle: 'Zbierka nápadov na varenie a pečenie',
-    tabRecipes: '📖 Recepty',
+    appTitle: 'Plánovač jedál', appSubtitle: 'Týždenný plánovač s receptami',
+    navRecipes: 'Receptár',
     searchPlaceholder: 'Hľadať...', allCategories: 'Všetky kategórie',
     btnAdd: '➕ Nový', btnMore: '⚙️ Viac', btnByIngr: '🥕 Suroviny', btnRandom: 'Náhodný',
     sortName: 'Názov', sortTime: 'Čas', sortRating: 'Hodnotenie',
     heroCta: 'Zobraziť recept',
-    navHome: 'Domov', navSearch: 'Hľadať', navFavs: 'Obľúbené', navCollections: 'Kolekcie', navAdd: 'Pridať',
+    navFavs: 'Obľúbené',
     formTitle: 'Nový recept', formName: 'Názov', formNamePlace: 'Názov',
     formCategory: 'Kategória', formTime: 'Čas (min)', formImage: 'Obrázok',
     formImagePlace: 'URL', formUpload: 'Nahrať', formNutrition: 'Nutričné hodnoty (na porciu)',
@@ -699,7 +672,6 @@ const LANG = {
     diffEasy:'Ľahké', diffMedium:'Stredné', diffHard:'Ťažké',
     btnCopy:'📋 Kopírovať',
     portions: 'Porcie:',
-    btnCollections: '📁 Kolekcie', collections: '📁 Kolekcie', colAdd: '+ Vytvoriť', colEmpty: 'Zatiaľ žiadne kolekcie.',
     tipOfDay: 'Tip dňa:',
     btnHistory: '📜 História', cookingHistory: '📜 História varenia', historyClear: '🗑 Vymazať históriu', historyEmpty: 'Zatiaľ žiadna história.',
     btnImportUrl:'Import z URL', importUrlTitle:'🌐 Importovať recept z URL', importUrlHint:'Vlož odkaz na recept (varecha.pravda.sk) – appka ho stiahne a predvyplní formulár.', importUrlDo:'📥 Importovať', importUrlOk:'✅ Recept načítaný! Skontroluj a ulož.', importUrlFail:'❌ Nepodarilo sa načítať recept. Skús iný odkaz.', importUrlBad:'❌ Nenašiel sa žiadny recept na tejto URL. Skús iný odkaz.',
@@ -712,13 +684,13 @@ const LANG = {
 
   },
   en: {
-    appTitle: 'Recipe Book', appSubtitle: 'Collection of cooking & baking ideas',
-    tabRecipes: '📖 Recipes',
+    appTitle: 'Meal Planner', appSubtitle: 'Weekly meal planner with recipes',
+    navRecipes: 'Recipes',
     searchPlaceholder: 'Search...', allCategories: 'All categories',
     btnAdd: '➕ New', btnMore: '⚙️ More', btnByIngr: '🥕 Ingredients', btnRandom: 'Random',
     sortName: 'Name', sortTime: 'Time', sortRating: 'Rating',
     heroCta: 'View recipe',
-    navHome: 'Home', navSearch: 'Search', navFavs: 'Favorites', navCollections: 'Collections', navAdd: 'Add',
+    navFavs: 'Favorites',
     formTitle: 'New Recipe', formName: 'Name', formNamePlace: 'Recipe name',
     formCategory: 'Category', formTime: 'Time (min)', formImage: 'Image',
     formImagePlace: 'URL', formUpload: 'Upload', formNutrition: 'Nutrition (per serving)',
@@ -747,7 +719,6 @@ const LANG = {
     diffEasy:'Easy', diffMedium:'Medium', diffHard:'Hard',
     btnCopy:'📋 Copy',
     portions: 'Servings:',
-    btnCollections: '📁 Collections', collections: '📁 Collections', colAdd: '+ Create', colEmpty: 'No collections yet.',
     tipOfDay: 'Tip of the day:',
     btnHistory: '📜 History', cookingHistory: '📜 Cooking history', historyClear: '🗑 Clear history', historyEmpty: 'No history yet.',
     btnImportUrl:'Import from URL', importUrlTitle:'🌐 Import recipe from URL', importUrlHint:'Paste a recipe link (varecha.pravda.sk) – the app will fetch and prefill the form.', importUrlDo:'📥 Import', importUrlOk:'✅ Recipe loaded! Check and save.', importUrlFail:'❌ Failed to load recipe. Try a different link.', importUrlBad:'❌ No recipe found at this URL. Try another link.',
@@ -874,7 +845,6 @@ let cookingStep = 0, cookingRecipeId = null, cookingTimer = null, cookingTimerRu
 let voiceRecognition = null, voiceListening = false;
 let ingredientSearchSelected = new Set();
 let currentPortion = 2, basePortion = 2;
-let collections = JSON.parse(localStorage.getItem('collections') || '[]');
 let cookingHistory = JSON.parse(localStorage.getItem('cookingHistory') || '[]');
 const DAYS = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
 let mealPlan = JSON.parse(localStorage.getItem('mealPlan') || '{}');
@@ -1023,14 +993,7 @@ function render() {
     const matchAge = matchesAgeFilter(r);
     return matchSearch && matchCat && matchFav && matchAge;
   });
-  const colFilter = document.getElementById('filter-collection')?.value;
-  if (colFilter) {
-    const col = collections.find(c => c.id == colFilter);
-    if (col) filtered = filtered.filter(r => col.recipeIds.includes(r.id));
-  }
   if (!filtered.length) {
-    grid.innerHTML = `<div class="empty-state"><h3>😕 ${t('noRecipes')}</h3><p>${t('noRecipesHint')}</p></div>`;
-    document.getElementById('recipe-count').textContent = '';
     return;
   }
   const sortBy = document.getElementById('sort-by')?.value || 'name';
@@ -1072,7 +1035,6 @@ function render() {
     </div>`;
   }).join('');
   updateFavFilter();
-  updateCollectionFilter();
 }
 
 document.getElementById('search').addEventListener('input', function() {
@@ -1233,7 +1195,6 @@ function viewRecipe(id) {
       ${(r.allergens||[]).length ? `<span>⚠️ ${r.allergens.map(esc).join(', ')}</span>` : ''}
     </div>
     <div style="display:flex;gap:.3rem;margin-bottom:.5rem;flex-wrap:wrap;">
-      <button class="btn btn-secondary" onclick="addToCollectionPrompt(${id})" style="padding:.2rem .5rem;font-size:.75rem;">📁 + Kolekcia</button>
       <button class="btn btn-secondary" onclick="editCurrent()" style="padding:.2rem .5rem;font-size:.75rem;">✏️ <span data-lang="btnEdit">Upraviť</span></button>
       <button class="btn btn-danger" onclick="deleteCurrent()" style="padding:.2rem .5rem;font-size:.75rem;">🗑️ <span data-lang="btnDelete">Zmazať</span></button>
     </div>
@@ -1659,72 +1620,6 @@ function scaleIngredient(text, ratio) {
 }
 
 // ======================== COLLECTIONS ========================
-function saveCollections() { localStorage.setItem('collections', JSON.stringify(collections)); }
-
-function openCollections() {
-  renderCollections();
-  openModal('collection-modal');
-}
-
-function renderCollections() {
-  const el = document.getElementById('collection-list');
-  if (!collections.length) { el.innerHTML = `<p style="color:var(--text2);padding:.5rem 0;" data-lang="colEmpty">Zatiaľ žiadne kolekcie.</p>`; return; }
-  el.innerHTML = collections.map((c, i) => `
-    <div style="display:flex;align-items:center;gap:.4rem;padding:.35rem .4rem;border-bottom:1px solid var(--border);">
-      <span style="flex:1;font-size:.88rem;"><strong>${esc(c.name)}</strong> (${c.recipeIds.length})</span>
-      <button class="btn btn-danger" onclick="deleteCollection(${c.id})" style="padding:.15rem .4rem;font-size:.7rem;">✕</button>
-    </div>
-  `).join('');
-}
-
-function addCollection(name) {
-  name = (name || document.getElementById('collection-name').value || '').trim();
-  if (!name) return;
-  collections.push({ id: Date.now(), name, recipeIds: [] });
-  document.getElementById('collection-name').value = '';
-  saveCollections();
-  renderCollections();
-}
-
-function deleteCollection(id) {
-  collections = collections.filter(c => c.id !== id);
-  saveCollections();
-  renderCollections();
-  render();
-}
-
-function addToCollectionPrompt(recipeId) {
-  if (!collections.length) {
-    const name = prompt(lang==='en'?'New collection name:':'Názov novej kolekcie:');
-    if (!name || !name.trim()) return;
-    addCollection(name.trim());
-    if (collections.length) {
-      collections[0].recipeIds.push(recipeId);
-      saveCollections();
-    }
-    return;
-  }
-  const names = collections.map((c,i) => `${i+1}. ${c.name}`);
-  const choice = prompt(`${lang==='en'?'Add to collection (number):':'Pridať do kolekcie (číslo):'}\n${names.join('\n')}`);
-  if (choice) {
-    const idx = parseInt(choice) - 1;
-    if (idx >= 0 && idx < collections.length) {
-      if (!collections[idx].recipeIds.includes(recipeId)) {
-        collections[idx].recipeIds.push(recipeId);
-        saveCollections();
-      }
-    }
-  }
-}
-
-function updateCollectionFilter() {
-  let sel = document.getElementById('filter-collection');
-  if (!sel) return;
-  const current = sel.value;
-  sel.innerHTML = `<option value="">📁 ${lang==='en'?'All':'Všetky'}</option>${collections.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('')}`;
-  sel.value = current;
-}
-
 // ======================== TIP OF THE DAY ========================
 function showTipOfDay() {
   if (localStorage.getItem('tipDismissed') === new Date().toISOString().slice(0,10)) return;
@@ -1759,7 +1654,6 @@ function switchTab(tab) {
   document.getElementById('planner-container').style.display = tab === 'planner' ? 'block' : 'none';
   if (tab === 'home') { document.getElementById('filter-fav').checked = false; render(); }
   if (tab === 'favorites') { document.getElementById('filter-fav').checked = true; render(); }
-  if (tab === 'search') { document.getElementById('search').focus(); render(); }
   if (tab === 'planner') { renderPlanner(); }
 }
 
@@ -2184,6 +2078,7 @@ document.getElementById('recipe-grid').addEventListener('click', function(e) {
   }
 });
 applyLang();
+switchTab('planner');
 render();
 showTipOfDay();
 
