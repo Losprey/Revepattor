@@ -393,19 +393,185 @@ body:not(.dark) .recipe-card .fav-btn.fav-active { background: linear-gradient(1
   .recipe-card { break-inside: avoid; }
 }
 
+/* ===== PREMIUM DESIGN TOKENS ===== */
+:root {
+  --glow-primary: 0 0 30px rgba(220,38,38,.12);
+  --glow-gold: 0 0 20px rgba(245,158,11,.1);
+  --glass-bg: rgba(28,25,23,.7);
+  --glass-border: rgba(255,255,255,.08);
+  --glass-shadow: 0 8px 32px rgba(0,0,0,.3);
+  --card-depth: 0 4px 24px rgba(0,0,0,.18), 0 1px 3px rgba(0,0,0,.1);
+  --card-depth-hover: 0 12px 40px rgba(0,0,0,.25), 0 0 0 1px rgba(220,38,38,.1);
+  --ease-out-expo: cubic-bezier(.16,1,.3,1);
+  --ease-elastic: cubic-bezier(.34,1.56,.64,1);
+  --font-display: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* ===== GLASSMORPHISM ===== */
+.glass { background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--glass-border); }
+.glass-card { background: var(--glass-bg); backdrop-filter: blur(16px); border-radius: var(--radius-md); border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow); }
+.glow-card { position: relative; overflow: hidden; }
+.glow-card::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 50% 0%, rgba(220,38,38,.04) 0%, transparent 60%); pointer-events: none; z-index: 0; }
+
+/* ===== MICROINTERACTIONS ===== */
+.press-scale { transition: transform .2s var(--ease-elastic); cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.press-scale:active { transform: scale(.94); }
+.hover-lift { transition: all .3s var(--ease-out-expo); }
+.hover-lift:hover { transform: translateY(-3px); box-shadow: var(--card-depth-hover); }
+.card-enter { animation: cardSlideIn .5s var(--ease-out-expo) both; }
+@keyframes cardSlideIn { from { opacity: 0; transform: translateY(20px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes glowPulse { 0%,100%{box-shadow:0 0 12px rgba(220,38,38,.06)} 50%{box-shadow:0 0 24px rgba(220,38,38,.12)} }
+@keyframes floatSlow { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+@keyframes shimmerWide { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+.skeleton-dash { background: linear-gradient(90deg, var(--border) 25%, var(--hover-bg) 50%, var(--border) 75%); background-size: 200% 100%; animation: shimmerWide 1.8s ease infinite; border-radius: var(--radius-md); }
+
+/* ===== DASHBOARD ===== */
+#dashboard { display: block; padding-top: .5rem; }
+body[data-tab="dashboard"] #app-header { display: none; }
+.dash-hero { position: relative; border-radius: var(--radius-lg); overflow: hidden; margin: 0 0 .6rem; min-height: 200px; box-shadow: var(--glow-lift); border: 1px solid var(--glass-border); }
+.dash-hero-bg { position: absolute; inset: 0; background: linear-gradient(135deg, rgba(153,27,27,.4) 0%, rgba(0,0,0,.6) 50%, rgba(15,14,13,.95) 100%); }
+.dash-hero-glow { position: absolute; top: -40%; left: -20%; width: 140%; height: 80%; background: radial-gradient(ellipse at 30% 50%, rgba(220,38,38,.08) 0%, transparent 60%); pointer-events: none; animation: floatSlow 5s ease-in-out infinite; }
+.dash-hero-content { position: relative; z-index: 2; padding: 1.2rem 1rem .9rem; display: flex; flex-direction: column; gap: .15rem; }
+.dash-greeting { font-size: .65rem; text-transform: uppercase; letter-spacing: .1em; color: var(--primary-light); font-weight: 700; opacity: .9; }
+.dash-date { font-size: .75rem; color: var(--text3); font-weight: 500; margin-bottom: .1rem; }
+.dash-message { font-size: 1.05rem; font-weight: 700; color: #fff; line-height: 1.3; text-shadow: 0 2px 8px rgba(0,0,0,.3); margin-top: .15rem; }
+.dash-message-sub { font-size: .78rem; color: rgba(255,255,255,.55); margin-top: .08rem; font-weight: 400; }
+.dash-stats-row { display: flex; gap: .5rem; margin-top: .25rem; flex-wrap: wrap; }
+.dash-stat-pill { display: inline-flex; align-items: center; gap: .3rem; background: rgba(255,255,255,.08); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,.06); padding: .2rem .55rem; border-radius: 20px; font-size: .62rem; color: rgba(255,255,255,.7); font-weight: 500; }
+.dash-stat-pill strong { color: #fff; font-weight: 700; }
+
+/* ===== DASHBOARD SECTION ===== */
+.dash-section { margin-bottom: .75rem; }
+.dash-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: .4rem; }
+.dash-section-title { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--text2); }
+.dash-section-link { font-size: .65rem; color: var(--primary-light); cursor: pointer; font-weight: 600; opacity: .7; transition: opacity .2s; }
+.dash-section-link:hover { opacity: 1; }
+
+/* ===== MEAL TIMELINE ===== */
+.meal-timeline { display: flex; flex-direction: column; gap: .35rem; }
+.meal-timeline-item { display: flex; align-items: center; gap: .5rem; background: var(--surface); border-radius: var(--radius-md); padding: .45rem .55rem; border: 1px solid var(--border); transition: all .25s var(--ease-out-expo); cursor: pointer; position: relative; }
+.meal-timeline-item:hover { border-color: rgba(220,38,38,.15); box-shadow: var(--glow-primary); }
+.meal-timeline-item:active { transform: scale(.97); }
+.meal-timeline-item.empty { opacity: .6; border-style: dashed; background: rgba(255,255,255,.02); }
+.meal-timeline-item .meal-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: var(--text3); }
+.meal-timeline-item.filled .meal-dot { background: var(--primary-light); box-shadow: 0 0 8px var(--primary-glow); }
+.meal-timeline-item .meal-icon { font-size: .95rem; flex-shrink: 0; }
+.meal-timeline-item .meal-info { flex: 1; min-width: 0; }
+.meal-timeline-item .meal-label { font-size: .55rem; text-transform: uppercase; letter-spacing: .06em; color: var(--text3); font-weight: 600; }
+.meal-timeline-item .meal-name { font-size: .78rem; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.meal-timeline-item .meal-meta { font-size: .6rem; color: var(--text3); display: flex; gap: .4rem; align-items: center; margin-top: .02rem; }
+.meal-timeline-item .meal-actions { display: flex; gap: .25rem; flex-shrink: 0; }
+.meal-timeline-item .meal-action-btn { width: 26px; height: 26px; border-radius: 50%; border: none; background: var(--border); color: var(--text3); font-size: .6rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s ease; }
+.meal-timeline-item .meal-action-btn:hover { background: var(--primary); color: #fff; }
+.meal-timeline-item .meal-img { width: 36px; height: 36px; border-radius: var(--radius-sm); object-fit: cover; flex-shrink: 0; background: var(--border); }
+.meal-timeline-item .meal-empty-text { font-size: .7rem; color: var(--text3); font-style: italic; }
+
+/* ===== CIRCULAR PROGRESS ===== */
+.circular-progress { width: 52px; height: 52px; position: relative; flex-shrink: 0; }
+.circular-progress svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.circular-progress .bg { fill: none; stroke: var(--border); stroke-width: 4; }
+.circular-progress .fg { fill: none; stroke: var(--primary-light); stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset .8s var(--ease-out-expo); }
+.circular-progress .center { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: .7rem; font-weight: 800; color: var(--text); }
+
+/* ===== SUMMARY WIDGETS ===== */
+.summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: .35rem; }
+.summary-widget { background: var(--surface); border-radius: var(--radius-md); padding: .4rem .35rem; border: 1px solid var(--border); text-align: center; display: flex; flex-direction: column; align-items: center; gap: .1rem; }
+.summary-widget .widget-value { font-size: .85rem; font-weight: 800; color: var(--text); line-height: 1.1; }
+.summary-widget .widget-label { font-size: .52rem; text-transform: uppercase; letter-spacing: .04em; color: var(--text3); font-weight: 600; }
+.summary-widget .widget-icon { font-size: .9rem; }
+.summary-widget.highlight { border-color: rgba(220,38,38,.15); background: linear-gradient(135deg, rgba(220,38,38,.04), transparent); }
+
+/* ===== SMART SUGGESTIONS ===== */
+.suggestion-scroll { display: flex; gap: .45rem; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; padding: .15rem 0 .25rem; scrollbar-width: none; }
+.suggestion-scroll::-webkit-scrollbar { display: none; }
+.suggestion-card { flex: 0 0 130px; scroll-snap-align: start; background: var(--surface); border-radius: var(--radius-md); padding: .5rem .45rem; border: 1px solid var(--border); cursor: pointer; transition: all .25s var(--ease-out-expo); }
+.suggestion-card:hover { border-color: rgba(220,38,38,.15); transform: translateY(-2px); box-shadow: var(--glow-primary); }
+.suggestion-card:active { transform: scale(.95); }
+.suggestion-card .sugg-icon { font-size: 1.1rem; margin-bottom: .2rem; }
+.suggestion-card .sugg-name { font-size: .7rem; font-weight: 600; color: var(--text); line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.suggestion-card .sugg-meta { font-size: .55rem; color: var(--text3); margin-top: .12rem; }
+
+/* ===== SHOPPING REDESIGN ===== */
+.shop-category { margin-bottom: .5rem; }
+.shop-category-header { display: flex; align-items: center; justify-content: space-between; padding: .25rem .35rem; font-size: .6rem; text-transform: uppercase; letter-spacing: .06em; color: var(--text3); font-weight: 700; }
+.shop-category-progress { height: 2px; background: var(--border); border-radius: 2px; overflow: hidden; margin: .2rem .35rem; }
+.shop-category-progress-bar { height: 100%; background: linear-gradient(90deg, var(--success), var(--primary-light)); border-radius: 2px; transition: width .5s var(--ease-out-expo); }
+.shop-item { display: flex; align-items: center; gap: .4rem; padding: .32rem .4rem; border-radius: var(--radius-sm); transition: all .2s ease; cursor: pointer; }
+.shop-item:hover { background: var(--hover-bg); }
+.shop-item .shop-check { width: 16px; height: 16px; border-radius: 4px; border: 2px solid var(--text3); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .2s var(--ease-spring); cursor: pointer; }
+.shop-item.checked .shop-check { background: var(--primary-light); border-color: var(--primary-light); }
+.shop-item .shop-qty { font-size: .6rem; background: var(--border); padding: .02rem .35rem; border-radius: 10px; color: var(--text2); font-weight: 600; margin-left: auto; }
+.shop-item .shop-name { flex: 1; font-size: .73rem; color: var(--text); transition: all .2s; }
+.shop-item.checked .shop-name { text-decoration: line-through; opacity: .5; }
+
+/* ===== BOTTOM SHEET ===== */
+.sheet-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 1000; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.sheet-overlay.active { display: flex; align-items: flex-end; justify-content: center; animation: sheetOverlayIn .3s ease; }
+@keyframes sheetOverlayIn { from { opacity: 0; } to { opacity: 1; } }
+.sheet { background: var(--surface-solid); border-radius: var(--radius-xl) var(--radius-xl) 0 0; max-width: 500px; width: 100%; max-height: 82vh; overflow-y: auto; box-shadow: 0 -10px 60px rgba(0,0,0,.5); border-top: 1px solid var(--glass-border); animation: sheetIn .4s var(--ease-out-expo); position: relative; }
+@keyframes sheetIn { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.sheet-handle { width: 32px; height: 4px; border-radius: 4px; background: var(--text3); margin: .5rem auto .3rem; opacity: .3; }
+.sheet-header { display: flex; align-items: center; justify-content: space-between; padding: .3rem 1rem .4rem; border-bottom: 1px solid var(--border); }
+.sheet-header h2 { font-size: .95rem; font-weight: 800; }
+.sheet-close { width: 28px; height: 28px; border-radius: 50%; border: none; background: var(--border); color: var(--text2); font-size: .7rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; }
+.sheet-close:hover { background: var(--danger); color: #fff; }
+.sheet-body { padding: .6rem 1rem 1.5rem; }
+
+/* ===== DASHBOARD RESPONSIVE ===== */
+@media (max-width: 460px) {
+  .dash-hero { min-height: 170px; }
+  .dash-hero-content { padding: 1rem .85rem .7rem; }
+  .dash-message { font-size: .92rem; }
+  .summary-grid { grid-template-columns: repeat(2, 1fr); }
+  .meal-timeline-item { padding: .35rem .45rem; }
+  .meal-timeline-item .meal-img { width: 30px; height: 30px; }
+  .circular-progress { width: 40px; height: 40px; }
+  .circular-progress .center { font-size: .6rem; }
+  .suggestion-card { flex: 0 0 110px; }
+}
+@media (min-width: 580px) {
+  .summary-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* ===== WATER REMINDER ===== */
+.water-reminder { display: flex; align-items: center; gap: .5rem; background: linear-gradient(135deg, rgba(59,130,246,.04), rgba(59,130,246,.01)); border: 1px solid rgba(59,130,246,.08); border-radius: var(--radius-md); padding: .4rem .55rem; margin-bottom: .4rem; }
+.water-reminder .water-icon { font-size: 1.1rem; animation: waterDrop 2s ease-in-out infinite; }
+@keyframes waterDrop { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
+.water-reminder .water-text { flex: 1; font-size: .72rem; color: var(--text2); }
+.water-reminder .water-btn { background: rgba(59,130,246,.12); border: none; color: #60a5fa; font-size: .65rem; font-weight: 700; padding: .2rem .55rem; border-radius: 12px; cursor: pointer; transition: all .2s; }
+.water-reminder .water-btn:hover { background: rgba(59,130,246,.2); }
+
 </style>
 </head>
 <body>
 
-<header>
-  <h1>🍽️ <span data-lang="appTitle">Receptár</span> <span id="recipe-count" style="font-size:.75rem;opacity:.7;font-weight:400;"></span></h1>
+<header id="app-header">
+  <h1 id="main-title">🍽️ <span data-lang="appTitle">Receptár</span> <span id="recipe-count" style="font-size:.75rem;opacity:.7;font-weight:400;"></span></h1>
   <div class="header-actions">
     <button class="topbar-btn" onclick="toggleDark()" id="dark-toggle" title="Tmavý režim">🌙</button>
     <button class="topbar-btn" onclick="switchLang()" id="lang-toggle">🇬🇧 EN</button>
   </div>
 </header>
 
-<div class="container">
+<!-- DASHBOARD -->
+<div class="container" id="dashboard">
+  <div id="dash-hero" class="dash-hero glow-card">
+    <div class="dash-hero-bg"></div>
+    <div class="dash-hero-glow"></div>
+    <div class="dash-hero-content">
+      <div class="dash-greeting" id="dash-greeting">Dobré ráno</div>
+      <div class="dash-date" id="dash-date"></div>
+      <div class="dash-message" id="dash-message">Vitaj späť!</div>
+      <div class="dash-message-sub" id="dash-message-sub"></div>
+      <div class="dash-stats-row" id="dash-stats-row"></div>
+    </div>
+  </div>
+  <div id="dash-content"></div>
+</div>
+
+<!-- RECIPES -->
+<div class="container" id="home" style="display:none;">
   <div class="hero-card" id="hero-card" onclick="viewRecipe(parseInt(this.dataset.id))">
     <div class="hero-bg" id="hero-bg"></div>
     <div class="hero-overlay"></div>
@@ -478,17 +644,15 @@ body:not(.dark) .recipe-card .fav-btn.fav-active { background: linear-gradient(1
 
 <!-- SHOPPING -->
 <div class="container" id="shopping-container" style="display:none;">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;flex-wrap:wrap;gap:.3rem;">
-    <h2 style="font-size:1rem;font-weight:700;"><span data-lang="plannerShopping">Nákupný zoznam</span></h2>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.4rem;flex-wrap:wrap;gap:.3rem;">
+    <h2 style="font-size:.95rem;font-weight:700;"><span data-lang="plannerShopping">Nákupný zoznam</span></h2>
     <div style="display:flex;align-items:center;gap:.25rem;">
-      <button class="btn btn-secondary" onclick="copyShoppingList()" style="font-size:.7rem;padding:.2rem .45rem;" data-lang="plannerCopy">📋</button>
-      <button class="btn btn-secondary" onclick="clearCheckedShopping()" style="font-size:.7rem;padding:.2rem .45rem;" data-lang="shopClearChecked">Vyčistiť</button>
-      <button class="btn btn-danger" onclick="confirmClearAllShopping()" style="font-size:.7rem;padding:.2rem .45rem;" data-lang="shopClearAll">Vymazať</button>
+      <button class="btn btn-secondary" onclick="copyShoppingList()" style="font-size:.65rem;padding:.18rem .4rem;" data-lang="plannerCopy">📋</button>
+      <button class="btn btn-secondary" onclick="clearCheckedShopping()" style="font-size:.65rem;padding:.18rem .4rem;" data-lang="shopClearChecked">Vyčistiť</button>
+      <button class="btn btn-danger" onclick="confirmClearAllShopping()" style="font-size:.65rem;padding:.18rem .4rem;" data-lang="shopClearAll">Vymazať</button>
     </div>
   </div>
-  <div class="planner-list" style="margin-top:0;">
-    <ul id="shopping-list-view" class="shopping-list" style="list-style:none;padding:0;font-size:.82rem;"></ul>
-  </div>
+  <div id="shopping-list-view"></div>
 </div>
 
 <!-- FORM MODAL -->
@@ -639,42 +803,54 @@ body:not(.dark) .recipe-card .fav-btn.fav-active { background: linear-gradient(1
 </div>
 
 <!-- SETTINGS -->
-<div class="modal-overlay" id="settings-modal">
-  <div class="modal" style="max-width:400px;">
-    <button class="modal-close" onclick="closeModal('settings-modal')">✕</button>
-    <h2 data-lang="settingsTitle">⚙️ Nastavenia</h2>
-    <div style="display:flex;flex-direction:column;gap:.5rem;margin-top:.6rem;">
-      <div class="settings-row" onclick="toggleDark()">
-        <span>🌙 <span data-lang="settingsDark">Tmavý režim</span></span>
-        <span id="settings-dark-label" style="color:var(--text2);font-size:.8rem;">OFF</span>
+<div class="sheet-overlay" id="settings-sheet" onclick="if(event.target===this)closeSettings()">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <h2 data-lang="settingsTitle">⚙️ Nastavenia</h2>
+      <button class="sheet-close" onclick="closeSettings()">✕</button>
+    </div>
+    <div class="sheet-body">
+      <div class="dash-section">
+        <div class="dash-section-title" style="margin-bottom:.35rem;" data-lang="moreLabelTools">NÁSTROJE</div>
+        <div class="settings-row" onclick="toggleDark()">
+          <span>🌙 <span data-lang="settingsDark">Tmavý režim</span></span>
+          <span id="settings-dark-label" style="color:var(--text2);font-size:.8rem;">OFF</span>
+        </div>
+        <div class="settings-row" onclick="switchLang()">
+          <span>🌐 <span data-lang="settingsLang">Jazyk</span></span>
+          <span id="settings-lang-label" style="color:var(--text2);font-size:.8rem;">SK</span>
+        </div>
       </div>
-      <div class="settings-row" onclick="switchLang()">
-        <span>🌐 <span data-lang="settingsLang">Jazyk</span></span>
-        <span id="settings-lang-label" style="color:var(--text2);font-size:.8rem;">SK</span>
+      <hr style="border:none;border-top:1px solid var(--border);margin:.2rem 0 .35rem;">
+      <div class="dash-section">
+        <div class="dash-section-title" style="margin-bottom:.35rem;" data-lang="moreLabelTools">NÁSTROJE</div>
+        <div class="settings-row" onclick="randomRecipe();closeSettings()">
+          <span>🎲 <span data-lang="btnRandom">Náhodný</span></span>
+        </div>
+        <div class="settings-row" onclick="closeSettings();openIngredientSearch()">
+          <span><span data-lang="btnByIngr">Suroviny</span></span>
+        </div>
+        <div class="settings-row" onclick="closeSettings();openHistory()">
+          <span><span data-lang="btnHistory">História</span></span>
+        </div>
       </div>
-      <hr style="border:none;border-top:1px solid var(--border);margin:0;">
-      <span class="controls-more-label" data-lang="moreLabelTools" style="margin:0;">NÁSTROJE</span>
-      <div class="settings-row" onclick="randomRecipe();closeModal('settings-modal')">
-        <span>🎲 <span data-lang="btnRandom">Náhodný</span></span>
+      <hr style="border:none;border-top:1px solid var(--border);margin:.2rem 0 .35rem;">
+      <div class="dash-section">
+        <div class="dash-section-title" style="margin-bottom:.35rem;">DÁTA</div>
+        <div class="settings-row" onclick="exportRecipes()">
+          <span>📤 <span data-lang="btnExport">Export</span></span>
+        </div>
+        <div class="settings-row" onclick="document.getElementById('import-file').click()">
+          <span>📥 <span data-lang="btnImport">Import</span></span>
+        </div>
+        <div class="settings-row" onclick="showImportUrlModal()">
+          <span>🌐 <span data-lang="btnImportUrl">Import z URL</span></span>
+        </div>
       </div>
-      <div class="settings-row" onclick="closeModal('settings-modal');openIngredientSearch()">
-        <span><span data-lang="btnByIngr">Suroviny</span></span>
-      </div>
-      <div class="settings-row" onclick="closeModal('settings-modal');openHistory()">
-        <span><span data-lang="btnHistory">História</span></span>
-      </div>
-      <div class="settings-row" onclick="exportRecipes()">
-        <span>📤 <span data-lang="btnExport">Export</span></span>
-      </div>
-      <div class="settings-row" onclick="document.getElementById('import-file').click()">
-        <span>📥 <span data-lang="btnImport">Import</span></span>
-      </div>
-      <div class="settings-row" onclick="showImportUrlModal()">
-        <span>🌐 <span data-lang="btnImportUrl">Import z URL</span></span>
-      </div>
-      <hr style="border:none;border-top:1px solid var(--border);margin:0;">
-      <div style="text-align:center;color:var(--text3);font-size:.7rem;padding:.3rem 0;">
-        <span data-lang="appTitle">Plánovač jedál</span> · v1
+      <hr style="border:none;border-top:1px solid var(--border);margin:.2rem 0 .35rem;">
+      <div style="text-align:center;color:var(--text3);font-size:.68rem;padding:.5rem 0 .3rem;">
+        <span data-lang="appTitle">Plánovač jedál</span> · v1 · <span id="recipe-stat-count"></span> receptov
       </div>
     </div>
     <input type="file" id="import-file" class="import-hidden" accept=".json" onchange="importRecipes(event)">
@@ -683,9 +859,9 @@ body:not(.dark) .recipe-card .fav-btn.fav-active { background: linear-gradient(1
 
 <!-- BOTTOM NAV -->
 <nav class="bottom-nav">
-  <button class="nav-item active" data-tab="planner" onclick="switchTab('planner')">
-    <span class="nav-icon">📅</span>
-    <span class="nav-label" data-lang="navPlanner">Plánovač</span>
+  <button class="nav-item active" data-tab="dashboard" onclick="switchTab('dashboard')">
+    <span class="nav-icon">🏠</span>
+    <span class="nav-label" data-lang="navDashboard">Domov</span>
   </button>
   <button class="nav-item" data-tab="home" onclick="switchTab('home')">
     <span class="nav-icon">📖</span>
@@ -710,7 +886,7 @@ body:not(.dark) .recipe-card .fav-btn.fav-active { background: linear-gradient(1
 const LANG = {
   sk: {
     appTitle: 'Plánovač jedál', appSubtitle: 'Týždenný plánovač s receptami',
-    navRecipes: 'Receptár', navShopping: 'Nákup', navFavs: 'Obľúbené', navSettings: 'Nastavenia',
+    navRecipes: 'Receptár', navShopping: 'Nákup', navFavs: 'Obľúbené', navSettings: 'Nastavenia', navDashboard: 'Domov',
     searchPlaceholder: 'Hľadať...', allCategories: 'Všetky kategórie',
     btnAdd: '➕ Nový', btnMore: '⚙️ Viac', btnByIngr: '🥕 Suroviny', btnRandom: 'Náhodný',
     sortName: 'Názov', sortTime: 'Čas', sortRating: 'Hodnotenie',
@@ -760,7 +936,7 @@ const LANG = {
   },
   en: {
     appTitle: 'Meal Planner', appSubtitle: 'Weekly meal planner with recipes',
-    navRecipes: 'Recipes', navShopping: 'Shopping', navFavs: 'Favorites', navSettings: 'Settings',
+    navRecipes: 'Recipes', navShopping: 'Shopping', navFavs: 'Favorites', navSettings: 'Settings', navDashboard: 'Home',
     searchPlaceholder: 'Search...', allCategories: 'All categories',
     btnAdd: '➕ New', btnMore: '⚙️ More', btnByIngr: '🥕 Ingredients', btnRandom: 'Random',
     sortName: 'Name', sortTime: 'Time', sortRating: 'Rating',
@@ -1134,7 +1310,11 @@ function clearSearch() {
 function openSettings() {
   document.getElementById('settings-dark-label').textContent = document.body.classList.contains('dark') ? 'ON' : 'OFF';
   document.getElementById('settings-lang-label').textContent = lang === 'en' ? 'EN' : 'SK';
-  openModal('settings-modal');
+  document.getElementById('recipe-stat-count').textContent = recipes.length;
+  document.getElementById('settings-sheet').classList.add('active');
+}
+function closeSettings() {
+  document.getElementById('settings-sheet').classList.remove('active');
 }
 
 function toggleFav(id) {
@@ -1733,15 +1913,279 @@ function switchTab(tab) {
   document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
   const btn = document.querySelector(`.nav-item[data-tab="${tab}"]`);
   if (btn) btn.classList.add('active');
-  const gridContainer = document.getElementById('recipe-grid').parentElement;
+  document.body.dataset.tab = tab;
+  const dashboard = document.getElementById('dashboard');
+  const recipeContainer = document.getElementById('home');
   const plannerContainer = document.getElementById('planner-container');
   const shoppingContainer = document.getElementById('shopping-container');
-  // Hide all
-  [gridContainer, plannerContainer, shoppingContainer].forEach(el => { if (el) el.style.display = 'none'; });
-  // Show active
-  if (tab === 'home' || tab === 'favorites') { document.getElementById('filter-fav').checked = tab === 'favorites'; gridContainer.style.display = ''; render(); }
-  if (tab === 'planner') { plannerContainer.style.display = 'block'; renderPlanner(); }
+  [dashboard, recipeContainer, plannerContainer, shoppingContainer].forEach(el => { if (el) el.style.display = 'none'; });
+  document.getElementById('main-title').style.display = tab === 'dashboard' ? 'none' : '';
+  if (tab === 'dashboard') { dashboard.style.display = ''; renderDashboard(); }
+  if (tab === 'home' || tab === 'favorites') { document.getElementById('filter-fav').checked = tab === 'favorites'; recipeContainer.style.display = ''; render(); }
   if (tab === 'shopping') { shoppingContainer.style.display = 'block'; renderShoppingList(); }
+  if (tab === 'planner') { plannerContainer.style.display = 'block'; renderPlanner(); }
+}
+
+// ======================== DASHBOARD ========================
+function renderDashboard() {
+  const now = new Date();
+  const hour = now.getHours();
+  const greetings = {
+    sk: { rano: 'Dobré ráno', obed: 'Dobrý deň', vecer: 'Dobrý večer' },
+    en: { rano: 'Good morning', obed: 'Good afternoon', vecer: 'Good evening' }
+  };
+  let period = 'obed';
+  if (hour < 10) period = 'rano';
+  else if (hour >= 18) period = 'vecer';
+  const greeting = greetings[lang][period];
+  document.getElementById('dash-greeting').textContent = greeting;
+
+  const dateStr = now.toLocaleDateString(lang === 'en' ? 'en-GB' : 'sk-SK', { weekday: 'long', day: 'numeric', month: 'long' });
+  document.getElementById('dash-date').textContent = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+
+  // Weather-aware message (simulated)
+  const messages = lang === 'en' ? {
+    rano: ['Start your day with a nutritious breakfast!', 'A light breakfast fuels a great day.', 'Perfect morning for a smoothie bowl!'],
+    obed: ['Today is ideal for light meals', 'Don\'t forget to stay hydrated!', 'Perfect time for a fresh salad.'],
+    vecer: ['A warm dinner sounds perfect tonight.', 'Time for something cozy and hearty.', 'Light dinner for better sleep.'],
+    hot: ['Stay cool — try a refreshing salad!', 'Perfect day for cold soups and smoothies.', 'Light meals for hot weather.'],
+    cold: ['Warm up with a hearty soup!', 'Perfect weather for comfort food.', 'Hot tea and warm meals for today.'],
+  } : {
+    rano: ['Začni deň výživnými raňajkami!', 'Ľahké raňajky naštartujú skvelý deň.', 'Ráno ideálne na smoothie bowl!'],
+    obed: ['Dnes ideálny deň na ľahké jedlá', 'Nezabudni na pitný režim!', 'Skvelý čas na čerstvý šalát.'],
+    vecer: ['Teplá večera znie dnes perfektne.', 'Čas na niečo hrejivé a sýte.', 'Ľahká večera pre lepší spánok.'],
+    hot: ['Ochlaď sa — skús osviežujúci šalát!', 'Deň ideálny na studené polievky.', 'Ľahké jedlá pre horúce počasie.'],
+    cold: ['Zahrej sa sýtou polievkou!', 'Perfektné počasie na comfort food.', 'Teplý čaj a hrejivé jedlá pre dnešok.'],
+  };
+  const isHot = (now.getMonth() >= 5 && now.getMonth() <= 7);
+  const isCold = (now.getMonth() <= 2 || now.getMonth() >= 10);
+  let msgKey = period;
+  if (isHot) msgKey = 'hot';
+  else if (isCold) msgKey = 'cold';
+  const msgArr = messages[msgKey];
+  document.getElementById('dash-message').textContent = msgArr[Math.floor(Math.random() * msgArr.length)];
+
+  // Motivational sub-message
+  const subs = lang === 'en' ? {
+    rano: ['🌅 Ready for a beautiful day', '☕ Coffee and meal planning time'],
+    obed: ['☀️ Stay energized throughout the day', '🥗 Halfway through — keep going strong!'],
+    vecer: ['🌙 Wind down with a cozy meal', '⭐ Reflect on today\'s meals'],
+  } : {
+    rano: ['🌅 Pripravený na krásny deň', '☕ Čas na kávu a plánovanie'],
+    obed: ['☀️ Drž sa — zvládneš to!', '🥗 V polovici dňa — pridaj!'],
+    vecer: ['🌙 Zrelaxuj pri dobrej večeri', '⭐ Ohliadni sa za dnešnými jedlami'],
+  };
+  const subArr = subs[period];
+  document.getElementById('dash-message-sub').textContent = subArr[Math.floor(Math.random() * subArr.length)];
+
+  // Stat pills
+  const plannedToday = getTodayMealCount();
+  const favCount = recipes.filter(r => r.favorite).length;
+  const totalKcal = getTodayKcal();
+  document.getElementById('dash-stats-row').innerHTML = `
+    <span class="dash-stat-pill">📅 <strong>${plannedToday}</strong>/${MEALS.length} ${lang === 'en' ? 'meals' : 'jedál'}</span>
+    <span class="dash-stat-pill">❤️ <strong>${favCount}</strong> ${lang === 'en' ? 'favorites' : 'obľúbených'}</span>
+    <span class="dash-stat-pill">🔥 <strong>${totalKcal}</strong> kcal</span>
+    <span class="dash-stat-pill">📖 <strong>${recipes.length}</strong> ${lang === 'en' ? 'recipes' : 'receptov'}</span>
+  `;
+
+  // Dashboard sections
+  let html = '';
+
+  // Water reminder
+  html += `<div class="water-reminder" id="water-reminder">
+    <span class="water-icon">💧</span>
+    <span class="water-text">${lang === 'en' ? 'Don\'t forget to drink water! 🚰' : 'Nezabudni na pitný režim! 🚰'}</span>
+    <button class="water-btn" onclick="dismissWaterReminder()">${lang === 'en' ? 'OK ✓' : 'OK ✓'}</button>
+  </div>`;
+
+  // Today's meals timeline
+  html += `<div class="dash-section">
+    <div class="dash-section-header">
+      <span class="dash-section-title">📋 ${lang === 'en' ? 'Today\'s meals' : 'Dnešné jedlá'}</span>
+      <span class="dash-section-link" onclick="switchTab('planner')">${lang === 'en' ? 'Full week' : 'Celý týždeň'} ›</span>
+    </div>
+    <div class="meal-timeline" id="dash-timeline">${renderMealTimeline()}</div>
+  </div>`;
+
+  // Daily summary
+  html += `<div class="dash-section">
+    <div class="dash-section-header">
+      <span class="dash-section-title">📊 ${lang === 'en' ? 'Daily Summary' : 'Denný súhrn'}</span>
+    </div>
+    <div class="summary-grid" id="dash-summary">${renderDailySummary()}</div>
+  </div>`;
+
+  // Smart suggestions
+  html += `<div class="dash-section">
+    <div class="dash-section-header">
+      <span class="dash-section-title">💡 ${lang === 'en' ? 'Suggestions' : 'Tipy na dnes'}</span>
+    </div>
+    <div class="suggestion-scroll" id="dash-suggestions">${renderSuggestions()}</div>
+  </div>`;
+
+  document.getElementById('dash-content').innerHTML = html;
+}
+
+function getTodayMealCount() {
+  const weekKey = getWeekKey(new Date());
+  const todayName = DAYS[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1];
+  const plan = getWeekPlan(weekKey);
+  const dayPlan = plan[todayName] || {};
+  return Object.values(dayPlan).filter(Boolean).length;
+}
+
+function getTodayKcal() {
+  const weekKey = getWeekKey(new Date());
+  const todayName = DAYS[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1];
+  const plan = getWeekPlan(weekKey);
+  const dayPlan = plan[todayName] || {};
+  let total = 0;
+  Object.values(dayPlan).filter(Boolean).forEach(entry => {
+    let r = null;
+    if (typeof entry === 'number') r = recipes.find(rec => rec.id === entry);
+    else if (entry.type === 'recipe') r = recipes.find(rec => rec.id === entry.id);
+    if (r && r.nutrition) total += r.nutrition.kcal || 0;
+  });
+  return total;
+}
+
+function renderMealTimeline() {
+  const weekKey = getWeekKey(new Date());
+  const todayName = DAYS[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1];
+  const plan = getWeekPlan(weekKey);
+  const dayPlan = plan[todayName] || {};
+  return MEALS.map(m => {
+    const entry = dayPlan[m.id];
+    let r = null, name = '', img = '', kcal = '', time = '';
+    if (entry) {
+      if (typeof entry === 'number') r = recipes.find(rec => rec.id === entry);
+      else if (entry.type === 'recipe') r = recipes.find(rec => rec.id === entry.id);
+      if (r) {
+        const rName = lang === 'en' && r.nameEn ? r.nameEn : r.name;
+        name = esc(rName); img = r.imageData || r.image || ''; kcal = r.nutrition ? '🔥' + (r.nutrition.kcal||'') : ''; time = '⏱' + r.time;
+      } else if (entry.type === 'custom') {
+        name = esc(entry.text || '—');
+      }
+    }
+    const filled = !!entry;
+    const defImg = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Crect fill=%22%23252220%22 width=%2240%22 height=%2240%22/%3E%3Ctext x=%2220%22 y=%2226%22 text-anchor=%22middle%22 font-size=%2214%22 fill=%22%2378716c%22%3E${m.icon}%3C/text%3E%3C/svg%3E';
+    return `<div class="meal-timeline-item ${filled?'filled':''}${(!filled||(entry&&entry.type==='custom'))?'':''} card-enter" onclick="${filled?'':'pickRecipe(\''+todayName+'\',\''+m.id+'\',\''+weekKey+'\')'}">
+      <span class="meal-dot"></span>
+      <span class="meal-icon">${m.icon}</span>
+      ${filled && img ? `<img class="meal-img" src="${escAttr(img)}" alt="${name}" onerror="this.style.display='none'">` : ''}
+      <div class="meal-info">
+        <div class="meal-label">${lang==='en'?m.id.charAt(0).toUpperCase()+m.id.slice(1):m.id}</div>
+        ${filled ? `<div class="meal-name">${name}</div>` : `<div class="meal-empty-text">${lang==='en'?'+ Add meal':'+ Pridať'}</div>`}
+        ${filled && time ? `<div class="meal-meta"><span>${time}</span>${kcal ? `<span>${kcal}</span>` : ''}</div>` : ''}
+      </div>
+      ${filled ? `<div class="meal-actions">
+        <button class="meal-action-btn" onclick="event.stopPropagation();pickRecipe('${todayName}','${m.id}','${weekKey}')" title="${lang==='en'?'Replace':'Vymeniť'}">↻</button>
+        <button class="meal-action-btn" onclick="event.stopPropagation();removeSlot('${todayName}','${m.id}','${weekKey}')" title="${lang==='en'?'Remove':'Odstrániť'}">✕</button>
+      </div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function renderDailySummary() {
+  const totalKcal = getTodayKcal();
+  const planned = getTodayMealCount();
+  const allRecipesToday = getTodayRecipes();
+  const totalProtein = allRecipesToday.reduce((s,r) => s + ((r.nutrition&&r.nutrition.protein)||0), 0);
+  const totalFat = allRecipesToday.reduce((s,r) => s + ((r.nutrition&&r.nutrition.fat)||0), 0);
+  const totalCarbs = allRecipesToday.reduce((s,r) => s + ((r.nutrition&&r.nutrition.carbs)||0), 0);
+  const avgDifficulty = allRecipesToday.length ? Math.round(allRecipesToday.reduce((s,r) => s + (r.difficulty||1), 0) / allRecipesToday.length * 10) / 10 : 0;
+  const progress = Math.min(100, Math.round(planned / MEALS.length * 100));
+  return `
+    <div class="summary-widget highlight">
+      <div class="circular-progress">
+        <svg viewBox="0 0 40 40"><circle class="bg" cx="20" cy="20" r="17"/><circle class="fg" cx="20" cy="20" r="17" stroke-dasharray="106.8" stroke-dashoffset="${106.8 - (106.8 * progress / 100)}"/></svg>
+        <span class="center">${progress}%</span>
+      </div>
+      <div class="widget-label">${lang === 'en' ? 'Planned' : 'Plán'}</div>
+    </div>
+    <div class="summary-widget">
+      <span class="widget-icon">🔥</span>
+      <span class="widget-value">${totalKcal}</span>
+      <span class="widget-label">${lang === 'en' ? 'kcal' : 'kcal'}</span>
+    </div>
+    <div class="summary-widget">
+      <span class="widget-icon">💪</span>
+      <span class="widget-value">${totalProtein}g</span>
+      <span class="widget-label">${lang === 'en' ? 'Protein' : 'Bielkov.'}</span>
+    </div>
+    <div class="summary-widget">
+      <span class="widget-icon">🍚</span>
+      <span class="widget-value">${totalCarbs}g</span>
+      <span class="widget-label">${lang === 'en' ? 'Carbs' : 'Sachar.'}</span>
+    </div>
+    <div class="summary-widget">
+      <span class="widget-icon">🧈</span>
+      <span class="widget-value">${totalFat}g</span>
+      <span class="widget-label">${lang === 'en' ? 'Fat' : 'Tuky'}</span>
+    </div>
+    <div class="summary-widget">
+      <span class="widget-icon">${avgDifficulty <= 1.5 ? '🟢' : avgDifficulty <= 2.5 ? '🟡' : '🔴'}</span>
+      <span class="widget-value">${avgDifficulty || '—'}</span>
+      <span class="widget-label">${lang === 'en' ? 'Difficulty' : 'Náročnosť'}</span>
+    </div>
+  `;
+}
+
+function getTodayRecipes() {
+  const weekKey = getWeekKey(new Date());
+  const todayName = DAYS[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1];
+  const plan = getWeekPlan(weekKey);
+  const dayPlan = plan[todayName] || {};
+  const result = [];
+  Object.values(dayPlan).filter(Boolean).forEach(entry => {
+    let r = null;
+    if (typeof entry === 'number') r = recipes.find(rec => rec.id === entry);
+    else if (entry.type === 'recipe') r = recipes.find(rec => rec.id === entry.id);
+    if (r) result.push(r);
+  });
+  return result;
+}
+
+function renderSuggestions() {
+  const isHot = (new Date().getMonth() >= 5 && new Date().getMonth() <= 7);
+  const isCold = (new Date().getMonth() <= 2 || new Date().getMonth() >= 10);
+
+  // Quick recipes (≤20 min)
+  const quick = recipes.filter(r => r.time <= 20).sort(() => Math.random() - .5).slice(0, 4);
+
+  // Weather-inspired
+  const weatherRecipes = recipes.filter(r => {
+    const t = [...(r.tags||[]), ...(r.tagsEn||[])];
+    if (isHot) return t.some(tag => ['šalát','salad','studené','cold','gril','grill','osviežujúce','refreshing','letné','summer'].includes(tag));
+    if (isCold) return t.some(tag => ['polievka','soup','teplý','warm','sýta','hearty','pečené','baked','zima','winter'].includes(tag));
+    return false;
+  }).sort(() => Math.random() - .5).slice(0, 4);
+
+  // Favorite dinners
+  const dinners = recipes.filter(r => {
+    const t = [...(r.tags||[]), ...(r.tagsEn||[])];
+    return t.some(tag => ['večera','dinner','hlavné','main'].includes(tag)) || r.category === 'Hlavné jedlá';
+  }).sort((a,b) => (b.rating||0) - (a.rating||0)).slice(0, 4);
+
+  const suggs = weatherRecipes.length >= 2 ? weatherRecipes : quick;
+  const extra = dinners.slice(0, 2);
+  const all = [...suggs, ...extra].slice(0, 6);
+
+  return all.map(r => {
+    const name = lang === 'en' && r.nameEn ? r.nameEn : r.name;
+    const icon = isCold ? '🍲' : isHot ? '🥗' : '🍽️';
+    return `<div class="suggestion-card press-scale" onclick="viewRecipe(${r.id})">
+      <div class="sugg-icon">${icon}</div>
+      <div class="sugg-name">${esc(name)}</div>
+      <div class="sugg-meta">⏱${r.time} · ${r.category}</div>
+    </div>`;
+  }).join('');
+}
+
+function dismissWaterReminder() {
+  const el = document.getElementById('water-reminder');
+  if (el) el.style.display = 'none';
 }
 
 // ======================== MEAL PLANNER ========================
@@ -1889,6 +2333,7 @@ function selectRecipe(day, slot, id, wk) {
   weekPlan[day][slot] = { type: 'recipe', id };
   saveWeekPlan();
   renderPlanner();
+  if (day === DAYS[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1] && !plannerIsVisible()) renderDashboard();
 }
 
 function selectCustomMeal(day, slot, text, wk) {
@@ -1931,6 +2376,12 @@ function removeSlot(day, slot, wk) {
   delete weekPlan[day][slot];
   saveWeekPlan();
   renderPlanner();
+  if (day === DAYS[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1] && !plannerIsVisible()) renderDashboard();
+}
+
+function plannerIsVisible() {
+  const el = document.getElementById('planner-container');
+  return el && el.style.display !== 'none';
 }
 
 function clearPlan() {
@@ -1969,12 +2420,15 @@ function toggleShoppingItem(text) {
   saveShoppingState(state);
 }
 function clearCheckedShopping() {
-  if (!document.querySelectorAll('#shopping-list-view .checked').length) return;
+  const checked = document.querySelectorAll('#shopping-list-view .shop-item.checked');
+  if (!checked.length) return;
   const state = getShoppingState();
   const wk = currentWeekKey();
-  const checked = state[wk] ? state[wk].checked || [] : [];
   if (!state[wk]) state[wk] = { checked: [], hidden: [] };
-  state[wk].hidden = (state[wk].hidden || []).concat(checked);
+  checked.forEach(el => {
+    const text = el.dataset.item;
+    if (text && !state[wk].hidden.includes(text)) state[wk].hidden.push(text);
+  });
   state[wk].checked = [];
   saveShoppingState(state);
   renderShoppingList();
@@ -1990,7 +2444,7 @@ function confirmClearAllShopping() {
 }
 
 function renderShoppingList() {
-  const ul = document.getElementById('shopping-list-view');
+  const container = document.getElementById('shopping-list-view');
   const merged = {};
   const weekKey = currentWeekKey();
   const weekPlan = getWeekPlan(weekKey);
@@ -2009,16 +2463,74 @@ function renderShoppingList() {
       }
     });
   });
-  const items = Object.values(merged).filter(i => !isShoppingHidden(i.text));
+  let items = Object.values(merged).filter(i => !isShoppingHidden(i.text));
   if (!items.length) {
-    ul.innerHTML = '<li style="opacity:.5;font-style:italic;" data-lang="plannerEmptyList">Zatiaľ žiadne recepty v pláne.</li>';
+    container.innerHTML = `<div style="text-align:center;padding:2rem 1rem;color:var(--text3);">
+      <div style="font-size:2.5rem;margin-bottom:.5rem;">🛒</div>
+      <div style="font-size:.9rem;font-weight:600;color:var(--text2);">${lang === 'en' ? 'Shopping list empty' : 'Nákupný zoznam je prázdny'}</div>
+      <div style="font-size:.7rem;margin-top:.15rem;">${lang === 'en' ? 'Plan your meals and ingredients will appear here.' : 'Naplánuj jedlá a suroviny sa zobrazia tu.'}</div>
+    </div>`;
     return;
   }
-  ul.innerHTML = items.map(i => `<li class="${isShoppingChecked(i.text)?'checked':''}" data-item="${escAttr(i.text)}"><input type="checkbox" ${isShoppingChecked(i.text)?'checked':''} onchange="toggleShoppingItem(this.parentElement.dataset.item);this.parentElement.classList.toggle('checked')"><span>${esc(i.text)}${i.count > 1 ? ` <em style="opacity:.5;font-size:.7rem;">×${i.count}</em>` : ''}</span></li>`).join('');
+
+  // Simple category heuristic based on ingredient keywords
+  const categories = {
+    '🥩': { keywords: ['mäso','meat','kura','chicken','hovädzie','beef','bravčové','pork','salmon','losos','tuniak','tuna','ryba','fish','slanina','bacon','klobása','sausage'], items: [] },
+    '🥬': { keywords: ['mrkva','carrot','zemiak','potato','cibuľa','onion','cesnak','garlic','kapusta','paradajka','tomato','paprika','pepper','cuketa','zucchini','špenát','spinach','brokolica','broccoli','šalát','lettuce','uhorka','cucumber','tekvica','pumpkin','batat','sweet potato','cvikla','beetroot','fazuľa','bean','hrášok','peas','kukurica','corn','šošovica','lentil','zeler','celeriac','petržlen','parsley','bylinky','herbs','bazalka','basil','kôpor','dill'], items: [] },
+    '🥛': { keywords: ['mlieko','milk','smotana','cream','syr','cheese','maslo','butter','tvaroh','cottage','jogurt','yogurt','mozzarella','parmezán','parmesan','ricotta','vajce','egg','feta','bryndza'], items: [] },
+    '🍞': { keywords: ['múka','flour','chlieb','bread','cesto','dough','strúhanka','breadcrumb','cestoviny','pasta','špagety','spaghetti','lasagne','ryža','rice','quinoa','granola','ovsené','oats','krupica','semolina'], items: [] },
+    '🥫': { keywords: ['konzerva','can','cícer','chickpea','pretlak','passata','vývar','broth','olej','oil','ocot','vinegar','horčica','mustard','kečup','ketchup','med','honey','čokoláda','chocolate','kakao','cocoa'], items: [] },
+    '🍎': { keywords: ['jablko','apple','banán','banana','jahody','strawberry','citrón','lemon','limetka','lime','pomaranč','orange','hrozienka','raisins','ovocie','fruit'], items: [] },
+    '🌰': { keywords: ['orechy','nuts','chia','semienka','seeds','mandle','almond'], items: [] },
+  };
+
+  // Categorize each item
+  const categorized = { '🧂': { label: lang === 'en' ? 'Other' : 'Ostatné', items: [] } };
+  Object.keys(categories).forEach(k => { categorized[k] = { label: k, items: [] }; });
+
+  items.forEach(item => {
+    const lower = item.text.toLowerCase();
+    let placed = false;
+    for (const [emoji, cat] of Object.entries(categories)) {
+      if (cat.keywords.some(kw => lower.includes(kw))) {
+        categorized[emoji].items.push(item);
+        placed = true; break;
+      }
+    }
+    if (!placed) categorized['🧂'].items.push(item);
+  });
+
+  let html = '';
+  const allChecked = (arr) => arr.every(i => isShoppingChecked(i.text));
+  const anyChecked = (arr) => arr.some(i => isShoppingChecked(i.text));
+  const catOrder = ['🥩','🥬','🥛','🍞','🥫','🍎','🌰','🧂'];
+
+  catOrder.forEach(emoji => {
+    const cat = categorized[emoji];
+    if (!cat || !cat.items || !cat.items.length) return;
+    const total = cat.items.length;
+    const checked = cat.items.filter(i => isShoppingChecked(i.text)).length;
+    const pct = Math.round(checked / total * 100);
+    html += `<div class="shop-category">
+      <div class="shop-category-header">
+        <span>${emoji} ${cat.label||''} <span style="font-weight:400;opacity:.6;">(${checked}/${total})</span></span>
+      </div>
+      <div class="shop-category-progress"><div class="shop-category-progress-bar" style="width:${pct}%"></div></div>
+      ${cat.items.map(i => {
+        const ch = isShoppingChecked(i.text);
+        return `<div class="shop-item ${ch?'checked':''}" data-item="${escAttr(i.text)}" onclick="toggleShoppingItem(this.dataset.item);this.classList.toggle('checked');const p=this.closest('.shop-category').querySelector('.shop-category-progress-bar');const all=this.closest('.shop-category').querySelectorAll('.shop-item');const chk=this.closest('.shop-category').querySelectorAll('.shop-item.checked');p.style.width=Math.round(chk.length/all.length*100)+'%'">
+          <span class="shop-check">${ch?'✓':''}</span>
+          <span class="shop-name">${esc(i.text)} ${i.count > 1 ? `<span class="shop-qty">×${i.count}</span>` : ''}</span>
+        </div>`;
+      }).join('')}
+    </div>`;
+  });
+
+  container.innerHTML = html;
 }
 
 function copyShoppingList() {
-  const items = document.querySelectorAll('#shopping-list-view li:not(.checked) span');
+  const items = document.querySelectorAll('#shopping-list-view .shop-item:not(.checked) .shop-name');
   const text = Array.from(items).map(el => el.textContent.replace(/\s*×\d+\s*$/,'').trim()).join('\n');
   if (!text) return;
   navigator.clipboard.writeText(text).catch(() => {});
@@ -2251,7 +2763,8 @@ document.getElementById('recipe-grid').addEventListener('click', function(e) {
   }
 });
 applyLang();
-switchTab('planner');
+document.body.dataset.tab = 'dashboard';
+switchTab('dashboard');
 render();
 showTipOfDay();
 
