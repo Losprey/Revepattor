@@ -1843,6 +1843,10 @@ function pickRecipe(day, slot) {
       closeModal('planner-picker');
     }
   };
+  document.getElementById('picker-custom-btn').onclick = function() {
+    const val = customInput.value.trim();
+    if (val) { selectCustomMeal(day, slot, val); closeModal('planner-picker'); }
+  };
   openModal('planner-picker');
 }
 
@@ -1852,7 +1856,10 @@ function createPickerModal() {
   div.id = 'planner-picker';
   div.innerHTML = `<div class="modal"><button class="modal-close" onclick="closeModal('planner-picker')">✕</button>
     <h3 style="font-size:.95rem;margin-bottom:.4rem;" data-lang="plannerPick">Vybrať recept</h3>
-    <input id="picker-custom" placeholder="✍️" style="width:100%;padding:.5rem .6rem;border:1px dashed var(--border);border-radius:var(--radius-sm);font-size:.82rem;background:var(--input-bg);color:var(--text);margin-bottom:.35rem;box-sizing:border-box;">
+    <div style="display:flex;gap:.35rem;margin-bottom:.35rem;">
+      <input id="picker-custom" placeholder="✍️" style="flex:1;padding:.5rem .6rem;border:1px dashed var(--border);border-radius:var(--radius-sm);font-size:.82rem;background:var(--input-bg);color:var(--text);box-sizing:border-box;">
+      <button id="picker-custom-btn" class="btn btn-primary" style="padding:.5rem .7rem;font-size:.8rem;white-space:nowrap;">➕</button>
+    </div>
     <input class="picker-search" id="picker-search" placeholder="🔍 ${t('searchPlaceholder')}">
     <div class="picker-recipes" id="picker-recipes"></div></div>`;
   document.body.appendChild(div);
