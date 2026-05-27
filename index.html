@@ -4398,6 +4398,7 @@ function createPickerModal() {
       <span class="picker-chip" data-cat="Hlavné jedlá" onclick="setPickerFilter(this,'Hlavné jedlá')">🍽️ ${lang==='en'?'Mains':'Hlavné'}</span>
       <span class="picker-chip" data-cat="Šaláty" onclick="setPickerFilter(this,'Šaláty')">🥗 ${lang==='en'?'Salads':'Šaláty'}</span>
       <span class="picker-chip" data-cat="Dezerty" onclick="setPickerFilter(this,'Dezerty')">🍰 ${lang==='en'?'Desserts':'Dezerty'}</span>
+      <span class="picker-chip" data-cat="__favs__" onclick="setPickerFilter(this,'__favs__')">❤️ ${lang==='en'?'Favorites':'Obľúbené'}</span>
     </div>
     <div class="picker-list" id="picker-recipes"></div>
     <div class="picker-custom-row" id="picker-custom-row">
@@ -4462,7 +4463,8 @@ function renderPickerRecipes() {
     });
     if (filtered.length < 3) filtered = recipes;
   }
-  if (_pickerCat) filtered = filtered.filter(r => r.category === _pickerCat);
+  if (_pickerCat === '__favs__') filtered = filtered.filter(r => r.favorite);
+  else if (_pickerCat) filtered = filtered.filter(r => r.category === _pickerCat);
   if (search) filtered = filtered.filter(r => {
     const name = (r.name + ' ' + (r.nameEn||'')).toLowerCase();
     const tags = [...(r.tags||[]), ...(r.tagsEn||[])].join(' ').toLowerCase();
