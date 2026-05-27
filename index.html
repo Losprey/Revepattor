@@ -621,6 +621,8 @@ body[data-tab="dashboard"] #app-header { display: none; }
 .shop-actions .sa-btn:active { transform: scale(.95); }
 .shop-actions .sa-btn:hover { border-color: var(--primary-light); color: var(--text); }
 .shop-actions .sa-btn.danger:hover { border-color: var(--danger); color: var(--danger); }
+.shop-actions .sa-btn.primary-action { background: var(--primary); color: #fff; border-color: var(--primary); }
+.shop-actions .sa-btn.primary-action:hover { background: var(--primary-light); border-color: var(--primary-light); color: #fff; }
 .shop-cat-card { background: var(--surface); border-radius: var(--radius-md); margin-bottom: .45rem; border: 1px solid var(--border); overflow: hidden; transition: all .2s ease; }
 .shop-cat-header { display: flex; align-items: center; gap: .4rem; padding: .45rem .5rem; cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; }
 .shop-cat-header:active { background: var(--hover-bg); }
@@ -4620,13 +4622,13 @@ function renderShoppingList() {
   shopItems = shopItems.filter(it => it.source === 'manual');
   saveShopItems();
 
-  if (!shopItems.length) {
+    if (!shopItems.length) {
     container.innerHTML = `<div class="shop-empty">
       <div class="shop-empty-icon">🛒</div>
       <div class="shop-empty-title">${lang === 'en' ? 'Shopping list is empty' : 'Nákupný zoznam je prázdny'}</div>
-      <div class="shop-empty-desc">${lang === 'en' ? 'Add your groceries manually to build your shopping list.' : 'Pridaj potraviny manuálne a vytvor si nákupný zoznam.'}</div>
+      <div class="shop-empty-desc">${lang === 'en' ? 'Tap the button below to add your first item.' : 'Klikni na tlačidlo a pridaj prvú položku.'}</div>
       <div class="shop-empty-actions">
-        <button class="btn primary" onclick="openAddItemSheet()">✏️ ${lang === 'en' ? 'Add item' : 'Pridať potravinu'}</button>
+        <button class="btn btn-primary" onclick="openAddItemSheet()" style="font-size:.85rem;padding:12px 28px;">➕ ${lang === 'en' ? 'Add first item' : 'Pridať prvú položku'}</button>
       </div>
     </div>`;
     return;
@@ -4674,9 +4676,11 @@ function renderShoppingList() {
 
   // Top actions
   html += `<div class="shop-actions">
+    <button class="sa-btn primary-action" onclick="openAddItemSheet()">➕ ${lang==='en'?'Add item':'Pridať položku'}</button>
     <button class="sa-btn" onclick="copyShopList()">📋 ${lang==='en'?'Copy':'Kopírovať'}</button>
-    <button class="sa-btn" onclick="clearCheckedShopItems()">✅ ${lang==='en'?'Clear checked':'Vyčistiť zaškrtnuté'}</button>
-    <button class="sa-btn danger" onclick="clearAllShopItems()">🗑 ${lang==='en'?'Clear all':'Vymazať všetko'}</button>
+    <button class="sa-btn" onclick="mergeDuplicateShopItems()">🔄 ${lang==='en'?'Merge dupes':'Zlúčiť duplicity'}</button>
+    <button class="sa-btn" onclick="clearCheckedShopItems()">✅ ${lang==='en'?'Clear checked':'Vyčistiť'}</button>
+    <button class="sa-btn danger" onclick="clearAllShopItems()">🗑 ${lang==='en'?'Clear all':'Všetko'}</button>
   </div>`;
 
   // Category cards
@@ -4750,6 +4754,34 @@ function clearAllShopItems() {
   shopItems = [];
   saveShopItems();
   renderShoppingList();
+}
+
+function mergeDuplicateShopItems() {
+  loadShopItems();
+  const merged = {};
+  let changed = 0;
+  shopItems.forEach(it => {
+    const key = norm(it.name.trim().toLowerCase());
+    if (merged[key]) {
+      const existing = merged[key];
+      const a1 = parseFloat(existing.amount) || 0;
+      const a2 = parseFloat(it.amount) || 0;
+      if (a1 && a2 && existing.unit === it.unit) {
+        existing.amount = String(a1 + a2);
+        changed++;
+      } else {
+        existing.note = (existing.note ? existing.note + '; ' : '') + it.amount + (it.unit||'');
+        changed++;
+      }
+    } else {
+      merged[key] = it;
+    }
+  });
+  shopItems = Object.values(merged);
+  saveShopItems();
+  renderShoppingList();
+  if (changed) alert(lang === 'en' ? 'Merged ' + changed + ' duplicate items.' : 'Zlúčených ' + changed + ' duplicitných položiek.');
+  else alert(lang === 'en' ? 'No duplicates found.' : 'Žiadne duplicity.');
 }
 
 function copyShopList() {
