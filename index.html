@@ -811,11 +811,6 @@ body[data-tab="dashboard"] #app-header { display: none; }
 .weather-cta { color: var(--primary); font-size: .85rem; font-weight: 500; white-space: nowrap; }
 .weather-fallback { opacity: .8; border-style: dashed; }
 
-/* ======== FAMILY WIDGET ======== */
-.family-widget-grid { display: flex; flex-wrap: wrap; gap: 10px; }
-.family-stat { display: flex; align-items: center; gap: 6px; background: var(--bg); border-radius: 10px; padding: 8px 14px; font-size: .85rem; }
-.family-stat-icon { font-size: 1.1rem; }
-
 /* ======== PREPARUJE SA BADGE ======== */
 .badge-prep { display: inline-block; font-size: .65rem; background: var(--primary-light); color: var(--primary); padding: 2px 7px; border-radius: 8px; margin-left: 6px; font-weight: 600; text-transform: uppercase; }
 
@@ -2259,10 +2254,9 @@ function loadSettings() {
     lang: localStorage.getItem('lang') || 'sk',
     accentColor: localStorage.getItem('accent') || '#dc2626',
     textSize: 'normal', uiDensity: 'normal',
-    homeWidgets: { weather: true, todayTasks: true, tipOfDay: true, hydration: true, calories: true, quickRecipes: true, familyMode: true },
+    homeWidgets: { weather: true, todayTasks: true, tipOfDay: true, hydration: true, calories: true, quickRecipes: true },
     mealPlanner: { defaultServings: 4, showNutrition: true },
     notifications: { breakfastReminder: false, todayCookingReminder: false, shoppingReminder: false, hydrationReminder: false, childMealReminder: false, eveningPlanningReminder: false },
-    family: { householdMembers: 2 },
     shopping: { storeMode: false, autoCategories: true },
     quickAdd: { enabled: false },
     notifTimes: { breakfast: '08:00', whatCook: '10:00', shopping: '16:00', water: '12:00', kids: '07:30', evening: '20:00' },
@@ -2299,7 +2293,7 @@ function applySettings() {
 }
 
 function resetWidgetsToDefaults() {
-  appSettings.homeWidgets = { weather: true, todayTasks: true, tipOfDay: true, hydration: true, calories: true, quickRecipes: true, familyMode: true };
+  appSettings.homeWidgets = { weather: true, todayTasks: true, tipOfDay: true, hydration: true, calories: true, quickRecipes: true };
   saveSettings();
   renderDashboard();
 }
@@ -2361,7 +2355,6 @@ function openSettings() {
     ['hydration','💧',t('Pitný režim','Hydration')],
     ['calories','🔥',t('Kalórie','Calories')],
     ['quickRecipes','🍽️',t('Rýchle recepty','Quick recipes')],
-    ['familyMode','👨‍👩‍👧',t('Rodina','Family')],
   ];
   html += `<div class="settings-group">
     <div class="settings-group-title">🏠 ${t('Domov','Home')}</div>
@@ -2379,11 +2372,6 @@ function openSettings() {
         <span class="sr-value">${s.weather.location||t('Nenastavené','Not set')} <span class="sr-arrow">›</span></span>
       </div>
       <div style="font-size:.6rem;color:var(--text3);padding:.2rem 0 0;">${t('Widget Počasie musí byť zapnutý vyššie.','Weather widget must be enabled above.')}</div>
-      <div style="font-size:.65rem;font-weight:600;color:var(--text3);margin:.6rem 0 .2rem;text-transform:uppercase;letter-spacing:.05em;">👨‍👩‍👧 ${t('Rodina','Family')}</div>
-      <div class="settings-row" onclick="promptNumber('family.householdMembers',1,10)">
-        <span class="sr-label"><span class="sr-icon">👥</span> ${t('Počet členov domácnosti','Household members')}</span>
-        <span class="sr-value">${s.family.householdMembers} <span class="sr-arrow">›</span></span>
-      </div>
       <div style="font-size:.65rem;font-weight:600;color:var(--text3);margin:.6rem 0 .2rem;text-transform:uppercase;letter-spacing:.05em;">🔔 ${t('Notifikácie','Notifications')}</div>
       ${[['breakfastReminder','breakfast','🌅',t('Pripomenutie raňajok','Breakfast reminder')],
          ['todayCookingReminder','whatCook','🍳',t('Čo variť dnes','What to cook today')],
@@ -2506,13 +2494,6 @@ function editText(path, label) {
   obj[key] = val.trim();
   // Reset weather cache & coords when location changes
   if (path === 'weather.location') { weatherCache = null; weatherCacheTs = 0; appSettings.weather.lat = null; appSettings.weather.lon = null; }
-  saveSettings();
-  openSettings();
-}
-function cycleKidAge() {
-  const ages = ['none','baby-6m','baby-1','baby-2','baby-3'];
-  const idx = ages.indexOf(appSettings.family.childAge);
-  appSettings.family.childAge = ages[(idx + 1) % ages.length];
   saveSettings();
   openSettings();
 }
@@ -3335,21 +3316,6 @@ function renderDashboard() {
         <span class="dash-section-title">💡 ${lang === 'en' ? 'Suggestions' : 'Tipy na dnes'}</span>
       </div>
       <div class="suggestion-scroll" id="dash-suggestions">${renderSuggestions()}</div>
-    </div>`;
-  }
-
-  // Family widget
-  if (w.familyMode) {
-    const hh = appSettings.family.householdMembers || 1;
-    html += `<div class="dash-section">
-      <div class="dash-section-header">
-        <span class="dash-section-title">👨‍👩‍👧‍👦 ${lang==='en'?'Family':'Rodina'}</span>
-        <span class="dash-section-link" onclick="openSettings()">${lang==='en'?'Edit':'Upraviť'} ›</span>
-      </div>
-      <div class="family-widget-grid">
-        <div class="family-stat"><span class="family-stat-icon">👥</span><span>${hh} ${lang==='en'?'members':'členov'}</span></div>
-        <div class="family-stat"><span class="family-stat-icon">🍽️</span><span>${t('Nastav v Domov','Configure in Home')}</span></div>
-      </div>
     </div>`;
   }
 
