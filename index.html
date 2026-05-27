@@ -655,6 +655,36 @@ body[data-tab="dashboard"] #app-header { display: none; }
 .meal-timeline-item .meal-img { animation: imgFadeIn .4s var(--ease-smooth) forwards; }
 .recipe-card-img { transition: transform .5s var(--ease-smooth); }
 
+/* ===== SETTINGS REDESIGN ===== */
+.settings-group { margin-bottom: .45rem; }
+.settings-group-title { font-size: .62rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--primary); padding: 0 .15rem .2rem; display: flex; align-items: center; gap: .25rem; }
+.settings-card { background: var(--surface); border-radius: var(--radius-md); border: 1px solid var(--border); overflow: hidden; }
+.settings-row { display: flex; align-items: center; justify-content: space-between; gap: .35rem; padding: .38rem .5rem; border-bottom: 1px solid var(--border); cursor: pointer; transition: all .15s ease; -webkit-tap-highlight-color: transparent; }
+.settings-row:last-child { border-bottom: none; }
+.settings-row:active { background: var(--hover-bg); }
+.settings-row .sr-label { display: flex; align-items: center; gap: .3rem; font-size: .75rem; font-weight: 600; color: var(--text); }
+.settings-row .sr-label .sr-icon { font-size: .9rem; flex-shrink: 0; }
+.settings-row .sr-label .sr-sub { font-size: .6rem; color: var(--text3); font-weight: 400; margin-top: .05rem; }
+.settings-row .sr-value { font-size: .7rem; color: var(--text2); font-weight: 500; display: flex; align-items: center; gap: .2rem; }
+.settings-row .sr-value .sr-arrow { font-size: .6rem; opacity: .4; }
+.settings-row.disabled { opacity: .55; pointer-events: none; }
+/* Toggle switch */
+.toggle-switch { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-slider { position: absolute; inset: 0; background: var(--border); border-radius: 22px; cursor: pointer; transition: all .3s var(--ease-smooth); }
+.toggle-slider::before { content: ''; position: absolute; left: 2px; top: 2px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: all .3s var(--ease-spring); box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+.toggle-switch input:checked + .toggle-slider { background: var(--primary); }
+.toggle-switch input:checked + .toggle-slider::before { transform: translateX(18px); }
+/* Color picker chips */
+.color-chips { display: flex; gap: .25rem; }
+.color-chip { width: 28px; height: 28px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: all .2s var(--ease-spring); flex-shrink: 0; }
+.color-chip:active { transform: scale(.85); }
+.color-chip.active { border-color: var(--text); box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px currentColor; }
+/* Settings stat card */
+.settings-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: .35rem; padding: .35rem; }
+.settings-stat { text-align: center; padding: .35rem .2rem; background: var(--input-bg); border-radius: var(--radius-sm); }
+.settings-stat .stat-val { font-size: .95rem; font-weight: 800; color: var(--text); }
+.settings-stat .stat-label { font-size: .58rem; color: var(--text3); margin-top: .02rem; }
 /* ===== PLANNER REDESIGN ===== */
 .planner-hero { background: linear-gradient(135deg, rgba(220,38,38,.08), rgba(180,30,30,.03)); border: 1px solid rgba(220,38,38,.1); border-radius: var(--radius-lg); padding: .65rem .7rem; margin-bottom: .6rem; position: relative; overflow: hidden; }
 .planner-hero-glow { position: absolute; top: -50%; right: -30%; width: 120px; height: 120px; background: radial-gradient(circle, rgba(220,38,38,.1), transparent 70%); pointer-events: none; }
@@ -1099,56 +1129,13 @@ body[data-tab="dashboard"] #app-header { display: none; }
 
 <!-- SETTINGS -->
 <div class="sheet-overlay" id="settings-sheet" onclick="if(event.target===this)closeSettings()">
-  <div class="sheet">
+  <div class="sheet" style="max-height:88vh;">
     <div class="sheet-handle"></div>
     <div class="sheet-header">
-      <h2 data-lang="settingsTitle">⚙️ Nastavenia</h2>
+      <h2>⚙️ <span data-lang="settingsTitle">Nastavenia</span></h2>
       <button class="sheet-close" onclick="closeSettings()">✕</button>
     </div>
-    <div class="sheet-body">
-      <div class="dash-section">
-        <div class="dash-section-title" style="margin-bottom:.35rem;" data-lang="moreLabelTools">NÁSTROJE</div>
-        <div class="settings-row" onclick="toggleDark()">
-          <span>🌙 <span data-lang="settingsDark">Tmavý režim</span></span>
-          <span id="settings-dark-label" style="color:var(--text2);font-size:.8rem;">OFF</span>
-        </div>
-        <div class="settings-row" onclick="switchLang()">
-          <span>🌐 <span data-lang="settingsLang">Jazyk</span></span>
-          <span id="settings-lang-label" style="color:var(--text2);font-size:.8rem;">SK</span>
-        </div>
-      </div>
-      <hr style="border:none;border-top:1px solid var(--border);margin:.2rem 0 .35rem;">
-      <div class="dash-section">
-        <div class="dash-section-title" style="margin-bottom:.35rem;" data-lang="moreLabelTools">NÁSTROJE</div>
-        <div class="settings-row" onclick="randomRecipe();closeSettings()">
-          <span>🎲 <span data-lang="btnRandom">Náhodný</span></span>
-        </div>
-        <div class="settings-row" onclick="closeSettings();openIngredientSearch()">
-          <span><span data-lang="btnByIngr">Suroviny</span></span>
-        </div>
-        <div class="settings-row" onclick="closeSettings();openHistory()">
-          <span><span data-lang="btnHistory">História</span></span>
-        </div>
-      </div>
-      <hr style="border:none;border-top:1px solid var(--border);margin:.2rem 0 .35rem;">
-      <div class="dash-section">
-        <div class="dash-section-title" style="margin-bottom:.35rem;">DÁTA</div>
-        <div class="settings-row" onclick="exportRecipes()">
-          <span>📤 <span data-lang="btnExport">Export</span></span>
-        </div>
-        <div class="settings-row" onclick="document.getElementById('import-file').click()">
-          <span>📥 <span data-lang="btnImport">Import</span></span>
-        </div>
-        <div class="settings-row" onclick="showImportUrlModal()">
-          <span>🌐 <span data-lang="btnImportUrl">Import z URL</span></span>
-        </div>
-      </div>
-      <hr style="border:none;border-top:1px solid var(--border);margin:.2rem 0 .35rem;">
-      <div style="text-align:center;color:var(--text3);font-size:.68rem;padding:.5rem 0 .3rem;">
-        <span data-lang="appTitle">Plánovač jedál</span> · v1 · <span id="recipe-stat-count"></span> receptov
-      </div>
-    </div>
-    <input type="file" id="import-file" class="import-hidden" accept=".json" onchange="importRecipes(event)">
+    <div class="sheet-body" id="settings-body"></div>
   </div>
 </div>
 
@@ -1542,9 +1529,18 @@ function applyLang() {
   }
 }
 
+function toggleDark() {
+  settings.dark = !document.body.classList.contains('dark');
+  saveSettings();
+  if (settings.dark) { document.body.classList.add('dark'); document.getElementById('dark-toggle').textContent = '☀️'; }
+  else { document.body.classList.remove('dark'); document.getElementById('dark-toggle').textContent = '🌙'; }
+}
+
 function switchLang() {
   lang = lang === 'en' ? 'sk' : 'en';
+  settings.lang = lang;
   localStorage.setItem('lang', lang);
+  saveSettings();
   applyLang();
   render();
   showTipOfDay();
@@ -1566,13 +1562,6 @@ function matchesAgeFilter(recipe) {
 }
 
 // ======================== THEME ========================
-function toggleDark() {
-  document.body.classList.toggle('dark');
-  localStorage.setItem('dark', document.body.classList.contains('dark') ? '1' : '');
-  document.getElementById('dark-toggle').textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
-  const lbl = document.getElementById('settings-dark-label');
-  if (lbl) lbl.textContent = document.body.classList.contains('dark') ? 'ON' : 'OFF';
-}
 if (localStorage.getItem('dark')) { document.body.classList.add('dark'); document.getElementById('dark-toggle').textContent = '☀️'; }
 
 // ======================== PERSISTENCE ========================
@@ -2214,11 +2203,334 @@ function clearSearch() {
   render();
 }
 
+// ======================== SETTINGS STATE ========================
+let settings = {};
+function loadSettings() {
+  try { settings = JSON.parse(localStorage.getItem('settings') || '{}'); } catch(e) { settings = {}; }
+  const defaults = {
+    dark: !!localStorage.getItem('dark'),
+    lang: localStorage.getItem('lang') || 'sk',
+    accent: 'red', textSize: 'normal', uiDensity: 'normal',
+    widgetWeather: true, widgetTasks: true, widgetTip: true, widgetWater: true,
+    widgetKcal: true, widgetRecipes: true, widgetFamily: false, widgetAi: false,
+    defaultPortions: 4, autoShop: false, showNutrition: true, prefHealthy: false,
+    prefQuick: false, prefKids: false, prefCheap: false, prefHighProtein: false,
+    notifBreakfast: false, notifWhatCook: false, notifShopping: false, notifWater: false,
+    notifKids: false, notifEvening: false, notifBreakfastTime: '08:00',
+    notifWhatCookTime: '10:00', notifShoppingTime: '16:00', notifWaterTime: '12:00',
+    notifKidsTime: '07:30', notifEveningTime: '20:00',
+    familyMembers: 2, kidAge: 'none', allergies: '', forbiddenFoods: '', favFoods: '',
+    aiRecs: true, weatherRecs: true, autoShopCat: true, ingrSuggest: true, autoPlan: false,
+    shopMode: false, quickAdd: false,
+  };
+  Object.keys(defaults).forEach(k => { if (settings[k] === undefined) settings[k] = defaults[k]; });
+}
+function saveSettings() {
+  localStorage.setItem('settings', JSON.stringify(settings));
+  applySettings();
+}
+function applySettings() {
+  if (settings.dark) { document.body.classList.add('dark'); document.getElementById('dark-toggle').textContent = '☀️'; }
+  else { document.body.classList.remove('dark'); document.getElementById('dark-toggle').textContent = '🌙'; }
+  if (settings.lang !== lang) { lang = settings.lang; localStorage.setItem('lang', lang); applyLang(); }
+  // Density
+  document.documentElement.style.setProperty('--ui-scale', settings.uiDensity === 'compact' ? '.85' : settings.uiDensity === 'large' ? '1.08' : '1');
+  document.documentElement.style.setProperty('--ui-spacing', settings.uiDensity === 'compact' ? '.85' : settings.uiDensity === 'large' ? '1.15' : '1');
+}
+loadSettings();
+applySettings();
+
 function openSettings() {
-  document.getElementById('settings-dark-label').textContent = document.body.classList.contains('dark') ? 'ON' : 'OFF';
-  document.getElementById('settings-lang-label').textContent = lang === 'en' ? 'EN' : 'SK';
-  document.getElementById('recipe-stat-count').textContent = recipes.length;
+  loadSettings();
+  const body = document.getElementById('settings-body');
+  const t = (sk, en) => lang === 'en' ? en : sk;
+
+  // Gather stats
+  const totalRecipes = recipes.length;
+  const plannedCount = Object.keys(Object.assign({}, ...Object.values(mealPlan || {}), ...Object.values(mealPlanKids || {}))).length;
+  const tasksDone = tasks.filter(t => t.completed).length;
+  const streak = calcPlanningStreak();
+
+  let html = '';
+
+  // 1. Personalisation
+  html += `<div class="settings-group">
+    <div class="settings-group-title">🎨 ${t('Personalizácia','Personalisation')}</div>
+    <div class="settings-card">
+      <div class="settings-row" onclick="toggleDark();updateSettingsUI()">
+        <span class="sr-label"><span class="sr-icon">🌙</span> <span data-lang="settingsDark">Tmavý režim</span></span>
+        <label class="toggle-switch"><input type="checkbox" ${settings.dark?'checked':''} onchange="settings.dark=this.checked;saveSettings();updateSettingsUI()"><span class="toggle-slider" onclick="event.stopPropagation()"></span></label>
+      </div>
+      <div class="settings-row" onclick="switchLang();updateSettingsUI()">
+        <span class="sr-label"><span class="sr-icon">🌐</span> <span data-lang="settingsLang">Jazyk</span></span>
+        <span class="sr-value" id="settings-lang-label">${lang === 'en' ? 'EN' : 'SK'} <span class="sr-arrow">›</span></span>
+      </div>
+      <div class="settings-row">
+        <span class="sr-label"><span class="sr-icon">🎯</span> Farba akcentu</span>
+        <div class="color-chips">${['#dc2626','#f59e0b','#10b981','#ec4899'].map(c =>
+          `<div class="color-chip${settings.accent === c ? ' active' : ''}" style="background:${c};color:${c}" onclick="settings.accent='${c}';document.querySelectorAll('.color-chip').forEach(x=>x.classList.remove('active'));this.classList.add('active');applyAccentColor('${c}');saveSettings()"></div>`
+        ).join('')}</div>
+      </div>
+      <div class="settings-row" onclick="cycleTextSize()">
+        <span class="sr-label"><span class="sr-icon">🔤</span> ${t('Veľkosť textu','Text size')}</span>
+        <span class="sr-value">${t({'compact':'Malá','normal':'Normálna','large':'Veľká'}[settings.textSize]||'Normálna', {'compact':'Small','normal':'Normal','large':'Large'}[settings.textSize]||'Normal')} <span class="sr-arrow">›</span></span>
+      </div>
+      <div class="settings-row" onclick="cycleDensity()">
+        <span class="sr-label"><span class="sr-icon">📐</span> ${t('Hustota UI','UI density')}</span>
+        <span class="sr-value">${t({'compact':'Kompaktné','normal':'Normálne','large':'Veľké prvky'}[settings.uiDensity]||'Normálne', {'compact':'Compact','normal':'Normal','large':'Large'}[settings.uiDensity]||'Normal')} <span class="sr-arrow">›</span></span>
+      </div>
+    </div>
+  </div>`;
+
+  // 2. Home screen widgets
+  const widgets = [
+    ['widgetWeather','🌤️',t('Počasie','Weather')],
+    ['widgetTasks','✅',t('Dnešné úlohy','Today\'s tasks')],
+    ['widgetTip','💡',t('Tip dňa','Tip of the day')],
+    ['widgetWater','💧',t('Pitný režim','Water reminder')],
+    ['widgetKcal','🔥',t('Kalórie','Calories')],
+    ['widgetRecipes','🍽️',t('Rýchle recepty','Quick recipes')],
+    ['widgetFamily','👨‍👩‍👧',t('Rodinný režim','Family mode')],
+    ['widgetAi','🤖',t('AI odporúčania','AI recommendations')],
+  ];
+  html += `<div class="settings-group">
+    <div class="settings-group-title">🏠 ${t('Domovská obrazovka','Home screen')}</div>
+    <div class="settings-card">${widgets.map(([k,icon,label]) =>
+      `<div class="settings-row">
+        <span class="sr-label"><span class="sr-icon">${icon}</span> ${label}</span>
+        <label class="toggle-switch"><input type="checkbox" ${settings[k]?'checked':''} onchange="settings.${k}=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
+      </div>`
+    ).join('')}</div>
+  </div>`;
+
+  // 3. Meal plan preferences
+  html += `<div class="settings-group">
+    <div class="settings-group-title">📅 ${t('Jedálniček','Meal plan')}</div>
+    <div class="settings-card">
+      <div class="settings-row">
+        <span class="sr-label"><span class="sr-icon">🍽️</span> ${t('Predvolený počet porcií','Default servings')}</span>
+        <span class="sr-value" onclick="adjustSetting('defaultPortions',1,8)">${settings.defaultPortions} <span class="sr-arrow">›</span></span>
+      </div>
+      <div class="settings-row">
+        <span class="sr-label"><span class="sr-icon">🛒</span> ${t('Auto nákupný zoznam','Auto shopping list')}</span>
+        <label class="toggle-switch"><input type="checkbox" ${settings.autoShop?'checked':''} onchange="settings.autoShop=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="settings-row">
+        <span class="sr-label"><span class="sr-icon">📊</span> ${t('Nutričné hodnoty','Show nutrition')}</span>
+        <label class="toggle-switch"><input type="checkbox" ${settings.showNutrition?'checked':''} onchange="settings.showNutrition=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="settings-row">
+        <span class="sr-label"><span class="sr-icon">🥗</span> ${t('Zdravé recepty','Healthy recipes')}</span>
+        <label class="toggle-switch"><input type="checkbox" ${settings.prefHealthy?'checked':''} onchange="settings.prefHealthy=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="settings-row">
+        <span class="sr-label"><span class="sr-icon">⚡</span> ${t('Rýchle recepty','Quick recipes')}</span>
+        <label class="toggle-switch"><input type="checkbox" ${settings.prefQuick?'checked':''} onchange="settings.prefQuick=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="settings-row">
+        <span class="sr-label"><span class="sr-icon">👶</span> ${t('Detské jedlá','Kids meals')}</span>
+        <label class="toggle-switch"><input type="checkbox" ${settings.prefKids?'checked':''} onchange="settings.prefKids=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="settings-row">
+        <span class="sr-label"><span class="sr-icon">💰</span> ${t('Lacné jedlá','Cheap meals')}</span>
+        <label class="toggle-switch"><input type="checkbox" ${settings.prefCheap?'checked':''} onchange="settings.prefCheap=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="settings-row">
+        <span class="sr-label"><span class="sr-icon">💪</span> ${t('Vysokoproteínové','High protein')}</span>
+        <label class="toggle-switch"><input type="checkbox" ${settings.prefHighProtein?'checked':''} onchange="settings.prefHighProtein=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+  </div>`;
+
+  // 4. Notifications
+  const notifs = [
+    ['notifBreakfast','notifBreakfastTime','🌅',t('Pripomenutie raňajok','Breakfast reminder')],
+    ['notifWhatCook','notifWhatCookTime','🍳',t('Čo variť dnes','What to cook today')],
+    ['notifShopping','notifShoppingTime','🛒',t('Ísť nakúpiť','Go shopping')],
+    ['notifWater','notifWaterTime','💧',t('Pitný režim','Water reminder')],
+    ['notifKids','notifKidsTime','👶',t('Jedlo pre dieťa','Kids meal prep')],
+    ['notifEvening','notifEveningTime','🌙',t('Večerné plánovanie','Evening planning')],
+  ];
+  html += `<div class="settings-group">
+    <div class="settings-group-title">🔔 ${t('Notifikácie','Notifications')}</div>
+    <div class="settings-card">${notifs.map(([en,timeK,icon,label]) =>
+      `<div class="settings-row">
+        <span class="sr-label"><span class="sr-icon">${icon}</span> ${label}</span>
+        <label class="toggle-switch"><input type="checkbox" ${settings[en]?'checked':''} onchange="settings.${en}=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
+      </div>`
+    ).join('')}</div>
+  </div>`;
+
+  // 5. Family & Kids
+  html += `<div class="settings-group">
+    <div class="settings-group-title">👨‍👩‍👧‍👦 ${t('Rodina a dieťa','Family & kids')}</div>
+    <div class="settings-card">
+      <div class="settings-row">
+        <span class="sr-label"><span class="sr-icon">👥</span> ${t('Počet členov','Household members')}</span>
+        <span class="sr-value" onclick="adjustSetting('familyMembers',1,10)">${settings.familyMembers} <span class="sr-arrow">›</span></span>
+      </div>
+      <div class="settings-row">
+        <span class="sr-label"><span class="sr-icon">👶</span> ${t('Vek dieťaťa','Child age')}</span>
+        <span class="sr-value">${t({'none':'—','baby-6m':'6m+','baby-1':'1r+','baby-2':'2r+','baby-3':'3r+'}[settings.kidAge]||'—', {'none':'—','baby-6m':'6m+','baby-1':'1y+','baby-2':'2y+','baby-3':'3y+'}[settings.kidAge]||'—')} <span class="sr-arrow">›</span></span>
+      </div>
+      <div class="settings-row" onclick="editSettingText('allergies','${t('Alergie (oddelené čiarkou)','Allergies (comma separated)')}')">
+        <span class="sr-label"><span class="sr-icon">⚠️</span> ${t('Alergie','Allergies')}</span>
+        <span class="sr-value">${settings.allergies ? trunc(settings.allergies,20) : '—'} <span class="sr-arrow">›</span></span>
+      </div>
+      <div class="settings-row" onclick="editSettingText('forbiddenFoods','${t('Zakázané potraviny','Forbidden foods')}')">
+        <span class="sr-label"><span class="sr-icon">🚫</span> ${t('Zakázané','Forbidden foods')}</span>
+        <span class="sr-value">${settings.forbiddenFoods ? trunc(settings.forbiddenFoods,20) : '—'} <span class="sr-arrow">›</span></span>
+      </div>
+      <div class="settings-row" onclick="editSettingText('favFoods','${t('Obľúbené jedlá','Favorite foods')}')">
+        <span class="sr-label"><span class="sr-icon">❤️</span> ${t('Obľúbené','Favorite foods')}</span>
+        <span class="sr-value">${settings.favFoods ? trunc(settings.favFoods,20) : '—'} <span class="sr-arrow">›</span></span>
+      </div>
+    </div>
+  </div>`;
+
+  // 6. Smart features
+  html += `<div class="settings-group">
+    <div class="settings-group-title">🤖 ${t('Smart funkcie','Smart features')}</div>
+    <div class="settings-card">
+      <div class="settings-row">
+        <span class="sr-label"><span class="sr-icon">🤖</span> ${t('AI odporúčania','AI recommendations')}</span>
+        <label class="toggle-switch"><input type="checkbox" ${settings.aiRecs?'checked':''} onchange="settings.aiRecs=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="settings-row">
+        <span class="sr-label"><span class="sr-icon">🌤️</span> ${t('Počasie → jedlá','Weather suggestions')}</span>
+        <label class="toggle-switch"><input type="checkbox" ${settings.weatherRecs?'checked':''} onchange="settings.weatherRecs=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="settings-row">
+        <span class="sr-label"><span class="sr-icon">📦</span> ${t('Auto kategórie nákupu','Auto shop categories')}</span>
+        <label class="toggle-switch"><input type="checkbox" ${settings.autoShopCat?'checked':''} onchange="settings.autoShopCat=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="settings-row">
+        <span class="sr-label"><span class="sr-icon">🥕</span> ${t('Návrhy z ingrediencií','Ingredient suggestions')}</span>
+        <label class="toggle-switch"><input type="checkbox" ${settings.ingrSuggest?'checked':''} onchange="settings.ingrSuggest=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="settings-row">
+        <span class="sr-label"><span class="sr-icon">📅</span> ${t('Auto plánovanie týždňa','Auto week planning')}</span>
+        <label class="toggle-switch"><input type="checkbox" ${settings.autoPlan?'checked':''} onchange="settings.autoPlan=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+  </div>`;
+
+  // 7. Quick actions / Shop mode
+  html += `<div class="settings-group">
+    <div class="settings-group-title">⚡ ${t('Rýchle akcie','Quick actions')}</div>
+    <div class="settings-card">
+      <div class="settings-row">
+        <span class="sr-label"><span class="sr-icon">🛒</span> ${t('Režim obchodu','Shopping mode')}</span>
+        <label class="toggle-switch"><input type="checkbox" ${settings.shopMode?'checked':''} onchange="settings.shopMode=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="settings-row">
+        <span class="sr-label"><span class="sr-icon">➕</span> ${t('Rýchle pridanie','Quick add')}</span>
+        <label class="toggle-switch"><input type="checkbox" ${settings.quickAdd?'checked':''} onchange="settings.quickAdd=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+  </div>`;
+
+  // 8. Data
+  html += `<div class="settings-group">
+    <div class="settings-group-title">💾 ${t('Dáta','Data')}</div>
+    <div class="settings-card">
+      <div class="settings-row" onclick="showImportUrlModal()">
+        <span class="sr-label"><span class="sr-icon">🌐</span> <span data-lang="btnImportUrl">Import z URL</span></span>
+        <span class="sr-value"><span class="sr-arrow">›</span></span>
+      </div>
+      <div class="settings-row" onclick="if(confirm('${t('Naozaj obnoviť demo recepty? Všetky existujúce sa stratia.','Reset to demo recipes? All existing recipes will be lost.')}')){resetRecipes();closeSettings()}">
+        <span class="sr-label"><span class="sr-icon">🔄</span> ${t('Obnoviť demo','Reset demo recipes')}</span>
+        <span class="sr-value"><span class="sr-arrow">›</span></span>
+      </div>
+      <div class="settings-row" onclick="if(confirm('${t('Naozaj vymazať všetky dáta? Táto akcia je nenávratná.','Delete all data? This cannot be undone.')}')){deleteAllData();closeSettings()}">
+        <span class="sr-label" style="color:var(--danger);"><span class="sr-icon">🗑</span> ${t('Vymazať všetky dáta','Delete all data')}</span>
+        <span class="sr-value" style="color:var(--danger);"><span class="sr-arrow">›</span></span>
+      </div>
+    </div>
+  </div>`;
+
+  // 9. About (stats)
+  html += `<div class="settings-group">
+    <div class="settings-group-title">ℹ️ ${t('O aplikácii','About')}</div>
+    <div class="settings-card">
+      <div class="settings-stats">
+        <div class="settings-stat"><div class="stat-val">${totalRecipes}</div><div class="stat-label">${t('receptov','recipes')}</div></div>
+        <div class="settings-stat"><div class="stat-val">${plannedCount}</div><div class="stat-label">${t('naplánovaných','planned')}</div></div>
+        <div class="settings-stat"><div class="stat-val">${tasksDone}</div><div class="stat-label">${t('úloh hotových','tasks done')}</div></div>
+        <div class="settings-stat"><div class="stat-val">${streak}</div><div class="stat-label">${t('dní v rade','day streak')}</div></div>
+      </div>
+      <div style="text-align:center;padding:.3rem 0 .15rem;font-size:.6rem;color:var(--text3);">
+        <span data-lang="appTitle">Plánovač jedál</span> · v1.5 · ${totalRecipes} ${t('receptov','recipes')}
+      </div>
+    </div>
+  </div>`;
+
+  body.innerHTML = html;
   document.getElementById('settings-sheet').classList.add('active');
+}
+
+function updateSettingsUI() {
+  document.getElementById('settings-lang-label').textContent = lang === 'en' ? 'EN' : 'SK';
+}
+
+function applyAccentColor(color) {
+  const root = document.documentElement;
+  // Map accent colors to CSS variables
+  const vars = {
+    '--primary': color,
+    '--primary-light': color + 'cc',
+  };
+  Object.keys(vars).forEach(k => root.style.setProperty(k, vars[k]));
+  localStorage.setItem('accent', color);
+}
+
+function cycleTextSize() {
+  const sizes = ['compact','normal','large'];
+  const idx = sizes.indexOf(settings.textSize);
+  settings.textSize = sizes[(idx + 1) % sizes.length];
+  saveSettings();
+  openSettings();
+}
+function cycleDensity() {
+  const dens = ['compact','normal','large'];
+  const idx = dens.indexOf(settings.uiDensity);
+  settings.uiDensity = dens[(idx + 1) % dens.length];
+  saveSettings();
+  openSettings();
+}
+function adjustSetting(key, min, max) {
+  const val = prompt(`${t('Zadaj hodnotu','Enter value')} (${min}-${max}):`, settings[key]);
+  if (val === null) return;
+  const num = parseInt(val);
+  if (isNaN(num) || num < min || num > max) return;
+  settings[key] = num;
+  saveSettings();
+  openSettings();
+}
+function editSettingText(key, label) {
+  const val = prompt(label + ':', settings[key] || '');
+  if (val === null) return;
+  settings[key] = val.trim();
+  saveSettings();
+  openSettings();
+}
+function trunc(s, max) { return s.length > max ? s.slice(0,max) + '…' : s; }
+function t(sk, en) { return lang === 'en' ? en : sk; }
+
+function calcPlanningStreak() {
+  // Count consecutive days with meal plan entries
+  let streak = 0;
+  const today = new Date();
+  for (let i = 0; i < 365; i++) {
+    const d = new Date(today); d.setDate(d.getDate() - i);
+    const key = getWeekKey(d);
+    const plan = getWeekPlan(key);
+    const dayName = DAYS[d.getDay() === 0 ? 6 : d.getDay() - 1];
+    const day = plan[dayName];
+    if (day && Object.values(day).filter(Boolean).length > 0) streak++;
+    else break;
+  }
+  return streak;
 }
 function closeSettings() {
   document.getElementById('settings-sheet').classList.remove('active');
@@ -2549,12 +2861,18 @@ function copyRecipe(e) {
 }
 
 // ======================== EXPORT/IMPORT ========================
-function exportRecipes() {
-  const blob = new Blob([JSON.stringify(recipes.map(r => ({...r, imageData: ''})), null, 2)], {type:'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `receptar-${new Date().toISOString().slice(0,10)}.json`;
-  a.click();
+function resetRecipes() {
+  localStorage.removeItem('recipes');
+  localStorage.removeItem('mealPlan');
+  localStorage.removeItem('mealPlanKids');
+  localStorage.removeItem('cookingHistory');
+  localStorage.removeItem('shoppingItems');
+  localStorage.removeItem('tasks');
+  location.reload();
+}
+function deleteAllData() {
+  localStorage.clear();
+  location.reload();
 }
 
 function importRecipes(e) {
