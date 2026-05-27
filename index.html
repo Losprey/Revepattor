@@ -96,6 +96,9 @@ header h1 { font-size: 1.1rem; font-weight: 800; color: var(--text); letter-spac
 /* ===== SEARCH + CONTROLS ===== */
 .controls-bar { position: sticky; top: 0; z-index: 50; background: var(--bg); padding: .35rem 0 .2rem; }
 .controls { display: flex; gap: .4rem; flex-wrap: wrap; align-items: center; }
+.controls-sub { display: flex; align-items: center; gap: .35rem; padding-top: .15rem; }
+.settings-row { display: flex; align-items: center; justify-content: space-between; padding: .45rem .55rem; border-radius: var(--radius-sm); cursor: pointer; transition: all .15s ease; font-size:.85rem; }
+.settings-row:hover { background: var(--hover-bg); }
 .search-wrap { position: relative; display: flex; flex: 1; min-width: 140px; align-items: center; }
 .search-wrap input { flex: 1; padding: .52rem 2.4rem .52rem 1rem; border: 1px solid var(--border); border-radius: var(--radius-lg); font-size: .82rem; background: var(--input-bg); color: var(--text); transition: all .25s ease; width: 100%; box-shadow: var(--inner-shadow); }
 .search-wrap input:focus { outline: none; border-color: rgba(220,38,38,.3); box-shadow: 0 0 0 3px var(--primary-glow), var(--inner-shadow); }
@@ -428,35 +431,15 @@ body:not(.dark) .recipe-card .fav-btn.fav-active { background: linear-gradient(1
         <option>Hlavné jedlá</option><option>Polievky</option><option>Šaláty</option><option>Dezerty</option><option>Pečivo</option><option>Nápoje</option><option>Predjedlá</option><option>Raňajky</option><option>Prílohy</option><option>Detské</option>
       </select>
       <button class="btn btn-primary" onclick="openFormModal()" data-lang="btnAdd">➕</button>
-      <button class="btn btn-secondary more-toggle" id="more-toggle" onclick="toggleMore()"><span data-lang="btnMore">⚙️ Viac</span></button>
     </div>
-    <div class="controls-more" id="controls-more">
-      <div class="controls-more-inner">
-        <span class="controls-more-label"><span data-lang="moreLabelTools">NÁSTROJE</span></span>
-        <div class="controls-more-row">
-          <button class="btn btn-secondary" onclick="randomRecipe()">🎲 <span data-lang="btnRandom">Náhodný</span></button>
-          <button class="btn btn-secondary" onclick="openIngredientSearch()">🥕 <span data-lang="btnByIngr">Suroviny</span></button>
-        </div>
-        <div class="controls-more-row">
-          <label class="fav-filter-label"><input type="checkbox" id="filter-fav" onchange="render()"> ❤️</label>
-          <select id="sort-by" onchange="render()">
-            <option value="name">📋 <span data-lang="sortName">Názov</span></option>
-            <option value="time">⏱ <span data-lang="sortTime">Čas</span></option>
-            <option value="rating">⭐ <span data-lang="sortRating">Hodnotenie</span></option>
-          </select>
-        </div>
-        <span class="controls-more-label"><span data-lang="moreLabelData">DÁTA</span></span>
-        <div class="controls-more-row">
-          <button class="btn btn-secondary" onclick="openHistory()">📜 <span data-lang="btnHistory">História</span></button>
-          <button class="btn btn-secondary" onclick="exportRecipes()">📤 <span data-lang="btnExport">Export</span></button>
-          <button class="btn btn-secondary" onclick="document.getElementById('import-file').click()">📥 <span data-lang="btnImport">Import</span></button>
-        </div>
-        <span class="controls-more-label"><span data-lang="moreLabelWeb">WEB</span></span>
-        <div class="controls-more-row">
-          <button class="btn btn-secondary" onclick="showImportUrlModal()">🌐 <span data-lang="btnImportUrl">Import z URL</span></button>
-        </div>
-      </div>
-      <input type="file" id="import-file" class="import-hidden" accept=".json" onchange="importRecipes(event)">
+    <div class="controls-sub">
+      <select id="sort-by" onchange="render()" style="padding:.3rem .5rem;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.72rem;background:var(--input-bg);color:var(--text);">
+        <option value="name">📋 <span data-lang="sortName">Názov</span></option>
+        <option value="time">⏱ <span data-lang="sortTime">Čas</span></option>
+        <option value="rating">⭐ <span data-lang="sortRating">Hodnotenie</span></option>
+      </select>
+      <label class="fav-filter-label"><input type="checkbox" id="filter-fav" onchange="render()"> ❤️</label>
+      <button class="btn btn-secondary" onclick="randomRecipe()" style="font-size:.68rem;padding:.22rem .45rem;">🎲</button>
     </div>
     <div class="age-filter" id="age-filter">
       <button class="age-btn active" data-age="" onclick="setAgeFilter('')"><span data-lang="allAges">Všetky veky</span></button>
@@ -644,6 +627,49 @@ body:not(.dark) .recipe-card .fav-btn.fav-active { background: linear-gradient(1
   </div>
 </div>
 
+<!-- SETTINGS -->
+<div class="modal-overlay" id="settings-modal">
+  <div class="modal" style="max-width:400px;">
+    <button class="modal-close" onclick="closeModal('settings-modal')">✕</button>
+    <h2 data-lang="settingsTitle">⚙️ Nastavenia</h2>
+    <div style="display:flex;flex-direction:column;gap:.5rem;margin-top:.6rem;">
+      <div class="settings-row" onclick="toggleDark()">
+        <span>🌙 <span data-lang="settingsDark">Tmavý režim</span></span>
+        <span id="settings-dark-label" style="color:var(--text2);font-size:.8rem;">OFF</span>
+      </div>
+      <div class="settings-row" onclick="switchLang()">
+        <span>🌐 <span data-lang="settingsLang">Jazyk</span></span>
+        <span id="settings-lang-label" style="color:var(--text2);font-size:.8rem;">SK</span>
+      </div>
+      <hr style="border:none;border-top:1px solid var(--border);margin:0;">
+      <span class="controls-more-label" data-lang="moreLabelTools" style="margin:0;">NÁSTROJE</span>
+      <div class="settings-row" onclick="randomRecipe();closeModal('settings-modal')">
+        <span>🎲 <span data-lang="btnRandom">Náhodný</span></span>
+      </div>
+      <div class="settings-row" onclick="closeModal('settings-modal');openIngredientSearch()">
+        <span>🥕 <span data-lang="btnByIngr">Suroviny</span></span>
+      </div>
+      <div class="settings-row" onclick="closeModal('settings-modal');openHistory()">
+        <span>📜 <span data-lang="btnHistory">História</span></span>
+      </div>
+      <div class="settings-row" onclick="exportRecipes()">
+        <span>📤 <span data-lang="btnExport">Export</span></span>
+      </div>
+      <div class="settings-row" onclick="document.getElementById('import-file').click()">
+        <span>📥 <span data-lang="btnImport">Import</span></span>
+      </div>
+      <div class="settings-row" onclick="showImportUrlModal()">
+        <span>🌐 <span data-lang="btnImportUrl">Import z URL</span></span>
+      </div>
+      <hr style="border:none;border-top:1px solid var(--border);margin:0;">
+      <div style="text-align:center;color:var(--text3);font-size:.7rem;padding:.3rem 0;">
+        <span data-lang="appTitle">Plánovač jedál</span> · v1
+      </div>
+    </div>
+    <input type="file" id="import-file" class="import-hidden" accept=".json" onchange="importRecipes(event)">
+  </div>
+</div>
+
 <!-- BOTTOM NAV -->
 <nav class="bottom-nav">
   <button class="nav-item active" data-tab="planner" onclick="switchTab('planner')">
@@ -658,9 +684,9 @@ body:not(.dark) .recipe-card .fav-btn.fav-active { background: linear-gradient(1
     <span class="nav-icon">❤️</span>
     <span class="nav-label" data-lang="navFavs">Obľúbené</span>
   </button>
-  <button class="nav-item" onclick="if(document.getElementById('planner-container').style.display!=='none')switchTab('home');toggleMore()">
+  <button class="nav-item" onclick="openSettings()">
     <span class="nav-icon">⚙️</span>
-    <span class="nav-label" data-lang="btnMore">Viac</span>
+    <span class="nav-label" data-lang="navSettings">Nastavenia</span>
   </button>
 </nav>
 
@@ -669,7 +695,7 @@ body:not(.dark) .recipe-card .fav-btn.fav-active { background: linear-gradient(1
 const LANG = {
   sk: {
     appTitle: 'Plánovač jedál', appSubtitle: 'Týždenný plánovač s receptami',
-    navRecipes: 'Receptár',
+    navRecipes: 'Receptár', navSettings: 'Nastavenia',
     searchPlaceholder: 'Hľadať...', allCategories: 'Všetky kategórie',
     btnAdd: '➕ Nový', btnMore: '⚙️ Viac', btnByIngr: '🥕 Suroviny', btnRandom: 'Náhodný',
     sortName: 'Názov', sortTime: 'Čas', sortRating: 'Hodnotenie',
@@ -709,15 +735,16 @@ const LANG = {
     moreLabelTools: 'NÁSTROJE', moreLabelData: 'DÁTA', moreLabelWeb: 'WEB',
     btnExport: 'Export', btnImport: 'Import',
     navPlanner: 'Plánovač', plannerTitle: '📅 Plánovač jedál', plannerClear: '🗑', plannerToday: 'dnes', plannerCustom: '✍️ Napíš vlastné jedlo...',
+    plannerWeek: 'Celý týždeň', plannerWeekHide: 'Skryť týždeň',
     plannerShopping: '🛒 Nákupný zoznam', plannerCopy: '📋 Kopírovať',
     plannerPick: 'Vybrať recept', plannerEmpty: '+ pridať',
     plannerEmptyList: 'Zatiaľ žiadne recepty v pláne.',
-    plannerWeek: 'Celý týždeň', plannerWeekHide: 'Skryť týždeň',
+    settingsTitle: '⚙️ Nastavenia', settingsDark: 'Tmavý režim', settingsLang: 'Jazyk',
 
   },
   en: {
     appTitle: 'Meal Planner', appSubtitle: 'Weekly meal planner with recipes',
-    navRecipes: 'Recipes',
+    navRecipes: 'Recipes', navSettings: 'Settings',
     searchPlaceholder: 'Search...', allCategories: 'All categories',
     btnAdd: '➕ New', btnMore: '⚙️ More', btnByIngr: '🥕 Ingredients', btnRandom: 'Random',
     sortName: 'Name', sortTime: 'Time', sortRating: 'Rating',
@@ -761,6 +788,7 @@ const LANG = {
     plannerPick: 'Pick a recipe', plannerEmpty: '+ add',
     plannerEmptyList: 'No recipes in the plan yet.',
     plannerWeek: 'Full week', plannerWeekHide: 'Hide week',
+    settingsTitle: '⚙️ Settings', settingsDark: 'Dark mode', settingsLang: 'Language',
 
   }
  };
@@ -974,6 +1002,8 @@ function switchLang() {
   applyLang();
   render();
   showTipOfDay();
+  const lbl = document.getElementById('settings-lang-label');
+  if (lbl) lbl.textContent = lang === 'en' ? 'EN' : 'SK';
 }
 
 function setAgeFilter(age) {
@@ -994,6 +1024,8 @@ function toggleDark() {
   document.body.classList.toggle('dark');
   localStorage.setItem('dark', document.body.classList.contains('dark') ? '1' : '');
   document.getElementById('dark-toggle').textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
+  const lbl = document.getElementById('settings-dark-label');
+  if (lbl) lbl.textContent = document.body.classList.contains('dark') ? 'ON' : 'OFF';
 }
 if (localStorage.getItem('dark')) { document.body.classList.add('dark'); document.getElementById('dark-toggle').textContent = '☀️'; }
 
@@ -1082,9 +1114,10 @@ function clearSearch() {
   render();
 }
 
-function toggleMore() {
-  document.getElementById('controls-more').classList.toggle('open');
-  document.getElementById('more-toggle').classList.toggle('open');
+function openSettings() {
+  document.getElementById('settings-dark-label').textContent = document.body.classList.contains('dark') ? 'ON' : 'OFF';
+  document.getElementById('settings-lang-label').textContent = lang === 'en' ? 'EN' : 'SK';
+  openModal('settings-modal');
 }
 
 function toggleFav(id) {
