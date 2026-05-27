@@ -2259,10 +2259,10 @@ function loadSettings() {
     lang: localStorage.getItem('lang') || 'sk',
     accentColor: localStorage.getItem('accent') || '#dc2626',
     textSize: 'normal', uiDensity: 'normal',
-    homeWidgets: { weather: true, todayTasks: true, tipOfDay: true, hydration: true, calories: true, quickRecipes: true, familyMode: true, aiSuggestions: true },
-    mealPlanner: { defaultServings: 4, autoShoppingList: false, showNutrition: true, preferHealthy: false, preferQuick: false, preferKidsMeals: false, preferCheap: false, preferHighProtein: false },
+    homeWidgets: { weather: true, todayTasks: true, tipOfDay: true, hydration: true, calories: true, quickRecipes: true, familyMode: true },
+    mealPlanner: { defaultServings: 4, showNutrition: true },
     notifications: { breakfastReminder: false, todayCookingReminder: false, shoppingReminder: false, hydrationReminder: false, childMealReminder: false, eveningPlanningReminder: false },
-    family: { householdMembers: 2, childAge: 'none', allergies: '', forbiddenFoods: '', favoriteMeals: '' },
+    family: { householdMembers: 2 },
     shopping: { storeMode: false, autoCategories: true },
     quickAdd: { enabled: false },
     notifTimes: { breakfast: '08:00', whatCook: '10:00', shopping: '16:00', water: '12:00', kids: '07:30', evening: '20:00' },
@@ -2299,7 +2299,7 @@ function applySettings() {
 }
 
 function resetWidgetsToDefaults() {
-  appSettings.homeWidgets = { weather: true, todayTasks: true, tipOfDay: true, hydration: true, calories: true, quickRecipes: true, familyMode: true, aiSuggestions: true };
+  appSettings.homeWidgets = { weather: true, todayTasks: true, tipOfDay: true, hydration: true, calories: true, quickRecipes: true, familyMode: true };
   saveSettings();
   renderDashboard();
 }
@@ -2314,11 +2314,11 @@ function openSettings() {
   const tasksDone = tasks.filter(t => t.completed).length;
   const streak = calcPlanningStreak();
   const s = appSettings;
-  const w = s.homeWidgets, m = s.mealPlanner, n = s.notifications, f = s.family;
+  const w = s.homeWidgets, m = s.mealPlanner;
 
   let html = '';
 
-  // 1. Personalisation
+  // 1. Vzhľad
   const accentColors = [
     { val: '#dc2626', label: 'Červená' },
     { val: '#f59e0b', label: 'Oranžová' },
@@ -2326,7 +2326,7 @@ function openSettings() {
     { val: '#ec4899', label: 'Ružová' },
   ];
   html += `<div class="settings-group">
-    <div class="settings-group-title">🎨 ${t('Personalizácia','Personalisation')}</div>
+    <div class="settings-group-title">🎨 ${t('Vzhľad','Appearance')}</div>
     <div class="settings-card">
       <div class="settings-row">
         <span class="sr-label"><span class="sr-icon">🌙</span> ${t('Tmavý režim','Dark mode')}</span>
@@ -2334,7 +2334,7 @@ function openSettings() {
       </div>
       <div class="settings-row" onclick="cycleLang()">
         <span class="sr-label"><span class="sr-icon">🌐</span> ${t('Jazyk','Language')}</span>
-        <span class="sr-value">${s.lang === 'en' ? 'EN' : 'SK'} <span class="sr-arrow">›</span></span>
+        <span class="sr-value">${s.lang === 'en' ? 'English' : 'Slovenčina'} <span class="sr-arrow">›</span></span>
       </div>
       <div class="settings-row">
         <span class="sr-label"><span class="sr-icon">🎯</span> ${t('Farba akcentu','Accent color')}</span>
@@ -2353,28 +2353,60 @@ function openSettings() {
     </div>
   </div>`;
 
-  // 2. Home screen widgets
+  // 2. Domov — widgets + weather + family + notifications
   const widgets = [
     ['weather','🌤️',t('Počasie','Weather')],
-    ['todayTasks','✅',t('Dnešné úlohy','Today\'s tasks')],
+    ['todayTasks','✅',t('Dnešné úlohy','Tasks')],
     ['tipOfDay','💡',t('Tip dňa','Tip of the day')],
     ['hydration','💧',t('Pitný režim','Hydration')],
     ['calories','🔥',t('Kalórie','Calories')],
     ['quickRecipes','🍽️',t('Rýchle recepty','Quick recipes')],
-    ['familyMode','👨‍👩‍👧',t('Rodinný režim','Family mode')],
-    ['aiSuggestions','🤖',t('AI odporúčania','AI suggestions')],
+    ['familyMode','👨‍👩‍👧',t('Rodina','Family')],
   ];
   html += `<div class="settings-group">
-    <div class="settings-group-title">🏠 ${t('Domovská obrazovka','Home screen')}</div>
-    <div class="settings-card">${widgets.map(([k,icon,label]) =>
-      `<div class="settings-row">
-        <span class="sr-label"><span class="sr-icon">${icon}</span> ${label}</span>
-        <label class="toggle-switch"><input type="checkbox" ${w[k]?'checked':''} onchange="w.${k}=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
-      </div>`
-    ).join('')}</div>
+    <div class="settings-group-title">🏠 ${t('Domov','Home')}</div>
+    <div class="settings-card">
+      <div style="font-size:.65rem;font-weight:600;color:var(--text3);margin-bottom:.2rem;text-transform:uppercase;letter-spacing:.05em;">${t('Widgety','Widgets')}</div>
+      ${widgets.map(([k,icon,label]) =>
+        `<div class="settings-row">
+          <span class="sr-label"><span class="sr-icon">${icon}</span> ${label}</span>
+          <label class="toggle-switch"><input type="checkbox" ${w[k]?'checked':''} onchange="w.${k}=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
+        </div>`
+      ).join('')}
+      <div style="font-size:.65rem;font-weight:600;color:var(--text3);margin:.6rem 0 .2rem;text-transform:uppercase;letter-spacing:.05em;">🌤️ ${t('Počasie','Weather')}</div>
+      <div class="settings-row">
+        <span class="sr-label"><span class="sr-icon">🌤️</span> ${t('Zobraziť počasie','Show weather')}</span>
+        <label class="toggle-switch"><input type="checkbox" ${s.weather.enabled?'checked':''} onchange="s.weather.enabled=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="settings-row" onclick="editText('weather.location','Mesto')">
+        <span class="sr-label"><span class="sr-icon">📍</span> ${t('Mesto','City')}</span>
+        <span class="sr-value">${s.weather.location||t('Nenastavené','Not set')} <span class="sr-arrow">›</span></span>
+      </div>
+      <div style="font-size:.65rem;font-weight:600;color:var(--text3);margin:.6rem 0 .2rem;text-transform:uppercase;letter-spacing:.05em;">👨‍👩‍👧 ${t('Rodina','Family')}</div>
+      <div class="settings-row" onclick="promptNumber('family.householdMembers',1,10)">
+        <span class="sr-label"><span class="sr-icon">👥</span> ${t('Počet členov domácnosti','Household members')}</span>
+        <span class="sr-value">${s.family.householdMembers} <span class="sr-arrow">›</span></span>
+      </div>
+      <div style="font-size:.65rem;font-weight:600;color:var(--text3);margin:.6rem 0 .2rem;text-transform:uppercase;letter-spacing:.05em;">🔔 ${t('Notifikácie','Notifications')}</div>
+      ${[['breakfastReminder','breakfast','🌅',t('Pripomenutie raňajok','Breakfast reminder')],
+         ['todayCookingReminder','whatCook','🍳',t('Čo variť dnes','What to cook today')],
+         ['shoppingReminder','shopping','🛒',t('Ísť nakúpiť','Go shopping')],
+         ['hydrationReminder','water','💧',t('Pitný režim','Hydration reminder')],
+         ['childMealReminder','kids','👶',t('Jedlo pre dieťa','Kids meal prep')],
+         ['eveningPlanningReminder','evening','🌙',t('Večerné plánovanie','Evening planning')],
+       ].map(([k,timeK,icon,label]) =>
+        `<div class="settings-row">
+          <span class="sr-label"><span class="sr-icon">${icon}</span> ${label}</span>
+          <div style="display:flex;align-items:center;gap:.2rem;">
+            <input type="time" value="${s.notifTimes[timeK]}" onchange="s.notifTimes.${timeK}=this.value;saveSettings()" style="width:70px;padding:.15rem;border:1px solid var(--border);border-radius:4px;font-size:.6rem;background:var(--input-bg);color:var(--text);">
+            <label class="toggle-switch"><input type="checkbox" ${s.notifications[k]?'checked':''} onchange="s.notifications.${k}=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
+          </div>
+        </div>`
+      ).join('')}
+    </div>
   </div>`;
 
-  // 3. Meal planner
+  // 3. Jedálniček
   html += `<div class="settings-group">
     <div class="settings-group-title">📅 ${t('Jedálniček','Meal planner')}</div>
     <div class="settings-card">
@@ -2383,86 +2415,22 @@ function openSettings() {
         <span class="sr-value">${m.defaultServings} <span class="sr-arrow">›</span></span>
       </div>
       <div class="settings-row">
-        <span class="sr-label"><span class="sr-icon">🛒</span> ${t('Auto nákupný zoznam','Auto shopping list')}</span>
-        <label class="toggle-switch"><input type="checkbox" ${m.autoShoppingList?'checked':''} onchange="m.autoShoppingList=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
-      </div>
-      <div class="settings-row">
         <span class="sr-label"><span class="sr-icon">📊</span> ${t('Zobrazovať nutričné hodnoty','Show nutrition')}</span>
         <label class="toggle-switch"><input type="checkbox" ${m.showNutrition?'checked':''} onchange="m.showNutrition=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
       </div>
-      ${[['preferHealthy','🥗',t('Zdravé recepty','Healthy recipes')],
-         ['preferQuick','⚡',t('Rýchle recepty','Quick recipes')],
-         ['preferKidsMeals','👶',t('Detské jedlá','Kids meals')],
-         ['preferCheap','💰',t('Lacné jedlá','Cheap meals')],
-         ['preferHighProtein','💪',t('Vysokoproteínové','High protein')],
-       ].map(([k,icon,label]) =>
-        `<div class="settings-row">
-          <span class="sr-label"><span class="sr-icon">${icon}</span> ${label}</span>
-          <label class="toggle-switch"><input type="checkbox" ${m[k]?'checked':''} onchange="m.${k}=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
-        </div>`
-      ).join('')}
     </div>
   </div>`;
 
-  // 4. Notifications
-  const notifRows = [
-    ['breakfastReminder','breakfast','🌅',t('Pripomenutie raňajok','Breakfast reminder')],
-    ['todayCookingReminder','whatCook','🍳',t('Čo variť dnes','What to cook today')],
-    ['shoppingReminder','shopping','🛒',t('Ísť nakúpiť','Go shopping')],
-    ['hydrationReminder','water','💧',t('Pitný režim','Hydration reminder')],
-    ['childMealReminder','kids','👶',t('Jedlo pre dieťa','Kids meal prep')],
-    ['eveningPlanningReminder','evening','🌙',t('Večerné plánovanie','Evening planning')],
-  ];
+  // 4. Nákup
   html += `<div class="settings-group">
-    <div class="settings-group-title">🔔 ${t('Notifikácie','Notifications')}</div>
-    <div class="settings-card">${notifRows.map(([k,timeK,icon,label]) =>
-      `<div class="settings-row">
-        <span class="sr-label"><span class="sr-icon">${icon}</span> ${label}</span>
-        <div style="display:flex;align-items:center;gap:.2rem;">
-          <input type="time" value="${s.notifTimes[timeK]}" onchange="s.notifTimes.${timeK}=this.value;saveSettings()" style="width:70px;padding:.15rem;border:1px solid var(--border);border-radius:4px;font-size:.6rem;background:var(--input-bg);color:var(--text);">
-          <label class="toggle-switch"><input type="checkbox" ${n[k]?'checked':''} onchange="n.${k}=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
-        </div>
-      </div>`
-    ).join('')}</div>
-  </div>`;
-
-  // 5. Family
-  html += `<div class="settings-group">
-    <div class="settings-group-title">👨‍👩‍👧‍👦 ${t('Rodina a dieťa','Family & kids')}</div>
-    <div class="settings-card">
-      <div class="settings-row" onclick="promptNumber('family.householdMembers',1,10)">
-        <span class="sr-label"><span class="sr-icon">👥</span> ${t('Počet členov','Household members')}</span>
-        <span class="sr-value">${f.householdMembers} <span class="sr-arrow">›</span></span>
-      </div>
-      <div class="settings-row" onclick="cycleKidAge()">
-        <span class="sr-label"><span class="sr-icon">👶</span> ${t('Vek dieťaťa','Child age')}</span>
-        <span class="sr-value">${t({'none':'—','baby-6m':'6m+','baby-1':'1r+','baby-2':'2r+','baby-3':'3r+'}[f.childAge]||'—', {'none':'—','baby-6m':'6m+','baby-1':'1y+','baby-2':'2y+','baby-3':'3y+'}[f.childAge]||'—')} <span class="sr-arrow">›</span></span>
-      </div>
-      <div class="settings-row" onclick="editText('family.allergies','${t('Alergie (oddelené čiarkou)','Allergies (comma separated)')}')">
-        <span class="sr-label"><span class="sr-icon">⚠️</span> ${t('Alergie','Allergies')}</span>
-        <span class="sr-value">${f.allergies||'—'} <span class="sr-arrow">›</span></span>
-      </div>
-      <div class="settings-row" onclick="editText('family.forbiddenFoods','${t('Zakázané potraviny','Forbidden foods')}')">
-        <span class="sr-label"><span class="sr-icon">🚫</span> ${t('Zakázané','Forbidden')}</span>
-        <span class="sr-value">${f.forbiddenFoods||'—'} <span class="sr-arrow">›</span></span>
-      </div>
-      <div class="settings-row" onclick="editText('family.favoriteMeals','${t('Obľúbené jedlá','Favorite meals')}')">
-        <span class="sr-label"><span class="sr-icon">❤️</span> ${t('Obľúbené','Favorites')}</span>
-        <span class="sr-value">${f.favoriteMeals||'—'} <span class="sr-arrow">›</span></span>
-      </div>
-    </div>
-  </div>`;
-
-  // 6. Quick actions
-  html += `<div class="settings-group">
-    <div class="settings-group-title">⚡ ${t('Rýchle akcie','Quick actions')}</div>
+    <div class="settings-group-title">🛒 ${t('Nákup','Shopping')}</div>
     <div class="settings-card">
       <div class="settings-row">
         <span class="sr-label"><span class="sr-icon">🛒</span> ${t('Režim obchodu','Store mode')}</span>
         <label class="toggle-switch"><input type="checkbox" ${s.shopping.storeMode?'checked':''} onchange="s.shopping.storeMode=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
       </div>
       <div class="settings-row">
-        <span class="sr-label"><span class="sr-icon">📦</span> ${t('Auto kategórie nákupu','Auto shop categories')}</span>
+        <span class="sr-label"><span class="sr-icon">📦</span> ${t('Auto kategórie','Auto categories')}</span>
         <label class="toggle-switch"><input type="checkbox" ${s.shopping.autoCategories?'checked':''} onchange="s.shopping.autoCategories=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
       </div>
       <div class="settings-row">
@@ -2472,22 +2440,7 @@ function openSettings() {
     </div>
   </div>`;
 
-  // 7. Weather settings
-  html += `<div class="settings-group">
-    <div class="settings-group-title">🌤️ ${t('Počasie','Weather')}</div>
-    <div class="settings-card">
-      <div class="settings-row">
-        <span class="sr-label"><span class="sr-icon">🌤️</span> ${t('Zobraziť počasie','Show weather')}</span>
-        <label class="toggle-switch"><input type="checkbox" ${s.weather.enabled?'checked':''} onchange="s.weather.enabled=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
-      </div>
-      <div class="settings-row" onclick="editText('weather.location','${t('Mesto','City')}')">
-        <span class="sr-label"><span class="sr-icon">📍</span> ${t('Mesto','City')}</span>
-        <span class="sr-value">${s.weather.location||t('Nenastavené','Not set')} <span class="sr-arrow">›</span></span>
-      </div>
-    </div>
-  </div>`;
-
-  // 8. Data
+  // 5. Dáta
   html += `<div class="settings-group">
     <div class="settings-group-title">💾 ${t('Dáta','Data')}</div>
     <div class="settings-card">
@@ -2506,7 +2459,7 @@ function openSettings() {
     </div>
   </div>`;
 
-  // 9. About
+  // 6. O aplikácii
   html += `<div class="settings-group">
     <div class="settings-group-title">ℹ️ ${t('O aplikácii','About')}</div>
     <div class="settings-card">
@@ -2517,7 +2470,7 @@ function openSettings() {
         <div class="settings-stat"><div class="stat-val">${streak}</div><div class="stat-label">${t('dní v rade','day streak')}</div></div>
       </div>
       <div style="text-align:center;padding:.3rem 0 .15rem;font-size:.6rem;color:var(--text3);">
-        <span data-lang="appTitle">Plánovač jedál</span> · v1.5 · ${totalRecipes} ${t('receptov','recipes')}
+        <span data-lang="appTitle">Plánovač jedál</span> · v1.6 · ${totalRecipes} ${t('receptov','recipes')}
       </div>
     </div>
   </div>`;
@@ -3390,15 +3343,9 @@ function renderDashboard() {
     </div>`;
   }
 
-  // Family mode widget
+  // Family widget
   if (w.familyMode) {
-    const hh = appSettings.family.householdMembers;
-    const childAge = appSettings.family.childAge;
-    const childLabel = { 'none': lang==='en'?'No child':lang==='sk'?'Bez dieťaťa':lang,
-      'baby-6m':'6m+', 'baby-1':'1r+', 'baby-2':'2r+', 'baby-3':'3r+' }[childAge] || childAge;
-    const allergyList = appSettings.family.allergies ? appSettings.family.allergies.split(',').map(s=>s.trim()).filter(Boolean) : [];
-    const forbiddenList = appSettings.family.forbiddenFoods ? appSettings.family.forbiddenFoods.split(',').map(s=>s.trim()).filter(Boolean) : [];
-    const favoriteList = appSettings.family.favoriteMeals ? appSettings.family.favoriteMeals.split(',').map(s=>s.trim()).filter(Boolean) : [];
+    const hh = appSettings.family.householdMembers || 1;
     html += `<div class="dash-section">
       <div class="dash-section-header">
         <span class="dash-section-title">👨‍👩‍👧‍👦 ${lang==='en'?'Family':'Rodina'}</span>
@@ -3406,24 +3353,7 @@ function renderDashboard() {
       </div>
       <div class="family-widget-grid">
         <div class="family-stat"><span class="family-stat-icon">👥</span><span>${hh} ${lang==='en'?'members':'členov'}</span></div>
-        <div class="family-stat"><span class="family-stat-icon">👶</span><span>${childLabel}</span></div>
-        ${allergyList.length ? `<div class="family-stat"><span class="family-stat-icon">⚠️</span><span>${allergyList.join(', ')}</span></div>` : ''}
-        ${forbiddenList.length ? `<div class="family-stat"><span class="family-stat-icon">🚫</span><span>${forbiddenList.join(', ')}</span></div>` : ''}
-        ${favoriteList.length ? `<div class="family-stat"><span class="family-stat-icon">❤️</span><span>${favoriteList.join(', ')}</span></div>` : ''}
-      </div>
-    </div>`;
-  }
-
-  // AI suggestions widget
-  if (w.aiSuggestions) {
-    html += `<div class="dash-section ai-suggestion-placeholder">
-      <div class="dash-section-header">
-        <span class="dash-section-title">🤖 ${lang==='en'?'AI Recommendations':'AI odporúčania'}</span>
-        <span class="badge-prep">Pripravuje sa</span>
-      </div>
-      <div style="padding:20px;text-align:center;color:var(--text-muted, #888);font-size:.9rem;">
-        <div style="font-size:2.5rem;margin-bottom:8px;">🧠</div>
-        <div>${lang==='en'?'AI-powered meal suggestions are coming soon. The app will learn your preferences and suggest perfect meals.':'Jedálniček s umelou inteligenciou už čoskoro. Aplikácia sa naučí vaše preferencie a navrhne ideálne jedlá.'}</div>
+        <div class="family-stat"><span class="family-stat-icon">🍽️</span><span>${t('Nastav v Domov','Configure in Home')}</span></div>
       </div>
     </div>`;
   }
@@ -3566,79 +3496,29 @@ function getTodayRecipes() {
 function renderSuggestions() {
   const isHot = (new Date().getMonth() >= 5 && new Date().getMonth() <= 7);
   const isCold = (new Date().getMonth() <= 2 || new Date().getMonth() >= 10);
-  const m = appSettings.mealPlanner;
-  const f = appSettings.family;
 
-  const scored = recipes.map(r => {
-    let score = 0;
-    const tags = [...(r.tags||[]), ...(r.tagsEn||[])];
-    const name = (r.name + ' ' + (r.nameEn || '')).toLowerCase();
-    const ingr = (r.ingredients || []).join(' ').toLowerCase() + ' ' + (r.ingredientsEn || []).join(' ').toLowerCase();
+  // Quick recipes (≤20 min)
+  const quick = recipes.filter(r => r.time <= 20).sort(() => Math.random() - .5).slice(0, 4);
 
-    // Base freshness: random rotation
-    score += Math.random() * 2;
-    // Rating bonus
-    score += (r.rating || 0) * 0.5;
+  // Weather-inspired
+  const weatherRecipes = recipes.filter(r => {
+    const t = [...(r.tags||[]), ...(r.tagsEn||[])];
+    if (isHot) return t.some(tag => ['šalát','salad','studené','cold','gril','grill','osviežujúce','refreshing','letné','summer'].includes(tag));
+    if (isCold) return t.some(tag => ['polievka','soup','teplý','warm','sýta','hearty','pečené','baked','zima','winter'].includes(tag));
+    return false;
+  }).sort(() => Math.random() - .5).slice(0, 4);
 
-    // preferHealthy: boost recipes with healthy tags or low fat
-    if (m.preferHealthy) {
-      if (tags.some(t => ['zdravé','healthy','fit','vegetariánske','vegetarian','vegánske','vegan','šalát','salad'].includes(t))) score += 5;
-      const nutrition = r.nutrition;
-      if (nutrition && nutrition.kcal < 350) score += 3;
-      if (nutrition && nutrition.protein > 20) score += 2;
-    }
+  // Favorite dinners
+  const dinners = recipes.filter(r => {
+    const t = [...(r.tags||[]), ...(r.tagsEn||[])];
+    return t.some(tag => ['večera','dinner','hlavné','main'].includes(tag)) || r.category === 'Hlavné jedlá';
+  }).sort((a,b) => (b.rating||0) - (a.rating||0)).slice(0, 4);
 
-    // preferQuick: boost recipes <= 20 min
-    if (m.preferQuick && r.time <= 20) score += 5;
-    if (m.preferQuick && r.time <= 15) score += 3;
+  const suggs = weatherRecipes.length >= 2 ? weatherRecipes : quick;
+  const extra = dinners.slice(0, 2);
+  const all = [...suggs, ...extra].slice(0, 6);
 
-    // preferKidsMeals: boost kid-friendly recipes based on child age
-    if (m.preferKidsMeals) {
-      const childAge = f.childAge;
-      if (tags.some(t => ['raňajky','breakfast','sladké','sweet','jednoduché','easy'].includes(t))) score += 3;
-      // Age-appropriate filtering
-      if (childAge === 'baby-6m' || childAge === 'baby-1') {
-        if (tags.some(t => ['kaša','puree','pyré','polievka','soup'].includes(t))) score += 6;
-        // Penalize spicy, heavy foods
-        if (tags.some(t => ['čili','chili','ostré','spicy','vyprážaný','fried'].includes(t))) score -= 5;
-      }
-      if (childAge === 'baby-2' || childAge === 'baby-3') {
-        if (tags.some(t => ['palacinky','pancakes','cestoviny','pasta','pizza','fašírka','burger'].includes(t))) score += 4;
-      }
-      // Ingredient-based: avoid allergens
-      const allergies = (f.allergies || '').toLowerCase().split(',').map(s=>s.trim()).filter(Boolean);
-      if (allergies.length && allergies.some(a => ingr.includes(a))) score -= 10;
-    }
-
-    // preferCheap: boost simple/cheap recipes
-    if (m.preferCheap) {
-      if (tags.some(t => ['lacné','cheap','jednoduché','easy','rýchle','quick','zemiaky','potatoes','cestoviny','pasta','ryža','rice'].includes(t))) score += 5;
-      if (r.ingredients && r.ingredients.length <= 5) score += 3;
-    }
-
-    // preferHighProtein: boost high protein/meat recipes
-    if (m.preferHighProtein) {
-      const nutrition = r.nutrition;
-      if (nutrition && nutrition.protein > 25) score += 6;
-      if (nutrition && nutrition.protein > 20) score += 3;
-      if (tags.some(t => ['mäso','meat','kuracie','chicken','ryba','fish','losos','salmon','hovädzie','beef','bravčové','pork'].includes(t))) score += 4;
-      if (ingr.includes('proteín') || ingr.includes('protein') || ingr.includes('tvaroh') || ingr.includes('cottage cheese')) score += 2;
-    }
-
-    // Weather bonuses (always active regardless of prefs)
-    if (isHot && tags.some(t => ['šalát','salad','studené','cold','osviežujúce','refreshing','letné','summer'].includes(t))) score += 4;
-    if (isCold && tags.some(t => ['polievka','soup','teplý','warm','sýta','hearty','pečené','baked','zima','winter'].includes(t))) score += 4;
-
-    return { recipe: r, score };
-  });
-
-  scored.sort((a, b) => b.score - a.score);
-  const top = scored.slice(0, 6).map(s => s.recipe);
-
-  // Determine weather icon for each card
-  const anyActive = m.preferHealthy || m.preferQuick || m.preferKidsMeals || m.preferCheap || m.preferHighProtein;
-
-  return top.map(r => {
+  return all.map(r => {
     const name = lang === 'en' && r.nameEn ? r.nameEn : r.name;
     const tags = [...(r.tags||[]), ...(r.tagsEn||[])];
     let icon = '🍽️';
@@ -3648,12 +3528,9 @@ function renderSuggestions() {
     else if (r.category === 'Raňajky') icon = '🌅';
     else if (r.category === 'Polievky') icon = '🥣';
     else if (r.category === 'Nápoje') icon = '🍹';
-
-    const prefLabel = anyActive ? `<span class="sugg-pref-badge">⭐</span>` : '';
-
     return `<div class="suggestion-card press-scale" onclick="viewRecipe(${r.id})">
       <div class="sugg-icon">${icon}</div>
-      <div class="sugg-name">${esc(name)}${prefLabel}</div>
+      <div class="sugg-name">${esc(name)}</div>
       <div class="sugg-meta">⏱${r.time} · ${r.category}</div>
     </div>`;
   }).join('');
