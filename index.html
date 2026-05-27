@@ -690,14 +690,22 @@ body[data-tab="dashboard"] #app-header { display: none; }
       <img id="r-image-preview" style="max-width:80px;max-height:60px;margin-top:.3rem;border-radius:6px;display:none;object-fit:cover;">
     </div>
     <div class="form-section">
-      <div class="form-section-title" data-lang="formNutrition">Nutričné hodnoty (na porciu)</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:.3rem;flex-wrap:wrap;">
+        <div class="form-section-title" data-lang="formNutrition">Nutričné hodnoty</div>
+        <div style="display:flex;align-items:center;gap:.3rem;">
+          <label style="font-size:.7rem;color:var(--text2);white-space:nowrap;" data-lang="nutritionPortions">Porcie:</label>
+          <input id="r-portions" type="number" value="4" min="1" max="50" style="width:3rem;padding:.25rem;font-size:.8rem;">
+        </div>
+      </div>
       <div class="form-row">
-        <div class="form-group"><input id="r-kcal" type="number" placeholder="🔥 kcal"></div>
-        <div class="form-group"><input id="r-protein" type="number" placeholder="💪 bielkoviny"></div>
-        <div class="form-group"><input id="r-fat" type="number" placeholder="🧈 tuky"></div>
-        <div class="form-group"><input id="r-carbs" type="number" placeholder="🍚 sacharidy"></div>
+        <div class="form-group"><input id="r-kcal" type="number" placeholder="🔥 kcal / porcia"></div>
+        <div class="form-group"><input id="r-protein" type="number" placeholder="💪 bielkoviny g"></div>
+        <div class="form-group"><input id="r-fat" type="number" placeholder="🧈 tuky g"></div>
+        <div class="form-group"><input id="r-carbs" type="number" placeholder="🍚 sacharidy g"></div>
       </div>
       <button type="button" class="btn btn-sm" onclick="autoFillNutrition()" style="margin-top:.3rem;width:100%;">🔮 <span data-lang="autoFill">Auto-odhadnúť zo surovín</span></button>
+      <div id="nutrition-status" style="font-size:.75rem;margin-top:.2rem;color:var(--text2);"></div>
+      <div id="nutrition-portion-info" style="font-size:.7rem;color:var(--text3);margin-top:.1rem;"></div>
     </div>
     <div class="form-section">
       <div class="form-section-title" data-lang="formIngredients">Suroviny</div>
@@ -934,6 +942,21 @@ const LANG = {
     shopClearChecked: 'Vyčistiť zaškrtnuté', shopClearAll: 'Vymazať všetko',
     settingsTitle: '⚙️ Nastavenia', settingsDark: 'Tmavý režim', settingsLang: 'Jazyk',
     autoFill: 'Auto-odhadnúť zo surovín',
+    unmatchedHint: 'surovín nebolo presne nájdených',
+    nutritionPerPortion: 'Na porciu',
+    nutritionTotal: 'Celý recept',
+    nutritionPortions: 'Porcie:',
+    nutritionHearty: 'Výdatné jedlo',
+    nutritionCheck: 'Skontroluj počet porcií alebo množstvá surovín.',
+    nutritionTotalLabel: 'celý recept',
+    nutritionConfidence: 'Spoľahlivosť',
+    dry: 'Suché',
+    oily: 'Mastné',
+    wet: 'Mokré',
+    portionUnit: 'porcií',
+    dry: 'Suché',
+    oily: 'Mastné',
+    wet: 'Mokré',
 
   },
   en: {
@@ -985,6 +1008,18 @@ const LANG = {
     plannerWeek: 'Full week', plannerWeekHide: 'Hide week',
     settingsTitle: '⚙️ Settings', settingsDark: 'Dark mode', settingsLang: 'Language',
     autoFill: 'Auto-estimate from ingredients',
+    unmatchedHint: 'ingredients not exactly matched',
+    nutritionPerPortion: 'Per portion',
+    nutritionTotal: 'Whole recipe',
+    nutritionPortions: 'Servings:',
+    nutritionHearty: 'Hearty meal',
+    nutritionCheck: 'Check serving count or ingredient amounts.',
+    nutritionTotalLabel: 'entire recipe',
+    nutritionConfidence: 'Confidence',
+    dry: 'Dry',
+    oily: 'Oily',
+    wet: 'Wet',
+    portionUnit: 'portions',
 
   }
  };
@@ -1248,8 +1283,9 @@ const NUTRITION_DB = {
   'morka':{kcal:135, protein:30, fat:1, carbs:0}, 'morie':{kcal:135, protein:30, fat:1, carbs:0},
   'kačka':{kcal:337, protein:18, fat:28, carbs:0}, 'kačacie':{kcal:337, protein:18, fat:28, carbs:0}, 'husacia':{kcal:370, protein:15, fat:35, carbs:0},
   'šunka':{kcal:145, protein:20, fat:7, carbs:1}, 'anglická slanina':{kcal:540, protein:12, fat:55, carbs:1}, 'slanina':{kcal:540, protein:12, fat:55, carbs:1},
-  'klobása':{kcal:310, protein:18, fat:26, carbs:2}, 'saláma':{kcal:300, protein:18, fat:25, carbs:1},
+  'klobása':{kcal:310, protein:18, fat:26, carbs:2}, 'saláma':{kcal:300, protein:18, fat:25, carbs:1}, 'špekáčik':{kcal:310, protein:15, fat:28, carbs:1},
   'pečeň':{kcal:135, protein:21, fat:5, carbs:2}, 'bryndza':{kcal:190, protein:14, fat:15, carbs:1},
+  'paštéta':{kcal:300, protein:13, fat:27, carbs:1}, 'salam':{kcal:300, protein:18, fat:25, carbs:1},
 
   // Ryby
   'losos':{kcal:208, protein:20, fat:13, carbs:0}, 'tuniak':{kcal:184, protein:26, fat:8, carbs:0}, 'pstruh':{kcal:148, protein:21, fat:7, carbs:0},
@@ -1267,7 +1303,7 @@ const NUTRITION_DB = {
   'múka':{kcal:364, protein:10, fat:1, carbs:76}, 'hladká múka':{kcal:364, protein:10, fat:1, carbs:76}, 'polohrubá múka':{kcal:364, protein:10, fat:1, carbs:76},
   'hrubá múka':{kcal:364, protein:10, fat:1, carbs:76}, 'celozrnná múka':{kcal:340, protein:13, fat:2, carbs:66},
   'chlieb':{kcal:265, protein:9, fat:1.5, carbs:52}, 'rožok':{kcal:286, protein:9, fat:2.5, carbs:55}, 'bageta':{kcal:280, protein:9, fat:2, carbs:55},
-  'cestoviny':{kcal:350, protein:12, fat:1.5, carbs:73}, 'špagety':{kcal:350, protein:12, fat:1.5, carbs:73}, 'rezance':{kcal:350, protein:12, fat:1.5, carbs:73},
+  'cestoviny':{kcal:350, protein:12, fat:1.5, carbs:73}, 'špagety':{kcal:350, protein:12, fat:1.5, carbs:73}, 'špagiet':{kcal:350, protein:12, fat:1.5, carbs:73}, 'rezance':{kcal:350, protein:12, fat:1.5, carbs:73},
   'ryža':{kcal:365, protein:7, fat:0.7, carbs:80}, 'ryža basmati':{kcal:360, protein:7, fat:0.6, carbs:80},
   'kuskus':{kcal:372, protein:12, fat:0.8, carbs:78}, 'bulgur':{kcal:342, protein:12, fat:1.3, carbs:68}, 'quinoa':{kcal:368, protein:14, fat:6, carbs:64},
   'ovsené vločky':{kcal:389, protein:17, fat:7, carbs:66}, 'vločky':{kcal:350, protein:12, fat:5, carbs:65},
@@ -1317,7 +1353,7 @@ const NUTRITION_DB = {
   'kešu maslo':{kcal:615, protein:18, fat:49, carbs:28}, 'arašidové maslo':{kcal:588, protein:25, fat:50, carbs:20},
 
   // Konzervy a omáčky
-  'paradajkový pyré':{kcal:40, protein:1.8, fat:0.2, carbs:9}, 'paradajková omáčka':{kcal:42, protein:1.8, fat:0.2, carbs:9},
+  'paradajkový pyré':{kcal:40, protein:1.8, fat:0.2, carbs:9}, 'paradajkový pretlak':{kcal:40, protein:1.8, fat:0.2, carbs:9}, 'pyré paradajkové':{kcal:40, protein:1.8, fat:0.2, carbs:9}, 'paradajková omáčka':{kcal:42, protein:1.8, fat:0.2, carbs:9},
   'kečup':{kcal:101, protein:1.3, fat:0.2, carbs:24}, 'horčica':{kcal:52, protein:3.7, fat:3.3, carbs:4},
   'majonéza':{kcal:680, protein:1, fat:75, carbs:1}, 'tatárska omáčka':{kcal:600, protein:0.8, fat:65, carbs:5},
   'sojová omáčka':{kcal:53, protein:5.3, fat:0.1, carbs:5}, 'oct':{kcal:18, protein:0, fat:0, carbs:0.6},
@@ -1364,97 +1400,199 @@ const PIECE_WEIGHT = {
   'paprika':120, 'banán':120,
   'jablko':150, 'pomaranč':150,
   'klobása':80, 'rožok':50,
+  'kuracie prsia':200, 'kuracie stehno':150, 'kurací':150, 'kurča':1200,
+  'strúčik':4, 'strúčiky':4, 'cesnak':4,
 };
 // Unit conversions
 const UNIT_G = {
   'g':1, 'kg':1000, 'dkg':10, 'dag':10,
   'ml':1, 'l':1000, 'dl':100, 'cl':10,
-  'pl':15, 'polievková lyžica':15, 'lyžica':15, 'lyžička':5, 'kl':5, 'čajová lyžička':5,
+  'pl':15, 'polievková lyžica':15, 'lyžica':15, 'lyžíc':15, 'lyžička':5, 'kl':5, 'čajová lyžička':5, 'čajové lyžičky':5,
   'šálka':240, 'hrnček':250, 'pohár':250,
 };
-function parseQuantity(s) {
-  const normed = s.trim().toLowerCase().replace(/^\d+[\.\,]\s*/, m => m.replace(',','.'));
+function parseQuantity(raw) {
+  let s = raw.trim();
+  s = s.replace(/\b(mleté|prerastená|čerstvý|čerstvá|čerstvé|sušené|sušený|sušená|nakrájané|nakrájaný|nakrájaná|plátky|plátok|na kocky|na plátky|na mesiačiky|ošúpané|ošúpaný|vypečené|červenej|bieleho|tmavého|svetlej)\b/gi, '');
+  const normed = s.toLowerCase().replace(/^\d+[\.\,]\s*/, m => m.replace(',','.')).trim();
   const fracMap = {'½':0.5,'¼':0.25,'¾':0.75,'⅓':0.333,'⅔':0.667,'⅕':0.2,'⅖':0.4,'⅗':0.6,'⅘':0.8,'⅙':0.167,'⅚':0.833,'⅛':0.125,'⅜':0.375,'⅝':0.625,'⅞':0.875};
   let val = 0, unit = null;
-  // Fraction shortcut
   for (const [f, v] of Object.entries(fracMap)) {
     if (normed.startsWith(f)) { val = v; break; }
   }
-  // "1/2" style fractions
   const fracMatch = normed.match(/^(\d+)\s*\/\s*(\d+)/);
   if (fracMatch) val = parseInt(fracMatch[1]) / parseInt(fracMatch[2]);
-  // Number at start
   const numMatch = normed.match(/^(\d+[\.\,]?\d*)/);
   if (numMatch) val = parseFloat(numMatch[1].replace(',','.')) || 0;
-  // Unit after number
   if (val) {
-    const afterNum = normed.replace(/^[\d\.\,\s]+/, '');
+    const afterNum = normed.replace(/^[\d\.\,\s]+/, '').trim();
     for (const [u, g] of Object.entries(UNIT_G)) {
       const re = new RegExp('^' + u.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '[\\s\\.]');
       if (re.test(afterNum)) { unit = u; val *= g; break; }
     }
-    // Check for piece words
     if (!unit) {
-      const pieceMatch = afterNum.match(/^(ks|kus|kusy|strúčik|strúčiky|plátok|plátky|list|listy)\b/);
+      const pieceMatch = afterNum.match(/^(ks|kus|kusy|strúčik|strúčiky|plátok|plátky|list|listy|balík|balenia|vajce|vajcia|kura|cibule|mrkvy|zemiaky|papriky|paradajky|stehná|prsia)\b/);
       if (pieceMatch) unit = 'ks';
+      // If followed by word chars (no space-delimited unit), also treat as pieces
+      else if (afterNum.match(/^[a-záčďéěíňóřšťúůýž]/)) unit = 'ks';
     }
   }
-  return { grams: val || 100, isPiece: unit === 'ks', val: val || 100 };
-}
-function estimateNutrition(ingredients) {
-  let totals = {kcal:0, protein:0, fat:0, carbs:0};
-  for (const ing of ingredients) {
-    const { grams, isPiece, val } = parseQuantity(ing);
-    const ingLower = ing.toLowerCase();
-    // Find best match in DB
-    let best = null, bestLen = 0;
-    for (const [key, data] of Object.entries(NUTRITION_DB)) {
-      if (ingLower.includes(key) && key.length > bestLen) {
-        best = data; bestLen = key.length;
+  // Comma-separated fallback: try to find quantity anywhere in string
+  if (!val || val === 100) {
+    const gMatch = normed.match(/(\d+[\.\,]?\d*)\s*(kg|g|dkg|dag|ml|l|dl|cl)/);
+    if (gMatch) {
+      val = parseFloat(gMatch[1].replace(',','.'));
+      const u = gMatch[2];
+      val *= (UNIT_G[u] || 1);
+      unit = u;
+    } else {
+      const numAny = normed.match(/(\d+[\.\,]?\d*)/);
+      if (numAny) {
+        const afterAny = normed.replace(/^[\d\.\,\s]+/, '').trim();
+        if (afterAny.match(/^(ks|kus|kusy|strúčik|strúčiky|plátok|plátky|list|listy|balík|balenia)\b/)) {
+          val = parseFloat(numAny[1].replace(',','.'));
+          unit = 'ks';
+        } else if (!unit) {
+          val = parseFloat(numAny[1].replace(',','.'));
+          unit = 'ks';
+        }
       }
     }
-    if (!best) { // fallback rough estimates
-      if (ingLower.includes('olej') || ingLower.includes('masť') || ingLower.includes('maslo')) best = {kcal:700, protein:0, fat:78, carbs:0};
-      else if (ingLower.includes('mäso') || ingLower.includes('mäsa')) best = {kcal:220, protein:25, fat:12, carbs:0};
-      else if (ingLower.includes('syr') || ingLower.includes('syr') || ingLower.includes('tvaroh')) best = {kcal:280, protein:20, fat:22, carbs:1};
-      else if (ingLower.includes('cukor') || ingLower.includes('med')) best = {kcal:350, protein:0, fat:0, carbs:87};
-      else if (ingLower.includes('múka') || ingLower.includes('cestovina')) best = {kcal:350, protein:10, fat:1, carbs:75};
-      else if (ingLower.includes('zelenina') || ingLower.includes('zeleniny')) best = {kcal:30, protein:1, fat:0.2, carbs:6};
-      else if (ingLower.includes('ovocie')) best = {kcal:50, protein:0.5, fat:0.2, carbs:12};
-      else if (ingLower.includes('korenie') || ingLower.includes('soľ')) best = {kcal:10, protein:0, fat:0, carbs:0};
+  }
+  return { grams: val > 0 ? val : 100, isPiece: unit === 'ks', val: val > 0 ? val : 100 };
+}
+const DESCRIPTIVE_STRIP = /\b(mleté|prerastená|čerstvý|čerstvá|čerstvé|sušené|sušený|sušená|nakrájané|nakrájaný|nakrájaná|ošúpané|vypečené|červenej|bieleho|tmavého|svetlej|domáce|domáci|domáca|čerstvo|hrsť|štipka|trochu|podľa|chuti)\b/gi;
+
+function estimateNutrition(ingredients, portions) {
+  const portionsNum = portions && portions > 0 ? portions : 4;
+  let total = {kcal:0, protein:0, fat:0, carbs:0};
+  let matchedCount = 0, unmatchedCount = 0, estimatedCount = 0;
+  const unmatched = [];
+  const matched = [];
+  for (const raw of ingredients) {
+    const ing = raw.trim();
+    if (!ing) continue;
+    processIngredient(ing);
+  }
+  function processIngredient(ing) {
+    const { grams, isPiece, val } = parseQuantity(ing);
+    const ingLookup = ing.toLowerCase().replace(DESCRIPTIVE_STRIP, '').trim();
+    let best = null, bestLen = 0, bestKey = '';
+    for (const [key, data] of Object.entries(NUTRITION_DB)) {
+      if (ingLookup.includes(key) && key.length > bestLen) {
+        best = data; bestLen = key.length; bestKey = key;
+      }
+    }
+    let usedFallback = false;
+    if (!best) {
+      usedFallback = true;
+      if (ingLookup.includes('olej') || ingLookup.includes('masť') || ingLookup.includes('maslo')) best = {kcal:700, protein:0, fat:78, carbs:0};
+      else if (ingLookup.includes('mäso') || ingLookup.includes('mäsa')) best = {kcal:220, protein:25, fat:12, carbs:0};
+      else if (ingLookup.includes('syr') || ingLookup.includes('tvaroh')) best = {kcal:280, protein:20, fat:22, carbs:1};
+      else if (ingLookup.includes('cukor') || ingLookup.includes('med') || ingLookup.includes('sirup')) best = {kcal:350, protein:0, fat:0, carbs:87};
+      else if (ingLookup.includes('múka') || ingLookup.includes('cestoviny') || ingLookup.includes('cestovina')) best = {kcal:350, protein:10, fat:1, carbs:75};
+      else if (ingLookup.includes('zelenina') || ingLookup.includes('zeleniny')) best = {kcal:30, protein:1, fat:0.2, carbs:6};
+      else if (ingLookup.includes('ovocie')) best = {kcal:50, protein:0.5, fat:0.2, carbs:12};
+      else if (ingLookup.includes('korenie') || ingLookup.includes('soľ') || ingLookup.includes('bylinky')) best = {kcal:10, protein:0, fat:0, carbs:0};
     }
     if (best) {
       let gramsUsed = grams;
       if (isPiece) {
-        // Try to get piece weight
         let pw = 50;
         for (const [k, w] of Object.entries(PIECE_WEIGHT)) {
-          if (ingLower.includes(k)) { pw = w; break; }
+          if (ingLookup.includes(k)) { pw = w; break; }
         }
         gramsUsed = val * pw;
       }
       const factor = gramsUsed / 100;
-      totals.kcal += Math.round(best.kcal * factor);
-      totals.protein += Math.round(best.protein * factor);
-      totals.fat += Math.round(best.fat * factor);
-      totals.carbs += Math.round(best.carbs * factor);
+      total.kcal += best.kcal * factor;
+      total.protein += best.protein * factor;
+      total.fat += best.fat * factor;
+      total.carbs += best.carbs * factor;
+      if (usedFallback) { estimatedCount++; unmatched.push(ing); }
+      else { matchedCount++; matched.push({ing, matchedKey: bestKey, grams: gramsUsed}); }
+    } else {
+      unmatchedCount++;
+      unmatched.push(ing);
     }
   }
-  // Round
-  totals.kcal = Math.round(totals.kcal * 10) / 10 || 0;
-  totals.protein = Math.round(totals.protein * 10) / 10 || 0;
-  totals.fat = Math.round(totals.fat * 10) / 10 || 0;
-  totals.carbs = Math.round(totals.carbs * 10) / 10 || 0;
-  return totals;
+  // Round total
+  total.kcal = Math.round(total.kcal) || 0;
+  total.protein = Math.round(total.protein) || 0;
+  total.fat = Math.round(total.fat) || 0;
+  total.carbs = Math.round(total.carbs) || 0;
+  // Compute per-portion
+  const pp = {
+    kcal: Math.round(total.kcal / portionsNum) || 0,
+    protein: Math.round(total.protein / portionsNum) || 0,
+    fat: Math.round(total.fat / portionsNum) || 0,
+    carbs: Math.round(total.carbs / portionsNum) || 0,
+  };
+  // Confidence
+  const totalItems = matchedCount + estimatedCount + unmatchedCount;
+  let confidence = 'presny';
+  if (unmatchedCount > 0 || estimatedCount > 0) confidence = 'odhad';
+  if (unmatchedCount > totalItems * 0.3) confidence = 'hruby';
+  return {
+    total,
+    perPortion: pp,
+    portions: portionsNum,
+    confidence,
+    matchedCount, estimatedCount, unmatchedCount,
+    matched, unmatched,
+  };
 }
+
+function sanitizeNutrition(nutrition, portions) {
+  const p = portions || 4;
+  const warnings = [];
+  if (nutrition.kcal > 1200) warnings.push('kcal');
+  if (nutrition.fat > 80) warnings.push('fat');
+  if (nutrition.protein > 80) warnings.push('protein');
+  if (nutrition.carbs > 150) warnings.push('carbs');
+  return {
+    warnings,
+    hasWarnings: warnings.length > 0,
+    isHeartyMeal: nutrition.kcal > 800 && nutrition.fat > 40,
+  };
+}
+
 function autoFillNutrition() {
   const ingredients = document.getElementById('r-ingredients').value.split('\n').map(s => s.trim()).filter(Boolean);
   if (!ingredients.length) return;
-  const n = estimateNutrition(ingredients);
-  document.getElementById('r-kcal').value = n.kcal;
-  document.getElementById('r-protein').value = n.protein || '';
-  document.getElementById('r-fat').value = n.fat || '';
-  document.getElementById('r-carbs').value = n.carbs || '';
+  const portions = parseInt(document.getElementById('r-portions').value) || 4;
+  const result = estimateNutrition(ingredients, portions);
+  // Fill per-portion values
+  document.getElementById('r-kcal').value = result.perPortion.kcal;
+  document.getElementById('r-protein').value = result.perPortion.protein || '';
+  document.getElementById('r-fat').value = result.perPortion.fat || '';
+  document.getElementById('r-carbs').value = result.perPortion.carbs || '';
+  // Show confidence
+  const status = document.getElementById('nutrition-status');
+  if (status) {
+    const labels = {presny: '✅ Presný výpočet', odhad: '📐 Odhad', hruby: '⚠️ Hrubý odhad'};
+    let text = labels[result.confidence] || '';
+    if (result.unmatched.length) {
+      text += `<br><span style="font-size:.7rem;opacity:.7;">⚠️ ${result.unmatched.length} ${t('unmatchedHint')}</span>`;
+    }
+    status.innerHTML = text;
+  }
+  // Portion info
+  const info = document.getElementById('nutrition-portion-info');
+  if (info) {
+    info.textContent = `Na 1 porciu z ${result.portions} (celý recept: ${result.total.kcal} kcal)`;
+  }
+}
+
+function estimateAndFillImport(ingrArray, yieldNum) {
+  const result = estimateNutrition(ingrArray, yieldNum || 4);
+  if (result.perPortion.kcal > 0) {
+    document.getElementById('r-kcal').value = result.perPortion.kcal;
+    document.getElementById('r-protein').value = result.perPortion.protein || '';
+    document.getElementById('r-fat').value = result.perPortion.fat || '';
+    document.getElementById('r-carbs').value = result.perPortion.carbs || '';
+    document.getElementById('r-portions').value = result.portions;
+  }
+  return result;
 }
 
 // ======================== RECIPES TAB ========================
@@ -1598,6 +1736,9 @@ function openFormModal(recipe) {
   document.getElementById('r-protein').value = recipe && recipe.nutrition ? recipe.nutrition.protein || '' : '';
   document.getElementById('r-fat').value = recipe && recipe.nutrition ? recipe.nutrition.fat || '' : '';
   document.getElementById('r-carbs').value = recipe && recipe.nutrition ? recipe.nutrition.carbs || '' : '';
+  document.getElementById('r-portions').value = recipe && recipe.portions ? recipe.portions : 4;
+  document.getElementById('nutrition-status').innerHTML = '';
+  document.getElementById('nutrition-portion-info').textContent = '';
   document.getElementById('r-image-preview').style.display = 'none';
   if (recipe && recipe.imageData) {
     document.getElementById('r-image-preview').src = recipe.imageData;
@@ -1635,16 +1776,27 @@ function saveRecipe() {
   const protein = parseInt(document.getElementById('r-protein').value) || 0;
   const fat = parseInt(document.getElementById('r-fat').value) || 0;
   const carbs = parseInt(document.getElementById('r-carbs').value) || 0;
+  const portions = parseInt(document.getElementById('r-portions').value) || 4;
   if (!name) return alert(t('formName') + ' je povinný.');
   if (!ingredients.length) return alert(t('formIngredients') + ' je povinná.');
   if (!steps.length) return alert(t('formSteps') + ' je povinný.');
   const nutrition = {kcal,protein,fat,carbs};
+  // Sanity check
+  const check = sanitizeNutrition(nutrition, portions);
+  if (check.hasWarnings && !confirm(
+    (lang === 'en' ? 'Per-portion values seem high:\n' : 'Hodnoty na porciu sú vysoké:\n') +
+    check.warnings.map(w => {
+      const labels = {kcal: '🔥 kcal > 1200', fat: '🧈 tuky > 80g', protein: '💪 bielkoviny > 80g', carbs: '🍚 sacharidy > 150g'};
+      return labels[w];
+    }).join('\n') + '\n\n' +
+    (lang === 'en' ? 'Save anyway?' : 'Aj tak uložiť?')
+  )) return;
   if (editingId) {
     const idx = recipes.findIndex(r => r.id === editingId);
-    if (idx !== -1) recipes[idx] = {...recipes[idx], name, nameEn, category, time, image, imageData, ingredients, steps, tags, nutrition, difficulty};
+    if (idx !== -1) recipes[idx] = {...recipes[idx], name, nameEn, category, time, image, imageData, ingredients, steps, tags, nutrition, difficulty, portions, allergens: recipes[idx].allergens || []};
     editingId = null;
   } else {
-    recipes.push({id:Date.now(), name, nameEn, category, time, image, imageData, ingredients, steps, tags, rating:0, notes:'', notesEn:'', favorite:false, nutrition, difficulty, allergens: []});
+    recipes.push({id:Date.now(), name, nameEn, category, time, image, imageData, ingredients, steps, tags, rating:0, notes:'', notesEn:'', favorite:false, nutrition, difficulty, portions, allergens: []});
   }
   saveToLS();
   closeModal('form-modal');
@@ -1689,13 +1841,25 @@ function viewRecipe(id) {
         <div class="star-rating">${[1,2,3,4,5].map(i => `<span class="star ${i<=Math.round(r.rating)?'active':''}" tabindex="0" role="button" onclick="setRating(${id},${i})" onkeydown="if(event.key==='Enter'||event.key===' ')event.preventDefault(),setRating(${id},${i})">★</span>`).join('')}</div>
       </div>
     </div>
-    ${n && (n.kcal||n.protein||n.fat||n.carbs) ? `<div class="detail-section"><h3>🥗 ${t('recipeNutri')}</h3>
+    ${n && (n.kcal||n.protein||n.fat||n.carbs) ? `<div class="detail-section">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:.3rem;flex-wrap:wrap;">
+        <h3>🥗 ${t('recipeNutri')}</h3>
+        <div style="display:flex;align-items:center;gap:.25rem;">
+          <button class="btn btn-sm ${!(window._showTotalNutri || false) ? 'btn-primary' : 'btn-secondary'}" onclick="window._showTotalNutri=false;viewRecipe(${id})" style="padding:.1rem .4rem;font-size:.65rem;" data-lang="nutritionPerPortion">Na porciu</button>
+          <button class="btn btn-sm ${window._showTotalNutri ? 'btn-primary' : 'btn-secondary'}" onclick="window._showTotalNutri=true;viewRecipe(${id})" style="padding:.1rem .4rem;font-size:.65rem;" data-lang="nutritionTotal">Celý recept</button>
+        </div>
+      </div>
+      ${window._showTotalNutri ? '' : `<div style="font-size:.7rem;color:var(--text2);margin-bottom:.3rem;">${t('nutritionPerPortion')} — ${r.portions||4} ${t('portionUnit')}</div>`}
       <div class="nutrition-grid">
-        <div class="nutrition-item"><div class="val">🔥 ${esc(n.kcal||'?')}</div><div class="lbl">${t('kcal')}</div></div>
-        <div class="nutrition-item"><div class="val">💪 ${esc(n.protein||'?')}g</div><div class="lbl">${t('protein')}</div></div>
-        <div class="nutrition-item"><div class="val">🧈 ${esc(n.fat||'?')}g</div><div class="lbl">${t('fat')}</div></div>
-        <div class="nutrition-item"><div class="val">🍚 ${esc(n.carbs||'?')}g</div><div class="lbl">${t('carbs')}</div></div>
-      </div></div>` : ''}
+        <div class="nutrition-item"><div class="val">🔥 ${esc(window._showTotalNutri ? Math.round((n.kcal||0)*(r.portions||4)) : n.kcal||'?')}</div><div class="lbl">${t('kcal')}</div></div>
+        <div class="nutrition-item"><div class="val">💪 ${esc(window._showTotalNutri ? Math.round((n.protein||0)*(r.portions||4)) : n.protein||'?')}g</div><div class="lbl">${t('protein')}</div></div>
+        <div class="nutrition-item"><div class="val">🧈 ${esc(window._showTotalNutri ? Math.round((n.fat||0)*(r.portions||4)) : n.fat||'?')}g</div><div class="lbl">${t('fat')}</div></div>
+        <div class="nutrition-item"><div class="val">🍚 ${esc(window._showTotalNutri ? Math.round((n.carbs||0)*(r.portions||4)) : n.carbs||'?')}g</div><div class="lbl">${t('carbs')}</div></div>
+      </div>
+      ${!window._showTotalNutri && n.kcal > 800 && n.fat > 40 ? `<div style="font-size:.7rem;color:var(--gold);margin-top:.2rem;">🍖 ${t('nutritionHearty')}</div>` : ''}
+      ${window._showTotalNutri ? `<div style="font-size:.7rem;color:var(--text3);margin-top:.2rem;">${t('nutritionTotalLabel')} — ${r.portions||4} ${t('portionUnit')}</div>` : ''}
+      ${!window._showTotalNutri && (n.kcal > 1200 || n.fat > 80 || n.protein > 80 || n.carbs > 150) ? `<div style="font-size:.7rem;color:var(--danger);margin-top:.2rem;">⚠️ ${t('nutritionCheck')}</div>` : ''}
+    </div>` : ''}
     <div class="detail-section">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.3rem;">
         <h3>🥕 ${t('formIngredients')}</h3>
@@ -2934,18 +3098,14 @@ function importFromUrl() {
         if (recipe.keywords) { const t = (typeof recipe.keywords === 'string' ? recipe.keywords : (Array.isArray(recipe.keywords) ? recipe.keywords.join(',') : '')).split(',').map(s => s.trim().toLowerCase()); tags.push(...t); }
         document.getElementById('r-tags').value = [...new Set(tags)].join(', ');
         if (calories) {
-          const n = parseInt(calories);
-          const k = Math.round(n / yieldNum);
-          document.getElementById('r-kcal').value = k || n;
+          // Source provided total calories - divide by yield for per-portion
+          const calTotal = parseInt(calories);
+          const perPortion = Math.round(calTotal / yieldNum);
+          document.getElementById('r-kcal').value = perPortion || calTotal;
+          document.getElementById('r-portions').value = yieldNum;
         } else {
-          // Auto-estimate from ingredients if no nutrition found
-          const auto = estimateNutrition((Array.isArray(ingr) ? ingr : []).filter(Boolean));
-          if (auto && auto.kcal) {
-            document.getElementById('r-kcal').value = Math.round(auto.kcal);
-            document.getElementById('r-protein').value = Math.round(auto.protein) || '';
-            document.getElementById('r-fat').value = Math.round(auto.fat) || '';
-            document.getElementById('r-carbs').value = Math.round(auto.carbs) || '';
-          }
+          // Auto-estimate from ingredients
+          const result = estimateAndFillImport(Array.isArray(ingr) ? ingr : [], yieldNum);
         }
         document.getElementById('r-image').dispatchEvent(new Event('input'));
         if (image) {
