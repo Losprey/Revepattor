@@ -964,6 +964,7 @@ body[data-tab="dashboard"] #app-header { display: none; }
     <button class="pa-btn" onclick="clearPlan()">🗑 <span data-lang="plannerClear">Vymazať týždeň</span></button>
     <button class="pa-btn" onclick="switchTab('shopping')">🛒 <span data-lang="plannerShopping">Nákupný zoznam</span></button>
     <button class="pa-btn" onclick="copyWeekPlan()">📋 <span data-lang="plannerCopy">Kopírovať</span></button>
+    <button class="pa-btn" onclick="handleAIWeeklyPlan()" style="background:linear-gradient(135deg,var(--primary-light),var(--primary));color:#fff;border:none;">🤖 AI týždeň</button>
   </div>
 </div>
 
@@ -1576,6 +1577,117 @@ function getSettingsAuthHTML() {
 
 // Wait for Firebase init then start auth
 setTimeout(() => { initFirebase(); initFirebaseAuth(); }, 500);
+
+// ======================== AI (DEEPSEEK PROXY) ========================
+const AI_PROXY_URL = 'YOUR_CLOUDFLARE_WORKER_URL'; // ← vlož URL z Cloudflare
+
+async function aiGenerate(messages) {
+  if (!AI_PROXY_URL || AI_PROXY_URL.includes('YOUR_CLOUDFLARE')) {
+    alert('AI nie je nastavené. Nastav AI_PROXY_URL v index.html.');
+    return null;
+  }
+  try {
+    const r = await fetch(AI_PROXY_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages }),
+    });
+    const data = await r.json();
+    if (data.error) { alert('AI chyba: ' + data.error); return null; }
+    return data.reply || '';
+  } catch(e) {
+    alert('AI nie je dostupné. Skontroluj pripojenie.');
+    return null;
+  }
+}
+
+async function aiWeeklyPlan() {
+  const members = (appSettings.family && appSettings.family.householdMembers) || 2;
+  const season = ['jar','jar','jar','leto','leto','leto','leto','leto','jeseň','jeseň','jeseň','zima'][new Date().getMonth()];
+  const prompt = 'Navrhni jedálniček na 7 dní (pondelok až nedeľa) pre '+members+' člennú domácnosť. Ročné obdobie: '+season+'. Pre každý deň navrhni: raňajky, desiatu, obed, olovrant, večeru. Formát: Pondelok: Raňajky: ... Desiata: ... Obed: ... Olovrant: ... Večera: ... (a tak 7 dní). Každé jedlo na nový riadok začína "Raňajky:", "Desiata:", "Obed:", "Olovrant:", "Večera:". Použi slovenské názvy.';
+  return aiGenerate([{ role: 'user', content: prompt }]);
+}
+
+async function handleAIWeeklyPlan() {
+  const reply = await aiWeeklyPlan();
+  if (!reply) return;
+  showAIPlanModal(reply);
+}
+
+function showAIPlanModal(text) {
+  const old = document.getElementById('ai-plan-modal');
+  if (old) old.remove();
+  const div = document.createElement('div');
+  div.id = 'ai-plan-modal';
+  div.className = 'modal-overlay active';
+  div.style.cssText = 'z-index:2000;';
+  div.innerHTML = `<div class="modal" style="max-width:500px;max-height:85vh;overflow-y:auto;">
+    <button class="modal-close" onclick="document.getElementById('ai-plan-modal').remove()">✕</button>
+    <h2>🤖 AI návrh jedálnička</h2>
+    <pre id="ai-plan-text" style="white-space:pre-wrap;font-size:.75rem;font-family:inherit;background:var(--bg);padding:.8rem;border-radius:8px;max-height:50vh;overflow-y:auto;">${esc(text)}</pre>
+    <div style="display:flex;gap:.5rem;margin-top:.8rem;">
+      <button class="btn btn-primary" onclick="parseAndFillAIPlan()" style="flex:1;">✅ Použiť</button>
+      <button class="btn btn-secondary" onclick="document.getElementById('ai-plan-modal').remove()">Zrušiť</button>
+    </div>
+  </div>`;
+  document.body.appendChild(div);
+}
+
+function parseAndFillAIPlan() {
+  const text = document.getElementById('ai-plan-text').textContent;
+  document.getElementById('ai-plan-modal').remove();
+  const weekKey = currentWeekKey();
+  const dayMap = { 'pondelok':'pondelok','utorok':'utorok','streda':'streda','štvrtok':'štvrtok','piatok':'piatok','sobota':'sobota','nedeľa':'nedeľa','monday':'pondelok','tuesday':'utorok','wednesday':'streda','thursday':'štvrtok','friday':'piatok','saturday':'sobota','sunday':'nedeľa' };
+  const mealSlots = ['raňajky','desiata','obed','olovrant','večera'];
+  const slotAliases = {
+    'raňajky':['raňajky','breakfast','ranajky','ranajka'],
+    'desiata':['desiata','snack','dopoludnia'],
+    'obed':['obed','lunch','obeda'],
+    'olovrant':['olovrant','popoludní','poobede'],
+    'večera':['večera','dinner','večere'],
+  };
+  const lines = text.split('\n');
+  let currentDay = null;
+  const plan = {};
+
+  for (const line of lines) {
+    const cleanLine = line.replace(/^[•\-\*\d\.\s]+/, '').trim();
+    if (!cleanLine) continue;
+    // Check if this is a day header
+    const dayMatch = cleanLine.match(/^([A-ZÁ-Ž][a-zá-ž]+)/);
+    if (dayMatch && dayMap[dayMatch[1].toLowerCase()]) {
+      currentDay = dayMap[dayMatch[1].toLowerCase()];
+      if (!plan[currentDay]) plan[currentDay] = {};
+      continue;
+    }
+    if (!currentDay) continue;
+    // Check if this is a meal line
+    for (const [slot, aliases] of Object.entries(slotAliases)) {
+      for (const alias of aliases) {
+        const idx = cleanLine.toLowerCase().indexOf(alias);
+        if (idx !== -1) {
+          const after = cleanLine.substring(idx + alias.length).replace(/^[:：\s\-–—]+/, '').trim();
+          if (after && !plan[currentDay][slot]) {
+            plan[currentDay][slot] = { type: 'custom', text: after };
+          }
+          break;
+        }
+      }
+    }
+  }
+
+  // Fill the planner
+  const weekPlan = getWeekPlan(weekKey);
+  Object.entries(plan).forEach(([day, meals]) => {
+    if (!weekPlan[day]) weekPlan[day] = {};
+    Object.entries(meals).forEach(([slot, entry]) => {
+      weekPlan[day][slot] = entry;
+    });
+  });
+  saveWeekPlan();
+  renderPlanner();
+  renderDashboard();
+}
 
  let lang = localStorage.getItem('lang') || 'sk';
 let ageFilter = '';
