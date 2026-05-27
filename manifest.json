@@ -3,24 +3,67 @@
   "short_name": "Receptár",
   "description": "Plánovač jedál s nákupným zoznamom, úlohami, notifikáciami a rodinným zdieľaním v reálnom čase.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "background_color": "#0f0e0d",
   "theme_color": "#dc2626",
   "orientation": "any",
   "categories": ["food", "lifestyle", "productivity"],
   "lang": "sk",
-  "icons": [
+  "dir": "ltr",
+  "prefer_related_applications": false,
+  "shortcuts": [
     {
-      "src": "icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "name": "Plánovač",
+      "short_name": "Plánovač",
+      "url": "/?tab=planner",
+      "icons": [{ "src": "icon-96.png", "sizes": "96x96" }]
     },
     {
-      "src": "icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "name": "Nákupný zoznam",
+      "short_name": "Nákup",
+      "url": "/?tab=shopping",
+      "icons": [{ "src": "icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Úlohy",
+      "short_name": "Úlohy",
+      "url": "/?tab=tasks",
+      "icons": [{ "src": "icon-96.png", "sizes": "96x96" }]
     }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshot1.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Dashboard"
+    },
+    {
+      "src": "screenshot2.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Plánovač jedál"
+    },
+    {
+      "src": "screenshot3.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Nákupný zoznam"
+    }
+  ],
+  "icons": [
+    { "src": "icon-72.png", "sizes": "72x72", "type": "image/png" },
+    { "src": "icon-96.png", "sizes": "96x96", "type": "image/png" },
+    { "src": "icon-128.png", "sizes": "128x128", "type": "image/png" },
+    { "src": "icon-144.png", "sizes": "144x144", "type": "image/png" },
+    { "src": "icon-152.png", "sizes": "152x152", "type": "image/png" },
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-384.png", "sizes": "384x384", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ]
 }
