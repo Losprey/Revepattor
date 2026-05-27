@@ -509,9 +509,9 @@ body:not(.dark) .recipe-card .fav-btn.fav-active { background: linear-gradient(1
         <div class="form-group"><input id="r-time" type="number" placeholder="⏱ min" min="1"></div>
         <div class="form-group">
           <select id="r-difficulty">
-            <option value="1">⚪⚪⚪ <span data-lang="diffEasy">Ľahké</span></option>
-            <option value="2" selected>⚪⚪⚫ <span data-lang="diffMedium">Stredné</span></option>
-            <option value="3">⚪⚫⚫ <span data-lang="diffHard">Ťažké</span></option>
+            <option value="1"><span data-lang="diffEasy">Ľahké</span></option>
+            <option value="2" selected><span data-lang="diffMedium">Stredné</span></option>
+            <option value="3"><span data-lang="diffHard">Ťažké</span></option>
           </select>
         </div>
       </div>
@@ -1579,7 +1579,7 @@ function toggleVoice() {
   voiceRecognition.start();
   voiceListening = true;
   document.getElementById('voice-btn').classList.add('listening');
-  document.getElementById('voice-btn').textContent = '🎤🔴';
+  document.getElementById('voice-btn').textContent = '🎤';
 }
 
 function stopVoice() {
@@ -1610,7 +1610,7 @@ function toggleVoiceSearch() {
   voiceSearch.onerror = function() { stopVoiceSearch(); };
   voiceSearch.start();
   voiceSearchListening = true;
-  document.getElementById('voice-search-btn').textContent = '🎤🔴';
+  document.getElementById('voice-search-btn').textContent = '🎤';
   document.getElementById('voice-search-btn').style.background = '#ef4444';
   document.getElementById('voice-search-btn').style.color = '#fff';
 }
