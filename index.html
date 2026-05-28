@@ -2290,7 +2290,7 @@ function matchesAgeFilter(recipe) {
 }
 
 // ======================== THEME ========================
-if (localStorage.getItem('dark')) { document.body.classList.add('dark'); document.getElementById('dark-toggle').textContent = '☀️'; }
+if (appSettings.theme === 'dark') { document.body.classList.add('dark'); document.getElementById('dark-toggle').textContent = '☀️'; }
 
 // ======================== PERSISTENCE ========================
 function saveToLS() {
@@ -2938,7 +2938,7 @@ let appSettings = {};
 function loadSettings() {
   try { appSettings = JSON.parse(localStorage.getItem('appSettings') || '{}'); } catch(e) { appSettings = {}; }
   const D = {
-    theme: localStorage.getItem('dark') ? 'dark' : 'light',
+    theme: 'light',
     lang: localStorage.getItem('lang') || 'sk',
     accentColor: localStorage.getItem('accent') || '#dc2626',
     textSize: 'normal', uiDensity: 'normal',
