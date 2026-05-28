@@ -998,7 +998,6 @@ body[data-tab="dashboard"] #app-header { display: none; }
     <button class="pa-btn" onclick="clearPlan()">🗑 <span data-lang="plannerClear">Vymazať týždeň</span></button>
     <button class="pa-btn" onclick="switchTab('shopping')">🛒 <span data-lang="plannerShopping">Nákupný zoznam</span></button>
     <button class="pa-btn" onclick="copyWeekPlan()">📋 <span data-lang="plannerCopy">Kopírovať</span></button>
-    <button class="pa-btn" onclick="aiFillEmptySlots()" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:#fff;border:none;">✨ AI doplniť</button>
     <button class="pa-btn" onclick="aiGenerateShoppingList()" style="background:linear-gradient(135deg,#059669,#047857);color:#fff;border:none;">📝 AI nákup</button>
   </div>
 </div>
@@ -2125,6 +2124,17 @@ const DEFAULT_RECIPES = [
   {id:89,name:'Zelené smoothie',nameEn:'Green smoothie',category:'Detské',time:5,image:'https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Zelen%C3%A9%20smoothie',imageData:'',ingredients:['1 banán','hrsť špenátu','1 jablko','200ml mlieka'],ingredientsEn:['1 banana','spinach','1 apple','200ml milk'],steps:['Všetko rozmixujte dohladka.'],stepsEn:['Blend until smooth.'],tags:['deti-1','nápoj','zdravé'],tagsEn:['baby-1y','drink','healthy'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:160,protein:4,fat:2,carbs:32}},
 ];
 
+// Migrate old raw localStorage data to namespaced keys BEFORE loading data
+(function migrateOldDataIfNeeded() {
+  if (window._lsGet.call(localStorage, '_migrated_v2') === '1') return;
+  const dataKeys = ['mealPlan','mealPlanKids','planType','shoppingItems','tasks','recipes','cookingHistory'];
+  dataKeys.forEach(k => {
+    var raw = window._lsGet.call(localStorage, k);
+    if (raw !== null) { window._lsSet.call(localStorage, storeNs + k, raw); }
+  });
+  window._lsSet.call(localStorage, '_migrated_v2', '1');
+})();
+
 let recipes = JSON.parse(localStorage.getItem('recipes') || 'null') || JSON.parse(JSON.stringify(DEFAULT_RECIPES));
 // Migrate: add allergens/difficulty if missing
 recipes = recipes.map(r => ({
@@ -2196,19 +2206,6 @@ function saveWeekPlan() {
     mealPlan[wk] = mealPlan;
     localStorage.setItem('mealPlan', JSON.stringify(mealPlan));
   }
-})();
-
-// Migrate old raw localStorage data to namespaced keys (one-time)
-(function migrateOldDataIfNeeded() {
-  if (localStorage.getItem('_migrated_v2') === '1') return;
-  const dataKeys = ['mealPlan','mealPlanKids','planType','shoppingItems','tasks','recipes','cookingHistory'];
-  dataKeys.forEach(k => {
-    const raw = window._lsGet.call(localStorage, k);
-    if (raw !== null) {
-      localStorage.setItem(k, raw);
-    }
-  });
-  localStorage.setItem('_migrated_v2', '1');
 })();
 
 // ======================== LANGUAGE ========================
@@ -4412,7 +4409,7 @@ function createPickerModal() {
 
 let _pickerDay, _pickerSlot, _pickerWk, _pickerCat = '';
 function openPickerModal(day, slot, wk) {
-  _pickerDay = day; _pickerSlot = slot; _pickerWk = wk; _pickerCat = '';
+  _pickerDay = day; _pickerSlot = slot; _pickerWk = wk || currentWeekKey(); _pickerCat = '';
   const el = document.getElementById('planner-picker') || createPickerModal();
   el.classList.add('active');
   document.getElementById('picker-chips')?.querySelectorAll('.picker-chip').forEach(c => c.classList.toggle('active', c.dataset.cat === ''));
