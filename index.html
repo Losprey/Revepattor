@@ -1651,6 +1651,10 @@ const ONBOARDING_SLIDES = [
     mockup: `<div class="onboard-mockup">
       <div class="onboard-mockup-row"><div class="onboard-mockup-item">📅 Plán</div><div class="onboard-mockup-item">📖 Recepty</div><div class="onboard-mockup-item">🛒 Nákup</div></div>
       <div class="onboard-mockup-row"><div class="onboard-mockup-item">✅ Úlohy</div><div class="onboard-mockup-item">🍽️ AI</div><div class="onboard-mockup-item">🏠 Domov</div></div>
+    </div>`,
+    mockupEn: `<div class="onboard-mockup">
+      <div class="onboard-mockup-row"><div class="onboard-mockup-item">📅 Plan</div><div class="onboard-mockup-item">📖 Recipes</div><div class="onboard-mockup-item">🛒 Shop</div></div>
+      <div class="onboard-mockup-row"><div class="onboard-mockup-item">✅ Tasks</div><div class="onboard-mockup-item">🍽️ AI</div><div class="onboard-mockup-item">🏠 Home</div></div>
     </div>`
   },
   {
@@ -1661,6 +1665,11 @@ const ONBOARDING_SLIDES = [
       <div class="onboard-mockup-row"><div class="onboard-mockup-item" style="background:var(--primary-light);color:#fff;">🌅 Raňajky: Palacinky</div></div>
       <div class="onboard-mockup-row"><div class="onboard-mockup-item">🍽️ Obed: Rizoto</div></div>
       <div class="onboard-mockup-row"><div class="onboard-mockup-item">🌙 Večera: Losos</div></div>
+    </div>`,
+    mockupEn: `<div class="onboard-mockup">
+      <div class="onboard-mockup-row"><div class="onboard-mockup-item" style="background:var(--primary-light);color:#fff;">🌅 Breakfast: Pancakes</div></div>
+      <div class="onboard-mockup-row"><div class="onboard-mockup-item">🍽️ Lunch: Risotto</div></div>
+      <div class="onboard-mockup-row"><div class="onboard-mockup-item">🌙 Dinner: Salmon</div></div>
     </div>`
   },
   {
@@ -1748,7 +1757,8 @@ function renderOnboardSlide() {
     else if (i > _onboardIndex) cls += ' next';
     const title = l === 'en' ? s2.titleEn : s2.title;
     const sub = l === 'en' ? s2.subEn : s2.sub;
-    return `<div class="${cls}"><div class="onboard-illustration">${s2.icon}</div><div class="onboard-title">${title}</div><div class="onboard-sub">${sub}</div>${s2.mockup||''}</div>`;
+    const mockup = l === 'en' && s2.mockupEn ? s2.mockupEn : s2.mockup || '';
+    return `<div class="${cls}"><div class="onboard-illustration">${s2.icon}</div><div class="onboard-title">${title}</div><div class="onboard-sub">${sub}</div>${mockup}</div>`;
   }).join('');
   // Dots
   const dots = document.getElementById('onboard-dots');
