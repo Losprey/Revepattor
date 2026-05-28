@@ -966,7 +966,7 @@ body[data-tab="dashboard"] #app-header { display: none; }
         <option>Hlavné jedlá</option><option>Polievky</option><option>Šaláty</option><option>Dezerty</option><option>Pečivo</option><option>Nápoje</option><option>Predjedlá</option><option>Raňajky</option><option>Prílohy</option><option>Detské</option>
       </select>
       <button class="btn btn-primary" onclick="openFormModal()" data-lang="btnAdd">➕</button>
-      <button class="btn" onclick="aiIngredientSuggest()" style="background:linear-gradient(135deg,var(--primary-light),var(--primary));color:#fff;border:none;padding:.35rem .55rem;border-radius:var(--radius-sm);font-size:.7rem;font-weight:600;cursor:pointer;" title="AI návrh z vašich surovín">🤖 Čo uvariť?</button>
+      <button class="btn" onclick="aiIngredientSuggest()" style="background:linear-gradient(135deg,var(--primary-light),var(--primary));color:#fff;border:none;padding:.35rem .55rem;border-radius:var(--radius-sm);font-size:.7rem;font-weight:600;cursor:pointer;" id="recipe-ai-btn">🤖 Čo uvariť?</button>
       <button class="btn" onclick="showImportUrlModal()" style="background:var(--surface);color:var(--text2);border:1px solid var(--border);padding:.35rem .55rem;border-radius:var(--radius-sm);font-size:.7rem;font-weight:600;cursor:pointer;" title="Import receptu z URL">🌐 Import</button>
     </div>
     <div class="controls-sub">
@@ -2440,6 +2440,7 @@ function applyLang() {
   const paC = document.getElementById('pa-clear-label'); if (paC) paC.textContent = lang==='en'?'Clear week':'Vymazať týždeň';
   const paA = document.getElementById('pa-ai-label'); if (paA) paA.textContent = lang==='en'?'📝 AI Shop':'📝 AI nákup';
   const aiTip = document.getElementById('dash-ai-label'); if (aiTip) aiTip.textContent = lang==='en'?'AI tip of the day':'AI tip dňa';
+  const rab = document.getElementById('recipe-ai-btn'); if (rab) { rab.textContent = lang==='en'?'🤖 What to cook?':'🤖 Čo uvariť?'; rab.title = lang==='en'?'AI suggestion from your ingredients':'AI návrh z vašich surovín'; }
 }
 
 function toggleDark() {
