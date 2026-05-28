@@ -60,105 +60,6 @@
   --inner-shadow: inset 0 1px 2px rgba(0,0,0,.12);
 }
 
-async function aiAdjustPortions(recipeId) {
-  const r = recipes.find(rec => rec.id === recipeId);
-  if (!r) return;
-  const current = r.portions || 4;
-  const target = parseInt(prompt(t('Uprav na počet porcií (teraz: '+current+'):','Adjust to servings (current: '+current+'):'), current));
-  if (!target || target < 1 || target > 50) return;
-  const ingr = (lang === 'en' && r.ingredientsEn ? r.ingredientsEn : r.ingredients).join('\n');
-  const reply = await aiGenerate([{ role: 'user', content: 'Uprav množstvo ingrediencií v tomto recepte z '+current+' porcií na '+target+' porcií. Ingrediencie:\n'+ingr+'\n\nOdpovedz len upravené ingrediencie, každá na nový riadok, vo formáte: množstvo názov. Odpoveď v slovenčine.' }]);
-  if (reply) {
-    const lines = reply.split('\n').filter(l => l.trim());
-    if (lang === 'en') r.ingredientsEn = lines; else r.ingredients = lines;
-    r.portions = target;
-    saveRecipes();
-    viewRecipe(recipeId);
-  }
-}
-
-async function aiSubstituteIngredient() {
-  const ingr = prompt(t('Ktorú surovinu chceš nahradiť?','Which ingredient to substitute?'), '');
-  if (!ingr) return;
-  const reply = await aiGenerate([{ role: 'user', content: 'Čím môžem nahradiť "'+ingr+'" pri varení? Daj mi 2-3 alternatívy s vysvetlením. Odpovedaj v slovenčine.' }]);
-  if (reply) {
-    const old = document.getElementById('ai-modal');
-    if (old) old.remove();
-    const div = document.createElement('div');
-    div.id = 'ai-modal';
-    div.className = 'modal-overlay active';
-    div.style.cssText = 'z-index:2000;';
-    div.innerHTML = '<div class="modal" style="max-width:500px;"><button class="modal-close" onclick="document.getElementById(\'ai-modal\').remove()">✕</button><h2>🔄 '+t('Náhrada: ','Substitute: ')+esc(ingr)+'</h2><pre style="white-space:pre-wrap;font-size:.78rem;font-family:inherit;background:var(--bg);padding:.8rem;border-radius:8px;">'+esc(reply)+'</pre></div>';
-    document.body.appendChild(div);
-  }
-}
-
-async function aiSimplifyRecipe(recipeId) {
-  const r = recipes.find(rec => rec.id === recipeId);
-  if (!r) return;
-  const steps = (lang === 'en' && r.stepsEn ? r.stepsEn : r.steps).join('\n');
-  const reply = await aiGenerate([{ role: 'user', content: 'Zjednoduš tento recept na 3-5 krokov. Originálny postup:\n'+steps+'\n\nOdpovedz len zjednodušené kroky, každý na nový riadok, očíslované. V slovenčine.' }]);
-  if (reply) {
-    const lines = reply.split('\n').map(l => l.replace(/^\d+[\.\)]\s*/, '').trim()).filter(Boolean);
-    if (lines.length) {
-      if (lang === 'en') r.stepsEn = lines; else r.steps = lines;
-      saveRecipes();
-      viewRecipe(recipeId);
-    }
-  }
-}
-
-async function aiEstimateNutrition(recipeId) {
-  const r = recipes.find(rec => rec.id === recipeId);
-  if (!r) return;
-  const name = lang === 'en' && r.nameEn ? r.nameEn : r.name;
-  const ingr = (lang === 'en' && r.ingredientsEn ? r.ingredientsEn : r.ingredients).join('\n');
-  const portions = r.portions || 4;
-  const reply = await aiGenerate([{ role: 'user', content: 'Odhadni nutričné hodnoty tohto receptu na JEDNU PORCIU ('+portions+' porcií celkovo). Recept: '+name+'\nIngrediencie:\n'+ingr+'\n\nOdpovedz IBA v tomto formáte (jedno číslo na riadok):\nkcal: [číslo]\nprotein: [číslo g]\nfat: [číslo g]\ncarbs: [číslo g]\n\nNič iné nepíš.' }]);
-  if (reply) {
-    const kcal = parseInt((reply.match(/kcal[:\s]*(\d+)/i) || [])[1]) || 0;
-    const protein = parseInt((reply.match(/protein[:\s]*(\d+)/i) || [])[1]) || 0;
-    const fat = parseInt((reply.match(/fat[:\s]*(\d+)/i) || [])[1]) || 0;
-    const carbs = parseInt((reply.match(/carbs[:\s]*(\d+)/i) || [])[1]) || 0;
-    if (kcal > 0) {
-      r.nutrition = { kcal, protein, fat, carbs };
-      r.portions = portions;
-      saveRecipes();
-      viewRecipe(recipeId);
-    }
-  }
-}
-
-async function aiBatchNutrition() {
-  if (!confirm(t('Aktualizovať nutričné hodnoty pre VŠETKY recepty cez AI? Môže to chvíľu trvať.','Update nutrition for ALL recipes via AI? This may take a while.'))) return;
-  const needUpdate = recipes.filter(r => !r.nutrition || !r.nutrition.kcal || r.nutrition.kcal < 10);
-  if (!needUpdate.length) { alert(t('Všetky recepty už majú nutričné hodnoty.','All recipes already have nutrition data.')); return; }
-  let count = 0;
-  const total = needUpdate.length;
-  for (const r of needUpdate) {
-    const name = lang === 'en' && r.nameEn ? r.nameEn : r.name;
-    const ingr = (lang === 'en' && r.ingredientsEn ? r.ingredientsEn : r.ingredients).join('\n');
-    const portions = r.portions || 4;
-    const reply = await aiGenerate([{ role: 'user', content: 'Odhadni nutričné hodnoty tohto receptu na JEDNU PORCIU ('+portions+' porcií celkovo). Recept: '+name+'\nIngrediencie:\n'+ingr+'\n\nOdpovedz IBA v tomto formáte:\nkcal: [číslo]\nprotein: [číslo g]\nfat: [číslo g]\ncarbs: [číslo g]' }]);
-    if (reply) {
-      const kcal = parseInt((reply.match(/kcal[:\s]*(\d+)/i) || [])[1]) || 0;
-      const protein = parseInt((reply.match(/protein[:\s]*(\d+)/i) || [])[1]) || 0;
-      const fat = parseInt((reply.match(/fat[:\s]*(\d+)/i) || [])[1]) || 0;
-      const carbs = parseInt((reply.match(/carbs[:\s]*(\d+)/i) || [])[1]) || 0;
-      if (kcal > 0) {
-        r.nutrition = { kcal, protein, fat, carbs };
-        r.portions = portions;
-        count++;
-      }
-    }
-    if (count % 5 === 0) saveRecipes();
-  }
-  saveRecipes();
-  render();
-  alert(t('Hotovo! Aktualizovaných '+count+' z '+total+' receptov.','Done! Updated '+count+' of '+total+' recipes.'));
-}
-
-
 /* ===== HEADER ===== */
 header { display: flex; justify-content: space-between; align-items: center; padding: .85rem 1rem .3rem; background: transparent; position: relative; z-index: 10; }
 header h1 { font-size: 1.1rem; font-weight: 800; color: var(--text); letter-spacing: -.03em; }
@@ -1889,6 +1790,72 @@ async function aiFillEmptySlots() {
   }
 }
 
+async function aiAdjustPortions(recipeId) {
+  const r = recipes.find(rec => rec.id === recipeId);
+  if (!r) return;
+  const current = r.portions || 4;
+  const target = parseInt(prompt(t('Uprav na počet porcií (teraz: '+current+'):','Adjust to servings (current: '+current+'):'), current));
+  if (!target || target < 1 || target > 50) return;
+  const ingr = (lang === 'en' && r.ingredientsEn ? r.ingredientsEn : r.ingredients).join('\n');
+  const reply = await aiGenerate([{ role: 'user', content: 'Uprav množstvo ingrediencií v tomto recepte z '+current+' porcií na '+target+' porcií. Ingrediencie:\n'+ingr+'\n\nOdpovedz len upravené ingrediencie, každá na nový riadok, vo formáte: množstvo názov. Odpoveď v slovenčine.' }]);
+  if (reply) { const lines = reply.split('\n').filter(l => l.trim()); if (lang === 'en') r.ingredientsEn = lines; else r.ingredients = lines; r.portions = target; saveToLS(); viewRecipe(recipeId); }
+}
+
+async function aiSubstituteIngredient() {
+  const ingr = prompt(t('Ktorú surovinu chceš nahradiť?','Which ingredient to substitute?'), '');
+  if (!ingr) return;
+  const reply = await aiGenerate([{ role: 'user', content: 'Čím môžem nahradiť "'+ingr+'" pri varení? Daj mi 2-3 alternatívy s vysvetlením. Odpovedaj v slovenčine.' }]);
+  if (reply) { const old = document.getElementById('ai-modal'); if (old) old.remove(); const div = document.createElement('div'); div.id = 'ai-modal'; div.className = 'modal-overlay active'; div.style.cssText = 'z-index:2000;'; div.innerHTML = '<div class="modal" style="max-width:500px;"><button class="modal-close" onclick="document.getElementById(\'ai-modal\').remove()">✕</button><h2>🔄 '+t('Náhrada: ','Substitute: ')+esc(ingr)+'</h2><pre style="white-space:pre-wrap;font-size:.78rem;font-family:inherit;background:var(--bg);padding:.8rem;border-radius:8px;">'+esc(reply)+'</pre></div>'; document.body.appendChild(div); }
+}
+
+async function aiSimplifyRecipe(recipeId) {
+  const r = recipes.find(rec => rec.id === recipeId);
+  if (!r) return;
+  const steps = (lang === 'en' && r.stepsEn ? r.stepsEn : r.steps).join('\n');
+  const reply = await aiGenerate([{ role: 'user', content: 'Zjednoduš tento recept na 3-5 krokov. Originálny postup:\n'+steps+'\n\nOdpovedz len zjednodušené kroky, každý na nový riadok, očíslované. V slovenčine.' }]);
+  if (reply) { const lines = reply.split('\n').map(l => l.replace(/^\d+[\.\)]\s*/, '').trim()).filter(Boolean); if (lines.length) { if (lang === 'en') r.stepsEn = lines; else r.steps = lines; saveToLS(); viewRecipe(recipeId); } }
+}
+
+async function aiEstimateNutrition(recipeId) {
+  const r = recipes.find(rec => rec.id === recipeId);
+  if (!r) return;
+  const name = lang === 'en' && r.nameEn ? r.nameEn : r.name;
+  const ingr = (lang === 'en' && r.ingredientsEn ? r.ingredientsEn : r.ingredients).join('\n');
+  const portions = r.portions || 4;
+  const reply = await aiGenerate([{ role: 'user', content: 'Odhadni nutričné hodnoty tohto receptu na JEDNU PORCIU ('+portions+' porcií celkovo). Recept: '+name+'\nIngrediencie:\n'+ingr+'\n\nOdpovedz IBA v tomto formáte (jedno číslo na riadok):\nkcal: [číslo]\nprotein: [číslo g]\nfat: [číslo g]\ncarbs: [číslo g]\n\nNič iné nepíš.' }]);
+  if (reply) { const kcal = parseInt((reply.match(/kcal[:\s]*(\d+)/i)||[])[1])||0; const protein = parseInt((reply.match(/protein[:\s]*(\d+)/i)||[])[1])||0; const fat = parseInt((reply.match(/fat[:\s]*(\d+)/i)||[])[1])||0; const carbs = parseInt((reply.match(/carbs[:\s]*(\d+)/i)||[])[1])||0; if (kcal>0) { r.nutrition={kcal,protein,fat,carbs}; r.portions=portions; saveToLS(); viewRecipe(recipeId); } }
+}
+
+async function aiBatchNutrition() {
+  if (!confirm(t('Aktualizovať nutričné hodnoty pre VŠETKY recepty cez AI? Môže to chvíľu trvať.','Update nutrition for ALL recipes via AI? This may take a while.'))) return;
+  const needUpdate = recipes.filter(r => !r.nutrition || !r.nutrition.kcal || r.nutrition.kcal < 10);
+  if (!needUpdate.length) { alert(t('Všetky recepty už majú nutričné hodnoty.','All recipes already have nutrition data.')); return; }
+  let count = 0; const total = needUpdate.length;
+  for (const r of needUpdate) { const name = lang==='en'&&r.nameEn?r.nameEn:r.name; const ingr = (lang==='en'&&r.ingredientsEn?r.ingredientsEn:r.ingredients).join('\n'); const portions = r.portions||4; const reply = await aiGenerate([{role:'user',content:'Odhadni nutričné hodnoty tohto receptu na JEDNU PORCIU. Recept: '+name+'\nIngrediencie:\n'+ingr+'\n\nOdpovedz IBA:\nkcal: [číslo]\nprotein: [číslo g]\nfat: [číslo g]\ncarbs: [číslo g]'}]);
+    if (reply) { const kcal = parseInt((reply.match(/kcal[:\s]*(\d+)/i)||[])[1])||0; const protein = parseInt((reply.match(/protein[:\s]*(\d+)/i)||[])[1])||0; const fat = parseInt((reply.match(/fat[:\s]*(\d+)/i)||[])[1])||0; const carbs = parseInt((reply.match(/carbs[:\s]*(\d+)/i)||[])[1])||0; if (kcal>0) { r.nutrition={kcal,protein,fat,carbs}; r.portions=portions; count++; } }
+    if (count%5===0) saveToLS();
+  }
+  saveToLS(); render();
+  alert(t('Hotovo! '+count+'/'+total+' receptov.','Done! '+count+'/'+total+' recipes.'));
+}
+
+async function aiGenerateShoppingList() {
+  if (!(appSettings.shopping && appSettings.shopping.aiShoppingList)) { alert(t('AI nákupný zoznam je vypnutý. Zapni ho v Nastaveniach → Nákup.','AI shopping list is off.')); return; }
+  const allMeals = [];
+  DAYS.forEach(d => { MEALS.forEach(m => { const e = getWeekPlan(currentWeekKey())[d]&&getWeekPlan(currentWeekKey())[d][m.id]; if (!e) return; if (e.type==='custom'&&e.text) allMeals.push(t(d,d)+' '+t(m.id,m.id)+': '+e.text); else { const rid=typeof e==='number'?e:e.id; const r = recipes.find(rec=>rec.id===rid); if (r) { const rName = lang==='en'&&r.nameEn?r.nameEn:r.name; const ingr = (r.ingredients||[]).join(', '); allMeals.push(t(d,d)+' '+t(m.id,m.id)+': '+rName+' — '+ingr); } } }); });
+  if (!allMeals.length) { alert(t('Plánovač je prázdny.','Planner is empty.')); return; }
+  const reply = await aiGenerate([{role:'user',content:'Vytvor nákupný zoznam na tento týždeň. Jedálniček:\n'+allMeals.join('\n')+'\n\nSpoj rovnaké položky, zoraď podľa kategórií. Ku každej uveď odhadované množstvo. Odpovedz v slovenčine.'}]);
+  if (reply) { const o=document.getElementById('ai-modal');if(o)o.remove();const d=document.createElement('div');d.id='ai-modal';d.className='modal-overlay active';d.style.cssText='z-index:2000;';d.innerHTML='<div class="modal" style="max-width:500px;max-height:80vh;overflow-y:auto;"><button class="modal-close" onclick="document.getElementById(\'ai-modal\').remove()">✕</button><h2>🛒 '+t('AI nákupný zoznam','AI shopping list')+'</h2><pre style="white-space:pre-wrap;font-size:.75rem;font-family:inherit;background:var(--bg);padding:.8rem;border-radius:8px;">'+esc(reply)+'</pre><button class="btn btn-primary" onclick="addAIShoppingItems()" style="width:100%;margin-top:.5rem;">📥 '+t('Pridať do nákupného zoznamu','Add to shopping list')+'</button></div>';document.body.appendChild(d);window._aiShoppingReply=reply; }
+}
+
+function addAIShoppingItems() {
+  const text = window._aiShoppingReply || ''; if (!text) return;
+  const lines = text.split('\n'); let c = 'other'; loadShopItems();
+  lines.forEach(l => { const cl = l.replace(/^[•\-\*\s]+/,'').trim(); if (!cl) return; if (cl.endsWith(':')&&!cl.includes('—')&&!cl.includes('-')){c=guessFoodCategory(cl.replace(':',''));return;}
+    const p=cl.split(/[—–-]/); if(p.length>=2){const nm=p[0].trim();const q=p.slice(1).join('—').trim();const am=(q.match(/^[\d.,\/]+/)||[])[0]||'';const u=am?q.replace(am,'').trim().replace(/^[gmlkGMLKčČ\s]+/,''):q;if(nm&&nm.length>1)shopItems.push({id:generateShopId(),name:nm,amount:am,unit:u||'',category:c==='other'?guessFoodCategory(nm):c,checked:false,source:'manual',note:'',recipeId:''});}});
+  saveShopItems(); document.getElementById('ai-modal')?.remove(); switchTab('shopping');
+}
+
  let lang = localStorage.getItem('lang') || 'sk';
 let ageFilter = '';
 let voiceSearch = null, voiceSearchListening = false;
@@ -2290,8 +2257,6 @@ function matchesAgeFilter(recipe) {
 }
 
 // ======================== THEME ========================
-if (appSettings.theme === 'dark') { document.body.classList.add('dark'); document.getElementById('dark-toggle').textContent = '☀️'; }
-
 // ======================== PERSISTENCE ========================
 function saveToLS() {
   localStorage.setItem('recipes', JSON.stringify(recipes));
@@ -3280,7 +3245,7 @@ function toggleFav(id) {
   }
 }
 
-function updateFavFilter() {}
+function updateFavFilter() { /* renders fav filter badge */ }
 
 // ======================== RANDOM ========================
 function randomRecipe() {
@@ -5801,7 +5766,7 @@ renderDashboard = function() {
   <div class="fab-backdrop" onclick="document.getElementById('fab-quick-add').classList.remove('open')"></div>
   <button class="fab-trigger" onclick="this.parentElement.classList.toggle('open')" aria-label="Quick add">➕</button>
   <div class="fab-menu">
-    <button class="fab-item" onclick="event.stopPropagation();this.closest('#fab-quick-add').classList.remove('open');switchTab('tasks');document.getElementById('task-add-btn')?.click()"><span data-lang="fabTask"></span></button>
+    <button class="fab-item" onclick="event.stopPropagation();this.closest('#fab-quick-add').classList.remove('open');switchTab('tasks');openTaskSheet()"><span data-lang="fabTask"></span></button>
     <button class="fab-item" onclick="event.stopPropagation();this.closest('#fab-quick-add').classList.remove('open');switchTab('planner')"><span data-lang="fabMeal"></span></button>
     <button class="fab-item" onclick="event.stopPropagation();this.closest('#fab-quick-add').classList.remove('open');switchTab('shopping');openAddItemSheet()"><span data-lang="fabFood"></span></button>
   </div>
