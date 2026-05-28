@@ -1544,7 +1544,7 @@ function signInWithGoogle() {
   });
   if (authIsGuest) {
     // Guest logging in — ask about migration
-    if (confirm('Chceš preniesť aktuálne dáta do účtu?\n\nOK = Preniesť dáta\nZrušiť = Začať s novým účtom')) {
+    if (confirm(lang==='en'?'Transfer your data to this account?\n\nOK = Transfer\nCancel = Start fresh':'Chceš preniesť aktuálne dáta do účtu?\n\nOK = Preniesť dáta\nZrušiť = Začať s novým účtom')) {
       // We'll migrate after login completes
       localStorage.setItem('authMigrateFromGuest', '1');
     }
@@ -1853,7 +1853,7 @@ function showAIPlanModal(text) {
     <pre id="ai-plan-text" style="white-space:pre-wrap;font-size:.75rem;font-family:inherit;background:var(--bg);padding:.8rem;border-radius:8px;max-height:50vh;overflow-y:auto;">${esc(text)}</pre>
     <div style="display:flex;gap:.5rem;margin-top:.8rem;">
       <button class="btn btn-primary" onclick="parseAndFillAIPlan()" style="flex:1;">✅ Použiť</button>
-      <button class="btn btn-secondary" onclick="document.getElementById('ai-plan-modal').remove()">Zrušiť</button>
+      <button class="btn btn-secondary" onclick="document.getElementById('ai-plan-modal').remove()">${lang==='en'?'Cancel':'Zrušiť'}</button>
     </div>
   </div>`;
   document.body.appendChild(div);
