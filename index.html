@@ -2441,6 +2441,15 @@ function applyLang() {
   const paA = document.getElementById('pa-ai-label'); if (paA) paA.textContent = lang==='en'?'📝 AI Shop':'📝 AI nákup';
   const aiTip = document.getElementById('dash-ai-label'); if (aiTip) aiTip.textContent = lang==='en'?'AI tip of the day':'AI tip dňa';
   const rab = document.getElementById('recipe-ai-btn'); if (rab) { rab.textContent = lang==='en'?'🤖 What to cook?':'🤖 Čo uvariť?'; rab.title = lang==='en'?'AI suggestion from your ingredients':'AI návrh z vašich surovín'; }
+  // Category dropdowns
+  const cats = ['Hlavné jedlá','Polievky','Šaláty','Dezerty','Pečivo','Nápoje','Predjedlá','Raňajky','Prílohy','Detské'];
+  ['filter-category','r-category','ingr-category'].forEach(id => {
+    const sel = document.getElementById(id); if (!sel) return;
+    const val = sel.value;
+    const opts = sel.querySelectorAll('option:not([value=""])');
+    opts.forEach((opt,i) => { if (cats[i]) opt.textContent = catLabel(cats[i]); });
+    sel.value = val;
+  });
 }
 
 function toggleDark() {
