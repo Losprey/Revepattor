@@ -931,7 +931,7 @@ body[data-tab="dashboard"] #app-header { display: none; }
       <div class="dash-date" id="dash-date"></div>
       <div class="dash-message" id="dash-message">Vitaj späť!</div>
       <div class="dash-message-sub" id="dash-message-sub"></div>
-      <button id="dash-ai-tip-btn" onclick="aiDailyTip()" style="margin-top:.4rem;padding:.3rem .7rem;border-radius:99px;border:1px solid var(--primary-light);background:rgba(220,38,38,.1);color:var(--primary-light);font-size:.65rem;font-weight:600;cursor:pointer;transition:all .2s;">🤖 AI tip dňa</button>
+      <button id="dash-ai-tip-btn" onclick="aiDailyTip()" style="margin-top:.4rem;padding:.3rem .7rem;border-radius:99px;border:1px solid var(--primary-light);background:rgba(220,38,38,.1);color:var(--primary-light);font-size:.65rem;font-weight:600;cursor:pointer;transition:all .2s;">🤖 <span id="dash-ai-label">AI tip dňa</span></button>
       <div class="dash-stats-row" id="dash-stats-row"></div>
     </div>
   </div>
@@ -1934,7 +1934,10 @@ async function aiIngredientSuggest() {
 
 async function aiDailyTip() {
   const season = ['jar','jar','jar','leto','leto','leto','leto','leto','jeseň','jeseň','jeseň','zima'][new Date().getMonth()];
-  const reply = await aiGenerate([{ role: 'user', content: 'Daj mi jeden krátky tip na dnešné varenie. Sezóna: '+season+'. Buď vtipný, originálny, max 2 vety. Odpovedaj v slovenčine.' }]);
+  const prompt = lang==='en'
+    ? 'Give me one short cooking tip for today. Season: '+season+'. Be witty, original, max 2 sentences. Reply in English.'
+    : 'Daj mi jeden krátky tip na dnešné varenie. Sezóna: '+season+'. Buď vtipný, originálny, max 2 vety. Odpovedaj v slovenčine.';
+  const reply = await aiGenerate([{ role: 'user', content: prompt }]);
   if (reply) {
     document.getElementById('dash-message').textContent = reply;
     document.getElementById('dash-message-sub').textContent = t('🤖 Vygenerované AI','🤖 AI-generated');
@@ -2436,6 +2439,7 @@ function applyLang() {
   const qwN = document.getElementById('qw-next'); if (qwN) qwN.childNodes[1].textContent = lang==='en'?'Next week':'Budúci týždeň';
   const paC = document.getElementById('pa-clear-label'); if (paC) paC.textContent = lang==='en'?'Clear week':'Vymazať týždeň';
   const paA = document.getElementById('pa-ai-label'); if (paA) paA.textContent = lang==='en'?'📝 AI Shop':'📝 AI nákup';
+  const aiTip = document.getElementById('dash-ai-label'); if (aiTip) aiTip.textContent = lang==='en'?'AI tip of the day':'AI tip dňa';
 }
 
 function toggleDark() {
