@@ -1,6 +1,6 @@
 {
-  "name": "Receptár — Plánovač jedál",
-  "short_name": "Receptár",
+  "name": "Mealnest — Plánovač jedál",
+  "short_name": "Mealnest",
   "description": "Plánovač jedál s nákupným zoznamom, úlohami, notifikáciami a rodinným zdieľaním v reálnom čase.",
   "start_url": "/",
   "scope": "/",
