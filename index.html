@@ -5236,7 +5236,7 @@ function renderTaskWidget() {
 
   let html = `<div class="tasks-widget">
     <div class="tw-header">
-      <div class="tw-title">✅ <span data-lang="tasksHomeTitle">Dnešné úlohy</span></div>
+      <div class="tw-title">✅ ${t('tasksHomeTitle')}</div>
       <div class="tw-progress">
         <span style="font-size:.65rem;color:var(--text3);font-weight:600;">${done}/${total}</span>
         <div class="tw-progress-circle">
@@ -5247,7 +5247,7 @@ function renderTaskWidget() {
     </div>`;
 
   if (!showTasks.length) {
-    html += `<div style="text-align:center;padding:.3rem 0;font-size:.7rem;color:var(--text3);">✨ <span data-lang="tasksHomeEmpty">Dnes voľno ✨</span></div>`;
+    html += `<div style="text-align:center;padding:.3rem 0;font-size:.7rem;color:var(--text3);">✨ ${t('tasksHomeEmpty')}</div>`;
   } else {
     html += `<div class="tw-items">${showTasks.map(t => {
       const ci = taskCatInfo(t.category);
