@@ -3085,7 +3085,7 @@ function render() {
         ${r.rating > 0 ? `<div class="stars" style="margin-top:.1rem;">${'★'.repeat(Math.round(r.rating))}${'☆'.repeat(5-Math.round(r.rating))}</div>` : ''}
         <div style="display:flex;align-items:center;gap:.15rem;margin-top:.15rem;">
           ${[1,2,3].map(i => `<span class="difficulty-dot ${i<=diff?'filled':'empty'}"></span>`).join('')}
-          <span style="font-size:.6rem;color:var(--text3);margin-left:.15rem;">Obtiažnosť</span>
+          <span style="font-size:.6rem;color:var(--text3);margin-left:.15rem;">${diffLabel(diff)}</span>
         </div>
         <div class="tags">${tags.map(t => `<span class="tag${t.startsWith('deti-')||t.startsWith('baby')?' baby-tag':''}${t==='vegan'||t==='vegetarian'?' vegan-tag':''}">${esc(t)}</span>`).join('')}</div>
       </div>
@@ -4424,6 +4424,20 @@ const MEALS = [
 function mealLabel(id) {
   const map = { 'raňajky':{sk:'raňajky',en:'Breakfast'}, 'desiata':{sk:'desiata',en:'Snack'}, 'obed':{sk:'obed',en:'Lunch'}, 'olovrant':{sk:'olovrant',en:'Afternoon'}, 'večera':{sk:'večera',en:'Dinner'} };
   return map[id] ? map[id][lang] || map[id].sk : id;
+}
+
+function catLabel(cat) {
+  const map = {
+    'Hlavné jedlá':'Main dishes','Polievky':'Soups','Šaláty':'Salads','Dezerty':'Desserts',
+    'Pečivo':'Bakery','Nápoje':'Drinks','Predjedlá':'Appetizers','Raňajky':'Breakfast',
+    'Prílohy':'Sides','Detské':'Kids'
+  };
+  return lang==='en' ? (map[cat]||cat) : cat;
+}
+
+function diffLabel(d) {
+  const map = {1:{sk:'Ľahké',en:'Easy'},2:{sk:'Stredné',en:'Medium'},3:{sk:'Ťažké',en:'Hard'}};
+  return map[d] ? map[d][lang]||map[d].sk : '';
 }
 
 function renderPlanner() {
