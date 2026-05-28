@@ -914,9 +914,9 @@ body[data-tab="dashboard"] #app-header { display: none; }
 <header id="app-header">
   <h1 id="main-title">🍽️ <span data-lang="appTitle">Mealnest</span> <span id="recipe-count" style="font-size:.75rem;opacity:.7;font-weight:400;"></span></h1>
   <div class="header-actions">
-    <button class="topbar-btn" onclick="toggleDark()" id="dark-toggle" title="">🌙</button>
+    <button class="topbar-btn" onclick="toggleDark()" id="dark-toggle" title="Tmavý režim">🌙</button>
     <button class="topbar-btn" onclick="switchLang()" id="lang-toggle">🇬🇧 EN</button>
-    <button class="topbar-btn" id="sync-indicator" onclick="openSettings()" title="">⚪</button>
+    <button class="topbar-btn" id="sync-indicator" onclick="openSettings()" title="Nie si pripojený k rodine">⚪</button>
     <span id="header-auth-area"></span>
   </div>
 </header>
@@ -1779,7 +1779,7 @@ const AI_PROXY_URL = 'https://receptar.waldis994.workers.dev'; // Cloudflare Wor
 
 async function aiGenerate(messages) {
   if (!AI_PROXY_URL || AI_PROXY_URL.includes('YOUR_CLOUDFLARE')) {
-    alert(t('AI nie je nastavená. Nastav AI_PROXY_URL v index.html.','AI not configured. Set AI_PROXY_URL in index.html.'));
+    alert('AI nie je nastavená. Nastav AI_PROXY_URL v index.html.');
     return null;
   }
   try {
@@ -1789,9 +1789,10 @@ async function aiGenerate(messages) {
       body: JSON.stringify({ messages }),
     });
     const data = await r.json();
-    if (data.error) { alert(t('AI chyba: ','AI error: ') + data.error); return null; }
+    if (data.error) { alert('AI chyba: ' + data.error); return null; }
+    return data.reply || '';
   } catch(e) {
-    alert(t('AI nie je dostupná. Skontroluj pripojenie.','AI not available. Check connection.'));
+    alert('AI nie je dostupná. Skontroluj pripojenie.');
     return null;
   }
 }
@@ -2057,20 +2058,20 @@ function generateFamilyCode() {
 
 function createFamily() {
   initFirebase();
-  if (!firebaseReady) { alert(t('Firebase nie je nastavený. Otvor index.html a vyplň FIREBASE_CONFIG.','Firebase not configured. Open index.html and fill FIREBASE_CONFIG.')); return; }
+  if (!firebaseReady) { alert('Firebase nie je nastavený. Otvor index.html a vyplň FIREBASE_CONFIG.'); return; }
   const code = generateFamilyCode();
   familyCode = code;
   localStorage.setItem('familyCode', code);
   connectToFamily(code);
   pushAllLocalData();
-  alert(t('Rodinný kód: ','Family code: ') + code + '\n' + t('Zdieľaj tento kód s rodinou.','Share this code with your family.'));
+  alert('Rodinný kód: ' + code + '\nZdieľaj tento kód s rodinou.');
   openSettings();
   updateSyncIndicator();
 }
 
 function joinFamily(code) {
   initFirebase();
-  if (!firebaseReady) { alert(t('Firebase nie je nastavený. Otvor index.html a vyplň FIREBASE_CONFIG.','Firebase not configured. Open index.html and fill FIREBASE_CONFIG.')); return; }
+  if (!firebaseReady) { alert('Firebase nie je nastavený. Otvor index.html a vyplň FIREBASE_CONFIG.'); return; }
   code = code.toUpperCase().trim();
   if (!code) return;
   familyCode = code;
@@ -2158,6 +2159,14 @@ function getDeviceId() {
   let id = localStorage.getItem('deviceId');
   if (!id) { id = 'dev_' + Math.random().toString(36).slice(2,10); localStorage.setItem('deviceId', id); }
   return id;
+}
+
+function updateSyncIndicator() {
+  const el = document.getElementById('sync-indicator');
+  if (!el) return;
+  if (!familyCode) { el.textContent = '⚪'; el.title = 'Nie si pripojený k rodine'; }
+  else if (firebaseReady) { el.textContent = '🟢'; el.title = 'Synchronizované — kód: ' + familyCode; }
+  else { el.textContent = '🔴'; el.title = 'Firebase nie je pripojený'; }
 }
 
 function refreshActiveTab() {
@@ -2383,18 +2392,12 @@ function applyLang() {
   document.getElementById('lang-toggle').textContent = lang === 'en' ? '🇸🇰 SK' : '🇬🇧 EN';
   // Show/hide English name field in form
   document.getElementById('name-en-group').style.display = lang === 'en' ? 'block' : 'none';
-  document.getElementById('form-title').textContent = editingId !== null ? t('formTitle') + ' (edit)' : t('formTitle');
-  // Dynamic title/placeholder translations
-  document.getElementById('dark-toggle').title = t('Tmavý režim','Dark mode');
-  document.getElementById('sync-indicator').title = familyCode ? t('Synchronizované','Synced') : t('Nie si pripojený k rodine','Not connected to family');
-}
-
-function updateSyncIndicator() {
-  const el = document.getElementById('sync-indicator');
-  if (!el) return;
-  if (!familyCode) { el.textContent = '⚪'; el.title = t('Nie si pripojený k rodine','Not connected to family'); }
-  else if (firebaseReady) { el.textContent = '🟢'; el.title = t('Synchronizované — kód: ','Synced — code: ') + familyCode; }
-  else { el.textContent = '🔴'; el.title = t('Firebase nie je pripojený','Firebase not connected'); }
+  // Update form title
+  if (editingId !== null) {
+    document.getElementById('form-title').textContent = t('formTitle') + ' (edit)';
+  } else {
+    document.getElementById('form-title').textContent = t('formTitle');
+  }
 }
 
 function toggleDark() {
@@ -4898,7 +4901,7 @@ function clearCheckedShopItems() {
   const checked = shopItems.filter(i => i.checked);
   if (!checked.length) {
     if (lang === 'en') alert('No checked items to clear.');
-    else alert(t('Žiadne zaškrtnuté položky na vymazanie.','No checked items to delete.'));
+    else alert('Žiadne zaškrtnuté položky na vymazanie.');
     return;
   }
   if (!confirm(lang === 'en' ? `Remove ${checked.length} checked items?` : `Odstrániť ${checked.length} zaškrtnutých položiek?`)) return;
@@ -4951,7 +4954,7 @@ function copyShopList() {
   }).join('\n');
   navigator.clipboard.writeText(text).catch(() => {});
   if (lang === 'en') alert('Copied ' + unchecked.length + ' items to clipboard.');
-  else alert(t('Skopírovaných ','Copied ') + unchecked.length + t(' položiek do schránky.',' items to clipboard.'));
+  else alert('Skopírovaných ' + unchecked.length + ' položiek do schránky.');
 }
 
 function openAddItemSheet(editId) {
@@ -5576,11 +5579,26 @@ function importFromUrl() {
   if (!url) return;
   const status = document.getElementById('import-url-status');
   const btn = document.getElementById('import-url-btn');
-  status.textContent = t('⏳ Načítavam...','⏳ Loading...');
-  const proxyUrl = proxies[proxyIdx](url);
-  const label = proxyIdx === 0 ? 'codetabs' : 'allorigins';
-  status.textContent = t('⏳ Načítavam...','⏳ Loading...') + ' (' + label + ')';
-  fetch(proxyUrl)
+  status.textContent = '⏳ Načítavam...';
+  btn.disabled = true;
+  const proxies = [
+    u => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u),
+    u => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u),
+    u => 'https://api.allorigins.win/get?url=' + encodeURIComponent(u),
+  ];
+  let proxyIdx = 0;
+  let retries = 0;
+  const maxRetries = 2;
+  function tryFetch() {
+    if (proxyIdx >= proxies.length) {
+      status.textContent = t('importUrlFail') + ' — skús znova neskôr';
+      btn.disabled = false;
+      return;
+    }
+    const proxyUrl = proxies[proxyIdx](url);
+    const label = proxyIdx === 0 ? 'codetabs' : 'allorigins';
+    status.textContent = '⏳ Načítavam... (' + label + ')';
+    fetch(proxyUrl)
       .then(r => {
         if (!r.ok) throw new Error('HTTP ' + r.status);
         return r.text();
