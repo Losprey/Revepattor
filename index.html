@@ -9,10 +9,10 @@
 <meta name="theme-color" content="#dc2626">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Receptár">
+<meta name="apple-mobile-web-app-title" content="Mealnest">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<title data-lang="appTitle">Receptár</title>
+<title data-lang="appTitle">Mealnest</title>
 <style>
 :root {
   --bg: #0f0e0d;
@@ -899,7 +899,7 @@ body[data-tab="dashboard"] #app-header { display: none; }
 <div id="login-overlay" style="display:none;">
   <div class="login-card">
     <div class="login-logo">🍽️</div>
-    <div class="login-title">Receptár</div>
+    <div class="login-title">Mealnest</div>
     <div class="login-sub">Ulož si jedálniček, nákupný zoznam a úlohy naprieč zariadeniami.</div>
     <button class="login-btn-google" onclick="signInWithGoogle()">
       <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
@@ -912,7 +912,7 @@ body[data-tab="dashboard"] #app-header { display: none; }
 </div>
 
 <header id="app-header">
-  <h1 id="main-title">🍽️ <span data-lang="appTitle">Receptár</span> <span id="recipe-count" style="font-size:.75rem;opacity:.7;font-weight:400;"></span></h1>
+  <h1 id="main-title">🍽️ <span data-lang="appTitle">Mealnest</span> <span id="recipe-count" style="font-size:.75rem;opacity:.7;font-weight:400;"></span></h1>
   <div class="header-actions">
     <button class="topbar-btn" onclick="toggleDark()" id="dark-toggle" title="Tmavý režim">🌙</button>
     <button class="topbar-btn" onclick="switchLang()" id="lang-toggle">🇬🇧 EN</button>
@@ -967,6 +967,7 @@ body[data-tab="dashboard"] #app-header { display: none; }
       </select>
       <button class="btn btn-primary" onclick="openFormModal()" data-lang="btnAdd">➕</button>
       <button class="btn" onclick="aiIngredientSuggest()" style="background:linear-gradient(135deg,var(--primary-light),var(--primary));color:#fff;border:none;padding:.35rem .55rem;border-radius:var(--radius-sm);font-size:.7rem;font-weight:600;cursor:pointer;" title="AI návrh z vašich surovín">🤖 Čo uvariť?</button>
+      <button class="btn" onclick="showImportUrlModal()" style="background:var(--surface);color:var(--text2);border:1px solid var(--border);padding:.35rem .55rem;border-radius:var(--radius-sm);font-size:.7rem;font-weight:600;cursor:pointer;" title="Import receptu z URL">🌐 Import</button>
     </div>
     <div class="controls-sub">
       <select id="sort-by" onchange="render()" style="padding:.3rem .5rem;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.72rem;background:var(--input-bg);color:var(--text);">
@@ -1291,7 +1292,7 @@ body[data-tab="dashboard"] #app-header { display: none; }
   </button>
   <button class="nav-item" data-tab="home" onclick="switchTab('home')">
     <span class="nav-icon">📖</span>
-    <span class="nav-label" data-lang="navRecipes">Receptár</span>
+    <span class="nav-label" data-lang="navRecipes">Recepty</span>
   </button>
   <button class="nav-item" data-tab="shopping" onclick="switchTab('shopping')">
     <span class="nav-icon">🛒</span>
@@ -1316,7 +1317,7 @@ body[data-tab="dashboard"] #app-header { display: none; }
 const LANG = {
   sk: {
     appTitle: 'Plánovač jedál', appSubtitle: 'Týždenný plánovač s receptami',
-    navRecipes: 'Receptár', navShopping: 'Nákup', navFavs: 'Obľúbené', navSettings: 'Nastavenia', navDashboard: 'Domov',
+    navRecipes: 'Recepty', navShopping: 'Nákup', navFavs: 'Obľúbené', navSettings: 'Nastavenia', navDashboard: 'Domov',
     searchPlaceholder: 'Hľadať...', allCategories: 'Všetky kategórie',
     btnAdd: '➕ Nový', btnMore: '⚙️ Viac', btnByIngr: '🥕 Suroviny', btnRandom: 'Náhodný',
     sortName: 'Názov', sortTime: 'Čas', sortRating: 'Hodnotenie',
@@ -1340,7 +1341,7 @@ const LANG = {
     matchCount: 'receptov sedí', matchPart: 'receptov sedí čiastočne',
     shareWhatsApp: 'WhatsApp', shareMessenger: 'Messenger', shareEmail: 'Email',
     cookingDone: 'Hotovo! Dobrú chuť! 🎉', cookingTimerStart: 'Spustiť', cookingTimerStop: 'Stop',
-    exportError: 'Neplatný súbor. Vyber JSON exportovaný z Receptára.',
+    exportError: 'Neplatný súbor. Vyber JSON exportovaný z Mealnesta.',
     importConfirm: 'Naozaj chcete importovať', importOk: 'Importovaných',
     deleteConfirm: 'Naozaj chcete zmazať tento recept?',
     recipeNutri: 'Nutričné hodnoty', kcal: 'kcal', protein: 'bielkoviny', fat: 'tuky', carbs: 'sacharidy',
@@ -1647,7 +1648,7 @@ setTimeout(() => { initFirebase(); initFirebaseAuth(); }, 500);
 // ======================== ONBOARDING ========================
 const ONBOARDING_SLIDES = [
   {
-    icon: '👋', title: 'Vitaj v Receptári', titleEn: 'Welcome to Receptár',
+    icon: '👋', title: 'Vitaj v Mealnesti', titleEn: 'Welcome to Mealnest',
     sub: 'Tvoj moderný plánovač jedál, nákupov a úloh pre celú rodinu.',
     subEn: 'Your modern meal planner, shopping list & task manager for the whole family.',
     mockup: `<div class="onboard-mockup">
@@ -1666,7 +1667,7 @@ const ONBOARDING_SLIDES = [
     </div>`
   },
   {
-    icon: '📖', title: 'Receptár', titleEn: 'Recipes',
+    icon: '📖', title: 'Mealnest', titleEn: 'Recipes',
     sub: 'Ukladaj si obľúbené recepty, prezeraj nutričné hodnoty a importuj z webu.',
     subEn: 'Save your favorite recipes, check nutrition & import from the web.',
     mockup: `<div class="onboard-mockup">
@@ -1680,7 +1681,7 @@ const ONBOARDING_SLIDES = [
     subEn: 'Just copy a recipe link from the web and the app imports it automatically.',
     mockup: `<div class="onboard-steps">
       <div class="onboard-step"><div class="onboard-step-num">1</div><span>Skopíruj URL receptu z webu</span></div>
-      <div class="onboard-step"><div class="onboard-step-num">2</div><span>Klikni Import z URL v Receptári</span></div>
+      <div class="onboard-step"><div class="onboard-step-num">2</div><span>Klikni Import z URL v Mealnesti</span></div>
       <div class="onboard-step"><div class="onboard-step-num">3</div><span>Recept sa automaticky spracuje ✨</span></div>
     </div>`
   },
@@ -1758,7 +1759,7 @@ function renderOnboardSlide() {
   // Button
   const btn = document.getElementById('onboard-next');
   const isLast = _onboardIndex === ONBOARDING_SLIDES.length - 1;
-  btn.textContent = isLast ? (l==='en'?'Start using Receptár':'Začať používať') : (l==='en'?'Next →':'Ďalej →');
+  btn.textContent = isLast ? (l==='en'?'Start using Mealnest':'Začať používať') : (l==='en'?'Next →':'Ďalej →');
 }
 
 function nextOnboardSlide() {
