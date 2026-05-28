@@ -1785,8 +1785,8 @@ function renderOnboardSlide() {
     const sub = l === 'en' ? s2.subEn : s2.sub;
     const mockup = s2.langPicker
       ? `<div style="display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap;justify-content:center;">
-          <button onclick="event.stopPropagation();pickOnboardLang('en')" style="padding:1rem 1.5rem;border-radius:16px;border:2px solid var(--border);background:var(--surface);color:var(--text);font-size:1rem;font-weight:700;cursor:pointer;min-width:140px;">🇬🇧 English</button>
-          <button onclick="event.stopPropagation();pickOnboardLang('sk')" style="padding:1rem 1.5rem;border-radius:16px;border:2px solid var(--primary);background:rgba(220,38,38,.08);color:var(--primary);font-size:1rem;font-weight:700;cursor:pointer;min-width:140px;">🇸🇰 Slovenčina</button>
+          <button id="onboard-lang-en" onclick="event.stopPropagation();pickOnboardLang('en')" style="padding:1rem 1.5rem;border-radius:16px;border:2px solid var(--border);background:var(--surface);color:var(--text);font-size:1rem;font-weight:700;cursor:pointer;min-width:140px;">🇬🇧 English</button>
+          <button id="onboard-lang-sk" onclick="event.stopPropagation();pickOnboardLang('sk')" style="padding:1rem 1.5rem;border-radius:16px;border:2px solid var(--border);background:var(--surface);color:var(--text);font-size:1rem;font-weight:700;cursor:pointer;min-width:140px;">🇸🇰 Slovenčina</button>
         </div>`
       : l === 'en' && s2.mockupEn ? s2.mockupEn : s2.mockup || '';
     return `<div class="${cls}"><div class="onboard-illustration">${s2.icon}</div><div class="onboard-title">${title}</div><div class="onboard-sub">${sub}</div>${mockup}</div>`;
@@ -1817,7 +1817,11 @@ function pickOnboardLang(l) {
   lang = l;
   localStorage.setItem('lang', l);
   saveSettings();
-  // Don't call render() here — just update the slide
+  // Highlight active
+  const enBtn = document.getElementById('onboard-lang-en');
+  const skBtn = document.getElementById('onboard-lang-sk');
+  if (enBtn) { enBtn.style.borderColor = l==='en'?'var(--primary)':'var(--border)'; enBtn.style.background = l==='en'?'rgba(220,38,38,.08)':'var(--surface)'; enBtn.style.color = l==='en'?'var(--primary)':'var(--text)'; }
+  if (skBtn) { skBtn.style.borderColor = l==='sk'?'var(--primary)':'var(--border)'; skBtn.style.background = l==='sk'?'rgba(220,38,38,.08)':'var(--surface)'; skBtn.style.color = l==='sk'?'var(--primary)':'var(--text)'; }
   renderOnboardSlide();
 }
 
