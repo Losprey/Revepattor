@@ -998,7 +998,6 @@ body[data-tab="dashboard"] #app-header { display: none; }
     <button class="pa-btn" onclick="clearPlan()">🗑 <span data-lang="plannerClear">Vymazať týždeň</span></button>
     <button class="pa-btn" onclick="switchTab('shopping')">🛒 <span data-lang="plannerShopping">Nákupný zoznam</span></button>
     <button class="pa-btn" onclick="copyWeekPlan()">📋 <span data-lang="plannerCopy">Kopírovať</span></button>
-    <button class="pa-btn" onclick="handleAIWeeklyPlan()" style="background:linear-gradient(135deg,var(--primary-light),var(--primary));color:#fff;border:none;">🤖 AI týždeň</button>
     <button class="pa-btn" onclick="aiFillEmptySlots()" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:#fff;border:none;">✨ AI doplniť</button>
     <button class="pa-btn" onclick="aiGenerateShoppingList()" style="background:linear-gradient(135deg,#059669,#047857);color:#fff;border:none;">📝 AI nákup</button>
   </div>
@@ -1470,6 +1469,9 @@ const GLOBAL_KEYS = new Set(['lang','dark','accent','appSettings','notifFired','
     if (GLOBAL_KEYS.has(key)) return _remove.call(this, key);
     return _remove.call(this, storeNs + key);
   };
+  // Save raw refs for migration
+  window._lsGet = _get;
+  window._lsSet = _set;
 })();
 
 function setStoreNamespace(ns) { storeNs = ns; }
@@ -2194,6 +2196,19 @@ function saveWeekPlan() {
     mealPlan[wk] = mealPlan;
     localStorage.setItem('mealPlan', JSON.stringify(mealPlan));
   }
+})();
+
+// Migrate old raw localStorage data to namespaced keys (one-time)
+(function migrateOldDataIfNeeded() {
+  if (localStorage.getItem('_migrated_v2') === '1') return;
+  const dataKeys = ['mealPlan','mealPlanKids','planType','shoppingItems','tasks','recipes','cookingHistory'];
+  dataKeys.forEach(k => {
+    const raw = window._lsGet.call(localStorage, k);
+    if (raw !== null) {
+      localStorage.setItem(k, raw);
+    }
+  });
+  localStorage.setItem('_migrated_v2', '1');
 })();
 
 // ======================== LANGUAGE ========================
