@@ -1262,7 +1262,7 @@ body[data-tab="dashboard"] #app-header { display: none; }
   <div class="modal" style="max-width:480px;">
     <button class="modal-close" onclick="closeModal('import-url-modal')">✕</button>
     <h2 data-lang="importUrlTitle">🌐 Importovať recept z URL</h2>
-    <p style="color:var(--text2);margin-bottom:.5rem;font-size:.85rem;" data-lang="importUrlHint">Vlož odkaz na recept (varecha.pravda.sk) – appka ho stiahne a predvyplní formulár.</p>
+    <p style="color:var(--text2);margin-bottom:.5rem;font-size:.85rem;" data-lang="importUrlHint">Vlož odkaz na recept (varecha.pravda.sk) – aplikácia ho stiahne a predvyplní formulár.</p>
     <input type="url" id="import-url-input" placeholder="https://varecha.pravda.sk/recept/..." style="width:100%;padding:.55rem 1rem;border:1px solid var(--border);border-radius:var(--radius-lg);font-size:.85rem;background:var(--input-bg);color:var(--text);box-shadow:var(--inner-shadow);">
     <div id="import-url-status" style="margin-top:.5rem;font-size:.85rem;color:var(--text2);"></div>
     <div class="modal-footer">
@@ -1331,10 +1331,10 @@ const LANG = {
     formTags: 'Štítky (oddelené čiarkou)', formTagsPlace: 'rýchle, lacné',
     cancel: 'Zrušiť', save: 'Uložiť',
     btnCook: 'Variť', btnPrint: 'Tlačiť', btnShare: 'Zdieľať', btnEdit: 'Upraviť',
-    btnDelete: 'Zmazať', close: 'Zavrieť',
+    btnDelete: 'Vymazať', close: 'Zavrieť',
     cookingClose: 'Zavrieť', cookingPrev: 'Predošlý', cookingNext: 'Ďalší',
 
-    ingrTitle: '🔍 Čo máš doma?', ingrHint: 'Označ suroviny, ktoré máš – zobrazia sa recepty, čo z nich uvaríš.',
+    ingrTitle: '🔍 Čo máš doma?',     ingrHint: 'Označ suroviny, ktoré máš – zobrazia sa recepty, ktoré z nich uvaríš.',
     ingrFilter: 'Filtrovať suroviny...', ingrClear: 'Vyčistiť', ingrDone: 'Hotovo',
     noRecipes: 'Žiadne recepty', noRecipesHint: 'Skúste iný filter alebo pridajte nový recept.',
     noMatch: 'Žiadne recepty neobsahujú všetky vybrané suroviny. Skús označiť menej surovín.',
@@ -1342,8 +1342,8 @@ const LANG = {
     shareWhatsApp: 'WhatsApp', shareMessenger: 'Messenger', shareEmail: 'Email',
     cookingDone: 'Hotovo! Dobrú chuť! 🎉', cookingTimerStart: 'Spustiť', cookingTimerStop: 'Stop',
     exportError: 'Neplatný súbor. Vyber JSON exportovaný z aplikácie Mealnest.',
-    importConfirm: 'Naozaj chcete importovať', importOk: 'Importovaných',
-    deleteConfirm: 'Naozaj chcete zmazať tento recept?',
+    importConfirm: 'Naozaj chceš importovať', importOk: 'Importovaných',
+    deleteConfirm: 'Naozaj chceš vymazať tento recept?',
     recipeNutri: 'Nutričné hodnoty', kcal: 'kcal', protein: 'bielkoviny', fat: 'tuky', carbs: 'sacharidy',
     perPortion: 'na porciu',
     allAges: 'Všetky veky', age6m: '6m+', age1: '1r+', age2: '2r+', age3: '3r+',
@@ -1353,7 +1353,7 @@ const LANG = {
     portions: 'Porcie:',
     tipOfDay: 'Tip dňa:',
     btnHistory: '📜 História', cookingHistory: '📜 História varenia', historyClear: '🗑 Vymazať históriu', historyEmpty: 'Zatiaľ žiadna história.',
-    btnImportUrl:'Import z URL', importUrlTitle:'🌐 Importovať recept z URL', importUrlHint:'Vlož odkaz na recept (varecha.pravda.sk) – appka ho stiahne a predvyplní formulár.', importUrlDo:'📥 Importovať', importUrlOk:'✅ Recept načítaný! Skontroluj a ulož.', importUrlFail:'❌ Nepodarilo sa načítať recept. Skús iný odkaz.', importUrlBad:'❌ Nenašiel sa žiadny recept na tejto URL. Skús iný odkaz.',
+    btnImportUrl:'Import z URL', importUrlTitle:'🌐 Importovať recept z URL', importUrlHint:'Vlož odkaz na recept (varecha.pravda.sk) – aplikácia ho stiahne a predvyplní formulár.', importUrlDo:'📥 Importovať', importUrlOk:'✅ Recept načítaný! Skontroluj a ulož.', importUrlFail:'❌ Nepodarilo sa načítať recept. Skús iný odkaz.', importUrlBad:'❌ Nenašiel sa žiadny recept na tejto URL. Skús iný odkaz.',
     moreLabelTools: 'NÁSTROJE', moreLabelData: 'DÁTA', moreLabelWeb: 'WEB',
     btnExport: 'Export', btnImport: 'Import',
     navPlanner: 'Plánovač', plannerTitle: '📅 Plánovač jedál', plannerClear: '🗑', plannerToday: 'dnes', plannerCustom: '✍️ Napíš vlastné jedlo...',
@@ -1376,19 +1376,6 @@ const LANG = {
     oily: 'Mastné',
     wet: 'Mokré',
     portionUnit: 'porcií',
-    dry: 'Suché',
-    oily: 'Mastné',
-    wet: 'Mokré',
-    navTasks: '✅ Úlohy', tasksTitle: 'Úlohy', tasksToday: 'Dnes', tasksTomorrow: 'Zajtra', tasksWeek: 'Tento týždeň', tasksDone: 'Dokončené',
-    tasksEmpty: 'Dnes máš voľnejší deň ✨', tasksEmptyDesc: 'Žiadne úlohy na dnes. Pridaj si nejakú!',
-    tasksAdd: 'Pridať úlohu', tasksEdit: 'Upraviť úlohu', tasksSave: 'Uložiť', tasksDelete: 'Vymazať',
-    tasksCatCooking: 'Varenie', tasksCatShopping: 'Nákup', tasksCatHousehold: 'Domácnosť', tasksCatKid: 'Dieťa', tasksCatCustom: 'Vlastné',
-    tasksPriorityLow: 'Nízka', tasksPriorityMedium: 'Stredná', tasksPriorityHigh: 'Vysoká',
-    tasksRepeatNone: 'Žiadne', tasksRepeatDaily: 'Denne', tasksRepeatWeekly: 'Týždenne',
-    tasksWidgetTitle: 'Dnešné úlohy', tasksWidgetDone: 'dokončené', tasksWidgetRemaining: 'zostáva',
-    tasksHomeTitle: 'Dnešné úlohy', tasksHomeEmpty: 'Dnes voľno ✨', tasksShowAll: 'Zobraziť všetky',
-    tasksQuickAdd: 'Rýchlo pridať...', tasksNote: 'Poznámka', tasksDate: 'Dátum', tasksTime: 'Čas',
-    tasksCategory: 'Kategória', tasksPriority: 'Priorita', tasksRepeat: 'Opakovanie',
     fabTask: '✅ Úloha', fabMeal: '🍽️ Jedlo', fabFood: '🛒 Potravina',
 
   },
@@ -1538,7 +1525,7 @@ function initFirebaseAuth() {
 }
 
 function signInWithGoogle() {
-  if (!firebaseReady || !firebase.auth) { alert('Firebase Auth nie je dostupné.'); return; }
+  if (!firebaseReady || !firebase.auth) { alert('Firebase Auth nie je dostupná.'); return; }
   const provider = new firebase.auth.GoogleAuthProvider();
   const doSignIn = () => firebase.auth().signInWithPopup(provider).catch(err => {
     if (err.code === 'auth/popup-blocked' || err.code === 'auth/cancelled-popup-request') {
@@ -1547,7 +1534,7 @@ function signInWithGoogle() {
   });
   if (authIsGuest) {
     // Guest logging in — ask about migration
-    if (confirm('Chceš preniesť aktuálne dáta do účtu?\n\nOK = Preniesť dáta\nZrušiť = Začať čistý účet')) {
+    if (confirm('Chceš preniesť aktuálne dáta do účtu?\n\nOK = Preniesť dáta\nZrušiť = Začať s novým účtom')) {
       // We'll migrate after login completes
       localStorage.setItem('authMigrateFromGuest', '1');
     }
@@ -1677,7 +1664,7 @@ const ONBOARDING_SLIDES = [
   },
   {
     icon: '🌐', title: 'Import z URL', titleEn: 'Import from URL',
-    sub: 'Stačí skopírovať odkaz na recept z webu a appka ho spracuje za teba.',
+    sub: 'Stačí skopírovať odkaz na recept z webu a aplikácia ho spracuje za teba.',
     subEn: 'Just copy a recipe link from the web and the app imports it automatically.',
     mockup: `<div class="onboard-steps">
       <div class="onboard-step"><div class="onboard-step-num">1</div><span>Skopíruj URL receptu z webu</span></div>
@@ -1687,7 +1674,7 @@ const ONBOARDING_SLIDES = [
   },
   {
     icon: '🛒', title: 'Nákupný zoznam', titleEn: 'Shopping List',
-    sub: 'Vytvor si zoznam potravín, rozdeľ do kategórií a odškrtávaj priamo v obchode.',
+    sub: 'Vytvor si zoznam potravín, rozdeľ ho do kategórií a odškrtávaj priamo v obchode.',
     subEn: 'Create grocery lists, organize by categories, and check off items in the store.',
     mockup: `<div class="onboard-mockup">
       <div class="onboard-mockup-row"><div class="onboard-mockup-item">🥦 Zelenina</div><div class="onboard-mockup-item">2/5 ✅</div></div>
@@ -1782,7 +1769,7 @@ const AI_PROXY_URL = 'https://receptar.waldis994.workers.dev'; // Cloudflare Wor
 
 async function aiGenerate(messages) {
   if (!AI_PROXY_URL || AI_PROXY_URL.includes('YOUR_CLOUDFLARE')) {
-    alert('AI nie je nastavené. Nastav AI_PROXY_URL v index.html.');
+    alert('AI nie je nastavená. Nastav AI_PROXY_URL v index.html.');
     return null;
   }
   try {
@@ -1795,7 +1782,7 @@ async function aiGenerate(messages) {
     if (data.error) { alert('AI chyba: ' + data.error); return null; }
     return data.reply || '';
   } catch(e) {
-    alert('AI nie je dostupné. Skontroluj pripojenie.');
+    alert('AI nie je dostupná. Skontroluj pripojenie.');
     return null;
   }
 }
@@ -1891,7 +1878,7 @@ function parseAndFillAIPlan() {
 async function aiIngredientSuggest() {
   const ingr = prompt(lang==='en'?'What ingredients do you have? (comma separated)':'Aké suroviny máš doma? (oddeľ čiarkou)', '');
   if (!ingr) return;
-  const prompt = 'Mám tieto suroviny: '+ingr+'. Navrhni 3 recepty ktoré z nich môžem uvariť. Pre každý uveď: názov, čas prípravy, postup v 3 bodoch. Odpovedaj v slovenčine.';
+  const prompt = 'Mám tieto suroviny: '+ingr+'. Navrhni 3 recepty, ktoré z nich môžem uvariť. Pre každý uveď: názov, čas prípravy, postup v 3 bodoch. Odpovedaj v slovenčine.';
   const reply = await aiGenerate([{ role: 'user', content: prompt }]);
   if (reply) {
     const old = document.getElementById('ai-modal');
@@ -3500,7 +3487,7 @@ function saveRecipe() {
   const carbs = parseInt(document.getElementById('r-carbs').value) || 0;
   const portions = parseInt(document.getElementById('r-portions').value) || 4;
   if (!name) return alert(t('formName') + ' je povinný.');
-  if (!ingredients.length) return alert(t('formIngredients') + ' je povinná.');
+  if (!ingredients.length) return alert(t('formIngredients') + ' sú povinné.');
   if (!steps.length) return alert(t('formSteps') + ' je povinný.');
   const nutrition = {kcal,protein,fat,carbs};
   // Sanity check
@@ -3839,7 +3826,7 @@ function toggleTimer() {
     const mins = prompt(lang==='en'?'Timer (minutes):' : 'Timer (minúty):', '5');
     if (mins === null) return;
     const val = parseInt(mins);
-    if (isNaN(val) || val < 1 || val > 999) { alert(lang==='en'?'Enter 1-999 minutes.':'Zadajte 1-999 minút.'); return; }
+    if (isNaN(val) || val < 1 || val > 999) { alert(lang==='en'?'Enter 1-999 minutes.':'Zadaj 1-999 minút.'); return; }
     cookingTimerSeconds = val * 60;
     startTimer();
   }
@@ -4904,7 +4891,7 @@ function clearCheckedShopItems() {
   const checked = shopItems.filter(i => i.checked);
   if (!checked.length) {
     if (lang === 'en') alert('No checked items to clear.');
-    else alert('Žiadne zaškrtnuté položky na vyčistenie.');
+    else alert('Žiadne zaškrtnuté položky na vymazanie.');
     return;
   }
   if (!confirm(lang === 'en' ? `Remove ${checked.length} checked items?` : `Odstrániť ${checked.length} zaškrtnutých položiek?`)) return;
