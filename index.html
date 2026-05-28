@@ -1607,9 +1607,9 @@ function updateAuthUI() {
   if (authUser && authUser.photoURL) {
     el.innerHTML = `<img class="user-avatar" src="${authUser.photoURL}" alt="${authUser.displayName||''}" title="${authUser.displayName||''} — odhlásiť" onclick="signOutUser()">`;
   } else if (authUser) {
-    el.innerHTML = `<span class="topbar-btn" onclick="signOutUser()" title="Odhlásiť sa">👤</span>`;
+    el.innerHTML = `<span class="topbar-btn" onclick="signOutUser()" title="${lang==='en'?'Sign out':'Odhlásiť sa'}">👤</span>`;
   } else if (authIsGuest) {
-    el.innerHTML = `<span class="guest-badge" onclick="openSettings()">Hosť</span>`;
+    el.innerHTML = `<span class="guest-badge" onclick="openSettings()">${lang==='en'?'Guest':'Hosť'}</span>`;
   } else {
     el.innerHTML = '';
   }
@@ -1624,15 +1624,15 @@ function getSettingsAuthHTML() {
       <span class="sr-label"><span class="sr-icon">📧</span> ${authUser.email||''}</span>
     </div>
     <div class="settings-row" onclick="signOutUser()">
-      <span class="sr-label" style="color:var(--danger);"><span class="sr-icon">🚪</span> Odhlásiť sa</span>
+      <span class="sr-label" style="color:var(--danger);"><span class="sr-icon">🚪</span> ${lang==='en'?'Sign out':'Odhlásiť sa'}</span>
       <span class="sr-value"><span class="sr-arrow">›</span></span>
     </div>`;
   } else if (authIsGuest) {
     return `<div class="settings-row">
-      <span class="sr-label"><span class="sr-icon">👤</span> Hosť <span class="guest-badge">Hosť</span></span>
+      <span class="sr-label"><span class="sr-icon">👤</span> ${lang==='en'?'Guest':'Hosť'} <span class="guest-badge">${lang==='en'?'Guest':'Hosť'}</span></span>
     </div>
     <div class="settings-row" onclick="signInWithGoogle()">
-      <span class="sr-label"><span class="sr-icon">🔐</span> Prihlásiť sa cez Google</span>
+      <span class="sr-label"><span class="sr-icon">🔐</span> ${lang==='en'?'Sign in with Google':'Prihlásiť sa cez Google'}</span>
       <span class="sr-value"><span class="sr-arrow">›</span></span>
     </div>`;
   }
