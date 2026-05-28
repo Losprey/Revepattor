@@ -1000,7 +1000,7 @@ body[data-tab="dashboard"] #app-header { display: none; }
     <button class="pa-btn" onclick="copyWeekPlan()">📋 <span data-lang="plannerCopy">Kopírovať</span></button>
     <button class="pa-btn" onclick="handleAIWeeklyPlan()" style="background:linear-gradient(135deg,var(--primary-light),var(--primary));color:#fff;border:none;">🤖 AI týždeň</button>
     <button class="pa-btn" onclick="aiFillEmptySlots()" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:#fff;border:none;">✨ AI doplniť</button>
-    <button class="pa-btn" onclick="aiGenerateShoppingList()" style="background:linear-gradient(135deg,#059669,#047857);color:#fff;border:none;">🛒 AI nákup</button>
+    <button class="pa-btn" onclick="aiGenerateShoppingList()" style="background:linear-gradient(135deg,#059669,#047857);color:#fff;border:none;">📝 AI nákup</button>
   </div>
 </div>
 
@@ -4256,7 +4256,8 @@ function renderPlanner() {
     const isCustom = entry && entry.type === 'custom';
     const kcal = r && r.nutrition ? r.nutrition.kcal : null;
     const time = r ? r.time : null;
-    return `<div class="td-meal-card${r || isCustom ? ' filled' : ''}" onclick="pickRecipe('${DAYS[todayIdx]}','${m.id}','${todayWk}')">
+    const clickHandler = r ? `viewRecipe(${r.id})` : isCustom ? '' : `pickRecipe('${DAYS[todayIdx]}','${m.id}','${todayWk}')`;
+    return `<div class="td-meal-card${r || isCustom ? ' filled' : ''}" onclick="${clickHandler}">
       <button class="td-remove" onclick="event.stopPropagation();removeSlot('${DAYS[todayIdx]}','${m.id}','${todayWk}')">✕</button>
       <span class="td-icon">${m.icon}</span>
       <span class="td-label">${m.id}</span>
@@ -4288,7 +4289,8 @@ function renderPlanner() {
         const r = getSlotRecipe(entry);
         const name = getSlotName(entry);
         const isCustom = entry && entry.type === 'custom';
-        return `<div class="wk-slot${r || isCustom ? ' filled' : ''}" onclick="pickRecipe('${d}','${m.id}')">
+        const wkClick = r ? `viewRecipe(${r.id})` : isCustom ? '' : `pickRecipe('${d}','${m.id}')`;
+        return `<div class="wk-slot${r || isCustom ? ' filled' : ''}" onclick="${wkClick}">
           <span class="ws-icon">${m.icon}</span>
           ${r || isCustom
             ? `<span class="ws-name">${esc(name)}</span><span class="ws-remove" onclick="event.stopPropagation();removeSlot('${d}','${m.id}')">✕</span>`
