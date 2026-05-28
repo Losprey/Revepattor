@@ -2938,6 +2938,8 @@ function loadSettings() {
     });
   }
   deepMerge(appSettings, D);
+  // Global alias for onclick handlers in settings
+  window.s = appSettings;
 }
 function saveSettings() {
   localStorage.setItem('appSettings', JSON.stringify(appSettings));
@@ -2977,6 +2979,9 @@ function openSettings() {
   const streak = calcPlanningStreak();
   const s = appSettings;
   const w = s.homeWidgets, m = s.mealPlanner;
+  // Expose for onclick handlers in settings HTML
+  window.s = appSettings; window.w = w; window.m = m;
+  window.n = s.notifications; window.f = s.family;
 
   let html = '';
 
