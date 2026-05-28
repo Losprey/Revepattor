@@ -4247,7 +4247,7 @@ function renderMealTimeline() {
       <span class="meal-icon">${m.icon}</span>
       ${filled && img ? `<img class="meal-img" src="${escAttr(img)}" alt="${name}" loading="lazy" onerror="this.style.display='none'">` : ''}
       <div class="meal-info">
-        <div class="meal-label">${lang==='en'?m.id.charAt(0).toUpperCase()+m.id.slice(1):m.id}</div>
+        <div class="meal-label">${mealLabel(m.id)}</div>
         ${filled ? `<div class="meal-name">${name}</div>` : `<div class="meal-empty-text">${lang==='en'?'+ Add meal':'+ Pridať'}</div>`}
         ${filled && time ? `<div class="meal-meta"><span>${time}</span>${kcal ? `<span>${kcal}</span>` : ''}</div>` : ''}
       </div>
@@ -4378,6 +4378,11 @@ const MEALS = [
   { id: 'večera',  icon: '🌙' },
 ];
 
+function mealLabel(id) {
+  const map = { 'raňajky':{sk:'raňajky',en:'Breakfast'}, 'desiata':{sk:'desiata',en:'Snack'}, 'obed':{sk:'obed',en:'Lunch'}, 'olovrant':{sk:'olovrant',en:'Afternoon'}, 'večera':{sk:'večera',en:'Dinner'} };
+  return map[id] ? map[id][lang] || map[id].sk : id;
+}
+
 function renderPlanner() {
   const todayEl = document.getElementById('planner-today');
   const weekEl = document.getElementById('planner-week-grid');
@@ -4436,12 +4441,12 @@ function renderPlanner() {
     return `<div class="td-meal-card${r || isCustom ? ' filled' : ''}" onclick="${clickHandler}">
       <button class="td-remove" onclick="event.stopPropagation();removeSlot('${DAYS[todayIdx]}','${m.id}','${todayWk}')">✕</button>
       <span class="td-icon">${m.icon}</span>
-      <span class="td-label">${m.id}</span>
+      <span class="td-label">${mealLabel(m.id)}</span>
       ${r || isCustom
         ? `<span class="td-name">${esc(name)}</span>
            ${kcal ? `<span class="td-meta">🔥${kcal}${time ? ' · ⏱'+time : ''}</span>` : ''}
            <span class="td-replace" onclick="event.stopPropagation();pickRecipe('${DAYS[todayIdx]}','${m.id}','${todayWk}')">↻ vymeniť</span>`
-        : `<span class="td-empty">+ ${m.id}</span>`}
+        : `<span class="td-empty">+ ${mealLabel(m.id)}</span>`}
     </div>`;
   }).join('')}</div>`;
 
