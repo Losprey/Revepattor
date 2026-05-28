@@ -1,0 +1,41 @@
+🌟 Plánuj, var a nakupuj s prehľadom.
+
+Mealnest je moderný rodinný plánovač jedál, ktorý ti pomôže zorganizovať celý týždeň — od receptov cez nákupný zoznam až po každodenné úlohy.
+
+📅 PLÁNOVAČ JEDÁL
+Naplánuj si raňajky, obed aj večeru na celý týždeň. Prepínaj medzi režimom pre dospelých a pre deti. Jednoducho vyber recept alebo napíš vlastné jedlo.
+
+🤖 AI ASISTENT
+Umelá inteligencia ti vygeneruje jedálniček na celý týždeň, navrhne recepty z tvojich surovín, upraví porcie, odhadne nutričné hodnoty a vytvorí kompletný nákupný zoznam.
+
+📖 RECEPTÁR
+Ukladaj si obľúbené recepty, prezeraj nutričné hodnoty (kalórie, bielkoviny, tuky, sacharidy) a importuj nové recepty priamo z webu — stačí vložiť odkaz.
+
+🛒 NÁKUPNÝ ZOZNAM
+Vytvor si zoznam potravín, rozdeľ ho do kategórií a odškrtávaj priamo v obchode. Režim obchodu zväčší písmo a checkboxy pre pohodlné nakupovanie.
+
+✅ ÚLOHY
+Maj prehľad o tom, čo treba uvariť, nakúpiť a vybaviť. Nastav si prioritu, termín, opakovanie a kategóriu. Aplikácia ťa upozorní v správny čas.
+
+🌤️ POČASIE
+Zadaj svoje mesto a aplikácia ti ukáže aktuálne počasie — vrátane tipov na jedlá podľa sezóny.
+
+👨‍👩‍👧‍👦 RODINNÉ ZDIELANIE
+Vytvor rodinný kód a zdieľaj plánovač aj nákupný zoznam s celou rodinou v reálnom čase. Všetci vidia to isté — žiadne zmätky.
+
+🔔 NOTIFIKÁCIE
+Pripomienky na raňajky, varenie, nákup, pitný režim, jedlo pre deti a večerné plánovanie. Všetko si nastavíš podľa seba.
+
+🌐 IMPORT Z URL
+Našiel si recept na webe? Skopíruj odkaz, klikni na Import a aplikácia ho automaticky spracuje.
+
+🌙 TMAVÝ REŽIM
+Príjemný tmavý režim pre večerné plánovanie.
+
+📱 FUNGUJE AJ BEZ INTERNETU
+Všetky dáta sú uložené v tvojom zariadení. Aplikácia funguje aj offline.
+
+🔒 ŽIADNE REKLAMY
+Mealnest je úplne zadarmo a bez reklám.
+
+Vytvorené s ❤️ na Slovensku.
