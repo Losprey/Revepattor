@@ -4373,6 +4373,8 @@ function selectCustomMeal(day, slot, text, weekKey) {
   if (!plan[day]) plan[day] = {};
   plan[day][slot] = { type: 'custom', text };
   saveWeekPlan();
+  localStorage.setItem('mealPlan', JSON.stringify(mealPlan));
+  localStorage.setItem('mealPlanKids', JSON.stringify(mealPlanKids));
   renderPlanner();
 }
 function createPickerModal() {
@@ -4503,6 +4505,9 @@ function selectRecipe(day, slot, id, wk) {
   if (!weekPlan[day]) weekPlan[day] = {};
   weekPlan[day][slot] = { type: 'recipe', id };
   saveWeekPlan();
+  // Double-save all plan data to ensure persistence
+  localStorage.setItem('mealPlan', JSON.stringify(mealPlan));
+  localStorage.setItem('mealPlanKids', JSON.stringify(mealPlanKids));
   renderPlanner();
   if (day === DAYS[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1] && !plannerIsVisible()) renderDashboard();
 }
@@ -4516,6 +4521,8 @@ function removeSlot(day, slot, wk) {
   if (!confirm((lang==='en'?'Remove ':'Odstrániť ') + name + '?')) return;
   delete weekPlan[day][slot];
   saveWeekPlan();
+  localStorage.setItem('mealPlan', JSON.stringify(mealPlan));
+  localStorage.setItem('mealPlanKids', JSON.stringify(mealPlanKids));
   renderPlanner();
   if (day === DAYS[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1] && !plannerIsVisible()) renderDashboard();
 }
