@@ -857,6 +857,33 @@ body[data-tab="dashboard"] #app-header { display: none; }
 .login-btn-guest { width: 100%; padding: 10px; border: none; border-radius: 12px; background: transparent; color: var(--text2); font-size: .82rem; cursor: pointer; }
 .login-btn-guest:hover { color: var(--text); }
 
+/* ======== ONBOARDING ======== */
+#onboarding-overlay { position: fixed; inset: 0; z-index: 11000; background: var(--bg); display: none; flex-direction: column; }
+#onboarding-overlay.active { display: flex; }
+.onboard-slides { flex: 1; position: relative; overflow: hidden; }
+.onboard-slide { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem 1.5rem; text-align: center; transition: opacity .4s ease, transform .4s ease; }
+.onboard-slide.prev { transform: translateX(-30%); opacity: 0; pointer-events: none; }
+.onboard-slide.next { transform: translateX(30%); opacity: 0; pointer-events: none; }
+.onboard-illustration { font-size: 5rem; margin-bottom: 1rem; animation: floatSlow 3s ease-in-out infinite; }
+.onboard-title { font-size: 1.4rem; font-weight: 800; margin-bottom: .5rem; line-height: 1.3; }
+.onboard-sub { font-size: .85rem; color: var(--text2); line-height: 1.5; max-width: 320px; margin: 0 auto; }
+.onboard-mockup { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); padding: .8rem; margin-top: 1rem; max-width: 300px; width: 100%; }
+.onboard-mockup-row { display: flex; gap: .3rem; margin-bottom: .3rem; }
+.onboard-mockup-item { flex: 1; background: var(--bg); border-radius: 8px; padding: .4rem; text-align: center; font-size: .65rem; color: var(--text2); }
+.onboard-mockup-bar { height: 4px; background: var(--border); border-radius: 2px; margin: .3rem 0; }
+.onboard-steps { text-align: left; margin-top: .8rem; }
+.onboard-step { display: flex; gap: .5rem; align-items: center; margin-bottom: .5rem; font-size: .75rem; }
+.onboard-step-num { width: 24px; height: 24px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: .7rem; font-weight: 700; flex-shrink: 0; }
+.onboard-footer { padding: 1rem 1.5rem calc(1rem + env(safe-area-inset-bottom, 0px)); display: flex; align-items: center; justify-content: space-between; }
+.onboard-dots { display: flex; gap: .4rem; }
+.onboard-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); transition: all .3s ease; }
+.onboard-dot.active { background: var(--primary); width: 24px; border-radius: 4px; }
+.onboard-btn { padding: .7rem 1.5rem; border-radius: 14px; border: none; font-size: .85rem; font-weight: 700; cursor: pointer; transition: all .2s; }
+.onboard-btn-primary { background: var(--primary); color: #fff; box-shadow: 0 3px 12px rgba(220,38,38,.3); }
+.onboard-btn-primary:hover { background: var(--primary-light); }
+.onboard-btn-ghost { background: transparent; color: var(--text2); }
+.onboard-btn-ghost:hover { color: var(--text); }
+
 /* user avatar in header */
 .user-avatar { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; cursor: pointer; }
 .guest-badge { font-size: .6rem; background: var(--text3); color: var(--bg); padding: 1px 6px; border-radius: 6px; font-weight: 600; }
@@ -1616,6 +1643,138 @@ function getSettingsAuthHTML() {
 
 // Wait for Firebase init then start auth
 setTimeout(() => { initFirebase(); initFirebaseAuth(); }, 500);
+
+// ======================== ONBOARDING ========================
+const ONBOARDING_SLIDES = [
+  {
+    icon: '👋', title: 'Vitaj v Receptári', titleEn: 'Welcome to Receptár',
+    sub: 'Tvoj moderný plánovač jedál, nákupov a úloh pre celú rodinu.',
+    subEn: 'Your modern meal planner, shopping list & task manager for the whole family.',
+    mockup: `<div class="onboard-mockup">
+      <div class="onboard-mockup-row"><div class="onboard-mockup-item">📅 Plán</div><div class="onboard-mockup-item">📖 Recepty</div><div class="onboard-mockup-item">🛒 Nákup</div></div>
+      <div class="onboard-mockup-row"><div class="onboard-mockup-item">✅ Úlohy</div><div class="onboard-mockup-item">🍽️ AI</div><div class="onboard-mockup-item">🏠 Domov</div></div>
+    </div>`
+  },
+  {
+    icon: '📅', title: 'Plánovač jedál', titleEn: 'Meal Planner',
+    sub: 'Naplánuj si celý týždeň na pár kliknutí. Režim pre dospelých aj pre deti.',
+    subEn: 'Plan your whole week in a few taps. Adult & kids mode.',
+    mockup: `<div class="onboard-mockup">
+      <div class="onboard-mockup-row"><div class="onboard-mockup-item" style="background:var(--primary-light);color:#fff;">🌅 Raňajky: Palacinky</div></div>
+      <div class="onboard-mockup-row"><div class="onboard-mockup-item">🍽️ Obed: Rizoto</div></div>
+      <div class="onboard-mockup-row"><div class="onboard-mockup-item">🌙 Večera: Losos</div></div>
+    </div>`
+  },
+  {
+    icon: '📖', title: 'Receptár', titleEn: 'Recipes',
+    sub: 'Ukladaj si obľúbené recepty, prezeraj nutričné hodnoty a importuj z webu.',
+    subEn: 'Save your favorite recipes, check nutrition & import from the web.',
+    mockup: `<div class="onboard-mockup">
+      <div class="onboard-mockup-bar" style="background:var(--primary);width:60%;"></div>
+      <div style="font-size:.7rem;color:var(--text2);">🍽️ 65 receptov · 🔥 nutričné hodnoty · ❤️ obľúbené</div>
+    </div>`
+  },
+  {
+    icon: '🌐', title: 'Import z URL', titleEn: 'Import from URL',
+    sub: 'Stačí skopírovať odkaz na recept z webu a appka ho spracuje za teba.',
+    subEn: 'Just copy a recipe link from the web and the app imports it automatically.',
+    mockup: `<div class="onboard-steps">
+      <div class="onboard-step"><div class="onboard-step-num">1</div><span>Skopíruj URL receptu z webu</span></div>
+      <div class="onboard-step"><div class="onboard-step-num">2</div><span>Klikni Import z URL v Receptári</span></div>
+      <div class="onboard-step"><div class="onboard-step-num">3</div><span>Recept sa automaticky spracuje ✨</span></div>
+    </div>`
+  },
+  {
+    icon: '🛒', title: 'Nákupný zoznam', titleEn: 'Shopping List',
+    sub: 'Vytvor si zoznam potravín, rozdeľ do kategórií a odškrtávaj priamo v obchode.',
+    subEn: 'Create grocery lists, organize by categories, and check off items in the store.',
+    mockup: `<div class="onboard-mockup">
+      <div class="onboard-mockup-row"><div class="onboard-mockup-item">🥦 Zelenina</div><div class="onboard-mockup-item">2/5 ✅</div></div>
+      <div class="onboard-mockup-row"><div class="onboard-mockup-item">🥩 Mäso</div><div class="onboard-mockup-item">0/3</div></div>
+      <div class="onboard-mockup-bar"><div style="background:var(--success);width:40%;height:100%;border-radius:2px;"></div></div>
+    </div>`
+  },
+  {
+    icon: '✅', title: 'Úlohy', titleEn: 'Tasks',
+    sub: 'Maj prehľad o tom čo treba uvariť, nakúpiť a vybaviť. Každý deň.',
+    subEn: 'Keep track of what to cook, buy, and organize. Every day.',
+    mockup: `<div class="onboard-mockup" style="text-align:left;">
+      <div style="font-size:.7rem;">📅 Dnes</div>
+      <div style="background:var(--bg);border-radius:6px;padding:.3rem;margin:.2rem 0;font-size:.68rem;">☐ Nakúpiť suroviny <span style="color:var(--primary-light);float:right;">🔴</span></div>
+      <div style="background:var(--bg);border-radius:6px;padding:.3rem;font-size:.68rem;opacity:.5;text-decoration:line-through;">✓ Pripraviť obed</div>
+      <div style="font-size:.65rem;color:var(--text3);text-align:center;margin-top:.3rem;">2/5 dokončené</div>
+    </div>`
+  },
+  {
+    icon: '✨', title: 'Všetko pripravené!', titleEn: 'All set!',
+    sub: 'Môžeš začať plánovať, variť a organizovať. Dobrú chuť!',
+    subEn: 'You\'re ready to plan, cook, and organize. Enjoy your meal!',
+    mockup: `<div style="font-size:4rem;margin-top:.5rem;">🍽️</div>`
+  },
+];
+
+let _onboardIndex = 0;
+function showOnboarding(forceShow) {
+  if (!forceShow && localStorage.getItem('onboardingCompleted') === '1') return;
+  const existing = document.getElementById('onboarding-overlay');
+  if (existing) existing.remove();
+  const ov = document.createElement('div');
+  ov.id = 'onboarding-overlay';
+  ov.className = 'active';
+  ov.innerHTML = `<div class="onboard-slides" id="onboard-slides"></div>
+    <div class="onboard-footer">
+      <div class="onboard-dots" id="onboard-dots"></div>
+      <button class="onboard-btn onboard-btn-primary" id="onboard-next">Ďalej →</button>
+    </div>`;
+  document.body.appendChild(ov);
+  _onboardIndex = 0;
+  renderOnboardSlide();
+  document.getElementById('onboard-next').onclick = nextOnboardSlide;
+  // Swipe support
+  let touchStartX = 0;
+  ov.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
+  ov.addEventListener('touchend', e => {
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (diff > 60) nextOnboardSlide();
+    else if (diff < -60) prevOnboardSlide();
+  });
+}
+
+function renderOnboardSlide() {
+  const slides = document.getElementById('onboard-slides');
+  const s = ONBOARDING_SLIDES[_onboardIndex];
+  const l = lang === 'en' ? 'en' : 'sk';
+  slides.innerHTML = ONBOARDING_SLIDES.map((s2, i) => {
+    let cls = 'onboard-slide';
+    if (i < _onboardIndex) cls += ' prev';
+    else if (i > _onboardIndex) cls += ' next';
+    const title = l === 'en' ? s2.titleEn : s2.title;
+    const sub = l === 'en' ? s2.subEn : s2.sub;
+    return `<div class="${cls}"><div class="onboard-illustration">${s2.icon}</div><div class="onboard-title">${title}</div><div class="onboard-sub">${sub}</div>${s2.mockup||''}</div>`;
+  }).join('');
+  // Dots
+  const dots = document.getElementById('onboard-dots');
+  dots.innerHTML = ONBOARDING_SLIDES.map((_, i) => `<div class="onboard-dot${i === _onboardIndex ? ' active' : ''}"></div>`).join('');
+  // Button
+  const btn = document.getElementById('onboard-next');
+  const isLast = _onboardIndex === ONBOARDING_SLIDES.length - 1;
+  btn.textContent = isLast ? (l==='en'?'Start using Receptár':'Začať používať') : (l==='en'?'Next →':'Ďalej →');
+}
+
+function nextOnboardSlide() {
+  if (_onboardIndex < ONBOARDING_SLIDES.length - 1) { _onboardIndex++; renderOnboardSlide(); }
+  else closeOnboarding();
+}
+function prevOnboardSlide() {
+  if (_onboardIndex > 0) { _onboardIndex--; renderOnboardSlide(); }
+}
+function closeOnboarding() {
+  document.getElementById('onboarding-overlay')?.remove();
+  localStorage.setItem('onboardingCompleted', '1');
+}
+
+// Show onboarding on first visit (after data loads)
+setTimeout(() => showOnboarding(), 300);
 
 // ======================== AI (DEEPSEEK PROXY) ========================
 const AI_PROXY_URL = 'https://receptar.waldis994.workers.dev'; // Cloudflare Worker proxy pre DeepSeek
@@ -3134,6 +3293,10 @@ function openSettings() {
   html += `<div class="settings-group">
     <div class="settings-group-title">💾 ${t('Dáta','Data')}</div>
     <div class="settings-card">
+      <div class="settings-row" onclick="localStorage.removeItem('onboardingCompleted');showOnboarding(true);closeSettings()">
+        <span class="sr-label"><span class="sr-icon">❓</span> ${t('Zobraziť onboarding','Show onboarding')}</span>
+        <span class="sr-value"><span class="sr-arrow">›</span></span>
+      </div>
       <div class="settings-row" onclick="showImportUrlModal()">
         <span class="sr-label"><span class="sr-icon">🌐</span> ${t('Import z URL','Import from URL')}</span>
         <span class="sr-value"><span class="sr-arrow">›</span></span>
