@@ -2160,14 +2160,6 @@ function getDeviceId() {
   return id;
 }
 
-function updateSyncIndicator() {
-  const el = document.getElementById('sync-indicator');
-  if (!el) return;
-  if (!familyCode) { el.textContent = '⚪'; el.title = 'Nie si pripojený k rodine'; }
-  else if (firebaseReady) { el.textContent = '🟢'; el.title = 'Synchronizované — kód: ' + familyCode; }
-  else { el.textContent = '🔴'; el.title = 'Firebase nie je pripojený'; }
-}
-
 function refreshActiveTab() {
   const tab = document.body.dataset.tab;
   if (tab === 'shopping') renderShoppingList();
@@ -2403,7 +2395,6 @@ function updateSyncIndicator() {
   if (!familyCode) { el.textContent = '⚪'; el.title = t('Nie si pripojený k rodine','Not connected to family'); }
   else if (firebaseReady) { el.textContent = '🟢'; el.title = t('Synchronizované — kód: ','Synced — code: ') + familyCode; }
   else { el.textContent = '🔴'; el.title = t('Firebase nie je pripojený','Firebase not connected'); }
-}
 }
 
 function toggleDark() {
