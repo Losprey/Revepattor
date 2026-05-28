@@ -1645,6 +1645,12 @@ setTimeout(() => { initFirebase(); initFirebaseAuth(); }, 500);
 // ======================== ONBOARDING ========================
 const ONBOARDING_SLIDES = [
   {
+    icon: '🌐', title: 'Choose language', titleEn: 'Choose language',
+    sub: 'Select your preferred language for the app.',
+    subEn: 'Vyber si preferovaný jazyk aplikácie.',
+    langPicker: true
+  },
+  {
     icon: '👋', title: 'Vitaj v aplikácii Mealnest', titleEn: 'Welcome to Mealnest',
     sub: 'Tvoj moderný plánovač jedál, nákupov a úloh pre celú rodinu.',
     subEn: 'Your modern meal planner, shopping list & task manager for the whole family.',
@@ -1777,7 +1783,12 @@ function renderOnboardSlide() {
     else if (i > _onboardIndex) cls += ' next';
     const title = l === 'en' ? s2.titleEn : s2.title;
     const sub = l === 'en' ? s2.subEn : s2.sub;
-    const mockup = l === 'en' && s2.mockupEn ? s2.mockupEn : s2.mockup || '';
+    const mockup = s2.langPicker
+      ? `<div style="display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap;justify-content:center;">
+          <button onclick="event.stopPropagation();appSettings.lang='en';saveSettings();renderOnboardSlide();" style="padding:1rem 1.5rem;border-radius:16px;border:2px solid var(--border);background:var(--surface);color:var(--text);font-size:1rem;font-weight:700;cursor:pointer;min-width:140px;">🇬🇧 English</button>
+          <button onclick="event.stopPropagation();appSettings.lang='sk';saveSettings();renderOnboardSlide();" style="padding:1rem 1.5rem;border-radius:16px;border:2px solid var(--primary);background:rgba(220,38,38,.08);color:var(--primary);font-size:1rem;font-weight:700;cursor:pointer;min-width:140px;">🇸🇰 Slovenčina</button>
+        </div>`
+      : l === 'en' && s2.mockupEn ? s2.mockupEn : s2.mockup || '';
     return `<div class="${cls}"><div class="onboard-illustration">${s2.icon}</div><div class="onboard-title">${title}</div><div class="onboard-sub">${sub}</div>${mockup}</div>`;
   }).join('');
   // Dots
@@ -2045,7 +2056,7 @@ function addAIShoppingItems() {
   saveShopItems(); document.getElementById('ai-modal')?.remove(); switchTab('shopping');
 }
 
- let lang = localStorage.getItem('lang') || 'sk';
+ let lang = localStorage.getItem('lang') || 'en';
 let ageFilter = '';
 let voiceSearch = null, voiceSearchListening = false;
 
@@ -3126,7 +3137,7 @@ function loadSettings() {
   try { appSettings = JSON.parse(localStorage.getItem('appSettings') || '{}'); } catch(e) { appSettings = {}; }
   const D = {
     theme: 'light',
-    lang: localStorage.getItem('lang') || 'sk',
+    lang: localStorage.getItem('lang') || 'en',
     accentColor: localStorage.getItem('accent') || '#dc2626',
     textSize: 'normal', uiDensity: 'normal',
     homeWidgets: { weather: true, todayTasks: true, hydration: true, calories: true, quickRecipes: true },
