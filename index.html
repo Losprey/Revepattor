@@ -2450,6 +2450,9 @@ function applyLang() {
     opts.forEach((opt,i) => { if (cats[i]) opt.textContent = catLabel(cats[i]); });
     sel.value = val;
   });
+  // Form placeholders
+  [['shop-item-name','Názov potraviny','Food name'],['shop-item-amount','Množstvo','Quantity'],['shop-item-unit','Jednotka (g, ks, ml...)','Unit (g, pcs, ml...)'],['shop-item-note','Poznámka (voliteľné)','Note (optional)'],['task-title','Názov úlohy','Task title'],['task-note','✏️ Poznámka (voliteľné)','✏️ Note (optional)']].forEach(p => { const el=document.getElementById(p[0]); if(el) el.placeholder = lang==='en'?p[2]:p[1]; });
+  [['r-kcal','🔥 kcal / porcia','🔥 kcal / serving'],['r-protein','💪 bielkoviny g','💪 protein g'],['r-fat','🧈 tuky g','🧈 fat g'],['r-carbs','🍚 sacharidy g','🍚 carbs g']].forEach(p => { const el=document.getElementById(p[0]); if(el) el.placeholder = lang==='en'?p[2]:p[1]; });
 }
 
 function toggleDark() {
