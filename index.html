@@ -4992,7 +4992,19 @@ function getWeekTasks() {
   return tasks.filter(t => !t.completed && dates.includes(t.date));
 }
 function getCompletedTasks() {
-  return tasks.filter(t => t.completed);
+  return tasks.filter(t => t.completed).sort((a,b) => (b.completedDate||'').localeCompare(a.completedDate||''));
+}
+function getRecentCompleted() {
+  const now = Date.now();
+  const day = 24 * 60 * 60 * 1000;
+  return tasks.filter(t => t.completed && t.completedDate && (now - new Date(t.completedDate).getTime()) < day);
+}
+function clearCompletedTasks() {
+  if (!confirm(lang==='en'?'Delete all completed tasks?':'Vymazať všetky dokončené úlohy?')) return;
+  tasks = tasks.filter(t => !t.completed);
+  saveTasks();
+  renderTasks();
+  renderDashboard();
 }
 function getTodayProgress() {
   const today = new Date().toISOString().slice(0,10);
@@ -5133,9 +5145,18 @@ function renderTasks() {
       html += filtered.map(t => renderTaskCard(t)).join('');
     });
   } else if (_taskFilter === 'done') {
+    const recentDone = getRecentCompleted();
+    const olderDone = completedList.filter(t => !recentDone.find(r => r.id === t.id));
+    if (recentDone.length) {
+      html += `<div class="task-section-title">🕐 ${lang==='en'?'Last 24 hours':'Posledných 24 hodín'} <span class="task-section-count">${recentDone.length}</span></div>`;
+      html += recentDone.map(t => renderTaskCard(t)).join('');
+    }
+    if (olderDone.length) {
+      html += `<div class="task-section-title">📦 ${lang==='en'?'Older':'Staršie'} <span class="task-section-count">${olderDone.length}</span></div>`;
+      html += olderDone.slice(0, 20).map(t => renderTaskCard(t)).join('');
+    }
     if (completedList.length) {
-      html += `<div class="task-section-title">✅ ${lang==='en'?'Completed':'Dokončené'} <span class="task-section-count">${completedList.length}</span></div>`;
-      html += completedList.slice(0, 20).map(t => renderTaskCard(t)).join('');
+      html += `<button class="shop-add-btn" onclick="clearCompletedTasks()" style="color:var(--danger);border-color:var(--danger);margin-top:.3rem;">🗑 ${lang==='en'?'Delete all completed':'Vymazať dokončené'}</button>`;
     }
   } else {
     sections.forEach(s => {
@@ -5144,8 +5165,14 @@ function renderTasks() {
       html += s.tasks.map(t => renderTaskCard(t)).join('');
     });
     if (completedList.length) {
-      html += `<div class="task-section-title">✅ ${lang==='en'?'Completed':'Dokončené'} <span class="task-section-count">${completedList.length}</span></div>`;
-      html += completedList.slice(0, 10).map(t => renderTaskCard(t)).join('');
+      const recentDone = getRecentCompleted();
+      if (recentDone.length) {
+        html += `<div class="task-section-title">✅ ${lang==='en'?'Recently completed':'Nedávno dokončené'} <span class="task-section-count">${recentDone.length}</span></div>`;
+        html += recentDone.slice(0, 5).map(t => renderTaskCard(t)).join('');
+      }
+      if (completedList.length > 10) {
+        html += `<button class="shop-add-btn" onclick="clearCompletedTasks()" style="color:var(--danger);border-color:var(--danger);margin-top:.3rem;">🗑 ${lang==='en'?'Delete completed':'Vymazať dokončené'}</button>`;
+      }
     }
   }
 
