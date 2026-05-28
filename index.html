@@ -1679,6 +1679,10 @@ const ONBOARDING_SLIDES = [
     mockup: `<div class="onboard-mockup">
       <div class="onboard-mockup-bar" style="background:var(--primary);width:60%;"></div>
       <div style="font-size:.7rem;color:var(--text2);">🍽️ 65 receptov · 🔥 nutričné hodnoty · ❤️ obľúbené</div>
+    </div>`,
+    mockupEn: `<div class="onboard-mockup">
+      <div class="onboard-mockup-bar" style="background:var(--primary);width:60%;"></div>
+      <div style="font-size:.7rem;color:var(--text2);">🍽️ 65 recipes · 🔥 nutrition · ❤️ favorites</div>
     </div>`
   },
   {
@@ -1689,6 +1693,11 @@ const ONBOARDING_SLIDES = [
       <div class="onboard-step"><div class="onboard-step-num">1</div><span>Skopíruj URL receptu z webu</span></div>
       <div class="onboard-step"><div class="onboard-step-num">2</div><span>Klikni Import z URL v aplikácii</span></div>
       <div class="onboard-step"><div class="onboard-step-num">3</div><span>Recept sa automaticky spracuje ✨</span></div>
+    </div>`,
+    mockupEn: `<div class="onboard-steps">
+      <div class="onboard-step"><div class="onboard-step-num">1</div><span>Copy a recipe URL from the web</span></div>
+      <div class="onboard-step"><div class="onboard-step-num">2</div><span>Tap Import from URL in the app</span></div>
+      <div class="onboard-step"><div class="onboard-step-num">3</div><span>The recipe is automatically imported ✨</span></div>
     </div>`
   },
   {
@@ -1698,6 +1707,11 @@ const ONBOARDING_SLIDES = [
     mockup: `<div class="onboard-mockup">
       <div class="onboard-mockup-row"><div class="onboard-mockup-item">🥦 Zelenina</div><div class="onboard-mockup-item">2/5 ✅</div></div>
       <div class="onboard-mockup-row"><div class="onboard-mockup-item">🥩 Mäso</div><div class="onboard-mockup-item">0/3</div></div>
+      <div class="onboard-mockup-bar"><div style="background:var(--success);width:40%;height:100%;border-radius:2px;"></div></div>
+    </div>`,
+    mockupEn: `<div class="onboard-mockup">
+      <div class="onboard-mockup-row"><div class="onboard-mockup-item">🥦 Vegetables</div><div class="onboard-mockup-item">2/5 ✅</div></div>
+      <div class="onboard-mockup-row"><div class="onboard-mockup-item">🥩 Meat</div><div class="onboard-mockup-item">0/3</div></div>
       <div class="onboard-mockup-bar"><div style="background:var(--success);width:40%;height:100%;border-radius:2px;"></div></div>
     </div>`
   },
@@ -1710,6 +1724,12 @@ const ONBOARDING_SLIDES = [
       <div style="background:var(--bg);border-radius:6px;padding:.3rem;margin:.2rem 0;font-size:.68rem;">☐ Nakúpiť suroviny <span style="color:var(--primary-light);float:right;">🔴</span></div>
       <div style="background:var(--bg);border-radius:6px;padding:.3rem;font-size:.68rem;opacity:.5;text-decoration:line-through;">✓ Pripraviť obed</div>
       <div style="font-size:.65rem;color:var(--text3);text-align:center;margin-top:.3rem;">2/5 dokončené</div>
+    </div>`,
+    mockupEn: `<div class="onboard-mockup" style="text-align:left;">
+      <div style="font-size:.7rem;">📅 Today</div>
+      <div style="background:var(--bg);border-radius:6px;padding:.3rem;margin:.2rem 0;font-size:.68rem;">☐ Buy groceries <span style="color:var(--primary-light);float:right;">🔴</span></div>
+      <div style="background:var(--bg);border-radius:6px;padding:.3rem;font-size:.68rem;opacity:.5;text-decoration:line-through;">✓ Prepare lunch</div>
+      <div style="font-size:.65rem;color:var(--text3);text-align:center;margin-top:.3rem;">2/5 completed</div>
     </div>`
   },
   {
@@ -1731,7 +1751,7 @@ function showOnboarding(forceShow) {
   ov.innerHTML = `<div class="onboard-slides" id="onboard-slides"></div>
     <div class="onboard-footer">
       <div class="onboard-dots" id="onboard-dots"></div>
-      <button class="onboard-btn onboard-btn-primary" id="onboard-next">Ďalej →</button>
+      <button class="onboard-btn onboard-btn-primary" id="onboard-next">${lang==='en'?'Next →':'Ďalej →'}</button>
     </div>`;
   document.body.appendChild(ov);
   _onboardIndex = 0;
