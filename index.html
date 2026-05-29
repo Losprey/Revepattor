@@ -5729,6 +5729,42 @@ function applyIngredientSearch() {
 }
 
 // ======================== IMPORT FROM URL ========================
+function cleanHtml(text) {
+  if (!text || typeof text !== 'string') return '';
+  // Decode HTML entities
+  const d = text
+    .replace(/&aacute;/gi, 'á').replace(/&eacute;/gi, 'é').replace(/&iacute;/gi, 'í')
+    .replace(/&oacute;/gi, 'ó').replace(/&uacute;/gi, 'ú').replace(/&yacute;/gi, 'ý')
+    .replace(/&Aacute;/gi, 'Á').replace(/&Eacute;/gi, 'É').replace(/&Iacute;/gi, 'Í')
+    .replace(/&Oacute;/gi, 'Ó').replace(/&Uacute;/gi, 'Ú').replace(/&Yacute;/gi, 'Ý')
+    .replace(/&scaron;/gi, 'š').replace(/&Scaron;/gi, 'Š')
+    .replace(/&ccaron;/gi, 'č').replace(/&Ccaron;/gi, 'Č')
+    .replace(/&rcaron;/gi, 'ř').replace(/&Rcaron;/gi, 'Ř')
+    .replace(/&zcaron;/gi, 'ž').replace(/&Zcaron;/gi, 'Ž')
+    .replace(/&ncaron;/gi, 'ň').replace(/&Ncaron;/gi, 'Ň')
+    .replace(/&dcaron;/gi, 'ď').replace(/&Dcaron;/gi, 'Ď')
+    .replace(/&tcaron;/gi, 'ť').replace(/&Tcaron;/gi, 'Ť')
+    .replace(/&lcaron;/gi, 'ľ').replace(/&Lcaron;/gi, 'Ľ')
+    .replace(/&auml;/gi, 'ä').replace(/&ouml;/gi, 'ö').replace(/&uuml;/gi, 'ü')
+    .replace(/&ocirc;/gi, 'ô').replace(/&Acirc;/gi, 'Â')
+    .replace(/&amp;/gi, '&').replace(/&lt;/gi, '<').replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"').replace(/&apos;/gi, "'")
+    .replace(/&nbsp;/gi, ' ').replace(/&#160;/gi, ' ').replace(/&ensp;/gi, ' ')
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(parseInt(n)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCharCode(parseInt(n, 16)));
+  // Convert <br>, <p>, <li>, </li> to newlines
+  let t = d.replace(/<br\s*\/?>/gi, '\n').replace(/<p[^>]*>/gi, '\n').replace(/<\/p>/gi, '\n');
+  t = t.replace(/<\/li>/gi, '\n').replace(/<li[^>]*>/gi, '');
+  t = t.replace(/<\/div>/gi, '\n').replace(/<div[^>]*>/gi, '');
+  // Strip remaining HTML tags
+  t = t.replace(/<[^>]+>/g, '');
+  // Normalize whitespace
+  t = t.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  t = t.split('\n').map(l => l.trim()).filter(Boolean).join('\n');
+  t = t.replace(/[ \t]{2,}/g, ' ');
+  return t.trim();
+}
+
 function showImportUrlModal() {
   document.getElementById('import-url-input').value = '';
   document.getElementById('import-url-status').textContent = '';
@@ -5799,7 +5835,7 @@ function importFromUrl() {
           btn.disabled = false;
           return;
         }
-        const name = recipe.name || '';
+        const name = cleanHtml(recipe.name || '');
         const ingr = recipe.recipeIngredient || [];
         const steps = recipe.recipeInstructions || [];
         const time = recipe.totalTime || recipe.cookTime || '';
@@ -5808,8 +5844,8 @@ function importFromUrl() {
         const cuisine = recipe.recipeCuisine || '';
         const category = recipe.recipeCategory || '';
         const calories = recipe.nutrition && recipe.nutrition.calories ? String(recipe.nutrition.calories).replace(/[^0-9]/g,'') : '';
-        const ingrText = (Array.isArray(ingr) ? ingr : []).join('\n');
-        const stepsArr = Array.isArray(steps) ? steps.map(s => typeof s === 'string' ? s : s.text || s.name || '') :
+        const ingrText = (Array.isArray(ingr) ? ingr : []).map(i => cleanHtml(typeof i === 'string' ? i : '')).join('\n');
+        const stepsArr = Array.isArray(steps) ? steps.map(s => cleanHtml(typeof s === 'string' ? s : s.text || s.name || '')) :
           typeof steps === 'string' ? steps.split('\n') : [];
         const stepText = stepsArr.join('\n');
         let timeNum = 30;
