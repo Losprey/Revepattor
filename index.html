@@ -3010,13 +3010,13 @@ async function getRecipeImage(recipe) {
   if (recipe.image && !recipe.image.includes('placehold.co')) return recipe.image;
   // Fetch from Pexels only for recipes without images
   const cache = getImageCache();
-  if (cache[recipe.id]) { recipe.image = cache[recipe.id]; saveToLS(); return cache[recipe.id]; }
+  if (cache[recipe.id]) { recipe.image = imgUrl(cache[recipe.id]); saveToLS(); return cache[recipe.id]; }
   // Priority 4: Pexels fetch
   const query = translateRecipeQuery(lang === 'en' && recipe.nameEn ? recipe.nameEn : recipe.name);
   const img = await fetchPexelsImage(query);
   if (img) {
     setImageCache(recipe.id, img);
-    recipe.image = img;
+    recipe.image = imgUrl(img);
     saveToLS();
     return img;
   }
@@ -3026,7 +3026,7 @@ async function getRecipeImage(recipe) {
     const fallbackImg = await fetchPexelsImage(catQuery);
     if (fallbackImg) {
       setImageCache(recipe.id, fallbackImg);
-      recipe.image = fallbackImg;
+      recipe.image = imgUrl(fallbackImg);
       saveToLS();
       return fallbackImg;
     }
