@@ -2381,10 +2381,9 @@ let cookingStep = 0, cookingRecipeId = null, cookingTimer = null, cookingTimerRu
 let voiceRecognition = null, voiceListening = false;
 let ingredientSearchSelected = new Set();
 let currentPortion = 2, basePortion = 2;
-let cookingHistory = JSON.parse(localStorage.getItem('cookingHistory') || '[]');
-const DAYS = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
-let mealPlan = JSON.parse(localStorage.getItem('mealPlan') || '{}');
-let mealPlanKids = JSON.parse(localStorage.getItem('mealPlanKids') || '{}');
+let cookingHistory = (() => { try { return JSON.parse(localStorage.getItem('cookingHistory') || '[]'); } catch(e) { return []; } })();
+let mealPlan = (() => { try { return JSON.parse(localStorage.getItem('mealPlan') || '{}'); } catch(e) { return {}; } })();
+let mealPlanKids = (() => { try { return JSON.parse(localStorage.getItem('mealPlanKids') || '{}'); } catch(e) { return {}; } })();
 let planType = localStorage.getItem('planType') || 'adults';
 let plannerWeekOffset = 0;
 
@@ -3123,6 +3122,8 @@ function render() {
     return matchSearch && matchCat && matchFav && matchAge;
   });
   if (!filtered.length) {
+    document.getElementById('recipe-grid').innerHTML = `<div class="shop-empty" style="padding:2rem 0;"><div class="shop-empty-icon">🔍</div><div class="shop-empty-title">${t('noRecipes')}</div><div class="shop-empty-desc">${t('noRecipesHint')}</div></div>`;
+    document.getElementById('recipe-count').textContent = '(0)';
     return;
   }
   const sortBy = document.getElementById('sort-by')?.value || 'name';
@@ -3503,12 +3504,14 @@ function applyAccentColor(color) {
 function calcPlanningStreak() {
   let streak = 0;
   const today = new Date();
+  const plan = planType === 'kids' ? mealPlanKids : mealPlan; // read-only, don't mutate
   for (let i = 0; i < 365; i++) {
     const d = new Date(today); d.setDate(d.getDate() - i);
     const key = getWeekKey(d);
-    const plan = getWeekPlan(key);
+    const week = plan[key];
+    if (!week) break;
     const dayName = DAYS[d.getDay() === 0 ? 6 : d.getDay() - 1];
-    const day = plan[dayName];
+    const day = week[dayName];
     if (day && Object.values(day).filter(Boolean).length > 0) streak++;
     else break;
   }
@@ -3637,7 +3640,7 @@ function saveRecipe() {
     if (idx !== -1) recipes[idx] = {...recipes[idx], name, nameEn, category, time, image, imageData, ingredients, steps, tags, nutrition, difficulty, portions, allergens: recipes[idx].allergens || []};
     editingId = null;
   } else {
-    recipes.push({id:Date.now(), name, nameEn, category, time, image, imageData, ingredients, steps, tags, rating:0, notes:'', notesEn:'', favorite:false, nutrition, difficulty, portions, allergens: []});
+          recipes.push({id:Date.now()*1000+Math.floor(Math.random()*1000), name, nameEn, category, time, image, imageData, ingredients, steps, tags, rating:0, notes:'', notesEn:'', favorite:false, nutrition, difficulty, portions, allergens: []});
   }
   saveToLS();
   closeModal('form-modal');
@@ -4610,11 +4613,11 @@ function renderPlanner() {
         const r = getSlotRecipe(entry);
         const name = getSlotName(entry);
         const isCustom = entry && entry.type === 'custom';
-        const wkClick = r ? `viewRecipe(${r.id})` : isCustom ? '' : `pickRecipe('${d}','${m.id}')`;
+        const wkClick = r ? `viewRecipe(${r.id})` : isCustom ? '' : `pickRecipe('${d}','${m.id}','${weekKey}')`;
         return `<div class="wk-slot${r || isCustom ? ' filled' : ''}" onclick="${wkClick}">
           <span class="ws-icon">${m.icon}</span>
           ${r || isCustom
-            ? `<span class="ws-name">${esc(name)}</span><span class="ws-remove" onclick="event.stopPropagation();removeSlot('${d}','${m.id}')">✕</span>`
+            ? `<span class="ws-name">${esc(name)}</span><span class="ws-remove" onclick="event.stopPropagation();removeSlot('${d}','${m.id}','${weekKey}')">✕</span>`
             : `<span class="ws-empty">${lang==='en'?'add':'pridať'}</span>`}
         </div>`;
       }).join('')}</div>
