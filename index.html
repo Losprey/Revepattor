@@ -6221,9 +6221,9 @@ renderDashboard = function() {
   <div class="fab-backdrop" onclick="document.getElementById('fab-quick-add').classList.remove('open')"></div>
   <button class="fab-trigger" onclick="this.parentElement.classList.toggle('open')" aria-label="Quick add">➕</button>
   <div class="fab-menu">
-    <button class="fab-item" onclick="event.stopPropagation();this.closest('#fab-quick-add').classList.remove('open');switchTab('tasks');openTaskSheet()"><span data-lang="fabTask"></span></button>
-    <button class="fab-item" onclick="event.stopPropagation();this.closest('#fab-quick-add').classList.remove('open');switchTab('planner')"><span data-lang="fabMeal"></span></button>
-    <button class="fab-item" onclick="event.stopPropagation();this.closest('#fab-quick-add').classList.remove('open');switchTab('shopping');openAddItemSheet()"><span data-lang="fabFood"></span></button>
+    <button class="fab-item" onclick="event.stopPropagation();this.closest('#fab-quick-add').classList.remove('open');switchTab('tasks');setTimeout(()=>openTaskSheet(),100)">✅ ${lang==='en'?'Task':'Úloha'}</button>
+    <button class="fab-item" onclick="event.stopPropagation();this.closest('#fab-quick-add').classList.remove('open');switchTab('planner')">🍽️ ${lang==='en'?'Meal':'Jedlo'}</button>
+    <button class="fab-item" onclick="event.stopPropagation();this.closest('#fab-quick-add').classList.remove('open');switchTab('shopping');setTimeout(()=>openAddItemSheet(),100)">🛒 ${lang==='en'?'Grocery':'Potravina'}</button>
   </div>
 </div>
 </body>
