@@ -1826,6 +1826,7 @@ function pickOnboardLang(l) {
 setTimeout(() => showOnboarding(), 300);
 
 // ======================== AI (DEEPSEEK PROXY) ========================
+const APP_VERSION = '1.0.3';
 const AI_PROXY_URL = 'https://receptar.waldis994.workers.dev'; // Cloudflare Worker proxy pre DeepSeek
 
 async function aiGenerate(messages) {
@@ -3050,6 +3051,22 @@ function categoryFallbackQuery(category) {
   return map[category] || 'food meal';
 }
 
+function imgUrl(url) {
+  if (!url || url.startsWith('data:')) return url;
+  return url + (url.includes('?') ? '&' : '?') + 'v=' + APP_VERSION;
+}
+
+async function refreshRecipeImages() {
+  localStorage.removeItem('pexels_cache_v2');
+  recipes.forEach(r => {
+    if (r.image && (r.image.includes('pexels.com') || r.image.includes('placehold.co'))) r.image = '';
+  });
+  saveToLS();
+  await batchFetchImages();
+  render();
+  alert(t('Obrázky boli obnovené','Images refreshed'));
+}
+
 async function batchFetchImages() {
   const toFetch = recipes.filter(r => {
     if (r.imageData) return false;
@@ -3106,7 +3123,7 @@ function render() {
     return `<div class="recipe-card" style="animation-delay:${Math.random()*.25}s" data-id="${r.id}">
       <button class="fav-btn ${r.favorite?'fav-active':''}" onclick="event.stopPropagation();toggleFav(${r.id})">${r.favorite ? '❤️' : '🤍'}</button>
       <div class="recipe-card-img${r.image||r.imageData?'':' img-skeleton'}" id="rcimg-${r.id}">${r.image||r.imageData
-        ? `<img src="${escAttr(r.imageData||r.image)}" alt="${san}" loading="lazy" onerror="this.outerHTML='<span style=\\'font-size:2.4rem\\'>🍽️</span>'" onload="this.parentElement.classList.remove('img-skeleton')">`
+        ? `<img src="${escAttr(imgUrl(r.imageData||r.image))}" alt="${san}" loading="lazy" onerror="this.outerHTML='<span style=\\'font-size:2.4rem\\'>🍽️</span>'" onload="this.parentElement.classList.remove('img-skeleton')">`
         : `<span style="font-size:2.4rem">🍽️</span>`}</div>
       <div class="recipe-card-body">
         <h3>${san}</h3>
@@ -3367,6 +3384,10 @@ function openSettings() {
   html += `<div class="settings-group">
     <div class="settings-group-title">💾 ${t('Dáta','Data')}</div>
     <div class="settings-card">
+      <div class="settings-row" onclick="refreshRecipeImages();closeSettings()">
+        <span class="sr-label"><span class="sr-icon">🖼️</span> ${t('Obnoviť obrázky','Refresh images')}</span>
+        <span class="sr-value"><span class="sr-arrow">›</span></span>
+      </div>
       <div class="settings-row" onclick="localStorage.removeItem('onboardingCompleted');showOnboarding(true);closeSettings()">
         <span class="sr-label"><span class="sr-icon">❓</span> ${t('Zobraziť onboarding','Show onboarding')}</span>
         <span class="sr-value"><span class="sr-arrow">›</span></span>

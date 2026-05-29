@@ -1,13 +1,11 @@
-const CACHE = 'mealnest-v1';
-const STATIC = ['manifest.json', 'icon-192.png', 'icon-512.png'];
+const CACHE = 'mealnest-v3';
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(STATIC)));
   self.skipWaiting();
 });
 
 self.addEventListener('activate', e => {
-  // Delete ALL old caches (including previous receptar-v*)
+  // Delete ALL old caches
   e.waitUntil(
     caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))))
   );
@@ -17,29 +15,30 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
 
-  // Network-first for HTML — always get latest
+  // Network-first for HTML
   if (e.request.mode === 'navigate') {
-    e.respondWith(
-      fetch(e.request).catch(() => caches.match(e.request))
-    );
+    e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
     return;
   }
 
-  // Network-first for images — never serve stale recipe photos
-  if (e.request.destination === 'image' || url.pathname.match(/\.(png|jpg|jpeg|gif|webp|svg)/i)) {
+  // Network-first for ALL images (pexels, placehold.co, remote recipe images)
+  if (e.request.destination === 'image' || /\.(png|jpg|jpeg|gif|webp|svg|ico)/i.test(url.pathname)) {
     e.respondWith(
       fetch(e.request, { cache: 'no-store' }).catch(() => caches.match(e.request))
     );
     return;
   }
 
-  // Cache-first for other static assets (CSS, JS, fonts)
+  // Stale-while-revalidate for local assets (icons, manifest)
   e.respondWith(
-    caches.match(e.request).then(r => r || fetch(e.request))
+    caches.open(CACHE).then(cache =>
+      cache.match(e.request).then(cached => {
+        const fetched = fetch(e.request).then(response => {
+          cache.put(e.request, response.clone());
+          return response;
+        }).catch(() => cached);
+        return cached || fetched;
+      })
+    )
   );
-});
-
-// Notify clients when an update is available
-self.addEventListener('message', e => {
-  if (e.data === 'skipWaiting') self.skipWaiting();
 });
