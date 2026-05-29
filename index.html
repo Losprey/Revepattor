@@ -3242,6 +3242,8 @@ function applySettings() {
   document.body.classList.toggle('store-mode', appSettings.shopping.storeMode);
   const fab = document.getElementById('fab-quick-add');
   if (fab) fab.style.display = appSettings.quickAdd.enabled ? '' : 'none';
+  // Re-check after DOM fully loads (FAB element is after the script tag)
+  setTimeout(() => { const f = document.getElementById('fab-quick-add'); if (f) f.style.display = appSettings.quickAdd.enabled ? '' : 'none'; }, 100);
   if (langChanged) { try { render(); } catch(e) {} try { showTipOfDay(); } catch(e) {} }
   try { initNotifications(); } catch(e) {}
 }
