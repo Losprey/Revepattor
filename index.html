@@ -5779,9 +5779,9 @@ function importFromUrl() {
   status.textContent = '⏳ Načítavam...';
   btn.disabled = true;
   const proxies = [
-    u => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u),
     u => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u),
-    u => 'https://api.allorigins.win/get?url=' + encodeURIComponent(u),
+    u => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u),
+    u => 'https://corsproxy.io/?' + encodeURIComponent(u),
   ];
   let proxyIdx = 0;
   let retries = 0;
