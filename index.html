@@ -5928,13 +5928,6 @@ try { applyLang(); } catch(e) {}
 document.body.dataset.tab = 'dashboard';
 switchTab('dashboard');
 
-// Assign preloaded images only if recipe has NO image at all (never overwrite existing)
-recipes.forEach(r => {
-  if (!r.image && !r.imageData && PRELOADED_IMAGES[r.id]) {
-    r.image = PRELOADED_IMAGES[r.id];
-  }
-});
-
 render();
 showTipOfDay();
 
