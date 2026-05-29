@@ -5854,8 +5854,14 @@ if ('serviceWorker' in navigator) {
     reg.addEventListener('updatefound', () => {
       const newSW = reg.installing;
       if (newSW) newSW.addEventListener('statechange', () => {
-        if (newSW.state === 'activated' && navigator.serviceWorker.controller) {
-          location.reload();
+        if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
+          // Show update notification
+          const banner = document.createElement('div');
+          banner.id = 'sw-update-banner';
+          banner.style.cssText = 'position:fixed;bottom:80px;left:20px;right:20px;z-index:9999;background:var(--primary);color:#fff;padding:12px 16px;border-radius:12px;display:flex;align-items:center;justify-content:space-between;font-size:.8rem;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,.4);animation:slideUp .3s ease;';
+          banner.innerHTML = '<span>✨ '+t('Nová verzia je k dispozícii','New version available')+'</span><button style="background:#fff;color:var(--primary);border:none;padding:6px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:.75rem;" onclick="newSW.postMessage(\'skipWaiting\');this.parentElement.remove();location.reload();">'+t('Aktualizovať','Update')+'</button>';
+          document.body.appendChild(banner);
+          setTimeout(() => banner.remove(), 15000);
         }
       });
     });
