@@ -5731,37 +5731,38 @@ function applyIngredientSearch() {
 // ======================== IMPORT FROM URL ========================
 function cleanHtml(text) {
   if (!text || typeof text !== 'string') return '';
-  // Decode HTML entities
-  const d = text
-    .replace(/&aacute;/gi, 'á').replace(/&eacute;/gi, 'é').replace(/&iacute;/gi, 'í')
-    .replace(/&oacute;/gi, 'ó').replace(/&uacute;/gi, 'ú').replace(/&yacute;/gi, 'ý')
-    .replace(/&Aacute;/gi, 'Á').replace(/&Eacute;/gi, 'É').replace(/&Iacute;/gi, 'Í')
-    .replace(/&Oacute;/gi, 'Ó').replace(/&Uacute;/gi, 'Ú').replace(/&Yacute;/gi, 'Ý')
-    .replace(/&scaron;/gi, 'š').replace(/&Scaron;/gi, 'Š')
-    .replace(/&ccaron;/gi, 'č').replace(/&Ccaron;/gi, 'Č')
-    .replace(/&rcaron;/gi, 'ř').replace(/&Rcaron;/gi, 'Ř')
-    .replace(/&zcaron;/gi, 'ž').replace(/&Zcaron;/gi, 'Ž')
-    .replace(/&ncaron;/gi, 'ň').replace(/&Ncaron;/gi, 'Ň')
-    .replace(/&dcaron;/gi, 'ď').replace(/&Dcaron;/gi, 'Ď')
-    .replace(/&tcaron;/gi, 'ť').replace(/&Tcaron;/gi, 'Ť')
-    .replace(/&lcaron;/gi, 'ľ').replace(/&Lcaron;/gi, 'Ľ')
-    .replace(/&auml;/gi, 'ä').replace(/&ouml;/gi, 'ö').replace(/&uuml;/gi, 'ü')
-    .replace(/&ocirc;/gi, 'ô').replace(/&Acirc;/gi, 'Â')
-    .replace(/&amp;/gi, '&').replace(/&lt;/gi, '<').replace(/&gt;/gi, '>')
-    .replace(/&quot;/gi, '"').replace(/&apos;/gi, "'")
-    .replace(/&nbsp;/gi, ' ').replace(/&#160;/gi, ' ').replace(/&ensp;/gi, ' ')
-    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(parseInt(n)))
-    .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCharCode(parseInt(n, 16)));
-  // Convert <br>, <p>, <li>, </li> to newlines
-  let t = d.replace(/<br\s*\/?>/gi, '\n').replace(/<p[^>]*>/gi, '\n').replace(/<\/p>/gi, '\n');
+  let t = text;
+  // Decode HTML entities (run twice for double-encoded entities)
+  for (let pass = 0; pass < 2; pass++) {
+    t = t.replace(/&aacute;/gi, '\u00e1').replace(/&eacute;/gi, '\u00e9').replace(/&iacute;/gi, '\u00ed')
+      .replace(/&oacute;/gi, '\u00f3').replace(/&uacute;/gi, '\u00fa').replace(/&yacute;/gi, '\u00fd')
+      .replace(/&Aacute;/gi, '\u00c1').replace(/&Eacute;/gi, '\u00c9').replace(/&Iacute;/gi, '\u00cd')
+      .replace(/&Oacute;/gi, '\u00d3').replace(/&Uacute;/gi, '\u00da')
+      .replace(/&scaron;/gi, '\u0161').replace(/&Scaron;/gi, '\u0160')
+      .replace(/&ccaron;/gi, '\u010d').replace(/&Ccaron;/gi, '\u010c')
+      .replace(/&zcaron;/gi, '\u017e').replace(/&Zcaron;/gi, '\u017d')
+      .replace(/&ncaron;/gi, '\u0148').replace(/&dcaron;/gi, '\u010f').replace(/&tcaron;/gi, '\u0165')
+      .replace(/&lcaron;/gi, '\u013e').replace(/&rcaron;/gi, '\u0159')
+      .replace(/&auml;/gi, '\u00e4').replace(/&ouml;/gi, '\u00f6').replace(/&uuml;/gi, '\u00fc')
+      .replace(/&ocirc;/gi, '\u00f4')
+      .replace(/&amp;/gi, '&').replace(/&lt;/gi, '<').replace(/&gt;/gi, '>')
+      .replace(/&quot;/gi, '"').replace(/&apos;/gi, "'")
+      .replace(/&nbsp;/gi, ' ').replace(/&#160;/gi, ' ')
+      .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(parseInt(n)))
+      .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCharCode(parseInt(n, 16)));
+  }
+  // Convert HTML breaks to newlines
+  t = t.replace(/<br\s*\/?>/gi, '\n').replace(/<p[^>]*>/gi, '\n').replace(/<\/p>/gi, '\n');
   t = t.replace(/<\/li>/gi, '\n').replace(/<li[^>]*>/gi, '');
   t = t.replace(/<\/div>/gi, '\n').replace(/<div[^>]*>/gi, '');
-  // Strip remaining HTML tags
+  t = t.replace(/<ol[^>]*>/gi, '').replace(/<\/ol>/gi, '\n');
+  t = t.replace(/<ul[^>]*>/gi, '').replace(/<\/ul>/gi, '\n');
+  // Strip all remaining HTML tags
   t = t.replace(/<[^>]+>/g, '');
-  // Normalize whitespace
+  // Normalize
   t = t.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
   t = t.split('\n').map(l => l.trim()).filter(Boolean).join('\n');
-  t = t.replace(/[ \t]{2,}/g, ' ');
+  t = t.replace(/[ \t]{2,}/g, ' ').replace(/^\d+\.\s*/, ''); // Remove leading step numbers
   return t.trim();
 }
 
