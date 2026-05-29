@@ -1602,9 +1602,9 @@ function updateAuthUI() {
   const el = document.getElementById('header-auth-area');
   if (!el) return;
   if (authUser && authUser.photoURL) {
-    el.innerHTML = `<img class="user-avatar" src="${authUser.photoURL}" alt="${authUser.displayName||''}" title="${authUser.displayName||''} — odhlásiť" onclick="signOutUser()">`;
+    el.innerHTML = `<img class="user-avatar" src="${authUser.photoURL}" alt="${authUser.displayName||''}" title="${authUser.displayName||''} — nastavenia" onclick="openSettings()">`;
   } else if (authUser) {
-    el.innerHTML = `<span class="topbar-btn" onclick="signOutUser()" title="${lang==='en'?'Sign out':'Odhlásiť sa'}">👤</span>`;
+    el.innerHTML = `<span class="topbar-btn" onclick="openSettings()" title="${lang==='en'?'Account':'Účet'}">👤</span>`;
   } else if (authIsGuest) {
     el.innerHTML = `<span class="guest-badge" onclick="openSettings()">${lang==='en'?'Guest':'Hosť'}</span>`;
   } else {
