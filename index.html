@@ -1826,7 +1826,7 @@ function pickOnboardLang(l) {
 setTimeout(() => showOnboarding(), 300);
 
 // ======================== AI (DEEPSEEK PROXY) ========================
-const APP_VERSION = '1.0.3';
+const APP_VERSION = '1.0.4';
 const AI_PROXY_URL = 'https://receptar.waldis994.workers.dev'; // Cloudflare Worker proxy pre DeepSeek
 
 async function aiGenerate(messages) {
@@ -2840,7 +2840,7 @@ function estimateAndFillImport(ingrArray, yieldNum) {
 // NOTE: For production, move the API key to a backend proxy.
 // This is a client-side PWA; the key is visible in source.
 const PEXELS_KEY = 'f0My7j2k4Ede64fRm8dQ5Ie181mtOWBSaVndMUOaJAeDY6ODa6QRAeg2';
-const IMG_CACHE_KEY = 'pexels_cache_v2';
+const IMG_CACHE_KEY = 'pexels_cache_v3';
 // Preloaded images fetched at build time — avoids 89 Pexels API calls on first load
 const PRELOADED_IMAGES = {"1":"https://images.pexels.com/photos/5807022/pexels-photo-5807022.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","2":"https://images.pexels.com/photos/37043949/pexels-photo-37043949.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","3":"https://images.pexels.com/photos/4115066/pexels-photo-4115066.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","4":"https://images.pexels.com/photos/7462819/pexels-photo-7462819.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","5":"https://images.pexels.com/photos/53483/strawberries-crepe-dessert-sweet-53483.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","6":"https://images.pexels.com/photos/4202387/pexels-photo-4202387.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","7":"https://images.pexels.com/photos/27381566/pexels-photo-27381566.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","8":"https://images.pexels.com/photos/10422365/pexels-photo-10422365.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","9":"https://images.pexels.com/photos/37275056/pexels-photo-37275056.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","10":"https://images.pexels.com/photos/37043949/pexels-photo-37043949.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","11":"https://images.pexels.com/photos/5639482/pexels-photo-5639482.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","12":"https://images.pexels.com/photos/17872670/pexels-photo-17872670.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","13":"https://images.pexels.com/photos/11256670/pexels-photo-11256670.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","14":"https://images.pexels.com/photos/34307857/pexels-photo-34307857.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","15":"https://images.pexels.com/photos/6612672/pexels-photo-6612672.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","16":"https://images.pexels.com/photos/12118045/pexels-photo-12118045.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","17":"https://images.pexels.com/photos/9170501/pexels-photo-9170501.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","18":"https://images.pexels.com/photos/30895291/pexels-photo-30895291.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","19":"https://images.pexels.com/photos/14966000/pexels-photo-14966000.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","20":"https://images.pexels.com/photos/7111387/pexels-photo-7111387.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","21":"https://images.pexels.com/photos/7936680/pexels-photo-7936680.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","22":"https://images.pexels.com/photos/4099238/pexels-photo-4099238.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","23":"https://images.pexels.com/photos/12927134/pexels-photo-12927134.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","24":"https://images.pexels.com/photos/11132399/pexels-photo-11132399.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","25":"https://images.pexels.com/photos/273825/pexels-photo-273825.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","26":"https://images.pexels.com/photos/15058965/pexels-photo-15058965.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","27":"https://images.pexels.com/photos/31779538/pexels-photo-31779538.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","28":"https://images.pexels.com/photos/13458086/pexels-photo-13458086.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","29":"https://images.pexels.com/photos/6287376/pexels-photo-6287376.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","30":"https://images.pexels.com/photos/10338434/pexels-photo-10338434.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","31":"https://images.pexels.com/photos/31953510/pexels-photo-31953510.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","32":"https://images.pexels.com/photos/6046493/pexels-photo-6046493.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","33":"https://images.pexels.com/photos/273825/pexels-photo-273825.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","34":"https://images.pexels.com/photos/33088383/pexels-photo-33088383.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","35":"https://images.pexels.com/photos/13458086/pexels-photo-13458086.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","36":"https://images.pexels.com/photos/7469395/pexels-photo-7469395.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","37":"https://images.pexels.com/photos/1277483/pexels-photo-1277483.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","38":"https://images.pexels.com/photos/5639445/pexels-photo-5639445.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","39":"https://images.pexels.com/photos/35695377/pexels-photo-35695377.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","40":"https://images.pexels.com/photos/3832348/pexels-photo-3832348.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","41":"https://images.pexels.com/photos/7282789/pexels-photo-7282789.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","42":"https://images.pexels.com/photos/18535642/pexels-photo-18535642.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","43":"https://images.pexels.com/photos/9213914/pexels-photo-9213914.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","44":"https://images.pexels.com/photos/17749740/pexels-photo-17749740.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","45":"https://images.pexels.com/photos/19051901/pexels-photo-19051901.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","46":"https://images.pexels.com/photos/36040964/pexels-photo-36040964.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","47":"https://images.pexels.com/photos/10338448/pexels-photo-10338448.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","48":"https://images.pexels.com/photos/7715715/pexels-photo-7715715.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","49":"https://images.pexels.com/photos/730922/pancakes-food-eat-breakfast-730922.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","50":"https://images.pexels.com/photos/11190138/pexels-photo-11190138.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","51":"https://images.pexels.com/photos/5793/food-healthy-hand-cooking.jpg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","52":"https://images.pexels.com/photos/25946547/pexels-photo-25946547.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","53":"https://images.pexels.com/photos/248428/pexels-photo-248428.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","54":"https://images.pexels.com/photos/273825/pexels-photo-273825.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","55":"https://images.pexels.com/photos/8520760/pexels-photo-8520760.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","56":"https://images.pexels.com/photos/4784025/pexels-photo-4784025.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","57":"https://images.pexels.com/photos/16725422/pexels-photo-16725422.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","58":"https://images.pexels.com/photos/9673804/pexels-photo-9673804.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","59":"https://images.pexels.com/photos/8880741/pexels-photo-8880741.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","60":"https://images.pexels.com/photos/9089767/pexels-photo-9089767.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","61":"https://images.pexels.com/photos/3768316/pexels-photo-3768316.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","62":"https://images.pexels.com/photos/15813489/pexels-photo-15813489.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","63":"https://images.pexels.com/photos/35290622/pexels-photo-35290622.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","64":"https://images.pexels.com/photos/3926126/pexels-photo-3926126.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","65":"https://images.pexels.com/photos/3810779/pexels-photo-3810779.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","66":"https://images.pexels.com/photos/9305088/pexels-photo-9305088.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","67":"https://images.pexels.com/photos/36242488/pexels-photo-36242488.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","68":"https://images.pexels.com/photos/29172200/pexels-photo-29172200.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","69":"https://images.pexels.com/photos/9213963/pexels-photo-9213963.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","70":"https://images.pexels.com/photos/4451834/pexels-photo-4451834.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","71":"https://images.pexels.com/photos/142579/pexels-photo-142579.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","72":"https://images.pexels.com/photos/31965033/pexels-photo-31965033.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","73":"https://images.pexels.com/photos/19837090/pexels-photo-19837090.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","74":"https://images.pexels.com/photos/14909203/pexels-photo-14909203.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","75":"https://images.pexels.com/photos/142579/pexels-photo-142579.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","76":"https://images.pexels.com/photos/20220708/pexels-photo-20220708.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","77":"https://images.pexels.com/photos/7253549/pexels-photo-7253549.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","78":"https://images.pexels.com/photos/1438672/pexels-photo-1438672.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","79":"https://images.pexels.com/photos/5953837/pexels-photo-5953837.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","80":"https://images.pexels.com/photos/18602417/pexels-photo-18602417.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","81":"https://images.pexels.com/photos/5374414/pexels-photo-5374414.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","82":"https://images.pexels.com/photos/8056670/pexels-photo-8056670.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","83":"https://images.pexels.com/photos/1438672/pexels-photo-1438672.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","84":"https://images.pexels.com/photos/14966000/pexels-photo-14966000.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","85":"https://images.pexels.com/photos/36897343/pexels-photo-36897343.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","86":"https://images.pexels.com/photos/7352787/pexels-photo-7352787.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","87":"https://images.pexels.com/photos/1321884/pexels-photo-1321884.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","88":"https://images.pexels.com/photos/4397236/pexels-photo-4397236.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","89":"https://images.pexels.com/photos/1194369/pexels-photo-1194369.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"};
 
@@ -3005,13 +3005,12 @@ async function fetchPexelsImage(query) {
 }
 
 async function getRecipeImage(recipe) {
-  // Priority 1: existing imageData
   if (recipe.imageData) return recipe.imageData;
-  // Priority 2: existing image URL (not placehold)
+  // Never overwrite existing real image with cached/fetched one
   if (recipe.image && !recipe.image.includes('placehold.co')) return recipe.image;
-  // Priority 3: cached
+  // Fetch from Pexels only for recipes without images
   const cache = getImageCache();
-  if (cache[recipe.id]) return cache[recipe.id];
+  if (cache[recipe.id]) { recipe.image = cache[recipe.id]; saveToLS(); return cache[recipe.id]; }
   // Priority 4: Pexels fetch
   const query = translateRecipeQuery(lang === 'en' && recipe.nameEn ? recipe.nameEn : recipe.name);
   const img = await fetchPexelsImage(query);
@@ -3057,7 +3056,7 @@ function imgUrl(url) {
 }
 
 async function refreshRecipeImages() {
-  localStorage.removeItem('pexels_cache_v2');
+  localStorage.removeItem('pexels_cache_v3');
   recipes.forEach(r => {
     if (r.image && (r.image.includes('pexels.com') || r.image.includes('placehold.co'))) r.image = '';
   });
@@ -3069,10 +3068,9 @@ async function refreshRecipeImages() {
 
 async function batchFetchImages() {
   const toFetch = recipes.filter(r => {
-    if (r.imageData) return false;
-    if (r.image && !r.image.includes('placehold.co')) return false;
-    const cache = getImageCache();
-    return !cache[r.id];
+    if (r.imageData) return false;  // Never touch recipes with user-uploaded images
+    if (r.image && !r.image.includes('placehold.co')) return false;  // Never overwrite real images
+    return true;  // Only fetch for recipes with no image or placeholder
   });
   if (!toFetch.length) return;
   // Fetch in batches of 3 to avoid rate limiting
@@ -5930,9 +5928,9 @@ try { applyLang(); } catch(e) {}
 document.body.dataset.tab = 'dashboard';
 switchTab('dashboard');
 
-// Assign preloaded images from build-time Pexels fetch BEFORE first render
+// Assign preloaded images only if recipe has NO image at all (never overwrite existing)
 recipes.forEach(r => {
-  if ((!r.image || r.image.includes('placehold.co')) && !r.imageData && PRELOADED_IMAGES[r.id]) {
+  if (!r.image && !r.imageData && PRELOADED_IMAGES[r.id]) {
     r.image = PRELOADED_IMAGES[r.id];
   }
 });
