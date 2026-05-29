@@ -2510,6 +2510,10 @@ function applyLang() {
   // Form placeholders
   [['shop-item-name','Názov potraviny','Food name'],['shop-item-amount','Množstvo','Quantity'],['shop-item-unit','Jednotka (g, ks, ml...)','Unit (g, pcs, ml...)'],['shop-item-note','Poznámka (voliteľné)','Note (optional)'],['task-title','Názov úlohy','Task title'],['task-note','✏️ Poznámka (voliteľné)','✏️ Note (optional)']].forEach(p => { const el=document.getElementById(p[0]); if(el) el.placeholder = lang==='en'?p[2]:p[1]; });
   [['r-kcal','🔥 kcal / porcia','🔥 kcal / serving'],['r-protein','💪 bielkoviny g','💪 protein g'],['r-fat','🧈 tuky g','🧈 fat g'],['r-carbs','🍚 sacharidy g','🍚 carbs g']].forEach(p => { const el=document.getElementById(p[0]); if(el) el.placeholder = lang==='en'?p[2]:p[1]; });
+  // FAB
+  const fbt = document.getElementById('fab-btn-task'); if (fbt) fbt.textContent = lang==='en'?'✅ Task':'✅ Úloha';
+  const fbm = document.getElementById('fab-btn-meal'); if (fbm) fbm.textContent = lang==='en'?'🍽️ Meal':'🍽️ Jedlo';
+  const fbf = document.getElementById('fab-btn-food'); if (fbf) fbf.textContent = lang==='en'?'🛒 Grocery':'🛒 Potravina';
 }
 
 function toggleDark() {
@@ -6221,9 +6225,9 @@ renderDashboard = function() {
   <div class="fab-backdrop" onclick="document.getElementById('fab-quick-add').classList.remove('open')"></div>
   <button class="fab-trigger" onclick="this.parentElement.classList.toggle('open')" aria-label="Quick add">➕</button>
   <div class="fab-menu">
-    <button class="fab-item" onclick="event.stopPropagation();this.closest('#fab-quick-add').classList.remove('open');switchTab('tasks');setTimeout(()=>openTaskSheet(),100)">✅ ${lang==='en'?'Task':'Úloha'}</button>
-    <button class="fab-item" onclick="event.stopPropagation();this.closest('#fab-quick-add').classList.remove('open');switchTab('planner')">🍽️ ${lang==='en'?'Meal':'Jedlo'}</button>
-    <button class="fab-item" onclick="event.stopPropagation();this.closest('#fab-quick-add').classList.remove('open');switchTab('shopping');setTimeout(()=>openAddItemSheet(),100)">🛒 ${lang==='en'?'Grocery':'Potravina'}</button>
+    <button id="fab-btn-task" class="fab-item" onclick="event.stopPropagation();this.closest('#fab-quick-add').classList.remove('open');switchTab('tasks');setTimeout(()=>openTaskSheet(),100)">✅ Úloha</button>
+    <button id="fab-btn-meal" class="fab-item" onclick="event.stopPropagation();this.closest('#fab-quick-add').classList.remove('open');switchTab('planner')">🍽️ Jedlo</button>
+    <button id="fab-btn-food" class="fab-item" onclick="event.stopPropagation();this.closest('#fab-quick-add').classList.remove('open');switchTab('shopping');setTimeout(()=>openAddItemSheet(),100)">🛒 Potravina</button>
   </div>
 </div>
 </body>
