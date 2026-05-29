@@ -2158,13 +2158,15 @@ function connectToFamily(code) {
   firebaseListeners = [];
 
   // Listen for remote changes on each data set
+  let _syncing = {}; // Track which keys are being pushed to Firebase
   const bindPath = (path, localKey, mergeFn) => {
     const ref = familyDbRef.child(path);
     ref.on('value', snap => {
       const remoteData = snap.val();
       if (!remoteData) return;
+      // Skip if we're currently pushing this data to Firebase
+      if (_syncing[localKey]) return;
       const localRaw = localStorage.getItem(localKey);
-      // Skip if remote data is identical to local (prevents initial flicker)
       if (localRaw === JSON.stringify(remoteData)) return;
       if (typeof mergeFn === 'function') {
         const local = JSON.parse(localRaw || 'null');
@@ -2206,7 +2208,9 @@ function pushToFirebase(path, localKey) {
   try {
     const data = JSON.parse(localStorage.getItem(localKey) || 'null');
     if (data !== null) {
+      _syncing[localKey] = true;  // Block remote overwrites during push
       familyDbRef.child(path).set(data);
+      setTimeout(() => { _syncing[localKey] = false; }, 2000); // Clear block after 2s
     }
   } catch(e) {}
 }
