@@ -892,6 +892,7 @@ body:not(.dark) .recipe-card .fav-btn.fav-active { background: linear-gradient(1
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
 </head>
 <body>
 
@@ -3352,6 +3353,10 @@ function openSettings() {
           </div>
         </div>`
       ).join('')}
+      <div class="settings-row" onclick="enablePushNotifications()">
+        <span class="sr-label"><span class="sr-icon">📲</span> ${t('Push notifikácie','Push notifications')}</span>
+        <span class="sr-value" style="font-size:.6rem;color:var(--text3);">${localStorage.getItem('fcmToken')?t('Zapnuté','Enabled'):t('Klikni pre zapnutie','Tap to enable')} <span class="sr-arrow">›</span></span>
+      </div>
     </div>
   </div>`;
 
@@ -5994,6 +5999,35 @@ try { notifFiredToday = JSON.parse(localStorage.getItem('notifFired') || '{}'); 
 
 function saveNotifFired() {
   localStorage.setItem('notifFired', JSON.stringify(notifFiredToday));
+}
+
+async function enablePushNotifications() {
+  if (!firebaseReady || !firebase.messaging) {
+    alert(t('Push notifikácie nie sú dostupné.','Push notifications not available.'));
+    return;
+  }
+  try {
+    const perm = await Notification.requestPermission();
+    if (perm !== 'granted') { alert(t('Povolenie zamietnuté.','Permission denied.')); return; }
+    const messaging = firebase.messaging();
+    const token = await messaging.getToken({ vapidKey: 'BFIk-aaP7VGUvRS8z-K0xAGkJ1AsWiMygZ9b4y4CcOG9eoOx1xFo7Ts_AwaJMeoLZjdGjmS89ewHl5ZwAin7_D8' });
+    if (token) {
+      // Store token in Firebase
+      if (firebaseReady) {
+        const db = firebase.database();
+        const userKey = authUser ? authUser.uid : 'guest';
+        db.ref('pushTokens/' + userKey + '/' + getDeviceId()).set({
+          token: token,
+          updatedAt: firebase.database.ServerValue.TIMESTAMP,
+        });
+      }
+      localStorage.setItem('fcmToken', token);
+      alert(t('Push notifikácie zapnuté!','Push notifications enabled!'));
+    }
+  } catch(e) {
+    console.warn('Push subscription failed:', e.message);
+    alert(t('Nepodarilo sa zapnúť push notifikácie.','Failed to enable push notifications.'));
+  }
 }
 
 function requestNotifPermission() {
