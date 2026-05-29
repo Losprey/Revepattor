@@ -17,19 +17,19 @@
     {
       "name": "Plánovač",
       "short_name": "Plánovač",
-      "url": "/?tab=planner",
+      "url": "/Revepattor/?tab=planner",
       "icons": [{ "src": "icon-96.png", "sizes": "96x96" }]
     },
     {
       "name": "Nákupný zoznam",
       "short_name": "Nákup",
-      "url": "/?tab=shopping",
+      "url": "/Revepattor/?tab=shopping",
       "icons": [{ "src": "icon-96.png", "sizes": "96x96" }]
     },
     {
       "name": "Úlohy",
       "short_name": "Úlohy",
-      "url": "/?tab=tasks",
+      "url": "/Revepattor/?tab=tasks",
       "icons": [{ "src": "icon-96.png", "sizes": "96x96" }]
     }
   ],
