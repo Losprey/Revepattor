@@ -5889,7 +5889,6 @@ function closeTopModal() {
 window.addEventListener('popstate', function(e) {
   // First: close any open modal/detail/overlay
   if (closeTopModal()) {
-    // Push back the state we just popped so another back press navigates properly
     history.pushState({ tab: document.body.dataset.tab || 'dashboard' }, '', '#' + (document.body.dataset.tab || 'dashboard'));
     return;
   }
@@ -5897,8 +5896,12 @@ window.addEventListener('popstate', function(e) {
   if (e.state && e.state.tab) {
     window._skipHistory = true;
     switchTab(e.state.tab);
+    // Always keep a history cushion so swipe-back doesn't exit
+    if (history.length <= 2) {
+      history.pushState({ tab: e.state.tab }, '', '#' + e.state.tab);
+    }
   } else {
-    // On home/dashboard — double-tap to exit
+    // On home — push replacement state instead of exiting immediately
     const now = Date.now();
     if (now - _backPressTimer < 2000) {
       history.go(-1);
@@ -5909,6 +5912,11 @@ window.addEventListener('popstate', function(e) {
     }
   }
 });
+
+// Ensure we always have at least 2 history entries on page load
+if (history.length <= 1) {
+  history.pushState({ tab: 'dashboard' }, '', '#dashboard');
+}
 
 // ======================== INIT ========================
 document.getElementById('recipe-grid').addEventListener('click', function(e) {
