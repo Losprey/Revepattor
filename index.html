@@ -2382,6 +2382,7 @@ let voiceRecognition = null, voiceListening = false;
 let ingredientSearchSelected = new Set();
 let currentPortion = 2, basePortion = 2;
 let cookingHistory = (() => { try { return JSON.parse(localStorage.getItem('cookingHistory') || '[]'); } catch(e) { return []; } })();
+const DAYS = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
 let mealPlan = (() => { try { return JSON.parse(localStorage.getItem('mealPlan') || '{}'); } catch(e) { return {}; } })();
 let mealPlanKids = (() => { try { return JSON.parse(localStorage.getItem('mealPlanKids') || '{}'); } catch(e) { return {}; } })();
 let planType = localStorage.getItem('planType') || 'adults';
