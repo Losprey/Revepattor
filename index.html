@@ -3696,6 +3696,7 @@ function viewRecipe(id) {
     <div class="detail-section"><h3>📓 ${t('formTitle')==='New Recipe'?'Notes':'Poznámky'}</h3>
       <textarea id="recipe-notes" style="width:100%;padding:.45rem;border:1px solid var(--border);border-radius:6px;min-height:45px;font-family:inherit;font-size:.82rem;background:var(--input-bg);color:var(--text);" onchange="saveNotes(${id},this.value)">${esc((lang==='en'&&r.notesEn?r.notesEn:r.notes)||'')}</textarea></div>
   `;
+  history.pushState({ modal: 'detail', id: id }, '', '#recipe-' + id);
   openModal('detail-modal');
   // Async image fetch in background
   if (!r.image && !r.imageData) {
@@ -5846,7 +5847,53 @@ function importFromUrl() {
 
 // ======================== BACK BUTTON + HISTORY ========================
 let _backPressTimer = 0;
+
+function isAnyModalOpen() {
+  return document.querySelector('.modal-overlay.active, #planner-picker.active, #login-overlay[style*="flex"], #settings-sheet.active, .sheet-overlay.active') !== null;
+}
+
+function closeTopModal() {
+  // Close any open modal/sheet/overlay
+  const selectors = [
+    '#ai-modal', '#ai-plan-modal',          // AI modals
+    '#detail-modal.active',                  // Recipe detail
+    '#cooking-overlay.active',               // Cooking mode
+    '#import-url-modal.active',              // Import URL
+    '#form-modal.active',                    // Recipe form
+    '#planner-picker.active',                // Recipe picker
+    '#shop-sheet.active',                    // Shop sheet
+    '#task-sheet.active',                    // Task sheet
+    '#settings-sheet.active',               // Settings
+    '#login-overlay'                         // Login (check inline style)
+  ];
+  for (const sel of selectors) {
+    const el = document.getElementById(sel.replace(/\.active/, '')) || document.querySelector(sel);
+    if (el) {
+      const active = el.classList.contains('active') || (el.id === 'login-overlay' && el.style.display === 'flex');
+      if (active) {
+        if (typeof closeModal === 'function' && el.id.endsWith('-modal')) closeModal(el.id);
+        else if (el.id === 'planner-picker') closePickerModal();
+        else if (el.id === 'settings-sheet') closeSettings();
+        else if (el.id === 'shop-sheet') closeShopSheet();
+        else if (el.id === 'task-sheet') closeTaskSheet();
+        else if (el.id === 'login-overlay') { el.style.display = 'none'; }
+        else if (el.id === 'ai-modal' || el.id === 'ai-plan-modal') el.remove();
+        else el.classList.remove('active');
+        return true; // Closed something
+      }
+    }
+  }
+  return false; // Nothing was open
+}
+
 window.addEventListener('popstate', function(e) {
+  // First: close any open modal/detail/overlay
+  if (closeTopModal()) {
+    // Push back the state we just popped so another back press navigates properly
+    history.pushState({ tab: document.body.dataset.tab || 'dashboard' }, '', '#' + (document.body.dataset.tab || 'dashboard'));
+    return;
+  }
+
   if (e.state && e.state.tab) {
     window._skipHistory = true;
     switchTab(e.state.tab);
@@ -5854,7 +5901,6 @@ window.addEventListener('popstate', function(e) {
     // On home/dashboard — double-tap to exit
     const now = Date.now();
     if (now - _backPressTimer < 2000) {
-      // Let the browser handle exit (close app)
       history.go(-1);
     } else {
       _backPressTimer = now;
