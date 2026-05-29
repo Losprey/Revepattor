@@ -1467,6 +1467,12 @@ let authUser = null;      // Firebase user object
 let authIsGuest = false;  // true = guest mode, false = logged in
 let authLoading = true;   // waiting for Firebase Auth init
 let storeNs = 'guest_';   // default: guest namespace
+// Restore correct namespace BEFORE data loads
+try {
+  const savedAuth = JSON.parse(localStorage.getItem('authUser') || 'null');
+  if (savedAuth && savedAuth.uid) { storeNs = 'user_' + savedAuth.uid + '_'; }
+  else if (localStorage.getItem('authGuest') === '1') { storeNs = 'guest_'; }
+} catch(e) { storeNs = 'guest_'; }
 
 // Shared keys that are NOT user-scoped
 const GLOBAL_KEYS = new Set(['lang','dark','accent','appSettings','notifFired','notifFiredToday','familyCode','deviceId','tipDismissed','authUser','authGuest','authMigrateFromGuest']);
@@ -4834,8 +4840,9 @@ function removeSlot(day, slot, wk) {
   if (!confirm((lang==='en'?'Remove ':'Odstrániť ') + name + '?')) return;
   delete weekPlan[day][slot];
   saveWeekPlan();
-  localStorage.setItem('mealPlan', JSON.stringify(mealPlan));
-  localStorage.setItem('mealPlanKids', JSON.stringify(mealPlanKids));
+  // Force save both plans directly
+  try { localStorage.setItem('mealPlan', JSON.stringify(mealPlan)); } catch(e) {}
+  try { localStorage.setItem('mealPlanKids', JSON.stringify(mealPlanKids)); } catch(e) {}
   renderPlanner();
   if (day === DAYS[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1] && !plannerIsVisible()) renderDashboard();
 }
