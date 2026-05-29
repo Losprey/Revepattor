@@ -5846,7 +5846,7 @@ function importFromUrl() {
         const calories = recipe.nutrition && recipe.nutrition.calories ? String(recipe.nutrition.calories).replace(/[^0-9]/g,'') : '';
         const ingrText = (Array.isArray(ingr) ? ingr : []).map(i => cleanHtml(typeof i === 'string' ? i : '')).join('\n');
         const stepsArr = Array.isArray(steps) ? steps.map(s => cleanHtml(typeof s === 'string' ? s : s.text || s.name || '')) :
-          typeof steps === 'string' ? steps.split('\n') : [];
+          typeof steps === 'string' ? cleanHtml(steps).split('\n') : [];
         const stepText = stepsArr.join('\n');
         let timeNum = 30;
         if (time) {
