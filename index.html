@@ -2163,15 +2163,16 @@ function connectToFamily(code) {
     ref.on('value', snap => {
       const remoteData = snap.val();
       if (!remoteData) return;
-      // Save to localStorage (remote overwrites local if timestamp newer, or just merge)
+      const localRaw = localStorage.getItem(localKey);
+      // Skip if remote data is identical to local (prevents initial flicker)
+      if (localRaw === JSON.stringify(remoteData)) return;
       if (typeof mergeFn === 'function') {
-        const local = JSON.parse(localStorage.getItem(localKey) || 'null');
+        const local = JSON.parse(localRaw || 'null');
         const merged = mergeFn(local, remoteData);
         localStorage.setItem(localKey, JSON.stringify(merged));
       } else {
         localStorage.setItem(localKey, JSON.stringify(remoteData));
       }
-      // Re-render active tab
       refreshActiveTab();
     });
     firebaseListeners.push(ref);
