@@ -342,6 +342,7 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: rgba(22
 .picker-custom-row button { background: var(--primary); color: #fff; border: none; border-radius: 10px; padding: .5rem .8rem; font-size: .75rem; font-weight: 600; cursor: pointer; white-space: nowrap; }
 
 /* ===== LIGHT MODE OVERRIDES ===== */
+body { overscroll-behavior: none; -webkit-overflow-scrolling: touch; }
 body:not(.dark) {
   --bg: #f5f5f0;
   --surface: rgba(255,255,255,.92);
@@ -1290,6 +1291,10 @@ body[data-tab="dashboard"] #app-header { display: none; }
     <span class="nav-icon">🏠</span>
     <span class="nav-label" data-lang="navDashboard">Domov</span>
   </button>
+  <button class="nav-item" data-tab="planner" onclick="switchTab('planner')">
+    <span class="nav-icon">📅</span>
+    <span class="nav-label" data-lang="navPlanner">Plánovač</span>
+  </button>
   <button class="nav-item" data-tab="home" onclick="switchTab('home')">
     <span class="nav-icon">📖</span>
     <span class="nav-label" data-lang="navRecipes">Recepty</span>
@@ -1298,17 +1303,9 @@ body[data-tab="dashboard"] #app-header { display: none; }
     <span class="nav-icon">🛒</span>
     <span class="nav-label" data-lang="navShopping">Nákup</span>
   </button>
-  <button class="nav-item" data-tab="planner" onclick="switchTab('planner')">
-    <span class="nav-icon">📅</span>
-    <span class="nav-label" data-lang="navPlanner">Plánovač</span>
-  </button>
   <button class="nav-item" data-tab="tasks" onclick="switchTab('tasks')">
     <span class="nav-icon">✅</span>
     <span class="nav-label" data-lang="navTasks">Úlohy</span>
-  </button>
-  <button class="nav-item" onclick="openSettings()">
-    <span class="nav-icon">⚙️</span>
-    <span class="nav-label" data-lang="navSettings">Nastavenia</span>
   </button>
 </nav>
 
@@ -4127,6 +4124,9 @@ function switchTab(tab) {
   const btn = document.querySelector(`.nav-item[data-tab="${tab}"]`);
   if (btn) btn.classList.add('active');
   document.body.dataset.tab = tab;
+  // Push to history for back-button navigation
+  if (window._skipHistory) { window._skipHistory = false; }
+  else { history.pushState({ tab }, '', '#' + tab); }
   const dashboard = document.getElementById('dashboard');
   const recipeContainer = document.getElementById('home');
   const plannerContainer = document.getElementById('planner-container');
@@ -5822,6 +5822,26 @@ function importFromUrl() {
   }
   tryFetch();
 }
+
+// ======================== BACK BUTTON + HISTORY ========================
+let _backPressTimer = 0;
+window.addEventListener('popstate', function(e) {
+  if (e.state && e.state.tab) {
+    window._skipHistory = true;
+    switchTab(e.state.tab);
+  } else {
+    // On home/dashboard — double-tap to exit
+    const now = Date.now();
+    if (now - _backPressTimer < 2000) {
+      // Let the browser handle exit (close app)
+      history.go(-1);
+    } else {
+      _backPressTimer = now;
+      alert(t('Stlač ešte raz pre ukončenie','Press again to exit'));
+      history.pushState({ tab: 'dashboard' }, '', '#dashboard');
+    }
+  }
+});
 
 // ======================== INIT ========================
 document.getElementById('recipe-grid').addEventListener('click', function(e) {
