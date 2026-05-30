@@ -3665,7 +3665,6 @@ function saveRecipe() {
   const portions = parseInt(document.getElementById('r-portions').value) || 4;
   if (!name) return alert(t('formName') + ' je povinný.');
   if (!ingredients.length) return alert(t('formIngredients') + ' sú povinné.');
-  if (!steps.length) return alert(t('formSteps') + ' je povinný.');
   const nutrition = {kcal,protein,fat,carbs};
   // Sanity check
   const check = sanitizeNutrition(nutrition, portions);
