@@ -1,0 +1,12 @@
+{
+  "rules": {
+    "families": {
+      ".read": true,
+      ".write": true
+    },
+    "pushTokens": {
+      ".read": true,
+      ".write": true
+    }
+  }
+}
