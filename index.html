@@ -2239,9 +2239,9 @@ function pushToFirebase(path, localKey) {
     const data = JSON.parse(localStorage.getItem(localKey) || 'null');
     if (data !== null) {
       _syncing[localKey] = true;
-      familyDbRef.child(path).set(data, () => {
-        _syncing[localKey] = false;
-      });
+      familyDbRef.child(path).set(data, () => { _syncing[localKey] = false; });
+      // Safety: clear flag after 5s even if callback fails
+      setTimeout(() => { _syncing[localKey] = false; }, 5000);
     }
   } catch(e) { _syncing[localKey] = false; }
 }
