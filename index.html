@@ -2205,6 +2205,8 @@ function connectToFamily(code) {
       } else {
         localStorage.setItem(localKey, JSON.stringify(remoteData));
       }
+      // Reload JS variables from localStorage for merged data
+      reloadFromLocalStorage(localKey, remoteData);
       refreshActiveTab();
     });
     firebaseListeners.push(ref);
@@ -6074,6 +6076,18 @@ const NOTIF_MESSAGES = {
 let notifInterval = null;
 let notifFiredToday = {};
 try { notifFiredToday = JSON.parse(localStorage.getItem('notifFired') || '{}'); } catch(e) { notifFiredToday = {}; }
+
+function reloadFromLocalStorage(key, data) {
+  // Reload in-memory JS variables when Firebase syncs new data
+  try {
+    if (key === 'mealPlan') mealPlan = JSON.parse(JSON.stringify(data));
+    else if (key === 'mealPlanKids') mealPlanKids = JSON.parse(JSON.stringify(data));
+    else if (key === 'shoppingItems') loadShopItems();
+    else if (key === 'tasks') { tasks = JSON.parse(JSON.stringify(data)); }
+    else if (key === 'planType') planType = data;
+    else if (key === 'recipes') { recipes = JSON.parse(JSON.stringify(data)); }
+  } catch(e) {}
+}
 
 function saveNotifFired() {
   localStorage.setItem('notifFired', JSON.stringify(notifFiredToday));
