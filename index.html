@@ -2067,10 +2067,34 @@ async function aiGenerateShoppingList() {
 
 function addAIShoppingItems() {
   const text = window._aiShoppingReply || ''; if (!text) return;
-  const lines = text.split('\n'); let c = 'other'; loadShopItems();
-  lines.forEach(l => { const cl = l.replace(/^[•\-\*\s]+/,'').trim(); if (!cl) return; if (cl.endsWith(':')&&!cl.includes('—')&&!cl.includes('-')){c=guessFoodCategory(cl.replace(':',''));return;}
-    const p=cl.split(/[—–-]/); if(p.length>=2){const nm=p[0].trim();const q=p.slice(1).join('—').trim();const am=(q.match(/^[\d.,\/]+/)||[])[0]||'';const u=am?q.replace(am,'').trim().replace(/^[gmlkGMLKčČ\s]+/,''):q;if(nm&&nm.length>1)shopItems.push({id:generateShopId(),name:nm,amount:am,unit:u||'',category:c==='other'?guessFoodCategory(nm):c,checked:false,source:'manual',note:'',recipeId:''});}});
-  saveShopItems(); document.getElementById('ai-modal')?.remove(); switchTab('shopping');
+  const lines = text.split('\n'); let c = 'other';
+  loadShopItems();
+  let added = 0;
+  lines.forEach(l => {
+    const cl = l.replace(/^[•\-\*\s\d\.\)]+\s*/,'').trim();
+    if (!cl) return;
+    if (cl.endsWith(':') && !cl.includes('—') && !cl.includes('–') && !cl.includes('-')) {
+      c = guessFoodCategory(cl.replace(':', '')); return;
+    }
+    const parts = cl.split(/[—–\-]\s*/);
+    if (parts.length >= 2) {
+      const nm = parts[0].trim();
+      const q = parts.slice(1).join(' ').trim();
+      const am = (q.match(/^[\d.,\/]+/g) || [])[0] || '';
+      const u = am ? q.replace(am, '').trim() : q;
+      if (nm && nm.length > 1) {
+        shopItems.push({ id: generateShopId(), name: nm, amount: am, unit: u || '',
+          category: c === 'other' ? guessFoodCategory(nm) : c,
+          checked: false, source: 'manual', note: '', recipeId: '' });
+        added++;
+      }
+    }
+  });
+  saveShopItems();
+  try { localStorage.setItem('shoppingItems', JSON.stringify(shopItems)); } catch(e) {}
+  document.getElementById('ai-modal')?.remove();
+  renderShoppingList();
+  switchTab('shopping');
 }
 
  let lang = localStorage.getItem('lang') || 'en';
