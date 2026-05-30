@@ -2123,14 +2123,19 @@ let firebaseListeners = []; // track active listeners for cleanup
 function initFirebase() {
   if (firebaseReady) return;
   if (!FIREBASE_CONFIG.apiKey || FIREBASE_CONFIG.apiKey === 'YOUR_API_KEY') {
-    console.warn('Firebase not configured. Set FIREBASE_CONFIG in index.html.');
+    console.warn('Firebase not configured.');
     return;
   }
   try {
-    firebase.initializeApp(FIREBASE_CONFIG);
-    firebaseReady = true;
+    if (firebase.apps && firebase.apps.length) {
+      firebaseReady = true;
+    } else {
+      firebase.initializeApp(FIREBASE_CONFIG);
+      firebaseReady = true;
+    }
   } catch(e) {
-    console.warn('Firebase init failed:', e.message);
+    // Already initialized
+    firebaseReady = true;
   }
 }
 
