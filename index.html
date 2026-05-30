@@ -2238,11 +2238,12 @@ function pushToFirebase(path, localKey) {
   try {
     const data = JSON.parse(localStorage.getItem(localKey) || 'null');
     if (data !== null) {
-      _syncing[localKey] = true;  // Block remote overwrites during push
-      familyDbRef.child(path).set(data);
-      setTimeout(() => { _syncing[localKey] = false; }, 2000); // Clear block after 2s
+      _syncing[localKey] = true;
+      familyDbRef.child(path).set(data, () => {
+        _syncing[localKey] = false;
+      });
     }
-  } catch(e) {}
+  } catch(e) { _syncing[localKey] = false; }
 }
 
 function getDeviceId() {
