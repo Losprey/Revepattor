@@ -2119,6 +2119,7 @@ let firebaseReady = false;
 let familyCode = '';
 let familyDbRef = null;
 let firebaseListeners = []; // track active listeners for cleanup
+let _syncing = {}; // Track which keys are being pushed to Firebase
 
 function initFirebase() {
   if (firebaseReady) return;
@@ -2193,7 +2194,6 @@ function connectToFamily(code) {
   firebaseListeners = [];
 
   // Listen for remote changes on each data set
-  let _syncing = {}; // Track which keys are being pushed to Firebase
   const bindPath = (path, localKey, mergeFn) => {
     const ref = familyDbRef.child(path);
     ref.on('value', snap => {
