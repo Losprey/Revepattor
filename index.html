@@ -4681,6 +4681,8 @@ function renderPlanner() {
     + '<button class="pwn-btn'+(plannerWeekOffset===1?' active':'')+'" onclick="goToWeek(1)">'+(lang==='en'?'Next week':'Bud\u00faci t\u00fd\u017ede\u0148')+'</button>'
     + '</div>';
 
+  let totalKcal = 0, totalMeals = 0, totalTime = 0;
+
   // Day cards
   var dayCards = '';
   DAYS.forEach(function(d, i) {
