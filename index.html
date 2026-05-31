@@ -2256,6 +2256,8 @@ function connectToFamily(code) {
       }
       // Reload JS variables from localStorage for merged data
       reloadFromLocalStorage(localKey, remoteData);
+      // Show sync toast
+      showSyncToast(localKey);
       refreshActiveTab();
     });
     firebaseListeners.push(ref);
@@ -6122,6 +6124,16 @@ const NOTIF_MESSAGES = {
 let notifInterval = null;
 let notifFiredToday = {};
 try { notifFiredToday = JSON.parse(localStorage.getItem('notifFired') || '{}'); } catch(e) { notifFiredToday = {}; }
+
+function showSyncToast(key) {
+  var labels = { mealPlan: (lang==='en'?'Meal plan':'Jed\u00e1lni\u010dek'), mealPlanKids: (lang==='en'?'Kids plan':'Detsk\u00fd pl\u00e1n'), shoppingItems: (lang==='en'?'Shopping list':'N\u00e1kupn\u00fd zoznam'), tasks: (lang==='en'?'Tasks':'\u00dalohy'), planType: (lang==='en'?'Plan type':'Typ pl\u00e1nu'), recipes: (lang==='en'?'Recipes':'Recepty') };
+  var name = labels[key] || key;
+  var d = document.createElement('div');
+  d.style.cssText = 'position:fixed;bottom:80px;left:10px;background:var(--primary);color:#fff;padding:6px 14px;border-radius:10px;font-size:.7rem;font-weight:600;z-index:9999;animation:fadeInUp .3s ease;';
+  d.textContent = '\u2b07\ufe0f ' + name + ' ' + (lang==='en'?'synced':'synchronizovan\u00e9');
+  document.body.appendChild(d);
+  setTimeout(function() { d.style.opacity = '0'; d.style.transition = 'opacity .5s'; setTimeout(function() { d.remove(); }, 500); }, 2000);
+}
 
 function reloadFromLocalStorage(key, data) {
   // Reload in-memory JS variables when Firebase syncs new data
