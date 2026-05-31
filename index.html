@@ -2282,7 +2282,7 @@ function connectToFamily(code) {
     firebaseListeners.push(ref);
   };
 
-  bindPath('shoppingItems', 'shoppingItems');
+  bindPath('shoppingItems', 'shoppingItems', mergeShoppingItems);
   bindPath('mealPlan', 'mealPlan');
   bindPath('mealPlanKids', 'mealPlanKids');
   bindPath('tasks', 'tasks');
@@ -5076,7 +5076,30 @@ function loadShopItems() {
   shopItems = shopItems.filter(it => it.source === 'manual');
 }
 function saveShopItems() {
+  var now = Date.now(), dev = getDeviceId();
+  shopItems.forEach(function(it) {
+    if (!it.createdAt) it.createdAt = now;
+    it.updatedAt = now;
+    it.updatedBy = dev;
+  });
   localStorage.setItem('shoppingItems', JSON.stringify(shopItems));
+}
+
+function mergeShoppingItems(localArr, remoteArr) {
+  if (!Array.isArray(localArr)) localArr = [];
+  if (!Array.isArray(remoteArr)) remoteArr = [];
+  var map = {};
+  localArr.forEach(function(r) { map[r.id] = r; });
+  remoteArr.forEach(function(r) {
+    var local = map[r.id];
+    if (!local) { map[r.id] = r; }
+    else if ((r.updatedAt||0) >= (local.updatedAt||0)) {
+      // Keep local checked state if it's more recent
+      if ((local.updatedAt||0) > (r.updatedAt||0)) r.checked = local.checked;
+      map[r.id] = r;
+    }
+  });
+  return Object.values(map);
 }
 function generateShopId() {
   return 'si_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8);
