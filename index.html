@@ -2285,16 +2285,20 @@ function connectToFamily(code) {
 function pushAllLocalData() { pushToFirebase('shoppingItems', 'shoppingItems'); pushToFirebase('mealPlan', 'mealPlan'); pushToFirebase('mealPlanKids', 'mealPlanKids'); pushToFirebase('tasks', 'tasks'); pushToFirebase('recipes', 'recipes'); pushToFirebase('planType', 'planType'); }
 
 function pushToFirebase(path, localKey) {
-  if (!familyDbRef) return;
+  if (!familyDbRef) { console.log('Firebase push SKIP: no familyDbRef'); return; }
   try {
-    const data = JSON.parse(localStorage.getItem(localKey) || 'null');
+    var data = JSON.parse(localStorage.getItem(localKey) || 'null');
     if (data !== null) {
+      console.log('Firebase PUSH:', localKey, 'size', JSON.stringify(data).length);
       _syncing[localKey] = true;
-      familyDbRef.child(path).set(data, () => { _syncing[localKey] = false; });
-      // Safety: clear flag after 5s even if callback fails
-      setTimeout(() => { _syncing[localKey] = false; }, 5000);
+      familyDbRef.child(path).set(data, function(err) {
+        _syncing[localKey] = false;
+        if (err) console.error('Firebase push ERROR:', localKey, err.message);
+        else console.log('Firebase push OK:', localKey);
+      });
+      setTimeout(function() { _syncing[localKey] = false; }, 8000);
     }
-  } catch(e) { _syncing[localKey] = false; }
+  } catch(e) { console.error('Firebase push EXCEPTION:', localKey, e.message); _syncing[localKey] = false; }
 }
 
 function getDeviceId() {
