@@ -4671,6 +4671,7 @@ function renderPlanner() {
     const r = getSlotRecipe(entry);
     if (r && r.nutrition) todayKcal += r.nutrition.kcal || 0;
   });
+  let totalKcal = 0, totalMeals = 0, totalTime = 0;
   todayEl.innerHTML = '';
 
   var s = '';
