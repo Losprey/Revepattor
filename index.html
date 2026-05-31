@@ -2354,6 +2354,14 @@ function debugFirebasePull() {
       }
     });
     refreshActiveTab();
+    // Force all renders
+    try { renderPlanner(); } catch(e) {}
+    try { renderTasks(); } catch(e) {}
+    try { renderShoppingList(); } catch(e) {}
+    try { renderDashboard(); } catch(e) {}
+    // Also reload recipes
+    if (val.recipes) { recipes = val.recipes; }
+    if (val.shoppingItems) { shopItems = val.shoppingItems; }
     alert(info);
   }, function(err) { alert('READ FAILED: ' + err.message); });
 }
