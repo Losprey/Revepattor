@@ -3508,6 +3508,10 @@ function openSettings() {
         <span class="sr-label"><span class="sr-icon">🖼️</span> ${t('Obnoviť obrázky','Refresh images')}</span>
         <span class="sr-value"><span class="sr-arrow">›</span></span>
       </div>
+      <div class="settings-row" onclick="testFirebaseSync()">
+        <span class="sr-label"><span class="sr-icon">🔬</span> ${t('Test synchronizácie','Test sync')}</span>
+        <span class="sr-value"><span class="sr-arrow">›</span></span>
+      </div>
       <div class="settings-row" onclick="localStorage.removeItem('onboardingCompleted');showOnboarding(true);closeSettings()">
         <span class="sr-label"><span class="sr-icon">❓</span> ${t('Zobraziť onboarding','Show onboarding')}</span>
         <span class="sr-value"><span class="sr-arrow">›</span></span>
