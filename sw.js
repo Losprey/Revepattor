@@ -1,4 +1,4 @@
-const CACHE = 'mealnest-v4';
+const CACHE = 'mealnest-v6';
 
 self.addEventListener('install', e => {
   self.skipWaiting();
