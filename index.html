@@ -4740,29 +4740,45 @@ function renderPlanner() {
     </div>`;
   });
 
-  weekEl.innerHTML = `
-    <div class="planner-week-nav">
-      <button class="pwn-btn" onclick="goToWeek(${plannerWeekOffset-1})">◀</button>
-      <span class="pwn-label">${getWeekLabel(startOfWeek)}</span>
-      <button class="pwn-btn" onclick="goToWeek(${plannerWeekOffset+1})">▶</button>
-    </div>
-    <div class="planner-day-strip">${dayStrip}</div>
-    ${mealRows}
-    <div class="pbs-card">
-      <div class="pbs-item"><div class="pbs-val">${totalMeals}</div><div class="pbs-label">${lang==='en'?'Meals':'Jedál'}</div></div>
-      <div class="pbs-item"><div class="pbs-val">🔥 ${totalKcal}</div><div class="pbs-label">kcal</div></div>
-      <div class="pbs-item"><div class="pbs-val">⏱ ${totalTime}min</div><div class="pbs-label">${lang==='en'?'Prep':'Príprava'}</div></div>
-      <div class="pbs-item"><div class="pbs-val">${totalMeals>0?Math.round(totalKcal/totalMeals):0}</div><div class="pbs-label">${lang==='en'?'Avg':'Priemer'}</div></div>
-    </div>`;
+  weekEl.innerHTML = '<div class="planner-week-nav"><button class="pwn-btn" onclick="goToWeek('+(plannerWeekOffset-1)+')">\u25c0</button><span class="pwn-label">'+getWeekLabel(startOfWeek)+'</span><button class="pwn-btn" onclick="goToWeek('+(plannerWeekOffset+1)+')">\u25b6</button></div>';
 
-  // Swipe support
-  const strip = weekEl.querySelector('.planner-day-strip');
-  let sx = 0;
-  strip.addEventListener('touchstart', e => { sx = e.touches[0].clientX; });
-  strip.addEventListener('touchend', e => {
-    const d = e.changedTouches[0].clientX - sx;
-    if (Math.abs(d) > 40) { if (d < 0) nextPlannerDay(); else prevPlannerDay(); }
+  // Full week grid: headers + 5 rows
+  weekEl.innerHTML += '<div class="planner-week-grid">';
+  // Day headers
+  let h = '';
+  DAYS.forEach((d,i) => {
+    var dt = new Date(startOfWeek); dt.setDate(startOfWeek.getDate()+i);
+    var td = dt.toISOString().slice(0,10)===todayStr;
+    h += '<div class="pwg-head'+(td?' today':'')+'">'+dayNames[i].slice(0,3)+'<br>'+dt.getDate()+'.</div>';
   });
+  weekEl.innerHTML += h;
+  // Meal rows
+  MEALS.forEach(m => {
+    var r = '';
+    DAYS.forEach((d,i) => {
+      var e = (weekPlan[d]||{})[m.id];
+      var rec = getSlotRecipe(e);
+      var nm = getSlotName(e);
+      var isC = e && e.type==='custom';
+      var f = rec || isC;
+      if (f) totalMeals++;
+      if (rec && rec.nutrition) totalKcal += rec.nutrition.kcal||0;
+      if (rec && rec.time) totalTime += rec.time;
+      var clk = rec ? 'viewRecipe('+rec.id+')' : (isC ? '' : 'pickRecipe(\''+d+'\',\''+m.id+'\',\''+weekKey+'\')');
+      r += '<div class="pwg-cell'+(f?' filled':'')+'" onclick="'+clk+'">';
+      r += f ? '<span class="pwgc-icon">'+m.icon+'</span><span class="pwgc-name">'+esc(nm.slice(0,12))+'</span>' : '<span class="pwgc-empty">+</span>';
+      r += '</div>';
+    });
+    weekEl.innerHTML += '<div style="display:contents">'+r+'</div>';
+  });
+  weekEl.innerHTML += '</div>';
+
+  // Bottom stats
+  weekEl.innerHTML += '<div class="planner-bottom-summary">'
+    + '<div class="pbs-item"><div class="pbs-val">'+totalMeals+'</div><div class="pbs-label">'+(lang==='en'?'Meals':'Jed\u00e1l')+'</div></div>'
+    + '<div class="pbs-item"><div class="pbs-val">\ud83d\udd25 '+totalKcal+'</div><div class="pbs-label">kcal</div></div>'
+    + '<div class="pbs-item"><div class="pbs-val">\u23f1 '+totalTime+'min</div><div class="pbs-label">'+(lang==='en'?'Prep':'Pr\u00edprava')+'</div></div>'
+    + '</div>';
 }
 
 function goToWeek(offset) {
