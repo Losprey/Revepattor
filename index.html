@@ -257,39 +257,30 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: rgba(22
 .nav-item:active { transform: scale(.9); }
 
 /* ===== PLANNER ===== */
-/* ======== PLANNER REDESIGN v3 - Premium Mobile ======== */
-.planner-day-strip { display: flex; gap: .35rem; padding: .4rem 0 .6rem; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
-.planner-day-strip::-webkit-scrollbar { display: none; }
-.pds-card { flex-shrink: 0; width: 68px; padding: .6rem .2rem .4rem; border-radius: 16px; border: 1.5px solid var(--border); text-align: center; cursor: pointer; transition: all .2s ease; background: var(--surface); }
-.pds-card:active { transform: scale(.93); }
-.pds-card.selected { background: var(--primary); border-color: var(--primary); transform: scale(1.05); box-shadow: 0 4px 16px rgba(220,38,38,.25); }
-.pds-card.selected .pds-dow { color: rgba(255,255,255,.75); }
-.pds-card.selected .pds-day { color: #fff; }
-.pds-card.selected .pds-count { color: rgba(255,255,255,.6); }
-.pds-dow { font-size: .55rem; text-transform: uppercase; letter-spacing: .06em; font-weight: 700; color: var(--text3); margin-bottom: .2rem; }
-.pds-day { font-size: 1rem; font-weight: 800; color: var(--text); margin-bottom: .15rem; }
-.pds-count { font-size: .5rem; font-weight: 600; color: var(--text3); }
+/* ======== PLANNER — Vertical Week ======== */
+.planner-week-nav { display: flex; align-items: center; gap: .4rem; padding-bottom: .5rem; }
+.planner-week-nav .pwn-btn { flex: 1; padding: .5rem; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text2); font-size: .68rem; font-weight: 700; cursor: pointer; text-align: center; }
+.planner-week-nav .pwn-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 
-.planner-meal-row { display: flex; align-items: center; gap: .6rem; padding: .8rem .6rem; margin-bottom: .35rem; background: var(--surface); border-radius: 16px; border: 1px solid var(--border); cursor: pointer; transition: all .15s ease; min-height: 64px; }
-.planner-meal-row:active { transform: scale(.97); background: var(--hover-bg); }
-.planner-meal-row.filled { border-left: 0; }
-.planner-meal-row .pmr-icon { font-size: 1.6rem; width: 44px; text-align: center; flex-shrink: 0; }
-.planner-meal-row .pmr-body { flex: 1; min-width: 0; }
-.planner-meal-row .pmr-label { font-size: .58rem; text-transform: uppercase; letter-spacing: .05em; color: var(--text3); font-weight: 600; margin-bottom: .1rem; }
-.planner-meal-row .pmr-name { font-size: .82rem; font-weight: 700; color: var(--text); }
-.planner-meal-row .pmr-meta { font-size: .6rem; color: var(--text3); margin-top: .08rem; }
-.planner-meal-row .pmr-empty { font-size: .72rem; color: var(--text3); opacity: .35; font-weight: 500; }
-.planner-meal-row .pmr-actions { display: flex; gap: .4rem; flex-shrink: 0; }
-.planner-meal-row .pmr-btn { width: 32px; height: 32px; border-radius: 10px; border: 1px solid var(--border); background: transparent; color: var(--text3); font-size: .7rem; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-left: .1rem; }
-.planner-meal-row .pmr-btn:hover { border-color: var(--primary); color: var(--primary); }
-
-.pbs-card { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); padding: .6rem; margin-top: .4rem; display: flex; justify-content: space-around; }
+.pv-day-card { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); margin-bottom: .5rem; overflow: hidden; }
+.pv-day-head { display: flex; align-items: center; justify-content: space-between; padding: .6rem .7rem; border-bottom: 1px solid var(--border); }
+.pv-day-title { font-size: .82rem; font-weight: 800; color: var(--text); }
+.pv-day-stats { font-size: .6rem; color: var(--text3); font-weight: 600; }
+.pv-meal-row { display: flex; align-items: center; gap: .5rem; padding: .55rem .7rem; border-bottom: 1px solid var(--border); cursor: pointer; transition: background .12s; min-height: 48px; }
+.pv-meal-row:last-child { border-bottom: none; }
+.pv-meal-row:active { background: var(--hover-bg); }
+.pv-meal-icon { font-size: 1.2rem; flex-shrink: 0; }
+.pv-meal-label { font-size: .6rem; text-transform: uppercase; letter-spacing: .04em; color: var(--text3); font-weight: 600; width: 68px; flex-shrink: 0; }
+.pv-meal-name { font-size: .76rem; font-weight: 600; color: var(--text); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pv-meal-meta { font-size: .55rem; color: var(--text3); margin-left: auto; margin-right: .3rem; white-space: nowrap; }
+.pv-add-btn { padding: .35rem .55rem; border-radius: 8px; border: 1px solid rgba(139,92,246,.3); background: rgba(139,92,246,.08); color: #8b5cf6; font-size: .6rem; font-weight: 700; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+.pv-add-btn:active { background: rgba(139,92,246,.15); }
+.pv-del-btn { width: 24px; height: 24px; border-radius: 50%; border: none; background: transparent; color: var(--text3); font-size: .55rem; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.pv-del-btn:hover { color: var(--danger); background: rgba(239,68,68,.1); }
+.planner-bottom-summary { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); padding: .55rem; margin-top: .3rem; display: flex; justify-content: space-around; }
 .pbs-item { text-align: center; }
-.pbs-val { font-size: .85rem; font-weight: 800; color: var(--text); }
-.pbs-label { font-size: .5rem; color: var(--text3); text-transform: uppercase; letter-spacing: .05em; font-weight: 600; margin-top: .05rem; }
-.planner-week-nav { display: flex; align-items: center; gap: .5rem; margin-bottom: .3rem; }
-.planner-week-nav .pwn-btn { padding: .4rem .6rem; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text2); font-size: .65rem; font-weight: 600; cursor: pointer; }
-.planner-week-nav .pwn-label { flex: 1; text-align: center; font-size: .72rem; font-weight: 700; color: var(--text); }
+.pbs-val { font-size: .78rem; font-weight: 800; color: var(--text); }
+.pbs-label { font-size: .48rem; color: var(--text3); text-transform: uppercase; letter-spacing: .04em; }
 
 .planner-container { display: none; padding-top: .3rem; }
 .planner-today { margin-bottom: .6rem; }
@@ -4684,100 +4675,57 @@ function renderPlanner() {
   });
   todayEl.innerHTML = '';
 
-  // ===== WEEK NAVIGATION =====
-  const prevWeekDate = new Date(startOfWeek); prevWeekDate.setDate(prevWeekDate.getDate() - 7);
-  const nextWeekDate = new Date(startOfWeek); nextWeekDate.setDate(nextWeekDate.getDate() + 7);
+  // Week nav
+  var navHtml = '<div class="planner-week-nav">'
+    + '<button class="pwn-btn'+(plannerWeekOffset===0?' active':'')+'" onclick="goToWeek(0)">'+(lang==='en'?'This week':'Tento t\u00fd\u017ede\u0148')+'</button>'
+    + '<button class="pwn-btn'+(plannerWeekOffset===1?' active':'')+'" onclick="goToWeek(1)">'+(lang==='en'?'Next week':'Bud\u00faci t\u00fd\u017ede\u0148')+'</button>'
+    + '</div>';
 
-  // ===== DAY STRIP =====
-  let dayStrip = '';
-  let totalKcal = 0, totalMeals = 0, totalTime = 0;
-  const todayDayIdx = (new Date().getDay() + 6) % 7;
-
-  DAYS.forEach((d, i) => {
-    const day = weekPlan[d] || {};
-    const date = new Date(startOfWeek); date.setDate(startOfWeek.getDate() + i);
-    const filled = Object.values(day).filter(Boolean).length;
-    const isToday = date.toISOString().slice(0,10) === todayStr;
+  // Day cards
+  var dayCards = '';
+  DAYS.forEach(function(d, i) {
+    var day = weekPlan[d] || {};
+    var date = new Date(startOfWeek); date.setDate(startOfWeek.getDate() + i);
+    var disp = date.getDate() + '.' + (date.getMonth()+1) + '.';
+    var filled = Object.values(day).filter(Boolean).length;
     totalMeals += filled;
-    Object.values(day).filter(Boolean).forEach(entry => {
-      const r = getSlotRecipe(entry);
+    Object.values(day).filter(Boolean).forEach(function(entry) {
+      var r = getSlotRecipe(entry);
       if (r) { if (r.nutrition) totalKcal += r.nutrition.kcal || 0; if (r.time) totalTime += r.time; }
     });
-    const sel = i === _selectedPlannerDay;
-    dayStrip += `<div class="pds-card${sel?' selected':''}" onclick="selectPlannerDay(${i})">
-      <div class="pds-dow">${dayNames[i].slice(0,3)}</div>
-      <div class="pds-day">${date.getDate()}</div>
-      <div class="pds-count">${filled}/${totalSlots}</div>
-    </div>`;
-  });
 
-  // ===== SELECTED DAY DETAIL =====
-  const selDayKey = DAYS[_selectedPlannerDay];
-  const selDate = new Date(startOfWeek); selDate.setDate(startOfWeek.getDate() + _selectedPlannerDay);
-  const selPlan = weekPlan[selDayKey] || {};
-  const selFilled = Object.values(selPlan).filter(Boolean).length;
+    dayCards += '<div class="pv-day-card"><div class="pv-day-head">'
+      + '<span class="pv-day-title">' + dayNames[i] + ' ' + disp + '</span>'
+      + '<span class="pv-day-stats">' + filled + '/' + totalSlots + ' ' + (lang==='en'?'meals':'jed\u00e1l') + '</span>'
+      + '</div>';
 
-  let mealRows = '';
-  MEALS.forEach(m => {
-    const entry = selPlan[m.id];
-    const r = getSlotRecipe(entry);
-    const name = getSlotName(entry);
-    const isCustom = entry && entry.type === 'custom';
-    const click = r ? `viewRecipe(${r.id})` : isCustom ? '' : `pickRecipe('${selDayKey}','${m.id}','${weekKey}')`;
-    const filled = r || isCustom;
-    mealRows += `<div class="planner-meal-row${filled?' filled':''}" onclick="${click}">
-      <span class="pmr-icon">${m.icon}</span>
-      <div class="pmr-body">
-        <div class="pmr-label">${mealLabel(m.id)}</div>
-        ${filled
-          ? `<div class="pmr-name">${esc(name)}</div>${r&&r.nutrition?`<div class="pmr-meta">🔥 ${r.nutrition.kcal||'?'} kcal · ⏱ ${r.time||'?'} min</div>`:''}`
-          : `<div class="pmr-empty">+ ${lang==='en'?'Pick a recipe':'Vybrať recept'}</div>`}
-      </div>
-      ${filled ? `<div class="pmr-actions">
-        <button class="pmr-btn" onclick="event.stopPropagation();pickRecipe('${selDayKey}','${m.id}','${weekKey}')" title="${t('Vymeniť','Replace')}">↻</button>
-        <button class="pmr-btn" onclick="event.stopPropagation();removeSlot('${selDayKey}','${m.id}','${weekKey}')" title="${t('Odstrániť','Remove')}">✕</button>
-      </div>` : ''}
-    </div>`;
-  });
-
-  weekEl.innerHTML = '<div class="planner-week-nav"><button class="pwn-btn" onclick="goToWeek('+(plannerWeekOffset-1)+')">\u25c0</button><span class="pwn-label">'+getWeekLabel(startOfWeek)+'</span><button class="pwn-btn" onclick="goToWeek('+(plannerWeekOffset+1)+')">\u25b6</button></div>';
-
-  // Full week grid: headers + 5 rows
-  weekEl.innerHTML += '<div class="planner-week-grid">';
-  // Day headers
-  let h = '';
-  DAYS.forEach((d,i) => {
-    var dt = new Date(startOfWeek); dt.setDate(startOfWeek.getDate()+i);
-    var td = dt.toISOString().slice(0,10)===todayStr;
-    h += '<div class="pwg-head'+(td?' today':'')+'">'+dayNames[i].slice(0,3)+'<br>'+dt.getDate()+'.</div>';
-  });
-  weekEl.innerHTML += h;
-  // Meal rows
-  MEALS.forEach(m => {
-    var r = '';
-    DAYS.forEach((d,i) => {
-      var e = (weekPlan[d]||{})[m.id];
-      var rec = getSlotRecipe(e);
+    MEALS.forEach(function(m) {
+      var e = day[m.id];
+      var r = getSlotRecipe(e);
       var nm = getSlotName(e);
-      var isC = e && e.type==='custom';
-      var f = rec || isC;
-      if (f) totalMeals++;
-      if (rec && rec.nutrition) totalKcal += rec.nutrition.kcal||0;
-      if (rec && rec.time) totalTime += rec.time;
-      var clk = rec ? 'viewRecipe('+rec.id+')' : (isC ? '' : 'pickRecipe(\''+d+'\',\''+m.id+'\',\''+weekKey+'\')');
-      r += '<div class="pwg-cell'+(f?' filled':'')+'" onclick="'+clk+'">';
-      r += f ? '<span class="pwgc-icon">'+m.icon+'</span><span class="pwgc-name">'+esc(nm.slice(0,12))+'</span>' : '<span class="pwgc-empty">+</span>';
-      r += '</div>';
+      var isC = e && e.type === 'custom';
+      var f = r || isC;
+      dayCards += '<div class="pv-meal-row" onclick="' + (r ? 'viewRecipe('+r.id+')' : (f ? '' : 'pickRecipe(\''+d+'\',\''+m.id+'\',\''+weekKey+'\')')) + '">'
+        + '<span class="pv-meal-icon">' + m.icon + '</span>'
+        + '<span class="pv-meal-label">' + mealLabel(m.id) + '</span>';
+      if (f) {
+        dayCards += '<span class="pv-meal-name">' + esc(nm) + '</span>'
+          + (r && r.nutrition ? '<span class="pv-meal-meta">\ud83d\udd25' + (r.nutrition.kcal||'?') + ' \u23f1' + (r.time||'?') + '</span>' : '')
+          + '<button class="pv-del-btn" onclick="event.stopPropagation();removeSlot(\''+d+'\',\''+m.id+'\',\''+weekKey+'\')" title="'+(lang==='en'?'Remove':'Odstr\u00e1ni\u0165')+'">\u2715</button>';
+      } else {
+        dayCards += '<span class="pv-meal-name"></span>'
+          + '<button class="pv-add-btn" onclick="event.stopPropagation();pickRecipe(\''+d+'\',\''+m.id+'\',\''+weekKey+'\')">+ '+(lang==='en'?'Add':'Prida\u0165')+'</button>';
+      }
+      dayCards += '</div>';
     });
-    weekEl.innerHTML += '<div style="display:contents">'+r+'</div>';
+    dayCards += '</div>';
   });
-  weekEl.innerHTML += '</div>';
 
-  // Bottom stats
-  weekEl.innerHTML += '<div class="planner-bottom-summary">'
-    + '<div class="pbs-item"><div class="pbs-val">'+totalMeals+'</div><div class="pbs-label">'+(lang==='en'?'Meals':'Jed\u00e1l')+'</div></div>'
-    + '<div class="pbs-item"><div class="pbs-val">\ud83d\udd25 '+totalKcal+'</div><div class="pbs-label">kcal</div></div>'
-    + '<div class="pbs-item"><div class="pbs-val">\u23f1 '+totalTime+'min</div><div class="pbs-label">'+(lang==='en'?'Prep':'Pr\u00edprava')+'</div></div>'
+  weekEl.innerHTML = navHtml + dayCards
+    + '<div class="planner-bottom-summary">'
+    + '<div class="pbs-item"><div class="pbs-val">' + totalMeals + '</div><div class="pbs-label">'+(lang==='en'?'Meals':'Jed\u00e1l')+'</div></div>'
+    + '<div class="pbs-item"><div class="pbs-val">\ud83d\udd25 ' + totalKcal + '</div><div class="pbs-label">kcal</div></div>'
+    + '<div class="pbs-item"><div class="pbs-val">\u23f1 ' + totalTime + 'min</div><div class="pbs-label">'+(lang==='en'?'Prep':'Pr\u00edprava')+'</div></div>'
     + '</div>';
 }
 
