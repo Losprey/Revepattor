@@ -2237,26 +2237,13 @@ function connectToFamily(code) {
   firebaseListeners = [];
 
   // Listen for remote changes on each data set
-  const bindPath = (path, localKey, mergeFn) => {
+  const bindPath = (path, localKey) => {
     const ref = familyDbRef.child(path);
     ref.on('value', snap => {
-      const remoteData = snap.val();
+      var remoteData = snap.val();
       if (!remoteData) return;
-      // Skip if we're currently pushing this data to Firebase
-      if (_syncing[localKey]) { console.log('Firebase sync SKIPPED (syncing):', localKey); return; }
-      const localRaw = localStorage.getItem(localKey);
-      if (localRaw === JSON.stringify(remoteData)) { console.log('Firebase sync SKIPPED (identical):', localKey); return; }
-      console.log('Firebase sync RECEIVED:', localKey, 'size', JSON.stringify(remoteData).length);
-      if (typeof mergeFn === 'function') {
-        const local = JSON.parse(localRaw || 'null');
-        const merged = mergeFn(local, remoteData);
-        localStorage.setItem(localKey, JSON.stringify(merged));
-      } else {
-        localStorage.setItem(localKey, JSON.stringify(remoteData));
-      }
-      // Reload JS variables from localStorage for merged data
+      localStorage.setItem(localKey, JSON.stringify(remoteData));
       reloadFromLocalStorage(localKey, remoteData);
-      // Show sync toast
       showSyncToast(localKey);
       refreshActiveTab();
     });
@@ -2270,13 +2257,7 @@ function connectToFamily(code) {
   bindPath('planType', 'planType');
 
   // Listen for recipe changes (merge by id, keep local-only recipes)
-  bindPath('recipes', 'recipes', (localRecipes, remoteRecipes) => {
-    if (!Array.isArray(localRecipes)) localRecipes = [];
-    if (!Array.isArray(remoteRecipes)) return localRecipes;
-    const map = new Map(localRecipes.map(r => [r.id, r]));
-    remoteRecipes.forEach(r => { map.set(r.id, r); });
-    return Array.from(map.values());
-  });
+  bindPath('recipes', 'recipes');
 
   // Also push local device presence
   const presenceRef = familyDbRef.child('members').child(getDeviceId());
