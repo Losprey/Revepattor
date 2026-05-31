@@ -2299,6 +2299,21 @@ function connectToFamily(code) {
 
 function pushAllLocalData() { pushToFirebase('shoppingItems', 'shoppingItems'); pushToFirebase('mealPlan', 'mealPlan'); pushToFirebase('mealPlanKids', 'mealPlanKids'); pushToFirebase('tasks', 'tasks'); pushToFirebase('recipes', 'recipes'); pushToFirebase('planType', 'planType'); }
 
+function firebaseHardTest() {
+  try {
+    initFirebase();
+    if (!firebaseReady) { alert('FAIL: firebaseReady=false'); return; }
+    var app = firebase.app();
+    var db = firebase.database();
+    var info = { appName: app.name, databaseURL: app.options.databaseURL, projectId: app.options.projectId, familyCode: familyCode||null, deviceId: getDeviceId(), timestamp: Date.now() };
+    var testRef = db.ref('hardTest/' + Date.now());
+    testRef.set(info, function(error) {
+      if (error) { alert('WRITE ERROR:\n' + error.code + '\n' + error.message + '\n\nURL:\n' + app.options.databaseURL); }
+      else { alert('WRITE OK\n\nCheck Firebase Data -> hardTest\n\nURL:\n' + app.options.databaseURL); }
+    });
+  } catch(e) { alert('EXCEPTION:\n' + e.name + '\n' + e.message); }
+}
+
 function debugFirebase() {
   var info = 'Firebase debug:\n';
   info += 'ready: ' + !!firebaseReady + '\n';
@@ -3620,6 +3635,10 @@ function openSettings() {
       </div>
       <div class="settings-row" onclick="debugFirebase()">
         <span class="sr-label"><span class="sr-icon">🔬</span> ${t('Debug Firebase','Debug Firebase')}</span>
+        <span class="sr-value"><span class="sr-arrow">›</span></span>
+      </div>
+      <div class="settings-row" onclick="firebaseHardTest()">
+        <span class="sr-label"><span class="sr-icon">🛠️</span> ${t('Hard Test','Hard Test')}</span>
         <span class="sr-value"><span class="sr-arrow">›</span></span>
       </div>
       <div class="settings-row" onclick="debugFirebaseWrite()">
