@@ -257,6 +257,11 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: rgba(22
 .nav-item:active { transform: scale(.9); }
 
 /* ===== PLANNER ===== */
+/* ======== PLANNER WEEK NAV ======== */
+.planner-week-nav { display: flex; gap: .5rem; margin-bottom: .5rem; }
+.pln-btn { flex: 1; padding: .45rem; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text2); font-size: .68rem; font-weight: 700; cursor: pointer; text-align: center; }
+.pln-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
 /* ======== PLANNER — Vertical Day Cards ======== */
 .pvc-day { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); margin-bottom: .55rem; overflow: hidden; max-width: 92%; margin-left: auto; margin-right: auto; }
 .pvc-head { padding: .5rem .65rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
@@ -1014,7 +1019,12 @@ body:not(.dark) .recipe-card .fav-btn.fav-active { background: linear-gradient(1
 </div>
 
 <div class="container planner-container" id="planner-container" style="display:none;">
-  <!-- HERO / WEEK NAV -->
+  <!-- WEEK NAV -->
+  <div class="planner-week-nav" id="planner-week-nav">
+    <button class="pln-btn active" onclick="goToWeek(0)" id="pln-this">Tento týždeň</button>
+    <button class="pln-btn" onclick="goToWeek(1)" id="pln-next">Budúci týždeň</button>
+  </div>
+
   <!-- PLAN TYPE SWITCHER -->
   <div class="plan-type-switch" id="plan-type-switch">
     <div class="pts-bg"></div>
@@ -4629,6 +4639,12 @@ function renderPlanner() {
   pts.className = 'plan-type-switch' + (planType === 'kids' ? ' kids' : '');
   document.querySelectorAll('.plan-type-btn').forEach(b => b.classList.toggle('active', b.dataset.pt === planType));
 
+  // Week nav active state
+  document.getElementById('pln-this').classList.toggle('active', plannerWeekOffset === 0);
+  document.getElementById('pln-next').classList.toggle('active', plannerWeekOffset === 1);
+  document.getElementById('pln-this').textContent = lang==='en'?'This week':'Tento t\u00fd\u017ede\u0148';
+  document.getElementById('pln-next').textContent = lang==='en'?'Next week':'Bud\u00faci t\u00fd\u017ede\u0148';
+
   // ===== TODAY SECTION =====
   const dayNameToday = dayNames[todayIdx];
   const todayDate = new Date();
@@ -4664,8 +4680,7 @@ function renderPlanner() {
     s += '</div>';
   });
 
-  weekEl.innerHTML = '<div class="planner-bar"><button class="pb-btn'+(plannerWeekOffset===0?' active':'')+'" onclick="goToWeek(0)">'+(lang==='en'?'This week':'Tento t\u00fd\u017ede\u0148')+'</button><button class="pb-btn'+(plannerWeekOffset===1?' active':'')+'" onclick="goToWeek(1)">'+(lang==='en'?'Next week':'Bud\u00faci t\u00fd\u017ede\u0148')+'</button></div>'
-    + s
+  weekEl.innerHTML = s
     + '<div class="planner-summary-row"><div class="psr-item"><div class="psr-val">'+totalMeals+'</div><div class="psr-label">'+(lang==='en'?'Meals':'Jed\u00e1l')+'</div></div><div class="psr-item"><div class="psr-val">\ud83d\udd25 '+totalKcal+'</div><div class="psr-label">kcal</div></div><div class="psr-item"><div class="psr-val">\u23f1 '+totalTime+'min</div><div class="psr-label">'+(lang==='en'?'Prep':'Pr\u00edprava')+'</div></div></div>';
 }
 
