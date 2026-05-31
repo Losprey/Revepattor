@@ -2299,6 +2299,50 @@ function connectToFamily(code) {
 
 function pushAllLocalData() { pushToFirebase('shoppingItems', 'shoppingItems'); pushToFirebase('mealPlan', 'mealPlan'); pushToFirebase('mealPlanKids', 'mealPlanKids'); pushToFirebase('tasks', 'tasks'); pushToFirebase('recipes', 'recipes'); pushToFirebase('planType', 'planType'); }
 
+function debugFirebase() {
+  var info = 'Firebase debug:\n';
+  info += 'ready: ' + !!firebaseReady + '\n';
+  info += 'familyCode: ' + (familyCode || 'none') + '\n';
+  info += 'familyDbRef: ' + !!familyDbRef + '\n';
+  info += 'databaseURL: ' + FIREBASE_CONFIG.databaseURL + '\n';
+  info += 'apps.length: ' + (firebase.apps ? firebase.apps.length : 'N/A') + '\n';
+  info += 'deviceId: ' + getDeviceId() + '\n';
+  try {
+    var mp = localStorage.getItem('mealPlan');
+    info += 'mealPlan localStorage: ' + (mp ? mp.length + ' chars' : 'empty') + '\n';
+    var sm = localStorage.getItem('shoppingItems');
+    info += 'shoppingItems localStorage: ' + (sm ? sm.length + ' chars' : 'empty');
+  } catch(e) { info += 'localStorage error: ' + e.message; }
+  alert(info);
+}
+
+function debugFirebaseWrite() {
+  if (!familyDbRef) { alert('FAIL: familyDbRef is null. Join a family first.'); return; }
+  var testData = { test: true, time: Date.now(), device: getDeviceId() };
+  familyDbRef.child('_debug').set(testData, function(err) {
+    if (err) { alert('WRITE FAILED: ' + err.message + '\nCode: ' + (err.code||'none')); }
+    else { alert('WRITE OK! Check Firebase console -> families/'+familyCode+'/_debug'); }
+  });
+}
+
+function debugFirebasePull() {
+  if (!familyDbRef) { alert('FAIL: familyDbRef is null.'); return; }
+  familyDbRef.once('value', function(snap) {
+    var val = snap.val();
+    if (!val) { alert('No data at families/'+familyCode); return; }
+    var keys = Object.keys(val);
+    var info = 'Found ' + keys.length + ' data keys:\n' + keys.join(', ') + '\n\nLoading into app...';
+    keys.forEach(function(k) {
+      if (val[k] !== null && val[k] !== undefined) {
+        localStorage.setItem(k, JSON.stringify(val[k]));
+        reloadFromLocalStorage(k, val[k]);
+      }
+    });
+    refreshActiveTab();
+    alert(info);
+  }, function(err) { alert('READ FAILED: ' + err.message); });
+}
+
 function testFirebaseSync() {
   try {
     var r = !!firebaseReady, f = !!familyCode, d = !!familyDbRef;
@@ -3572,6 +3616,18 @@ function openSettings() {
     <div class="settings-card">
       <div class="settings-row" onclick="refreshRecipeImages();closeSettings()">
         <span class="sr-label"><span class="sr-icon">🖼️</span> ${t('Obnoviť obrázky','Refresh images')}</span>
+        <span class="sr-value"><span class="sr-arrow">›</span></span>
+      </div>
+      <div class="settings-row" onclick="debugFirebase()">
+        <span class="sr-label"><span class="sr-icon">🔬</span> ${t('Debug Firebase','Debug Firebase')}</span>
+        <span class="sr-value"><span class="sr-arrow">›</span></span>
+      </div>
+      <div class="settings-row" onclick="debugFirebaseWrite()">
+        <span class="sr-label"><span class="sr-icon">📤</span> ${t('Force Push','Force Push')}</span>
+        <span class="sr-value"><span class="sr-arrow">›</span></span>
+      </div>
+      <div class="settings-row" onclick="debugFirebasePull()">
+        <span class="sr-label"><span class="sr-icon">📥</span> ${t('Force Pull','Force Pull')}</span>
         <span class="sr-value"><span class="sr-arrow">›</span></span>
       </div>
       <div class="settings-row" onclick="var d={t:Date.now()};firebase.database().ref('_test').set(d,function(e){alert(e?'FAIL:'+e.message:'OK')})">
