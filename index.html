@@ -2258,12 +2258,19 @@ function connectToFamily(code) {
   firebaseListeners = [];
 
   // Listen for remote changes on each data set
-  const bindPath = (path, localKey) => {
+  const bindPath = (path, localKey, mergeFn) => {
     const ref = familyDbRef.child(path);
     ref.on('value', snap => {
       var remoteData = snap.val();
       if (!remoteData) return;
-      localStorage.setItem(localKey, JSON.stringify(remoteData));
+      if (mergeFn) {
+        var localRaw = localStorage.getItem(localKey);
+        var localData = localRaw ? JSON.parse(localRaw) : null;
+        var merged = mergeFn(localData, remoteData);
+        localStorage.setItem(localKey, JSON.stringify(merged));
+      } else {
+        localStorage.setItem(localKey, JSON.stringify(remoteData));
+      }
       reloadFromLocalStorage(localKey, remoteData);
       showSyncToast(localKey);
       // Force re-render
@@ -2282,7 +2289,7 @@ function connectToFamily(code) {
   bindPath('planType', 'planType');
 
   // Listen for recipe changes (merge by id, keep local-only recipes)
-  bindPath('recipes', 'recipes');
+  bindPath('recipes', 'recipes', mergeRecipes);
 
   // Also push local device presence
   const presenceRef = familyDbRef.child('members').child(getDeviceId());
@@ -2646,7 +2653,38 @@ function matchesAgeFilter(recipe) {
 
 // ======================== THEME ========================
 // ======================== PERSISTENCE ========================
+function mergeRecipes(localArr, remoteArr) {
+  if (!Array.isArray(localArr)) localArr = [];
+  if (!Array.isArray(remoteArr)) remoteArr = [];
+  var map = {};
+  // Index local recipes
+  localArr.forEach(function(r) { map[r.id] = r; });
+  // Merge remote recipes (remote wins if timestamp is newer)
+  remoteArr.forEach(function(r) {
+    var local = map[r.id];
+    if (!local) { map[r.id] = r; }
+    else {
+      // Keep the newer version
+      var localTs = local.updatedAt || 0;
+      var remoteTs = r.updatedAt || 0;
+      if (remoteTs >= localTs) {
+        // Keep local favorites and ratings if remote doesn't have them
+        if (local.favorite && !r.favorite) r.favorite = true;
+        if (local.rating > (r.rating || 0)) r.rating = local.rating;
+        map[r.id] = r;
+      }
+    }
+  });
+  return Object.values(map);
+}
+
 function saveToLS() {
+  // Add timestamp and device ID before saving
+  recipes.forEach(function(r) {
+    if (!r.updatedAt) r.updatedAt = Date.now();
+    r.updatedAt = Date.now();
+    r.updatedBy = getDeviceId();
+  });
   localStorage.setItem('recipes', JSON.stringify(recipes));
 }
 
