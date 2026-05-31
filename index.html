@@ -2317,18 +2317,20 @@ function testFirebaseSync() {
 function pushToFirebase(path, localKey) {
   if (!familyDbRef) { console.log('Firebase push SKIP: no familyDbRef'); return; }
   try {
-    var data = JSON.parse(localStorage.getItem(localKey) || 'null');
+    var data = null;
+    if (localKey === 'mealPlan') data = mealPlan;
+    else if (localKey === 'mealPlanKids') data = mealPlanKids;
+    else if (localKey === 'shoppingItems') data = shopItems;
+    else if (localKey === 'tasks') data = tasks;
+    else if (localKey === 'recipes') data = recipes;
+    else if (localKey === 'planType') data = planType;
+    else { data = JSON.parse(localStorage.getItem(localKey) || 'null'); }
     if (data !== null) {
-      console.log('Firebase PUSH:', localKey, 'size', JSON.stringify(data).length);
-      _syncing[localKey] = true;
       familyDbRef.child(path).set(data, function(err) {
-        _syncing[localKey] = false;
         if (err) console.error('Firebase push ERROR:', localKey, err.message);
-        else console.log('Firebase push OK:', localKey);
       });
-      setTimeout(function() { _syncing[localKey] = false; }, 8000);
     }
-  } catch(e) { console.error('Firebase push EXCEPTION:', localKey, e.message); _syncing[localKey] = false; }
+  } catch(e) { console.error('Firebase push EXCEPTION:', localKey, e.message); }
 }
 
 function getDeviceId() {
