@@ -6142,13 +6142,12 @@ function showSyncToast(key) {
 }
 
 function reloadFromLocalStorage(key, data) {
-  // Reload in-memory JS variables when Firebase syncs new data
   try {
-    if (key === 'mealPlan') mealPlan = JSON.parse(JSON.stringify(data));
-    else if (key === 'mealPlanKids') mealPlanKids = JSON.parse(JSON.stringify(data));
-    else if (key === 'shoppingItems') loadShopItems();
-    else if (key === 'tasks') { tasks = JSON.parse(JSON.stringify(data)); }
-    else if (key === 'planType') planType = data;
+    if (key === 'mealPlan') { mealPlan = JSON.parse(JSON.stringify(data)); renderPlanner(); }
+    else if (key === 'mealPlanKids') { mealPlanKids = JSON.parse(JSON.stringify(data)); }
+    else if (key === 'shoppingItems') { loadShopItems(); renderShoppingList(); }
+    else if (key === 'tasks') { tasks = Array.isArray(data) ? data.slice() : []; renderTasks(); }
+    else if (key === 'planType') { planType = data; renderPlanner(); }
     else if (key === 'recipes') { recipes = JSON.parse(JSON.stringify(data)); }
   } catch(e) {}
 }
