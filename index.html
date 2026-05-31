@@ -2318,7 +2318,9 @@ function refreshActiveTab() {
   if (tab === 'shopping') renderShoppingList();
   if (tab === 'planner') renderPlanner();
   if (tab === 'tasks') renderTasks();
-  if (tab === 'dashboard') renderDashboard();
+  if (tab === 'dashboard') { renderDashboard(); }
+  // Always update task widget on dashboard
+  try { renderTaskWidget(); } catch(e) {}
 }
 
 // Load family code from localStorage on init
