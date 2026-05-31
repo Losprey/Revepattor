@@ -2149,28 +2149,36 @@ async function aiGenerateShoppingList() {
 }
 
 function addAIShoppingItems() {
-  const text = window._aiShoppingReply || ''; if (!text) return;
-  const lines = text.split('\n'); let c = 'other';
+  var text = window._aiShoppingReply || ''; if (!text) return;
+  var lines = text.split('\n'); var c = 'other';
   loadShopItems();
-  let added = 0;
-  lines.forEach(l => {
-    const cl = l.replace(/^[•\-\*\s\d\.\)]+\s*/,'').trim();
-    if (!cl) return;
-    if (cl.endsWith(':') && !cl.includes('—') && !cl.includes('–') && !cl.includes('-')) {
-      c = guessFoodCategory(cl.replace(':', '')); return;
+  var added = 0;
+  lines.forEach(function(l) {
+    var cl = l.replace(/^[•\-\*\s\d\.\)]+\s*/, '').trim();
+    if (!cl || cl.length < 2) return;
+    // Skip lines that are just separators
+    if (/^[=\-—–]{3,}$/.test(cl)) return;
+    // Category header: ends with : and no item separator
+    if (cl.endsWith(':') && cl.indexOf('—') === -1 && cl.indexOf('–') === -1 && cl.indexOf('-') === -1) {
+      c = guessFoodCategory(cl.replace(':', '').trim()); return;
     }
-    const parts = cl.split(/[—–\-]\s*/);
-    if (parts.length >= 2) {
-      const nm = parts[0].trim();
-      const q = parts.slice(1).join(' ').trim();
-      const am = (q.match(/^[\d.,\/]+/g) || [])[0] || '';
-      const u = am ? q.replace(am, '').trim() : q;
-      if (nm && nm.length > 1) {
-        shopItems.push({ id: generateShopId(), name: nm, amount: am, unit: u || '',
-          category: c === 'other' ? guessFoodCategory(nm) : c,
-          checked: false, source: 'manual', note: '', recipeId: '' });
-        added++;
-      }
+    // Try to find item name and optional quantity
+    var name = cl, amount = '', unit = '';
+    var sep = cl.match(/[—–\-]\s*/);
+    if (sep) {
+      var idx = cl.indexOf(sep[0]);
+      name = cl.slice(0, idx).trim();
+      var rest = cl.slice(idx + 1).trim();
+      var am = rest.match(/^(\d+[\.,]?\d*)\s*(\w*)/);
+      if (am) { amount = am[1]; unit = am[2] || ''; }
+      else { amount = rest; }
+    }
+    // Just use whatever we have as the item name
+    if (name && name.length > 1) {
+      shopItems.push({ id: generateShopId(), name: name, amount: amount, unit: unit,
+        category: c === 'other' ? guessFoodCategory(name) : c,
+        checked: false, source: 'manual', note: '', recipeId: '' });
+      added++;
     }
   });
   saveShopItems();
