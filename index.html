@@ -3507,7 +3507,7 @@ function openSettings() {
         <span class="sr-label"><span class="sr-icon">🖼️</span> ${t('Obnoviť obrázky','Refresh images')}</span>
         <span class="sr-value"><span class="sr-arrow">›</span></span>
       </div>
-      <div class="settings-row" onclick="alert('FB:'+!!firebaseReady+' code:'+!!familyCode+' ref:'+!!familyDbRef)">
+      <div class="settings-row" onclick="var d={t:Date.now()};firebase.database().ref('_test').set(d,function(e){alert(e?'FAIL:'+e.message:'OK')})">
         <span class="sr-label"><span class="sr-icon">🔬</span> Test sync</span>
         <span class="sr-value"><span class="sr-arrow">›</span></span>
       </div>
