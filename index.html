@@ -2192,26 +2192,47 @@ function generateFamilyCode() {
 
 function createFamily() {
   initFirebase();
-  if (!firebaseReady) { alert('Firebase nie je nastavený. Otvor index.html a vyplň FIREBASE_CONFIG.'); return; }
-  const code = generateFamilyCode();
+  if (!firebaseReady) { alert(t('Firebase nie je nastaven\u00fd.','Firebase not configured.')); return; }
+  var code = '';
+  var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  for (var i = 0; i < 8; i++) code += chars[Math.floor(Math.random() * chars.length)];
   familyCode = code;
   localStorage.setItem('familyCode', code);
   connectToFamily(code);
-  pushAllLocalData();
-  alert('Rodinný kód: ' + code + '\nZdieľaj tento kód s rodinou.');
+  // Only push if user confirms (creator is first, so safe to push)
+  if (confirm(t('Vytvoren\u00e1 nov\u00e1 rodina. Synchronizova\u0165 aktu\u00e1lne d\u00e1ta?','New family created. Sync your current data?'))) {
+    pushAllLocalData();
+  }
+  alert(t('Rodinn\u00fd k\u00f3d: ','Family code: ') + code + '\n' + t('Zdie\u013eaj tento k\u00f3d s rodinou.','Share this code with your family.'));
   openSettings();
   updateSyncIndicator();
 }
 
 function joinFamily(code) {
   initFirebase();
-  if (!firebaseReady) { alert('Firebase nie je nastavený. Otvor index.html a vyplň FIREBASE_CONFIG.'); return; }
+  if (!firebaseReady) { alert(t('Firebase nie je nastaven\u00fd.','Firebase not configured.')); return; }
   code = code.toUpperCase().trim();
   if (!code) return;
   familyCode = code;
   localStorage.setItem('familyCode', code);
   connectToFamily(code);
-  pushAllLocalData();
+  // Wait for remote data, then ask about merge
+  setTimeout(function() {
+    var hasRemote = false;
+    try {
+      var mp = localStorage.getItem('mealPlan');
+      if (mp && mp !== '{}') hasRemote = true;
+    } catch(e) {}
+    if (hasRemote) {
+      if (confirm(t('Rodina m\u00e1 d\u00e1ta. Pou\u017ei\u0165 rodinn\u00e9 d\u00e1ta?','Family has data. Use family data?\nOK = Use family data\nCancel = Keep mine'))) {
+        // Already loaded by listener, nothing to do
+      } else {
+        pushAllLocalData();
+      }
+    } else {
+      pushAllLocalData();
+    }
+  }, 2000);
   openSettings();
   updateSyncIndicator();
 }
