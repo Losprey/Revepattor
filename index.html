@@ -258,7 +258,7 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: rgba(22
 
 /* ===== PLANNER ===== */
 /* ======== PLANNER — Vertical Day Cards ======== */
-.pvc-day { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); margin-bottom: .45rem; overflow: hidden; }
+.pvc-day { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); margin-bottom: .55rem; overflow: hidden; max-width: 92%; margin-left: auto; margin-right: auto; }
 .pvc-head { padding: .5rem .65rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
 .pvc-title { font-size: .78rem; font-weight: 800; color: var(--text); }
 .pvc-progress { font-size: .58rem; color: var(--text3); font-weight: 600; }
@@ -1015,20 +1015,6 @@ body:not(.dark) .recipe-card .fav-btn.fav-active { background: linear-gradient(1
 
 <div class="container planner-container" id="planner-container" style="display:none;">
   <!-- HERO / WEEK NAV -->
-  <div class="planner-hero" id="planner-hero">
-    <div class="planner-hero-glow"></div>
-    <div class="planner-hero-row">
-      <div class="planner-week-title" id="planner-week-title">
-        <span id="planner-week-range">25.5 – 31.5.2026</span>
-        <span class="wk-sub" id="planner-week-sub">Tento týždeň</span>
-      </div>
-    </div>
-    <div class="planner-quick-row">
-      <button class="planner-quick-btn" onclick="goToWeek(0)" id="qw-this"><span class="qb-icon">📅</span>Tento týždeň</button>
-      <button class="planner-quick-btn" onclick="goToWeek(1)" id="qw-next"><span class="qb-icon">➡️</span>Budúci týždeň</button>
-    </div>
-  </div>
-
   <!-- PLAN TYPE SWITCHER -->
   <div class="plan-type-switch" id="plan-type-switch">
     <div class="pts-bg"></div>
@@ -2571,9 +2557,6 @@ function applyLang() {
   // Planner labels
   const ptA = document.getElementById('pt-adults-label'); if (ptA) ptA.textContent = lang==='en'?'Adults':'Dospelí';
   const ptK = document.getElementById('pt-kids-label'); if (ptK) ptK.textContent = lang==='en'?'Kids':'Deti';
-  const ws = document.getElementById('planner-week-sub'); if (ws) ws.textContent = lang==='en'?'This week':'Tento týždeň';
-  const qwT = document.getElementById('qw-this'); if (qwT) qwT.childNodes[1].textContent = lang==='en'?'This week':'Tento týždeň';
-  const qwN = document.getElementById('qw-next'); if (qwN) qwN.childNodes[1].textContent = lang==='en'?'Next week':'Budúci týždeň';
   const paC = document.getElementById('pa-clear-label'); if (paC) paC.textContent = lang==='en'?'Clear week':'Vymazať týždeň';
   const paA = document.getElementById('pa-ai-label'); if (paA) paA.textContent = lang==='en'?'📝 AI Shop':'📝 AI nákup';
   const aiTip = document.getElementById('dash-ai-label'); if (aiTip) aiTip.textContent = lang==='en'?'AI tip of the day':'AI tip dňa';
@@ -4640,19 +4623,6 @@ function renderPlanner() {
   const totalSlots = MEALS.length;
   const todayStr = new Date().toISOString().slice(0,10);
   const todayIdx = (new Date().getDay() + 6) % 7;
-
-  // Update week nav
-  document.getElementById('planner-week-range').textContent = getWeekLabel(startOfWeek);
-  const wkSub = document.getElementById('planner-week-sub');
-  if (plannerWeekOffset === 0) wkSub.textContent = lang === 'en' ? 'This week' : 'Tento týždeň';
-  else if (plannerWeekOffset === 1) wkSub.textContent = lang === 'en' ? 'Next week' : 'Budúci týždeň';
-  else if (plannerWeekOffset === -1) wkSub.textContent = lang === 'en' ? 'Last week' : 'Minulý týždeň';
-  else wkSub.textContent = lang === 'en' ? `Week ${plannerWeekOffset > 0 ? '+' : ''}${plannerWeekOffset}` : `Týždeň ${plannerWeekOffset > 0 ? '+' : ''}${plannerWeekOffset}`;
-
-  // Quick buttons active state
-  document.querySelectorAll('.planner-quick-btn').forEach(b => b.classList.remove('active'));
-  if (plannerWeekOffset === 0) document.getElementById('qw-this').classList.add('active');
-  else if (plannerWeekOffset === 1) document.getElementById('qw-next').classList.add('active');
 
   // Plan type switcher
   const pts = document.getElementById('plan-type-switch');
