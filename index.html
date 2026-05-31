@@ -2567,6 +2567,8 @@ function applyLang() {
   // Planner labels
   const ptA = document.getElementById('pt-adults-label'); if (ptA) ptA.textContent = lang==='en'?'Adults':'Dospelí';
   const ptK = document.getElementById('pt-kids-label'); if (ptK) ptK.textContent = lang==='en'?'Kids':'Deti';
+  document.getElementById('pln-this').textContent = lang==='en'?'This week':'Tento t\u00fd\u017ede\u0148';
+  document.getElementById('pln-next').textContent = lang==='en'?'Next week':'Bud\u00faci t\u00fd\u017ede\u0148';
   const paC = document.getElementById('pa-clear-label'); if (paC) paC.textContent = lang==='en'?'Clear week':'Vymazať týždeň';
   const paA = document.getElementById('pa-ai-label'); if (paA) paA.textContent = lang==='en'?'📝 AI Shop':'📝 AI nákup';
   const aiTip = document.getElementById('dash-ai-label'); if (aiTip) aiTip.textContent = lang==='en'?'AI tip of the day':'AI tip dňa';
