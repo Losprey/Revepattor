@@ -260,7 +260,7 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: rgba(22
 /* ======== PLANNER REDESIGN — Day Selector + Meal Cards ======== */
 .planner-day-strip { display: flex; gap: .4rem; padding: .3rem 0 .5rem; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
 .planner-day-strip::-webkit-scrollbar { display: none; }
-.planner-day-card { flex-shrink: 0; min-width: 58px; padding: .45rem .25rem .3rem; border-radius: 14px; border: 1px solid var(--border); text-align: center; cursor: pointer; transition: all .2s ease; background: var(--surface); }
+.planner-day-card { flex-shrink: 0; min-width: 62px; padding: .5rem .3rem .35rem; border-radius: 16px; border: 1px solid var(--border); text-align: center; cursor: pointer; transition: all .2s ease; background: var(--surface); }
 .planner-day-card:active { transform: scale(.94); }
 .planner-day-card.selected { background: var(--primary); border-color: var(--primary); }
 .pdc-name { font-size: .55rem; text-transform: uppercase; letter-spacing: .04em; font-weight: 700; color: var(--text); margin-bottom: .12rem; }
@@ -4683,31 +4683,7 @@ function renderPlanner() {
     const r = getSlotRecipe(entry);
     if (r && r.nutrition) todayKcal += r.nutrition.kcal || 0;
   });
-  todayEl.innerHTML = `<div class="planner-today-header">
-    <span class="td-icon">📅</span>
-    <span class="td-label">${dayNameToday}</span>
-    <span class="td-date">${todayDisp}</span>
-    <span class="td-kcal">🔥 ~${todayKcal} kcal</span>
-  </div>
-  <div class="planner-today-meals">${MEALS.map(m => {
-    const entry = todayDay[m.id];
-    const r = getSlotRecipe(entry);
-    const name = getSlotName(entry);
-    const isCustom = entry && entry.type === 'custom';
-    const kcal = r && r.nutrition ? r.nutrition.kcal : null;
-    const time = r ? r.time : null;
-    const clickHandler = r ? `viewRecipe(${r.id})` : isCustom ? '' : `pickRecipe('${DAYS[todayIdx]}','${m.id}','${todayWk}')`;
-    return `<div class="td-meal-card${r || isCustom ? ' filled' : ''}" onclick="${clickHandler}">
-      <button class="td-remove" onclick="event.stopPropagation();removeSlot('${DAYS[todayIdx]}','${m.id}','${todayWk}')">✕</button>
-      <span class="td-icon">${m.icon}</span>
-      <span class="td-label">${mealLabel(m.id)}</span>
-      ${r || isCustom
-        ? `<span class="td-name">${esc(name)}</span>
-           ${kcal ? `<span class="td-meta">🔥${kcal}${time ? ' · ⏱'+time : ''}</span>` : ''}
-           <span class="td-replace" onclick="event.stopPropagation();pickRecipe('${DAYS[todayIdx]}','${m.id}','${todayWk}')">↻ vymeniť</span>`
-        : `<span class="td-empty">+ ${mealLabel(m.id)}</span>`}
-    </div>`;
-  }).join('')}</div>`;
+  todayEl.innerHTML = ''; // Remove old today grid, replaced by new selector below
 
   // ===== DAY SELECTOR STRIP =====
   let dayStrip = '';
