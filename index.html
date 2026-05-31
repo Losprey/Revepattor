@@ -2346,23 +2346,25 @@ function debugFirebasePull() {
     var val = snap.val();
     if (!val) { alert('No data at families/'+familyCode); return; }
     var keys = Object.keys(val);
-    var info = 'Found ' + keys.length + ' data keys:\n' + keys.join(', ') + '\n\nLoading into app...';
+    // Directly set JS variables
+    if (val.mealPlan) { mealPlan = val.mealPlan; }
+    if (val.mealPlanKids) { mealPlanKids = val.mealPlanKids; }
+    if (val.shoppingItems) { shopItems = Array.isArray(val.shoppingItems) ? val.shoppingItems : []; saveShopItems(); }
+    if (val.tasks) { tasks = Array.isArray(val.tasks) ? val.tasks : []; }
+    if (val.recipes) { recipes = Array.isArray(val.recipes) ? val.recipes : []; saveToLS(); }
+    if (val.planType) { planType = val.planType; localStorage.setItem('planType', planType); }
+    // Also save to localStorage
     keys.forEach(function(k) {
       if (val[k] !== null && val[k] !== undefined) {
-        localStorage.setItem(k, JSON.stringify(val[k]));
-        reloadFromLocalStorage(k, val[k]);
+        try { localStorage.setItem(k, JSON.stringify(val[k])); } catch(e) {}
       }
     });
-    refreshActiveTab();
-    // Force all renders
+    // Force render everything
     try { renderPlanner(); } catch(e) {}
     try { renderTasks(); } catch(e) {}
     try { renderShoppingList(); } catch(e) {}
     try { renderDashboard(); } catch(e) {}
-    // Also reload recipes
-    if (val.recipes) { recipes = val.recipes; }
-    if (val.shoppingItems) { shopItems = val.shoppingItems; }
-    alert(info);
+    alert('Loaded ' + keys.length + ' keys:\n' + keys.join(', ') + '\n\nCheck planner/tasks/shopping now.');
   }, function(err) { alert('READ FAILED: ' + err.message); });
 }
 
