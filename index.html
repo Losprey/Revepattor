@@ -2149,31 +2149,26 @@ async function aiGenerateShoppingList() {
 }
 
 function addAIShoppingItems() {
-  var text = window._aiShoppingReply || ''; if (!text) return;
+  var text = window._aiShoppingReply || ''; if (!text) { alert('No AI reply data'); return; }
+  // For debugging: show what we got
+  alert(t('AI odpoveď (prvých 300 znakov):','AI reply (first 300 chars):') + '\n' + text.slice(0,300));
   var lines = text.split('\n'); var c = 'other';
   loadShopItems();
   var added = 0;
   lines.forEach(function(l) {
     var cl = l.replace(/^[•\-\*\s\d\.\)]+\s*/, '').trim();
     if (!cl || cl.length < 2) return;
-    // Skip lines that are just separators
     if (/^[=\-—–]{3,}$/.test(cl)) return;
-    // Category header: ends with : and no item separator
     if (cl.endsWith(':') && cl.indexOf('—') === -1 && cl.indexOf('–') === -1 && cl.indexOf('-') === -1) {
       c = guessFoodCategory(cl.replace(':', '').trim()); return;
     }
-    // Try to find item name and optional quantity
+    // Simple: use the whole line as item name, try to extract number at end
     var name = cl, amount = '', unit = '';
-    var sep = cl.match(/[—–\-]\s*/);
-    if (sep) {
-      var idx = cl.indexOf(sep[0]);
-      name = cl.slice(0, idx).trim();
-      var rest = cl.slice(idx + 1).trim();
-      var am = rest.match(/^(\d+[\.,]?\d*)\s*(\w*)/);
-      if (am) { amount = am[1]; unit = am[2] || ''; }
-      else { amount = rest; }
+    var numMatch = cl.match(/[—–\-]\s*(\d+[\.,]?\d*)\s*(\S*)\s*$/);
+    if (numMatch) {
+      name = cl.slice(0, cl.indexOf(numMatch[0])).trim();
+      amount = numMatch[1]; unit = numMatch[2] || '';
     }
-    // Just use whatever we have as the item name
     if (name && name.length > 1) {
       shopItems.push({ id: generateShopId(), name: name, amount: amount, unit: unit,
         category: c === 'other' ? guessFoodCategory(name) : c,
