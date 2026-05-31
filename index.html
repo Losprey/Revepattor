@@ -257,30 +257,22 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: rgba(22
 .nav-item:active { transform: scale(.9); }
 
 /* ===== PLANNER ===== */
-/* ======== PLANNER — Vertical Week ======== */
-.planner-week-nav { display: flex; align-items: center; gap: .4rem; padding-bottom: .5rem; }
-.planner-week-nav .pwn-btn { flex: 1; padding: .5rem; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text2); font-size: .68rem; font-weight: 700; cursor: pointer; text-align: center; }
-.planner-week-nav .pwn-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
-
-.pv-day-card { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); margin-bottom: .5rem; overflow: hidden; }
-.pv-day-head { display: flex; align-items: center; justify-content: space-between; padding: .6rem .7rem; border-bottom: 1px solid var(--border); }
-.pv-day-title { font-size: .82rem; font-weight: 800; color: var(--text); }
-.pv-day-stats { font-size: .6rem; color: var(--text3); font-weight: 600; }
-.pv-meal-row { display: flex; align-items: center; gap: .5rem; padding: .55rem .7rem; border-bottom: 1px solid var(--border); cursor: pointer; transition: background .12s; min-height: 48px; }
-.pv-meal-row:last-child { border-bottom: none; }
-.pv-meal-row:active { background: var(--hover-bg); }
-.pv-meal-icon { font-size: 1.2rem; flex-shrink: 0; }
-.pv-meal-label { font-size: .6rem; text-transform: uppercase; letter-spacing: .04em; color: var(--text3); font-weight: 600; width: 68px; flex-shrink: 0; }
-.pv-meal-name { font-size: .76rem; font-weight: 600; color: var(--text); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.pv-meal-meta { font-size: .55rem; color: var(--text3); margin-left: auto; margin-right: .3rem; white-space: nowrap; }
-.pv-add-btn { padding: .35rem .55rem; border-radius: 8px; border: 1px solid rgba(139,92,246,.3); background: rgba(139,92,246,.08); color: #8b5cf6; font-size: .6rem; font-weight: 700; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
-.pv-add-btn:active { background: rgba(139,92,246,.15); }
-.pv-del-btn { width: 24px; height: 24px; border-radius: 50%; border: none; background: transparent; color: var(--text3); font-size: .55rem; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
-.pv-del-btn:hover { color: var(--danger); background: rgba(239,68,68,.1); }
-.planner-bottom-summary { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); padding: .55rem; margin-top: .3rem; display: flex; justify-content: space-around; }
-.pbs-item { text-align: center; }
-.pbs-val { font-size: .78rem; font-weight: 800; color: var(--text); }
-.pbs-label { font-size: .48rem; color: var(--text3); text-transform: uppercase; letter-spacing: .04em; }
+/* ======== PLANNER — Week Overview Grid ======== */
+.planner-week-grid-wrap { display: grid; grid-template-columns: repeat(4, 1fr); gap: .4rem; margin-bottom: .5rem; }
+.planner-week-grid-wrap.two { grid-template-columns: repeat(3, 1fr); justify-content: center; }
+.pw-day-card { background: var(--surface); border-radius: 14px; border: 1px solid var(--border); padding: .45rem .3rem .3rem; cursor: pointer; transition: all .15s ease; text-align: center; }
+.pw-day-card:active { transform: scale(.96); }
+.pw-day-head { margin-bottom: .3rem; }
+.pw-day-name { font-size: .6rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: var(--text2); }
+.pw-day-date { font-size: .75rem; font-weight: 800; color: var(--text); margin: .05rem 0; }
+.pw-day-count { font-size: .5rem; color: var(--text3); font-weight: 600; }
+.pw-day-meals { display: flex; justify-content: center; gap: .15rem; flex-wrap: wrap; }
+.pw-meal-dot { font-size: .65rem; opacity: .25; }
+.pw-meal-dot.done { opacity: 1; }
+.planner-bottom-bar { background: var(--surface); border-radius: 14px; border: 1px solid var(--border); padding: .5rem; display: flex; justify-content: space-around; }
+.pbb-item { text-align: center; }
+.pbb-val { font-size: .75rem; font-weight: 800; color: var(--text); }
+.pbb-label { font-size: .48rem; color: var(--text3); text-transform: uppercase; letter-spacing: .04em; font-weight: 600; }
 
 .planner-container { display: none; padding-top: .3rem; }
 .planner-today { margin-bottom: .6rem; }
@@ -4675,65 +4667,86 @@ function renderPlanner() {
   });
   todayEl.innerHTML = '';
 
-  // Week nav
-  var navHtml = '<div class="planner-week-nav">'
-    + '<button class="pwn-btn'+(plannerWeekOffset===0?' active':'')+'" onclick="goToWeek(0)">'+(lang==='en'?'This week':'Tento t\u00fd\u017ede\u0148')+'</button>'
-    + '<button class="pwn-btn'+(plannerWeekOffset===1?' active':'')+'" onclick="goToWeek(1)">'+(lang==='en'?'Next week':'Bud\u00faci t\u00fd\u017ede\u0148')+'</button>'
-    + '</div>';
+  // Week nav buttons
+  var nav = '<div class="planner-week-nav"><button class="pwn-btn'+(plannerWeekOffset===0?' active':'')+'" onclick="goToWeek(0)">'+(lang==='en'?'This week':'Tento t\u00fd\u017ede\u0148')+'</button><button class="pwn-btn'+(plannerWeekOffset===1?' active':'')+'" onclick="goToWeek(1)">'+(lang==='en'?'Next week':'Bud\u00faci t\u00fd\u017ede\u0148')+'</button></div>';
 
-  let totalKcal = 0, totalMeals = 0, totalTime = 0;
-
-  // Day cards
-  var dayCards = '';
+  // Cards row 1 (mon-thu) and row 2 (fri-sun)
+  var row1 = '', row2 = '';
   DAYS.forEach(function(d, i) {
     var day = weekPlan[d] || {};
     var date = new Date(startOfWeek); date.setDate(startOfWeek.getDate() + i);
-    var disp = date.getDate() + '.' + (date.getMonth()+1) + '.';
+    var disp = date.getDate() + '.' + (date.getMonth()+1);
     var filled = Object.values(day).filter(Boolean).length;
     totalMeals += filled;
-    Object.values(day).filter(Boolean).forEach(function(entry) {
-      var r = getSlotRecipe(entry);
-      if (r) { if (r.nutrition) totalKcal += r.nutrition.kcal || 0; if (r.time) totalTime += r.time; }
-    });
-
-    dayCards += '<div class="pv-day-card"><div class="pv-day-head">'
-      + '<span class="pv-day-title">' + dayNames[i] + ' ' + disp + '</span>'
-      + '<span class="pv-day-stats">' + filled + '/' + totalSlots + ' ' + (lang==='en'?'meals':'jed\u00e1l') + '</span>'
-      + '</div>';
-
-    MEALS.forEach(function(m) {
-      var e = day[m.id];
+    Object.values(day).filter(Boolean).forEach(function(e) {
       var r = getSlotRecipe(e);
-      var nm = getSlotName(e);
-      var isC = e && e.type === 'custom';
-      var f = r || isC;
-      dayCards += '<div class="pv-meal-row" onclick="' + (r ? 'viewRecipe('+r.id+')' : (f ? '' : 'pickRecipe(\''+d+'\',\''+m.id+'\',\''+weekKey+'\')')) + '">'
-        + '<span class="pv-meal-icon">' + m.icon + '</span>'
-        + '<span class="pv-meal-label">' + mealLabel(m.id) + '</span>';
-      if (f) {
-        dayCards += '<span class="pv-meal-name">' + esc(nm) + '</span>'
-          + (r && r.nutrition ? '<span class="pv-meal-meta">\ud83d\udd25' + (r.nutrition.kcal||'?') + ' \u23f1' + (r.time||'?') + '</span>' : '')
-          + '<button class="pv-del-btn" onclick="event.stopPropagation();removeSlot(\''+d+'\',\''+m.id+'\',\''+weekKey+'\')" title="'+(lang==='en'?'Remove':'Odstr\u00e1ni\u0165')+'">\u2715</button>';
-      } else {
-        dayCards += '<span class="pv-meal-name"></span>'
-          + '<button class="pv-add-btn" onclick="event.stopPropagation();pickRecipe(\''+d+'\',\''+m.id+'\',\''+weekKey+'\')">+ '+(lang==='en'?'Add':'Prida\u0165')+'</button>';
-      }
-      dayCards += '</div>';
+      if (r) { if (r.nutrition) totalKcal += r.nutrition.kcal||0; if (r.time) totalTime += r.time; }
     });
-    dayCards += '</div>';
+    var dots = '';
+    MEALS.forEach(function(m) {
+      dots += '<span class="pw-meal-dot'+(day[m.id]?' done':'')+'">'+(day[m.id]?m.icon:'\u25cf')+'</span>';
+    });
+    var card = '<div class="pw-day-card" onclick="showDayDetail(\''+d+'\')">'
+      + '<div class="pw-day-head"><div class="pw-day-name">'+dayNames[i]+'</div><div class="pw-day-date">'+disp+'</div><div class="pw-day-count">'+filled+'/'+totalSlots+'</div></div>'
+      + '<div class="pw-day-meals">'+dots+'</div></div>';
+    if (i < 4) row1 += card; else row2 += card;
   });
 
-  weekEl.innerHTML = navHtml + dayCards
-    + '<div class="planner-bottom-summary">'
-    + '<div class="pbs-item"><div class="pbs-val">' + totalMeals + '</div><div class="pbs-label">'+(lang==='en'?'Meals':'Jed\u00e1l')+'</div></div>'
-    + '<div class="pbs-item"><div class="pbs-val">\ud83d\udd25 ' + totalKcal + '</div><div class="pbs-label">kcal</div></div>'
-    + '<div class="pbs-item"><div class="pbs-val">\u23f1 ' + totalTime + 'min</div><div class="pbs-label">'+(lang==='en'?'Prep':'Pr\u00edprava')+'</div></div>'
+  weekEl.innerHTML = nav
+    + '<div class="planner-week-grid-wrap">'+row1+'</div>'
+    + '<div class="planner-week-grid-wrap two">'+row2+'</div>'
+    + '<div class="planner-bottom-bar">'
+    + '<div class="pbb-item"><div class="pbb-val">'+totalMeals+'</div><div class="pbb-label">'+(lang==='en'?'Meals':'Jed\u00e1l')+'</div></div>'
+    + '<div class="pbb-item"><div class="pbb-val">\ud83d\udd25 '+totalKcal+'</div><div class="pbb-label">kcal</div></div>'
+    + '<div class="pbb-item"><div class="pbb-val">\u23f1 '+totalTime+'min</div><div class="pbb-label">'+(lang==='en'?'Prep':'Pr\u00edprava')+'</div></div>'
     + '</div>';
 }
 
 function goToWeek(offset) {
   plannerWeekOffset = offset;
   _selectedPlannerDay = 0;
+  renderPlanner();
+}
+
+function showDayDetail(dayKey) {
+  var weekPlan = getWeekPlan(currentWeekKey());
+  var d = weekPlan[dayKey] || {};
+  var dayNames = lang==='en'?DAYS_EN:DAYS_SK;
+  var idx = DAYS.indexOf(dayKey);
+  var date = plannerWeekStart(plannerWeekOffset); date.setDate(date.getDate()+idx);
+  var name = dayNames[idx]+' '+date.getDate()+'.'+(date.getMonth()+1)+'.';
+  var filled = Object.values(d).filter(Boolean).length;
+  var html = '<div class="modal-overlay active" id="day-detail-modal" style="z-index:2000;" onclick="if(event.target===this)closeDayDetail()">'
+    + '<div class="modal" style="max-width:480px;">'
+    + '<button class="modal-close" onclick="closeDayDetail()">\u2715</button>'
+    + '<h2>\ud83d\udcc5 '+name+' ('+filled+'/'+totalSlots+')</h2>';
+  MEALS.forEach(function(m) {
+    var e = d[m.id];
+    var r = getSlotRecipe(e);
+    var nm = getSlotName(e);
+    var isC = e && e.type==='custom';
+    var f = r||isC;
+    var wk = currentWeekKey();
+    html += '<div style="display:flex;align-items:center;gap:.6rem;padding:.5rem;border-bottom:1px solid var(--border);cursor:pointer;min-height:44px;"'
+      + (r?' onclick="closeDayDetail();viewRecipe('+r.id+')"':(f?'':' onclick="closeDayDetail();pickRecipe(\''+dayKey+'\',\''+m.id+'\',\''+wk+'\')"'))+'>'
+      + '<span style="font-size:1.2rem;">'+m.icon+'</span>'
+      + '<span style="font-size:.6rem;text-transform:uppercase;color:var(--text3);width:65px;font-weight:600;">'+mealLabel(m.id)+'</span>'
+      + '<span style="flex:1;font-weight:600;font-size:.78rem;color:var(--text);">'+(f?esc(nm):'<span style="opacity:.3">'+(lang==='en'?'Pick recipe':'Vybra\u0165 recept')+'</span>')+'</span>'
+      + (r&&r.nutrition?'<span style="font-size:.55rem;color:var(--text3);">\ud83d\udd25'+(r.nutrition.kcal||'?')+'</span>':'')
+      + (f?'<button class="pv-del-btn" onclick="event.stopPropagation();removeSlot(\''+dayKey+'\',\''+m.id+'\',\''+wk+'\');closeDayDetail()">\u2715</button>':'')
+      + '</div>';
+  });
+  html += '</div></div>';
+  var old = document.getElementById('day-detail-modal');
+  if (old) old.remove();
+  var div = document.createElement('div');
+  div.innerHTML = html;
+  document.body.appendChild(div.firstChild);
+}
+
+function closeDayDetail() {
+  var m = document.getElementById('day-detail-modal');
+  if (m) m.remove();
   renderPlanner();
 }
 
