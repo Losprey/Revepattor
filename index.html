@@ -1848,15 +1848,6 @@ function pickOnboardLang(l) {
   renderOnboardSlide();
 }
 
-// Check for new version — clear caches and force reload
-var _lastVersion = localStorage.getItem('_appVersion');
-if (_lastVersion && _lastVersion !== APP_VERSION) {
-  if ('caches' in window) { caches.keys().then(function(keys) { keys.forEach(function(k) { caches.delete(k); }); }); }
-  localStorage.setItem('_appVersion', APP_VERSION);
-  location.reload(true);
-}
-if (!_lastVersion) localStorage.setItem('_appVersion', APP_VERSION);
-
 // Show onboarding on first visit (after data loads)
 setTimeout(() => showOnboarding(), 300);
 
