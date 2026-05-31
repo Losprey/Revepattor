@@ -2268,19 +2268,18 @@ function connectToFamily(code) {
 function pushAllLocalData() { pushToFirebase('shoppingItems', 'shoppingItems'); pushToFirebase('mealPlan', 'mealPlan'); pushToFirebase('mealPlanKids', 'mealPlanKids'); pushToFirebase('tasks', 'tasks'); pushToFirebase('recipes', 'recipes'); pushToFirebase('planType', 'planType'); }
 
 function testFirebaseSync() {
-  if (!firebaseReady || !familyDbRef) {
-    alert('Firebase nie je pripojen\u00fd: ready='+firebaseReady+' ref='+!!familyDbRef);
-    return;
-  }
-  var testData = { test: Date.now(), from: getDeviceId() };
-  familyDbRef.child('_test').set(testData, function(err) {
-    if (err) { alert('Z\u00e1pis zlyhal: '+err.message); return; }
-    alert('Z\u00e1pis OK! \u010c\u00edtam nasp\u00e4\u0165...');
-    familyDbRef.child('_test').once('value', function(snap) {
-      var val = snap.val();
-      alert(val && val.test === testData.test ? '\u00daspe\u0161n\u00fd test synchroniz\u00e1cie! \u2705' : 'D\u00e1ta sa nezhoduj\u00fa!');
-    }, function(err) { alert('\u010c\u00edtanie zlyhalo: '+err.message); });
-  });
+  try {
+    var r = !!firebaseReady, f = !!familyCode, d = !!familyDbRef;
+    alert('Firebase: ready='+r+' code='+f+' dbRef='+d);
+    if (!d) return;
+    var testData = { test: Date.now(), from: getDeviceId() };
+    familyDbRef.child('_test').set(testData, function(err) {
+      if (err) { alert('Z\u00e1pis zlyhal: '+err.message); return; }
+      familyDbRef.child('_test').once('value', function(snap) {
+        alert('\u00daspe\u0161n\u00fd test! \u2705');
+      });
+    });
+  } catch(e) { alert('Chyba: '+e.message); }
 }
 
 function pushToFirebase(path, localKey) {
