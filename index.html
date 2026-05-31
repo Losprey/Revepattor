@@ -269,28 +269,24 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: rgba(22
 .planner-day-card.selected .pdc-date { color: #fff; }
 .pdc-count { font-size: .5rem; opacity: .65; font-weight: 600; color: var(--text2); }
 .planner-day-card.selected .pdc-count { color: rgba(255,255,255,.7); }
-.planner-day-detail { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); padding: .6rem; margin-bottom: .5rem; }
-.planner-day-header { display: flex; align-items: center; justify-content: space-between; padding-bottom: .4rem; margin-bottom: .3rem; border-bottom: 1px solid var(--border); }
-.pdh-title { font-size: .9rem; font-weight: 800; color: var(--text); }
-.pdh-stats { display: flex; gap: .5rem; font-size: .62rem; color: var(--text2); }
+.planner-day-detail { background: var(--surface); border-radius: 18px; border: 1px solid var(--border); padding: .5rem .6rem; margin-bottom: .5rem; }
+.planner-day-header { display: flex; align-items: center; justify-content: space-between; padding-bottom: .5rem; margin-bottom: .2rem; border-bottom: 1px solid var(--border); }
+.pdh-title { font-size: .95rem; font-weight: 800; color: var(--text); }
+.pdh-stats { display: flex; gap: .5rem; font-size: .65rem; color: var(--text2); }
 .pdh-kcal { color: var(--primary-light); font-weight: 700; }
-.planner-meal-card { display: flex; align-items: center; gap: .5rem; padding: .5rem 0; border-bottom: 1px solid var(--border); cursor: pointer; transition: background .15s; }
+.planner-meal-card { display: flex; align-items: center; gap: .6rem; padding: .65rem 0; border-bottom: 1px solid var(--border); cursor: pointer; transition: background .15s; min-height: 58px; }
 .planner-meal-card:last-child { border-bottom: none; }
 .planner-meal-card:active { background: var(--hover-bg); }
-.planner-meal-card.filled { cursor: pointer; }
-.pmc-icon { font-size: 1.3rem; flex-shrink: 0; width: 36px; text-align: center; }
+.planner-meal-card.filled { cursor: pointer; border-left: 3px solid transparent; }
+.pmc-icon { font-size: 1.5rem; flex-shrink: 0; width: 42px; text-align: center; }
 .pmc-info { flex: 1; min-width: 0; }
-.pmc-label { font-size: .55rem; text-transform: uppercase; letter-spacing: .05em; color: var(--text3); font-weight: 600; }
-.pmc-name { font-size: .78rem; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.pmc-meta { font-size: .58rem; color: var(--text3); margin-top: .03rem; }
-.pmc-empty { font-size: .68rem; color: var(--text3); opacity: .5; }
-.pmc-actions { display: flex; gap: .2rem; flex-shrink: 0; }
-.pmc-btn { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border); background: transparent; color: var(--text3); font-size: .6rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.pmc-btn:hover { border-color: var(--primary-light); color: var(--primary); }
-.planner-bottom-summary { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); padding: .5rem; margin-top: .4rem; display: flex; justify-content: space-around; }
-.pbs-item { text-align: center; }
-.pbs-val { font-size: .8rem; font-weight: 800; color: var(--text); }
-.pbs-label { font-size: .5rem; color: var(--text3); text-transform: uppercase; letter-spacing: .04em; font-weight: 600; }
+.pmc-label { font-size: .58rem; text-transform: uppercase; letter-spacing: .06em; color: var(--text3); font-weight: 600; }
+.pmc-name { font-size: .82rem; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pmc-meta { font-size: .62rem; color: var(--text3); margin-top: .04rem; }
+.pmc-empty { font-size: .72rem; color: var(--text3); opacity: .4; }
+.planner-bottom-summary { background: var(--surface); border-radius: 18px; border: 1px solid var(--border); padding: .6rem; margin-top: .4rem; display: flex; justify-content: space-around; }
+.pbs-val { font-size: .85rem; font-weight: 800; color: var(--text); }
+.pbs-label { font-size: .52rem; color: var(--text3); text-transform: uppercase; letter-spacing: .05em; font-weight: 600; }
 
 .planner-container { display: none; padding-top: .3rem; }
 .planner-today { margin-bottom: .6rem; }
