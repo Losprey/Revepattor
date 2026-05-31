@@ -2223,9 +2223,10 @@ function connectToFamily(code) {
       const remoteData = snap.val();
       if (!remoteData) return;
       // Skip if we're currently pushing this data to Firebase
-      if (_syncing[localKey]) return;
+      if (_syncing[localKey]) { console.log('Firebase sync SKIPPED (syncing):', localKey); return; }
       const localRaw = localStorage.getItem(localKey);
-      if (localRaw === JSON.stringify(remoteData)) return;
+      if (localRaw === JSON.stringify(remoteData)) { console.log('Firebase sync SKIPPED (identical):', localKey); return; }
+      console.log('Firebase sync RECEIVED:', localKey, 'size', JSON.stringify(remoteData).length);
       if (typeof mergeFn === 'function') {
         const local = JSON.parse(localRaw || 'null');
         const merged = mergeFn(local, remoteData);
