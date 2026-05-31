@@ -2245,6 +2245,10 @@ function connectToFamily(code) {
       localStorage.setItem(localKey, JSON.stringify(remoteData));
       reloadFromLocalStorage(localKey, remoteData);
       showSyncToast(localKey);
+      // Force re-render
+      try { renderTasks(); } catch(e) {}
+      try { renderPlanner(); } catch(e) {}
+      try { renderShoppingList(); } catch(e) {}
       refreshActiveTab();
     });
     firebaseListeners.push(ref);
