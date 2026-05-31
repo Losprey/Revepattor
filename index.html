@@ -263,8 +263,8 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: rgba(22
 .pln-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 
 /* ======== PLANNER — Vertical Day Cards ======== */
-.pvc-day { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); margin-bottom: .55rem; overflow: hidden; max-width: 92%; margin-left: auto; margin-right: auto; }
-.pvc-head { padding: .5rem .65rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+.pvc-day { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); margin-bottom: .55rem; overflow: hidden; }
+.pvc-head { padding: .55rem .7rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
 .pvc-title { font-size: .78rem; font-weight: 800; color: var(--text); }
 .pvc-progress { font-size: .58rem; color: var(--text3); font-weight: 600; }
 .pvc-row { display: flex; align-items: center; gap: .5rem; padding: .45rem .65rem; border-bottom: 1px solid var(--border); cursor: pointer; transition: background .12s; min-height: 40px; }
@@ -788,9 +788,7 @@ body:not(.dark) .recipe-card .fav-btn.fav-active { background: linear-gradient(1
 .td-meal-card.filled:hover .td-replace { opacity: 1; }
 
 /* Full week grid */
-.planner-week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: .3rem; margin-top: .4rem; }
-@media (max-width: 480px) { .planner-week-grid { grid-template-columns: repeat(4, 1fr); } .planner-week-grid .wk-day:nth-child(n+5) { grid-column: span 2; } }
-@media (max-width: 380px) { .planner-week-grid { grid-template-columns: repeat(2, 1fr); } }
+.planner-week-grid { margin-top: .4rem; }
 .wk-day { background: var(--surface); border-radius: var(--radius-md); border: 1px solid var(--border); overflow: hidden; transition: all .2s var(--ease-out-expo); }
 .wk-day:active { transform: scale(.97); }
 .wk-day.today { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary), 0 2px 8px rgba(180,30,30,.1); }
@@ -4682,8 +4680,9 @@ function renderPlanner() {
     s += '</div>';
   });
 
-  weekEl.innerHTML = s
-    + '<div class="planner-summary-row"><div class="psr-item"><div class="psr-val">'+totalMeals+'</div><div class="psr-label">'+(lang==='en'?'Meals':'Jed\u00e1l')+'</div></div><div class="psr-item"><div class="psr-val">\ud83d\udd25 '+totalKcal+'</div><div class="psr-label">kcal</div></div><div class="psr-item"><div class="psr-val">\u23f1 '+totalTime+'min</div><div class="psr-label">'+(lang==='en'?'Prep':'Pr\u00edprava')+'</div></div></div>';
+  weekEl.innerHTML = s;
+  // Move stats to separate summary element
+  document.getElementById('planner-summary').innerHTML = '<div class="planner-summary-row"><div class="psr-item"><div class="psr-val">'+totalMeals+'</div><div class="psr-label">'+(lang==='en'?'Meals':'Jed\u00e1l')+'</div></div><div class="psr-item"><div class="psr-val">\ud83d\udd25 '+totalKcal+'</div><div class="psr-label">kcal</div></div><div class="psr-item"><div class="psr-val">\u23f1 '+totalTime+'min</div><div class="psr-label">'+(lang==='en'?'Prep':'Pr\u00edprava')+'</div></div></div>';
 }
 
 function goToWeek(offset) {
