@@ -2176,6 +2176,7 @@ function addAIShoppingItems() {
   saveShopItems();
   try { localStorage.setItem('shoppingItems', JSON.stringify(shopItems)); } catch(e) {}
   document.getElementById('ai-modal')?.remove();
+  if (added === 0) { alert(t('Nepodarilo sa pridať položky.','Failed to add items.')); return; }
   renderShoppingList();
   switchTab('shopping');
 }
@@ -6509,11 +6510,9 @@ try { initNotifications(); } catch(e) {}
 // Firebase sync hooks — always active, they check familyCode internally
 (function hookFirebaseSync() {
   const _origSSI = saveShopItems;
-  saveShopItems = function() { _origSSI(); if (familyCode) try { pushToFirebase('shoppingItems','shoppingItems'); } catch(e) {} };
-  const _origSWP = saveWeekPlan;
-  saveWeekPlan = function() { _origSWP(); if (familyCode) try { pushToFirebase('mealPlan','mealPlan'); pushToFirebase('mealPlanKids','mealPlanKids'); } catch(e) {} };
-  const _origST = saveTasks;
-  saveTasks = function() { _origST(); if (familyCode) try { pushToFirebase('tasks','tasks'); } catch(e) {} };
+  saveShopItems = function() { try { _origSSI(); } catch(e) {}; if (familyCode) try { pushToFirebase('shoppingItems','shoppingItems'); } catch(e) {} };
+  saveWeekPlan = function() { try { _origSWP(); } catch(e) {}; if (familyCode) try { pushToFirebase('mealPlan','mealPlan'); pushToFirebase('mealPlanKids','mealPlanKids'); } catch(e) {} };
+  saveTasks = function() { try { _origST(); } catch(e) {}; if (familyCode) try { pushToFirebase('tasks','tasks'); } catch(e) {} };
 })();
 
 setTimeout(() => {
