@@ -3507,8 +3507,8 @@ function openSettings() {
         <span class="sr-label"><span class="sr-icon">🖼️</span> ${t('Obnoviť obrázky','Refresh images')}</span>
         <span class="sr-value"><span class="sr-arrow">›</span></span>
       </div>
-      <div class="settings-row" onclick="testFirebaseSync()">
-        <span class="sr-label"><span class="sr-icon">🔬</span> ${t('Test synchronizácie','Test sync')}</span>
+      <div class="settings-row" onclick="alert('FB:'+!!firebaseReady+' code:'+!!familyCode+' ref:'+!!familyDbRef)">
+        <span class="sr-label"><span class="sr-icon">🔬</span> Test sync</span>
         <span class="sr-value"><span class="sr-arrow">›</span></span>
       </div>
       <div class="settings-row" onclick="localStorage.removeItem('onboardingCompleted');showOnboarding(true);closeSettings()">
