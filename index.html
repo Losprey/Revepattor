@@ -1837,7 +1837,7 @@ const AI_PROXY_URL = 'https://receptar.waldis994.workers.dev'; // Cloudflare Wor
 
 async function aiGenerate(messages) {
   if (!AI_PROXY_URL || AI_PROXY_URL.includes('YOUR_CLOUDFLARE')) {
-    alert('AI nie je nastavená. Nastav AI_PROXY_URL v index.html.');
+    alert(t('AI nie je nastavená. Nastav AI_PROXY_URL v index.html.','AI not configured. Set AI_PROXY_URL in index.html.'));
     return null;
   }
   try {
@@ -1846,11 +1846,18 @@ async function aiGenerate(messages) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ messages }),
     });
+    if (!r.ok) {
+      const txt = await r.text().catch(() => '');
+      console.error('AI proxy error', r.status, txt.slice(0,200));
+      alert(t('AI chyba: ','AI error: ') + r.status + ' ' + (txt.slice(0,80) || ''));
+      return null;
+    }
     const data = await r.json();
-    if (data.error) { alert('AI chyba: ' + data.error); return null; }
+    if (data.error) { alert(t('AI chyba: ','AI error: ') + data.error); return null; }
     return data.reply || '';
   } catch(e) {
-    alert('AI nie je dostupná. Skontroluj pripojenie.');
+    console.error('AI fetch failed:', e.message);
+    alert(t('AI nie je dostupná. Skontroluj pripojenie.','AI not available. Check connection.'));
     return null;
   }
 }
@@ -2060,7 +2067,23 @@ async function aiGenerateShoppingList() {
   if (!(appSettings.shopping && appSettings.shopping.aiShoppingList)) { alert(t('AI nákupný zoznam je vypnutý. Zapni ho v Nastaveniach → Nákup.','AI shopping list is off.')); return; }
   const allMeals = [];
   DAYS.forEach(d => { MEALS.forEach(m => { const e = getWeekPlan(currentWeekKey())[d]&&getWeekPlan(currentWeekKey())[d][m.id]; if (!e) return; if (e.type==='custom'&&e.text) allMeals.push(t(d,d)+' '+t(m.id,m.id)+': '+e.text); else { const rid=typeof e==='number'?e:e.id; const r = recipes.find(rec=>rec.id===rid); if (r) { const rName = lang==='en'&&r.nameEn?r.nameEn:r.name; const ingr = (r.ingredients||[]).join(', '); allMeals.push(t(d,d)+' '+t(m.id,m.id)+': '+rName+' — '+ingr); } } }); });
-  if (!allMeals.length) { alert(t('Plánovač je prázdny.','Planner is empty.')); return; }
+  if (!allMeals.length) {
+    const synced = familyCode && firebaseReady;
+    alert(synced
+      ? t('Plánovač je prázdny. Najprv synchronizuj rodinný plánovač.','Planner is empty. Sync the family planner first.')
+      : t('Plánovač je prázdny. Naplánuj si jedlá na tento týždeň.','Planner is empty. Plan your meals for this week.'));
+    return;
+  }
+  // Show how many meals found
+  const statusEl = document.getElementById('import-url-status');
+  if (!statusEl) {
+    const s = document.createElement('div');
+    s.id = 'ai-shop-status';
+    s.style.cssText = 'position:fixed;bottom:20px;left:20px;right:20px;background:var(--primary);color:#fff;padding:10px;border-radius:10px;text-align:center;z-index:9999;font-size:.8rem;font-weight:600;';
+    s.textContent = allMeals.length + ' ' + t('jedál naplánovaných, generujem...','meals planned, generating...');
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 3000);
+  }
   const reply = await aiGenerate([{role:'user',content:'Vytvor nákupný zoznam na tento týždeň. Jedálniček:\n'+allMeals.join('\n')+'\n\nSpoj rovnaké položky, zoraď podľa kategórií. Ku každej uveď odhadované množstvo. Odpovedz v slovenčine.'}]);
   if (reply) { const o=document.getElementById('ai-modal');if(o)o.remove();const d=document.createElement('div');d.id='ai-modal';d.className='modal-overlay active';d.style.cssText='z-index:2000;';d.innerHTML='<div class="modal" style="max-width:500px;max-height:80vh;overflow-y:auto;"><button class="modal-close" onclick="document.getElementById(\'ai-modal\').remove()">✕</button><h2>🛒 '+t('AI nákupný zoznam','AI shopping list')+'</h2><pre style="white-space:pre-wrap;font-size:.75rem;font-family:inherit;background:var(--bg);padding:.8rem;border-radius:8px;">'+esc(reply)+'</pre><button class="btn btn-primary" onclick="addAIShoppingItems()" style="width:100%;margin-top:.5rem;">📥 '+t('Pridať do nákupného zoznamu','Add to shopping list')+'</button></div>';document.body.appendChild(d);window._aiShoppingReply=reply; }
 }
