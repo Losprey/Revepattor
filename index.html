@@ -6567,7 +6567,7 @@ try { initNotifications(); } catch(e) {}
   saveShopItems = function() { try { _origSSI(); } catch(e) {}; if (familyCode) try { pushToFirebase('shoppingItems','shoppingItems'); } catch(e) {} };
   saveWeekPlan = function() { try { _origSWP(); } catch(e) {}; if (familyCode) try { pushToFirebase('mealPlan','mealPlan'); pushToFirebase('mealPlanKids','mealPlanKids'); } catch(e) {} };
   saveTasks = function() { try { _origST(); } catch(e) {}; if (familyCode) try { pushToFirebase('tasks','tasks'); } catch(e) {} };
-  saveToLS = function() { try { _origSLS(); } catch(e) {}; if (familyCode) try { pushToFirebase('recipes','recipes'); } catch(e) {} };
+  saveToLS = function() { try { _origSLS(); } catch(e) {}; if (familyCode) try { pushToFirebase('recipes','recipes'); alert('Recept pushnut\u00fd do Firebase'); } catch(e) { alert('Chyba pri pushi receptov: '+e.message); } };
 })();
 
 setTimeout(() => {
