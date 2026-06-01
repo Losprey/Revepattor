@@ -5108,8 +5108,8 @@ function renderPickerRecipes() {
   if (_pickerCat === '__favs__') filtered = filtered.filter(r => r.favorite);
   else if (_pickerCat) filtered = filtered.filter(r => r.category === _pickerCat);
   if (search) filtered = filtered.filter(r => {
-    const name = (r.name + ' ' + (r.nameEn||'')).toLowerCase();
-    const tags = [...(r.tags||[]), ...(r.tagsEn||[])].join(' ').toLowerCase();
+    const name = norm(r.name + ' ' + (r.nameEn||''));
+    const tags = norm([...(r.tags||[]), ...(r.tagsEn||[])].join(' '));
     return name.includes(search) || tags.includes(search);
   });
 
