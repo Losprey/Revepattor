@@ -3554,6 +3554,15 @@ function openSettings() {
 
   let html = '';
 
+  // Účet — always at top
+  const authHtml = getSettingsAuthHTML();
+  if (authHtml) {
+    html += `<div class="settings-group">
+      <div class="settings-group-title">👤 ${t('Účet','Account')}</div>
+      <div class="settings-card">${authHtml}</div>
+    </div>`;
+  }
+
   // 1. Vzhľad
   const accentColors = [
     { val: '#dc2626', label: 'Červená' },
@@ -3704,14 +3713,6 @@ function openSettings() {
   </div>`;
 
   // 5. Účet
-  const authHtml = getSettingsAuthHTML();
-  if (authHtml) {
-    html += `<div class="settings-group">
-      <div class="settings-group-title">👤 ${t('Účet','Account')}</div>
-      <div class="settings-card">${authHtml}</div>
-    </div>`;
-  }
-
   // 6. Dáta
   html += `<div class="settings-group">
     <div class="settings-group-title">💾 ${t('Dáta','Data')}</div>
