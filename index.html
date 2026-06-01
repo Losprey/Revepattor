@@ -5201,9 +5201,10 @@ function loadShopItems() {
   try { shopItems = JSON.parse(localStorage.getItem('shoppingItems') || '[]'); } catch(e) { shopItems = []; }
   if (!Array.isArray(shopItems)) shopItems = [];
   // Keep only manual items (recipe auto-population removed)
-  shopItems = shopItems.filter(it => it.source === 'manual');
+  shopItems = shopItems.filter(function(it) { return it && it.source === 'manual'; });
 }
 function saveShopItems() {
+  if (!Array.isArray(shopItems)) { shopItems = []; }
   var now = Date.now(), dev = getDeviceId();
   shopItems.forEach(function(it) {
     if (!it.createdAt) it.createdAt = now;
@@ -5237,7 +5238,7 @@ function renderShoppingList() {
   const container = document.getElementById('shopping-list-view');
   loadShopItems();
   // Only keep manual items (recipe auto-population removed per user request)
-  shopItems = shopItems.filter(it => it.source === 'manual');
+  shopItems = shopItems.filter(function(it) { return it && it.source === 'manual'; });
   saveShopItems();
 
     if (!shopItems.length) {
