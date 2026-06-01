@@ -2171,12 +2171,6 @@ function addAIShoppingItems() {
           checked: false, source: 'manual', note: '', recipeId: '' });
         added++;
       }
-    } else if (cl && cl.length > 2) {
-      // No separator found — use whole line as item name
-      shopItems.push({ id: generateShopId(), name: cl, amount: '', unit: '',
-        category: c === 'other' ? guessFoodCategory(cl) : c,
-        checked: false, source: 'manual', note: '', recipeId: '' });
-      added++;
     }
   });
   saveShopItems();
