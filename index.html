@@ -3776,11 +3776,25 @@ function openSettings() {
       <div style="text-align:center;padding:.3rem 0 .15rem;font-size:.6rem;color:var(--text3);">
         <span data-lang="appTitle">Mealnest</span> · v1.6 · ${totalRecipes} ${t('receptov','recipes')}
       </div>
-      <div style="text-align:center;padding:.15rem 0;font-size:.6rem;">
+      <div style="text-align:center;padding:.15rem 0;font-size:.6rem;" onclick="var c=parseInt(localStorage.getItem('_devClicks')||'0')+1;localStorage.setItem('_devClicks',c);if(c>=5){localStorage.setItem('devMode','1');localStorage.removeItem('_devClicks');closeSettings();setTimeout(function(){openSettings()},100)}">
         <a href="privacy-policy.html" target="_blank" style="color:var(--text3);text-decoration:underline;">${t('Ochrana súkromia','Privacy Policy')}</a>
       </div>
     </div>
   </div>`;
+
+  // Dev tools — shown after 5 taps on version
+  if (localStorage.getItem('devMode') === '1') {
+    html += `<div class="settings-group">
+      <div class="settings-group-title">🛠️ ${t('Vývojárske','Developer')}</div>
+      <div class="settings-card">
+        ${['debugFirebase','📊','Debug Firebase'],['firebaseHardTest','🛠️','Hard Test'],['debugFirebaseWrite','📤','Force Push'],['debugFirebasePull','📥','Force Pull']}.map(function(b) { return '<div class="settings-row" onclick="'+b[0]+'()"><span class="sr-label"><span class="sr-icon">'+b[1]+'</span> '+b[2]+'</span><span class="sr-value"><span class="sr-arrow">›</span></span></div>'; }).join('')}
+        <div class="settings-row" onclick="localStorage.removeItem(\'devMode\');closeSettings()">
+          <span class="sr-label" style="color:var(--danger);"><span class="sr-icon">🚫</span> ${t('Skryť vývojárske','Hide developer')}</span>
+          <span class="sr-value"><span class="sr-arrow">›</span></span>
+        </div>
+      </div>
+    </div>`;
+  }
 
   body.innerHTML = html;
   document.getElementById('settings-sheet').classList.add('active');
