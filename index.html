@@ -2149,33 +2149,44 @@ async function aiGenerateShoppingList() {
 }
 
 function addAIShoppingItems() {
-  var text = window._aiShoppingReply || ''; if (!text) { alert('No AI reply data'); return; }
-  // For debugging: show what we got
-  alert(t('AI odpoveď (prvých 300 znakov):','AI reply (first 300 chars):') + '\n' + text.slice(0,300));
+  var text = window._aiShoppingReply || ''; if (!text) return;
   var lines = text.split('\n'); var c = 'other';
   loadShopItems();
   var added = 0;
   lines.forEach(function(l) {
     var cl = l.replace(/^[•\-\*\s\d\.\)]+\s*/, '').trim();
     if (!cl || cl.length < 2) return;
-    if (/^[=\-—–]{3,}$/.test(cl)) return;
-    if (cl.endsWith(':') && cl.indexOf('—') === -1 && cl.indexOf('–') === -1 && cl.indexOf('-') === -1) {
-      c = guessFoodCategory(cl.replace(':', '').trim()); return;
-    }
-    // Simple: use the whole line as item name, try to extract number at end
+    // Category header detection
+    var isCat = cl.endsWith(':') && cl.indexOf('—') === -1 && cl.indexOf('–') === -1 && cl.indexOf('-') === -1 && cl.length < 30;
+    if (isCat) { c = guessFoodCategory(cl.replace(':', '').trim()); return; }
+    // Skip separators
+    if (/^[=\-—–\*]{3,}$/.test(cl)) return;
+    // Extract name and optional quantity
     var name = cl, amount = '', unit = '';
-    var numMatch = cl.match(/[—–\-]\s*(\d+[\.,]?\d*)\s*(\S*)\s*$/);
-    if (numMatch) {
-      name = cl.slice(0, cl.indexOf(numMatch[0])).trim();
-      amount = numMatch[1]; unit = numMatch[2] || '';
+    var m = cl.match(/^(.+?)[—–\-]\s*(\d+[\.,]?\d*)\s*(\S*)\s*$/);
+    if (m) { name = m[1].trim(); amount = m[2]; unit = m[3]; }
+    else {
+      m = cl.match(/^(.+?)\s+(\d+[\.,]?\d*)\s*(\S{1,4})\s*$/);
+      if (m) { name = m[1].trim(); amount = m[2]; unit = m[3]; }
     }
-    if (name && name.length > 1) {
+    if (name && name.length > 1 && name !== cl) {
       shopItems.push({ id: generateShopId(), name: name, amount: amount, unit: unit,
         category: c === 'other' ? guessFoodCategory(name) : c,
         checked: false, source: 'manual', note: '', recipeId: '' });
       added++;
     }
   });
+  if (added === 0) {
+    // Fallback: add every non-empty line as an item
+    lines.forEach(function(l) {
+      var cl = l.trim();
+      if (cl && cl.length > 2 && !cl.endsWith(':') && cl.length < 60) {
+        shopItems.push({ id: generateShopId(), name: cl, amount: '', unit: '',
+          category: guessFoodCategory(cl), checked: false, source: 'manual', note: '', recipeId: '' });
+        added++;
+      }
+    });
+  }
   saveShopItems();
   try { localStorage.setItem('shoppingItems', JSON.stringify(shopItems)); } catch(e) {}
   document.getElementById('ai-modal')?.remove();
