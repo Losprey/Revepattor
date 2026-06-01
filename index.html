@@ -2176,7 +2176,19 @@ function addAIShoppingItems() {
   saveShopItems();
   try { localStorage.setItem('shoppingItems', JSON.stringify(shopItems)); } catch(e) {}
   document.getElementById('ai-modal')?.remove();
-  if (added === 0) { alert(t('Nepodarilo sa pridať položky.','Failed to add items.')); return; }
+  // Fallback: if main parser found nothing, add every line as an item
+  if (added === 0) {
+    lines.forEach(function(l) {
+      var cl2 = l.replace(/^[•\-\*\s\d\.\)]+\s*/, '').trim();
+      if (cl2 && cl2.length > 2 && !cl2.match(/^[=\-—–\*]{3,}$/) && !(cl2.endsWith(':') && cl2.length < 30)) {
+        shopItems.push({ id: generateShopId(), name: cl2, amount: '', unit: '',
+          category: guessFoodCategory(cl2), checked: false, source: 'manual', note: '', recipeId: '' });
+        added++;
+      }
+    });
+    if (added > 0) { saveShopItems(); try { localStorage.setItem('shoppingItems', JSON.stringify(shopItems)); } catch(e) {} }
+    else { alert(t('Nepodarilo sa pridať položky.','Failed to add items.')); return; }
+  }
   renderShoppingList();
   switchTab('shopping');
 }
