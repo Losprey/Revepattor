@@ -2149,44 +2149,36 @@ async function aiGenerateShoppingList() {
 }
 
 function addAIShoppingItems() {
-  var text = window._aiShoppingReply || ''; if (!text) return;
-  var lines = text.split('\n'); var c = 'other';
+  const text = window._aiShoppingReply || ''; if (!text) return;
+  const lines = text.split('\n'); let c = 'other';
   loadShopItems();
-  var added = 0;
-  lines.forEach(function(l) {
-    var cl = l.replace(/^[•\-\*\s\d\.\)]+\s*/, '').trim();
-    if (!cl || cl.length < 2) return;
-    // Category header detection
-    var isCat = cl.endsWith(':') && cl.indexOf('—') === -1 && cl.indexOf('–') === -1 && cl.indexOf('-') === -1 && cl.length < 30;
-    if (isCat) { c = guessFoodCategory(cl.replace(':', '').trim()); return; }
-    // Skip separators
-    if (/^[=\-—–\*]{3,}$/.test(cl)) return;
-    // Extract name and optional quantity
-    var name = cl, amount = '', unit = '';
-    var m = cl.match(/^(.+?)[—–\-]\s*(\d+[\.,]?\d*)\s*(\S*)\s*$/);
-    if (m) { name = m[1].trim(); amount = m[2]; unit = m[3]; }
-    else {
-      m = cl.match(/^(.+?)\s+(\d+[\.,]?\d*)\s*(\S{1,4})\s*$/);
-      if (m) { name = m[1].trim(); amount = m[2]; unit = m[3]; }
+  let added = 0;
+  lines.forEach(l => {
+    const cl = l.replace(/^[•\-\*\s\d\.\)]+\s*/,'').trim();
+    if (!cl) return;
+    if (cl.endsWith(':') && !cl.includes('—') && !cl.includes('–') && !cl.includes('-')) {
+      c = guessFoodCategory(cl.replace(':', '')); return;
     }
-    if (name && name.length > 1 && name !== cl) {
-      shopItems.push({ id: generateShopId(), name: name, amount: amount, unit: unit,
-        category: c === 'other' ? guessFoodCategory(name) : c,
+    const parts = cl.split(/[—–\-]\s*/);
+    if (parts.length >= 2) {
+      const nm = parts[0].trim();
+      const q = parts.slice(1).join(' ').trim();
+      const am = (q.match(/^[\d.,\/]+/g) || [])[0] || '';
+      const u = am ? q.replace(am, '').trim() : q;
+      if (nm && nm.length > 1) {
+        shopItems.push({ id: generateShopId(), name: nm, amount: am, unit: u || '',
+          category: c === 'other' ? guessFoodCategory(nm) : c,
+          checked: false, source: 'manual', note: '', recipeId: '' });
+        added++;
+      }
+    } else if (cl && cl.length > 2) {
+      // No separator found — use whole line as item name
+      shopItems.push({ id: generateShopId(), name: cl, amount: '', unit: '',
+        category: c === 'other' ? guessFoodCategory(cl) : c,
         checked: false, source: 'manual', note: '', recipeId: '' });
       added++;
     }
   });
-  if (added === 0) {
-    // Fallback: add every non-empty line as an item
-    lines.forEach(function(l) {
-      var cl = l.trim();
-      if (cl && cl.length > 2 && !cl.endsWith(':') && cl.length < 60) {
-        shopItems.push({ id: generateShopId(), name: cl, amount: '', unit: '',
-          category: guessFoodCategory(cl), checked: false, source: 'manual', note: '', recipeId: '' });
-        added++;
-      }
-    });
-  }
   saveShopItems();
   try { localStorage.setItem('shoppingItems', JSON.stringify(shopItems)); } catch(e) {}
   document.getElementById('ai-modal')?.remove();
