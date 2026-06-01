@@ -2290,6 +2290,22 @@ function joinFamily(code) {
   updateSyncIndicator();
 }
 
+function showFamilyMembers() {
+  if (!familyDbRef) { alert(t('Nie si v rodine.','Not in a family.')); return; }
+  familyDbRef.child('members').once('value', function(snap) {
+    var members = snap.val();
+    if (!members) { alert(t('Žiadni členovia.','No members.')); return; }
+    var list = Object.keys(members).map(function(id) {
+      var m = members[id];
+      var name = m.name || id.slice(0,8);
+      var online = m.online ? '🟢' : '⚪';
+      var seen = m.lastSeen ? new Date(m.lastSeen).toLocaleString() : '?';
+      return online + ' ' + name + '\n  ' + (m.online ? t('Online','Online') : t('Naposledy: ','Last seen: ') + seen);
+    }).join('\n\n');
+    alert(t('Členovia rodiny:','Family members:') + '\n\n' + list);
+  });
+}
+
 function leaveFamily() {
   if (!confirm(t('Naozaj opustiť rodinu? Lokálne dáta ostanú.','Really leave family? Local data stays.'))) return;
   // Remove all Firebase listeners
@@ -2346,7 +2362,7 @@ function connectToFamily(code) {
 
   // Also push local device presence
   const presenceRef = familyDbRef.child('members').child(getDeviceId());
-  presenceRef.set({ name: localStorage.getItem('deviceName') || 'Zariadenie', lastSeen: firebase.database.ServerValue.TIMESTAMP, online: true });
+  presenceRef.set({ name: localStorage.getItem('deviceName') || (lang==='en'?'Device':'Zariadenie'), lastSeen: firebase.database.ServerValue.TIMESTAMP, online: true });
   presenceRef.onDisconnect().update({ online: false, lastSeen: firebase.database.ServerValue.TIMESTAMP });
 }
 
@@ -3606,6 +3622,14 @@ function openSettings() {
         <div class="settings-row" onclick="pushAllLocalData();alert('${t('Dáta odoslané.','Data synced.')}')">
           <span class="sr-label"><span class="sr-icon">🔄</span> ${t('Synchronizovať teraz','Sync now')}</span>
           <span class="sr-value"><span class="sr-arrow">›</span></span>
+        </div>
+        <div class="settings-row" onclick="showFamilyMembers()">
+          <span class="sr-label"><span class="sr-icon">👥</span> ${t('Zobraziť členov','Show members')}</span>
+          <span class="sr-value"><span class="sr-arrow">›</span></span>
+        </div>
+        <div class="settings-row" onclick="var n=prompt('${t('Názov zariadenia:','Device name:')}',localStorage.getItem('deviceName')||'');if(n){localStorage.setItem('deviceName',n.trim());if(familyDbRef)familyDbRef.child('members').child(getDeviceId()).update({name:n.trim()});openSettings()}">
+          <span class="sr-label"><span class="sr-icon">📱</span> ${t('Názov zariadenia','Device name')}</span>
+          <span class="sr-value">${(localStorage.getItem('deviceName')||t('Zariadenie','Device')).slice(0,12)} <span class="sr-arrow">›</span></span>
         </div>
         <div class="settings-row" onclick="leaveFamily()">
           <span class="sr-label" style="color:var(--danger);"><span class="sr-icon">🚪</span> ${t('Opustiť rodinu','Leave family')}</span>
