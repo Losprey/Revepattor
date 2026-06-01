@@ -6561,9 +6561,13 @@ try { initNotifications(); } catch(e) {}
 // Firebase sync hooks — always active, they check familyCode internally
 (function hookFirebaseSync() {
   const _origSSI = saveShopItems;
+  const _origSWP = saveWeekPlan;
+  const _origST = saveTasks;
+  const _origSLS = saveToLS;
   saveShopItems = function() { try { _origSSI(); } catch(e) {}; if (familyCode) try { pushToFirebase('shoppingItems','shoppingItems'); } catch(e) {} };
   saveWeekPlan = function() { try { _origSWP(); } catch(e) {}; if (familyCode) try { pushToFirebase('mealPlan','mealPlan'); pushToFirebase('mealPlanKids','mealPlanKids'); } catch(e) {} };
   saveTasks = function() { try { _origST(); } catch(e) {}; if (familyCode) try { pushToFirebase('tasks','tasks'); } catch(e) {} };
+  saveToLS = function() { try { _origSLS(); } catch(e) {}; if (familyCode) try { pushToFirebase('recipes','recipes'); } catch(e) {} };
 })();
 
 setTimeout(() => {
