@@ -5239,7 +5239,6 @@ function renderShoppingList() {
   loadShopItems();
   // Only keep manual items (recipe auto-population removed per user request)
   shopItems = shopItems.filter(function(it) { return it && it.source === 'manual'; });
-  saveShopItems();
 
     if (!shopItems.length) {
     container.innerHTML = `<div class="shop-empty">
