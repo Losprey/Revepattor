@@ -3415,7 +3415,7 @@ function render() {
     const tags = lang === 'en' && r.tagsEn ? r.tagsEn : r.tags;
     const tagMatch = tags.some(t => norm(t).includes(norm(search)));
     const matchSearch = norm(name).includes(norm(search)) || tagMatch;
-    const matchCat = !cat || r.category === cat || catLabel(r.category) === cat;
+    const matchCat = !cat || r.category === cat;
     const matchFav = !showFav || r.favorite;
     const matchAge = matchesAgeFilter(r);
     return matchSearch && matchCat && matchFav && matchAge;
