@@ -1530,6 +1530,12 @@ function initFirebaseAuth() {
       authIsGuest = false;
       authLoading = false;
       setStoreNamespace('user_' + user.uid + '_');
+      // Reload data from new namespace
+      try { recipes = JSON.parse(localStorage.getItem('recipes') || 'null') || JSON.parse(JSON.stringify(DEFAULT_RECIPES)); } catch(e) {}
+      try { mealPlan = JSON.parse(localStorage.getItem('mealPlan') || '{}'); } catch(e) {}
+      try { mealPlanKids = JSON.parse(localStorage.getItem('mealPlanKids') || '{}'); } catch(e) {}
+      try { loadShopItems(); } catch(e) {}
+      try { tasks = JSON.parse(localStorage.getItem('tasks') || '[]'); } catch(e) {}
       localStorage.setItem('authUser', JSON.stringify({ uid: user.uid, name: user.displayName, email: user.email, photo: user.photoURL }));
       localStorage.removeItem('authGuest');
       document.getElementById('login-overlay').style.display = 'none';
