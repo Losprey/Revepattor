@@ -3466,7 +3466,7 @@ function render() {
   const showFav = document.getElementById('filter-fav')?.checked;
   let filtered = recipes.filter(r => {
     const name = lang === 'en' && r.nameEn ? r.nameEn : r.name;
-    const tags = lang === 'en' && r.tagsEn ? r.tagsEn : r.tags;
+    const tags = (lang === 'en' && r.tagsEn ? r.tagsEn : r.tags) || [];
     const tagMatch = tags.some(t => norm(t).includes(norm(search)));
     const matchSearch = norm(name).includes(norm(search)) || tagMatch;
     const matchCat = !cat || r.category === cat;
@@ -3493,7 +3493,7 @@ function render() {
   document.getElementById('recipe-count').textContent = `(${filtered.length})`;
   grid.innerHTML = filtered.map(r => {
     const name = lang === 'en' && r.nameEn ? r.nameEn : r.name;
-    const tags = lang === 'en' && r.tagsEn ? r.tagsEn : r.tags;
+    const tags = (lang === 'en' && r.tagsEn ? r.tagsEn : r.tags) || [];
     const diff = r.difficulty || 1;
     const san = esc(name), sanCat = esc(r.category), sanTime = esc(r.time);
     return `<div class="recipe-card" style="animation-delay:${Math.random()*.25}s" data-id="${r.id}">
