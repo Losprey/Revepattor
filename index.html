@@ -2510,7 +2510,7 @@ function refreshActiveTab() {
 
 // Load family code from localStorage on init
 try { familyCode = localStorage.getItem('familyCode') || ''; } catch(e) { familyCode = ''; }
-if (familyCode) { setTimeout(function() { initFirebase(); if (firebaseReady) { connectToFamily(familyCode); setTimeout(function() { debugFirebasePull(); }, 2000); } }, 1500); }
+if (familyCode) { setTimeout(function() { initFirebase(); if (firebaseReady) { connectToFamily(familyCode); setTimeout(function() { if (familyDbRef) { familyDbRef.once('value', function(snap) { var v = snap.val(); if (!v) return; if (v.mealPlan) { mealPlan = v.mealPlan; renderPlanner(); } if (v.mealPlanKids) mealPlanKids = v.mealPlanKids; if (v.shoppingItems) { shopItems = Array.isArray(v.shoppingItems) ? v.shoppingItems : []; } if (v.tasks) { tasks = Array.isArray(v.tasks) ? v.tasks : []; } if (v.recipes && Array.isArray(v.recipes) && v.recipes.length) { recipes = v.recipes; saveToLS(); } try { render(); } catch(e) {} try { renderDashboard(); } catch(e) {} }); } }, 2000); } }, 1500); }
 
 // ======================== DATA ========================
 const DEFAULT_RECIPES = [
