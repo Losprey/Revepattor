@@ -2510,7 +2510,7 @@ function refreshActiveTab() {
 
 // Load family code from localStorage on init
 try { familyCode = localStorage.getItem('familyCode') || ''; } catch(e) { familyCode = ''; }
-if (familyCode) { setTimeout(() => { initFirebase(); if (firebaseReady) connectToFamily(familyCode); }, 1500); }
+if (familyCode) { setTimeout(function() { initFirebase(); if (firebaseReady) { connectToFamily(familyCode); setTimeout(function() { debugFirebasePull(); }, 2000); } }, 1500); }
 
 // ======================== DATA ========================
 const DEFAULT_RECIPES = [
