@@ -2632,7 +2632,7 @@ const DEFAULT_RECIPES = [
   window._lsSet.call(localStorage, '_imgcache_cleared_v4', '1');
 })();
 
-let recipes = JSON.parse(localStorage.getItem('recipes') || 'null') || JSON.parse(JSON.stringify(DEFAULT_RECIPES));
+let recipes = (function() { var parsed = JSON.parse(localStorage.getItem('recipes') || 'null'); if (!parsed || !Array.isArray(parsed) || parsed.length === 0) return JSON.parse(JSON.stringify(DEFAULT_RECIPES)); return parsed; })();
 // Migrate: add allergens/difficulty if missing
 recipes = recipes.map(r => ({
   ...r,
