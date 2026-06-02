@@ -1,8 +1,15 @@
-[{
-  "relation": ["delegate_permission/common.handle_all_urls"],
-  "target": {
-    "namespace": "android_app",
-    "package_name": "com.losprey.mealnest",
-    "sha256_cert_fingerprints": ["YOUR_SHA256_HERE"]
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls",
+      "delegate_permission/common.get_login_creds"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.losprey.mealnest",
+      "sha256_cert_fingerprints": [
+        "D0:7F:76:C5:44:E4:28:58:90:2A:BA:31:96:D2:27:4F:E4:EB:84:DD:15:8A:80:60:DB:21:2C:8A:DF:8A:92:EF"
+      ]
+    }
   }
-}]
+]
