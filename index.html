@@ -1536,6 +1536,13 @@ function initFirebaseAuth() {
       try { mealPlanKids = JSON.parse(localStorage.getItem('mealPlanKids') || '{}'); } catch(e) {}
       try { loadShopItems(); } catch(e) {}
       try { tasks = JSON.parse(localStorage.getItem('tasks') || '[]'); } catch(e) {}
+      // If user namespace is empty, try to load from guest namespace
+      if (!recipes || (Array.isArray(recipes) && recipes.length === 0)) {
+        var guestRecipes = window._lsGet.call(localStorage, 'guest_recipes');
+        if (guestRecipes) {
+          try { var gr = JSON.parse(guestRecipes); if (gr && gr.length) { recipes = gr; saveToLS(); } } catch(e) {}
+        }
+      }
       localStorage.setItem('authUser', JSON.stringify({ uid: user.uid, name: user.displayName, email: user.email, photo: user.photoURL }));
       localStorage.removeItem('authGuest');
       document.getElementById('login-overlay').style.display = 'none';
