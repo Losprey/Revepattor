@@ -951,6 +951,8 @@ body:not(.dark) .recipe-card .fav-btn.fav-active { background: linear-gradient(1
   </div>
 </header>
 
+<div id="boot-status" style="position:fixed;top:0;left:0;right:0;z-index:99999;background:rgba(0,0,0,.92);color:#fff;font-size:.7rem;padding:.3rem .6rem;text-align:center;font-weight:600;display:none;"></div>
+
 <!-- DASHBOARD -->
 <div class="container" id="dashboard">
   <div id="dash-hero" class="dash-hero glow-card">
@@ -2510,7 +2512,39 @@ function refreshActiveTab() {
 
 // Load family code from localStorage on init
 try { familyCode = localStorage.getItem('familyCode') || ''; } catch(e) { familyCode = ''; }
-if (familyCode) { setTimeout(function() { initFirebase(); if (firebaseReady) { connectToFamily(familyCode); setTimeout(function() { if (familyDbRef) { familyDbRef.once('value', function(snap) { var v = snap.val(); if (!v) return; if (v.mealPlan) { mealPlan = v.mealPlan; renderPlanner(); } if (v.mealPlanKids) mealPlanKids = v.mealPlanKids; if (v.shoppingItems) { shopItems = Array.isArray(v.shoppingItems) ? v.shoppingItems : []; } if (v.tasks) { tasks = Array.isArray(v.tasks) ? v.tasks : []; } if (v.recipes && Array.isArray(v.recipes) && v.recipes.length) { recipes = v.recipes; saveToLS(); } try { render(); } catch(e) {} try { renderDashboard(); } catch(e) {} }); } }, 2000); } }, 1500); }
+if (familyCode) { setTimeout(function() { initFirebase(); if (firebaseReady) { connectToFamily(familyCode); setTimeout(function() { autoPullFromFirebase(); }, 2500); } }, 1500); }
+
+function autoPullFromFirebase() {
+  var el = document.getElementById('boot-status');
+  if (el) { el.style.display = 'block'; el.textContent = '⏳ Sťahujem dáta z Firebase...'; }
+  if (!familyDbRef) {
+    if (el) el.textContent = '❌ Nepripojené k Firebase';
+    return;
+  }
+  familyDbRef.once('value', function(snap) {
+    var val = snap.val();
+    if (!val) {
+      if (el) el.textContent = '⚪ Firebase prázdne – používam lokálne dáta';
+      setTimeout(function() { if (el) el.style.display = 'none'; }, 3000);
+      return;
+    }
+    var keys = Object.keys(val);
+    if (val.mealPlan) { mealPlan = val.mealPlan; renderPlanner(); }
+    if (val.mealPlanKids) { mealPlanKids = val.mealPlanKids; }
+    if (val.shoppingItems) { shopItems = Array.isArray(val.shoppingItems) ? val.shoppingItems : []; saveShopItems(); renderShoppingList(); }
+    if (val.tasks) { tasks = Array.isArray(val.tasks) ? val.tasks : []; renderTasks(); }
+    if (val.recipes && Array.isArray(val.recipes) && val.recipes.length) { recipes = val.recipes; saveToLS(); }
+    if (val.planType) { planType = val.planType; localStorage.setItem('planType', planType); }
+    keys.forEach(function(k) { try { localStorage.setItem(k, JSON.stringify(val[k])); } catch(e) {} });
+    try { render(); } catch(e) {}
+    try { renderDashboard(); } catch(e) {}
+    try { renderTaskWidget(); } catch(e) {}
+    if (el) { el.textContent = '✅ Načítané: ' + recipes.length + ' receptov, ' + Object.values(getWeekPlan(getWeekKey(new Date()))).reduce(function(s,d){return s+Object.values(d).filter(Boolean).length},0) + ' jedál'; el.style.background = 'rgba(0,128,0,.92)'; }
+    setTimeout(function() { if (el) { el.style.display = 'none'; } }, 2500);
+  }, function(err) {
+    if (el) { el.textContent = '❌ Chyba: ' + err.message; }
+  });
+}
 
 // ======================== DATA ========================
 const DEFAULT_RECIPES = [
@@ -6353,7 +6387,25 @@ if (history.length <= 1) {
   history.pushState({ tab: 'dashboard' }, '', '#dashboard');
 }
 
+// Global error handler
+window.addEventListener('error', function(evt) {
+  var el = document.getElementById('boot-status');
+  if (el) { el.style.display = 'block'; el.style.background = 'rgba(200,0,0,.92)'; el.textContent = '❌ CHYBA: ' + (evt.message || evt.error || ''); }
+});
+
 // ======================== INIT ========================
+(function showBootInfo() {
+  var el = document.getElementById('boot-status');
+  if (!el) return;
+  el.style.display = 'block';
+  el.style.background = 'rgba(0,0,0,.92)';
+  var r = JSON.parse(localStorage.getItem('recipes')||'null');
+  var rc = (r && Array.isArray(r) && r.length) ? r.length : 0;
+  var fc = localStorage.getItem('familyCode') || '';
+  el.textContent = '⚡ ' + rc + ' receptov | ' + (fc?'rodina: '+fc:'bez rodiny');
+  setTimeout(function() { if (el && el.textContent.indexOf('⏳')<0 && el.textContent.indexOf('✅')<0) { el.style.display = 'none'; } }, 3000);
+})();
+
 document.getElementById('recipe-grid').addEventListener('click', function(e) {
   const card = e.target.closest('.recipe-card');
   if (card) {
