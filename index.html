@@ -2352,10 +2352,11 @@ function connectToFamily(code) {
         var localData = localRaw ? JSON.parse(localRaw) : null;
         var merged = mergeFn(localData, remoteData);
         localStorage.setItem(localKey, JSON.stringify(merged));
+        reloadFromLocalStorage(localKey, merged);
       } else {
         localStorage.setItem(localKey, JSON.stringify(remoteData));
+        reloadFromLocalStorage(localKey, remoteData);
       }
-      reloadFromLocalStorage(localKey, remoteData);
       showSyncToast(localKey);
       // Force re-render
       try { renderTasks(); } catch(e) {}
@@ -2531,12 +2532,10 @@ function autoPullFromFirebase() {
     // Merge recipes (preserve local recipes not in remote)
     if (val.recipes && Array.isArray(val.recipes)) {
       recipes = mergeRecipes(recipes, val.recipes);
-      saveToLS();
     }
     // Merge shopping items
     if (val.shoppingItems && Array.isArray(val.shoppingItems)) {
       shopItems = mergeShoppingItems(shopItems, val.shoppingItems);
-      saveShopItems();
     }
     // Direct assignments for simple data
     if (val.mealPlan) { mealPlan = val.mealPlan; }
@@ -2854,18 +2853,15 @@ function mergeRecipes(localArr, remoteArr) {
   if (!Array.isArray(localArr)) localArr = [];
   if (!Array.isArray(remoteArr)) remoteArr = [];
   var map = {};
-  // Index local recipes
-  localArr.forEach(function(r) { map[r.id] = r; });
-  // Merge remote recipes (remote wins if timestamp is newer)
+  localArr.forEach(function(r) { if (r && r.id != null) map[r.id] = r; });
   remoteArr.forEach(function(r) {
+    if (!r || r.id == null) return;
     var local = map[r.id];
     if (!local) { map[r.id] = r; }
     else {
-      // Keep the newer version
       var localTs = local.updatedAt || 0;
       var remoteTs = r.updatedAt || 0;
-      if (remoteTs >= localTs) {
-        // Keep local favorites and ratings if remote doesn't have them
+      if (remoteTs > localTs) {
         if (local.favorite && !r.favorite) r.favorite = true;
         if (local.rating > (r.rating || 0)) r.rating = local.rating;
         map[r.id] = r;
@@ -2876,7 +2872,7 @@ function mergeRecipes(localArr, remoteArr) {
 }
 
 function saveToLS() {
-  // Add timestamp and device ID before saving
+  if (!Array.isArray(recipes)) recipes = [];
   recipes.forEach(function(r) {
     if (!r.updatedAt) r.updatedAt = Date.now();
     r.updatedAt = Date.now();
@@ -3463,6 +3459,7 @@ async function batchFetchImages() {
 
 // ======================== RECIPES TAB ========================
 function render() {
+  if (!Array.isArray(recipes)) recipes = [];
   const grid = document.getElementById('recipe-grid');
   const search = document.getElementById('search').value.toLowerCase();
   const cat = document.getElementById('filter-category').value;
@@ -5326,12 +5323,12 @@ function mergeShoppingItems(localArr, remoteArr) {
   if (!Array.isArray(localArr)) localArr = [];
   if (!Array.isArray(remoteArr)) remoteArr = [];
   var map = {};
-  localArr.forEach(function(r) { map[r.id] = r; });
+  localArr.forEach(function(r) { if (r && r.id != null) map[r.id] = r; });
   remoteArr.forEach(function(r) {
+    if (!r || r.id == null) return;
     var local = map[r.id];
     if (!local) { map[r.id] = r; }
     else if ((r.updatedAt||0) >= (local.updatedAt||0)) {
-      // Keep local checked state if it's more recent
       if ((local.updatedAt||0) > (r.updatedAt||0)) r.checked = local.checked;
       map[r.id] = r;
     }
@@ -6484,7 +6481,7 @@ function reloadFromLocalStorage(key, data) {
     else if (key === 'shoppingItems') { loadShopItems(); renderShoppingList(); }
     else if (key === 'tasks') { tasks = Array.isArray(data) ? data.slice() : []; renderTasks(); }
     else if (key === 'planType') { planType = data; renderPlanner(); }
-    else if (key === 'recipes') { recipes = JSON.parse(JSON.stringify(data)); }
+    else if (key === 'recipes') { var rd = JSON.parse(JSON.stringify(data)); if (Array.isArray(rd) && rd.length) recipes = rd; else if (!Array.isArray(rd) || !rd.length) { /* don't overwrite */ } }
   } catch(e) {}
 }
 
