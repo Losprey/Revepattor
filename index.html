@@ -4055,9 +4055,9 @@ function viewRecipe(id) {
   const r = recipes.find(rec => rec.id === id);
   if (!r) return;
   const name = lang === 'en' && r.nameEn ? r.nameEn : r.name;
-  const ingr = lang === 'en' && r.ingredientsEn ? r.ingredientsEn : r.ingredients;
-  const stps = lang === 'en' && r.stepsEn ? r.stepsEn : r.steps;
-  const tgs = lang === 'en' && r.tagsEn ? r.tagsEn : r.tags;
+  const ingr = (lang === 'en' && r.ingredientsEn ? r.ingredientsEn : r.ingredients) || [];
+  const stps = (lang === 'en' && r.stepsEn ? r.stepsEn : r.steps) || [];
+  const tgs = (lang === 'en' && r.tagsEn ? r.tagsEn : r.tags) || [];
   const n = r.nutrition;
   const el = document.getElementById('recipe-detail');
   const san = esc(name), sanCat = esc(r.category), sanTime = esc(r.time);
@@ -4174,8 +4174,8 @@ function printRecipe() {
   const r = recipes.find(rec => rec.id === viewingId);
   if (!r) return;
   const name = lang === 'en' && r.nameEn ? r.nameEn : r.name;
-  const ingr = lang === 'en' && r.ingredientsEn ? r.ingredientsEn : r.ingredients;
-  const stps = lang === 'en' && r.stepsEn ? r.stepsEn : r.steps;
+  const ingr = (lang === "en" && r.ingredientsEn ? r.ingredientsEn : r.ingredients) || [];
+  const stps = (lang === "en" && r.stepsEn ? r.stepsEn : r.steps) || [];
   const san = esc(name), sanCat = esc(r.category), sanTime = esc(r.time);
   const kcalHtml = r.nutrition && r.nutrition.kcal ? ` | 🔥 ${esc(r.nutrition.kcal)} kcal` : '';
   const win = window.open('', '_blank');
@@ -4199,9 +4199,9 @@ function shareRecipe() {
   const r = recipes.find(rec => rec.id === viewingId);
   if (!r) return;
   const name = lang === 'en' && r.nameEn ? r.nameEn : r.name;
-  const ingr = lang === 'en' && r.ingredientsEn ? r.ingredientsEn : r.ingredients;
-  const stps = lang === 'en' && r.stepsEn ? r.stepsEn : r.steps;
-  const tgs = lang === 'en' && r.tagsEn ? r.tagsEn : r.tags;
+  const ingr = (lang === "en" && r.ingredientsEn ? r.ingredientsEn : r.ingredients) || [];
+  const stps = (lang === "en" && r.stepsEn ? r.stepsEn : r.steps) || [];
+  const tgs = (lang === "en" && r.tagsEn ? r.tagsEn : r.tags) || [];
   const text = `🍽️ ${name}\n⏱ ${r.time} min | 📂 ${r.category}\n\n🥕 ${t('formIngredients')}:\n${ingr.map(i=>`• ${i}`).join('\n')}\n\n📝 ${t('formSteps')}:\n${stps.map((s,j)=>`${j+1}. ${s}`).join('\n')}\n\n🏷 ${tgs.join(', ')}`;
   if (navigator.share) {
     navigator.share({title: name, text: text}).catch(() => {});
@@ -4236,9 +4236,9 @@ function copyRecipe(e) {
   const r = recipes.find(rec => rec.id === viewingId);
   if (!r) return;
   const name = lang==='en'&&r.nameEn?r.nameEn:r.name;
-  const ingr = lang==='en'&&r.ingredientsEn?r.ingredientsEn:r.ingredients;
-  const stps = lang==='en'&&r.stepsEn?r.stepsEn:r.steps;
-  const tgs = lang==='en'&&r.tagsEn?r.tagsEn:r.tags;
+  const ingr = (lang==="en"&&r.ingredientsEn?r.ingredientsEn:r.ingredients)||[];
+  const stps = (lang==="en"&&r.stepsEn?r.stepsEn:r.steps)||[];
+  const tgs = (lang==="en"&&r.tagsEn?r.tagsEn:r.tags)||[];
   const text = `🍽️ ${name}\n⏱ ${r.time} min\n\nSuroviny:\n${ingr.map(i=>`• ${i}`).join('\n')}\n\nPostup:\n${stps.map((s,i)=>`${i+1}. ${s}`).join('\n')}\n\n🏷 ${tgs.join(', ')}`;
   navigator.clipboard.writeText(text).then(() => {
     const btn = (e && e.target) ? e.target.closest('.btn') : document.querySelector('.modal-footer .btn:last-child');
@@ -4307,7 +4307,7 @@ function renderCookingStep() {
   if (!r) return;
   const total = r.steps.length;
   const name = lang === 'en' && r.nameEn ? r.nameEn : r.name;
-  const stps = lang === 'en' && r.stepsEn ? r.stepsEn : r.steps;
+  const stps = (lang === "en" && r.stepsEn ? r.stepsEn : r.steps) || [];
   document.getElementById('cooking-title').textContent = name;
   const imgEl = document.getElementById('cooking-img');
   if (r.image || r.imageData) {
@@ -4462,7 +4462,7 @@ function stopVoiceSearch() {
 // ======================== INGREDIENT SEARCH ========================
 function openIngredientSearch() {
   const allIngrs = [...new Set(recipes.flatMap(r => {
-    const ingr = lang === 'en' && r.ingredientsEn ? r.ingredientsEn : r.ingredients;
+    const ingr = (lang === "en" && r.ingredientsEn ? r.ingredientsEn : r.ingredients) || [];
     return ingr;
   }))].sort();
   document.getElementById('ingredient-modal').dataset.all = JSON.stringify(allIngrs);
@@ -4483,11 +4483,11 @@ function renderIngredientSearch() {
   const sel = [...ingredientSearchSelected];
   const cat = document.getElementById('ingr-category').value;
   const fullMatch = recipes.filter(r => {
-    const ingr = lang === 'en' && r.ingredientsEn ? r.ingredientsEn : r.ingredients;
+    const ingr = (lang === "en" && r.ingredientsEn ? r.ingredientsEn : r.ingredients) || [];
     return (!cat || r.category === cat) && sel.every(s => ingr.some(i => norm(i).includes(norm(s))));
   });
   const partialMatch = recipes.filter(r => {
-    const ingr = lang === 'en' && r.ingredientsEn ? r.ingredientsEn : r.ingredients;
+    const ingr = (lang === "en" && r.ingredientsEn ? r.ingredientsEn : r.ingredients) || [];
     return (!cat || r.category === cat) && !fullMatch.includes(r) && sel.some(s => ingr.some(i => norm(i).includes(norm(s))));
   });
   let html = '';
@@ -6106,14 +6106,14 @@ function applyIngredientSearch() {
     const sel = [...ingredientSearchSelected];
     const cat = document.getElementById('ingr-category').value;
     const matching = recipes.filter(r => {
-      const ingr = lang === 'en' && r.ingredientsEn ? r.ingredientsEn : r.ingredients;
+      const ingr = (lang === "en" && r.ingredientsEn ? r.ingredientsEn : r.ingredients) || [];
       return sel.some(s => ingr.some(i => norm(i).includes(norm(s)))) && (!cat || r.category === cat);
     });
     const grid = document.getElementById('recipe-grid');
     if (!matching.length) { grid.innerHTML = `<div class="empty-state"><h3>😕 ${t('noRecipes')}</h3></div>`; return; }
     grid.innerHTML = matching.map(r => {
       const name = lang==='en'&&r.nameEn?r.nameEn:r.name;
-      const tags = lang==='en'&&r.tagsEn?r.tagsEn:r.tags;
+      const tags = (lang==="en"&&r.tagsEn?r.tagsEn:r.tags)||[];
       const diff = r.difficulty||1;
       const san = esc(name), sanCat = esc(r.category), sanTime = esc(r.time);
       return `<div class="recipe-card" data-id="${r.id}"><button class="fav-btn ${r.favorite?'fav-active':''}" onclick="event.stopPropagation();toggleFav(${r.id})">${r.favorite?'❤️':'🤍'}</button>
