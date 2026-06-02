@@ -2528,18 +2528,28 @@ function autoPullFromFirebase() {
       setTimeout(function() { if (el) el.style.display = 'none'; }, 3000);
       return;
     }
-    var keys = Object.keys(val);
-    if (val.mealPlan) { mealPlan = val.mealPlan; renderPlanner(); }
+    // Merge recipes (preserve local recipes not in remote)
+    if (val.recipes && Array.isArray(val.recipes)) {
+      recipes = mergeRecipes(recipes, val.recipes);
+      saveToLS();
+    }
+    // Merge shopping items
+    if (val.shoppingItems && Array.isArray(val.shoppingItems)) {
+      shopItems = mergeShoppingItems(shopItems, val.shoppingItems);
+      saveShopItems();
+    }
+    // Direct assignments for simple data
+    if (val.mealPlan) { mealPlan = val.mealPlan; }
     if (val.mealPlanKids) { mealPlanKids = val.mealPlanKids; }
-    if (val.shoppingItems) { shopItems = Array.isArray(val.shoppingItems) ? val.shoppingItems : []; saveShopItems(); renderShoppingList(); }
-    if (val.tasks) { tasks = Array.isArray(val.tasks) ? val.tasks : []; renderTasks(); }
-    if (val.recipes && Array.isArray(val.recipes) && val.recipes.length) { recipes = val.recipes; saveToLS(); }
-    if (val.planType) { planType = val.planType; localStorage.setItem('planType', planType); }
-    keys.forEach(function(k) { try { localStorage.setItem(k, JSON.stringify(val[k])); } catch(e) {} });
+    if (val.tasks) { tasks = Array.isArray(val.tasks) ? val.tasks : []; }
+    if (val.planType && !planType) { planType = val.planType; }
     try { render(); } catch(e) {}
+    try { renderPlanner(); } catch(e) {}
+    try { renderShoppingList(); } catch(e) {}
+    try { renderTasks(); } catch(e) {}
     try { renderDashboard(); } catch(e) {}
     try { renderTaskWidget(); } catch(e) {}
-    if (el) { el.textContent = '✅ Načítané: ' + recipes.length + ' receptov, ' + Object.values(getWeekPlan(getWeekKey(new Date()))).reduce(function(s,d){return s+Object.values(d).filter(Boolean).length},0) + ' jedál'; el.style.background = 'rgba(0,128,0,.92)'; }
+    if (el) { el.textContent = '✅ Načítané: ' + recipes.length + ' receptov'; el.style.background = 'rgba(0,128,0,.92)'; }
     setTimeout(function() { if (el) { el.style.display = 'none'; } }, 2500);
   }, function(err) {
     if (el) { el.textContent = '❌ Chyba: ' + err.message; }
