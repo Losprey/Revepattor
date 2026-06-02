@@ -2688,9 +2688,9 @@ const DEFAULT_RECIPES = [
   window._lsSet.call(localStorage, '_imgcache_cleared_v4', '1');
 })();
 
-let recipes = (function() { var parsed = JSON.parse(localStorage.getItem('recipes') || 'null'); if (!parsed || !Array.isArray(parsed) || parsed.length === 0) return JSON.parse(JSON.stringify(DEFAULT_RECIPES)); return parsed; })();
+let recipes = (function() { var parsed = JSON.parse(localStorage.getItem('recipes') || 'null'); if (!parsed || !Array.isArray(parsed) || parsed.length === 0) return JSON.parse(JSON.stringify(DEFAULT_RECIPES)); return parsed.filter(function(r) { return r != null && typeof r === 'object'; }); })();
 // Migrate: add allergens/difficulty if missing
-recipes = recipes.map(r => ({
+recipes = recipes.filter(function(r) { return r != null && typeof r === 'object'; }).map(r => ({
   ...r,
   allergens: r.allergens || [],
   difficulty: r.difficulty || (r.time <= 15 ? 1 : r.time <= 35 ? 2 : 3),
@@ -3459,7 +3459,9 @@ async function batchFetchImages() {
 
 // ======================== RECIPES TAB ========================
 function render() {
+  try {
   if (!Array.isArray(recipes)) recipes = [];
+  recipes = recipes.filter(function(r) { return r != null && typeof r === 'object'; });
   const grid = document.getElementById('recipe-grid');
   const search = document.getElementById('search').value.toLowerCase();
   const cat = document.getElementById('filter-category').value;
@@ -3518,6 +3520,7 @@ function render() {
     </div>`;
   }).join('');
   updateFavFilter();
+  } catch(e) { var el = document.getElementById('boot-status'); if (el) { el.style.display = 'block'; el.style.background = 'rgba(200,0,0,.92)'; el.textContent = '❌ render: ' + (e.message || ''); } }
 }
 
 document.getElementById('search').addEventListener('input', function() {
