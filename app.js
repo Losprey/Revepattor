@@ -1181,6 +1181,9 @@ function updateSyncIndicator() {
 
 function refreshActiveTab() {
   const tab = document.body.dataset.tab;
+    // Set season
+  const seasonNames = ["zima","zima","jar","jar","jar","leto","leto","leto","leto","leto","jesen","jesen"];
+  document.body.dataset.season = seasonNames[new Date().getMonth()] || "leto";
   if (tab === 'shopping') renderShoppingList();
   if (tab === 'planner') renderPlanner();
   if (tab === 'tasks') renderTasks();

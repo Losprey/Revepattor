@@ -22,15 +22,16 @@
 <body>
 
 <!-- SPLASH SCREEN -->
-<div id="splash" style="position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .6s var(--ease-smooth);">
-  <div style="font-size:3.5rem;margin-bottom:.8rem;animation:splashPulse 1.2s var(--ease-smooth) infinite alternate;">🍽️</div>
-  <div style="font-size:1rem;font-weight:800;color:var(--text);letter-spacing:-.03em;">Mealnest</div>
-  <div style="font-size:.7rem;color:var(--text3);margin-top:.3rem;">Plánovač jedál</div>
-  <div id="splash-progress" style="margin-top:1.2rem;width:120px;height:3px;background:var(--border);border-radius:3px;overflow:hidden;">
+<div id="splash" class="splash-logo" style="position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .6s var(--ease-smooth);">
+  <div style="font-size:4rem;margin-bottom:.6rem;animation:splashPulse 1.4s var(--ease-spring) infinite alternate;position:relative;z-index:1;">🍽️</div>
+  <div style="font-size:1.2rem;font-weight:800;color:var(--text);letter-spacing:-.03em;position:relative;z-index:1;background:var(--accent-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Mealnest</div>
+  <div style="font-size:.75rem;color:var(--text3);margin-top:.2rem;position:relative;z-index:1;">Plánovač jedál · Recepty · Nákup</div>
+  <div id="splash-progress" style="margin-top:1.2rem;width:140px;height:3px;background:var(--border);border-radius:3px;overflow:hidden;position:relative;z-index:1;">
     <div style="width:30%;height:100%;background:var(--accent-gradient);border-radius:3px;animation:splashLoad 1.8s var(--ease-smooth) infinite;"></div>
   </div>
+  <div style="font-size:.6rem;color:var(--text3);margin-top:.8rem;opacity:.5;position:relative;z-index:1;">v1.6 · 🍽️ Mealnest</div>
   <style>
-    @keyframes splashPulse { from { transform: scale(1); opacity:.6; } to { transform: scale(1.08); opacity:1; } }
+    @keyframes splashPulse { 0% { transform: scale(1) rotate(-2deg); opacity:.7; } 100% { transform: scale(1.08) rotate(2deg); opacity:1; } }
     @keyframes splashLoad { 0% { width:10%;margin-left:0; } 50% { width:60%;margin-left:20%; } 100% { width:10%;margin-left:90%; } }
   </style>
 </div>

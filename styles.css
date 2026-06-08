@@ -1077,3 +1077,72 @@ body::after { content: ""; position: fixed; bottom: -30%; left: -30%; width: 80%
 /* Navigation active indicator */
 .nav-item.active .nav-icon { transform: scale(1.1); }
 .nav-icon { transition: transform .25s var(--ease-spring); }
+
+/* ===== SEZÓNNÉ SCHÉMY ===== */
+[data-season="jar"] { --season-color: #10b981; --season-glow: rgba(16,185,129,.06); }
+[data-season="leto"] { --season-color: #f59e0b; --season-glow: rgba(245,158,11,.06); }
+[data-season="jesen"] { --season-color: #d97706; --season-glow: rgba(217,119,6,.06); }
+[data-season="zima"] { --season-color: #3b82f6; --season-glow: rgba(59,130,246,.06); }
+
+
+/* ===== SEZONNE SCHEMY ===== */
+[data-season="jar"] { --season-color: #10b981; --season-glow: rgba(16,185,129,.06); }
+[data-season="leto"] { --season-color: #f59e0b; --season-glow: rgba(245,158,11,.06); }
+[data-season="jesen"] { --season-color: #d97706; --season-glow: rgba(217,119,6,.06); }
+[data-season="zima"] { --season-color: #3b82f6; --season-glow: rgba(59,130,246,.06); }
+
+/* ===== PROGRESS RING ===== */
+.progress-ring { width: 48px; height: 48px; position: relative; }
+.progress-ring svg { transform: rotate(-90deg); }
+.progress-ring-bg { fill: none; stroke: var(--border); stroke-width: 4; }
+.progress-ring-fill { fill: none; stroke: var(--accent-gradient); stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset .8s var(--ease-spring); }
+.progress-ring-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: .7rem; font-weight: 800; color: var(--text); }
+
+/* ===== LOADING SPINNER ===== */
+.spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin .6s linear infinite; vertical-align: middle; margin-right: .2rem; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ===== SKELETON LOADING ===== */
+.skeleton { background: linear-gradient(90deg, var(--border) 25%, rgba(255,255,255,.04) 50%, var(--border) 75%); background-size: 200% 100%; animation: skeletonShine 1.5s infinite; border-radius: var(--radius-sm); }
+@keyframes skeletonShine { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+/* ===== HERO CARD ===== */
+.hero-card { background: linear-gradient(135deg, rgba(230,57,70,.12), rgba(249,115,22,.08)); border-radius: var(--radius-md); padding: 1rem; border: 1px solid rgba(230,57,70,.2); margin-bottom: .5rem; position: relative; overflow: hidden; }
+.hero-card::before { content: ""; position: absolute; top: -50%; right: -30%; width: 80%; height: 80%; background: radial-gradient(circle, rgba(230,57,70,.06) 0%, transparent 70%); pointer-events: none; }
+.hero-card-content { position: relative; z-index: 1; display: flex; align-items: center; gap: .7rem; }
+
+/* ===== RESPONSIVE GRID ===== */
+@media (min-width: 600px) {
+  #recipe-grid { grid-template-columns: repeat(3, 1fr) !important; }
+}
+@media (min-width: 900px) {
+  #recipe-grid { grid-template-columns: repeat(4, 1fr) !important; }
+}
+@media (min-width: 1200px) {
+  #recipe-grid { grid-template-columns: repeat(5, 1fr) !important; }
+}
+
+/* ===== FAREBNE KATEGORIE ===== */
+.category-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: .25rem; }
+[data-cat="Polievky"] .category-dot { background: #f59e0b; }
+[data-cat="Hlavné jedlá"] .category-dot { background: #e63946; }
+[data-cat="Šaláty"] .category-dot { background: #10b981; }
+[data-cat="Dezerty"] .category-dot { background: #ec4899; }
+[data-cat="Raňajky"] .category-dot { background: #3b82f6; }
+[data-cat="Predjedlá"] .category-dot { background: #8b5cf6; }
+[data-cat="Pečivo"] .category-dot { background: #d97706; }
+[data-cat="Nápoje"] .category-dot { background: #06b6d4; }
+[data-cat="Detské"] .category-dot { background: #ec4899; }
+[data-cat="Prílohy"] .category-dot { background: #78716c; }
+
+/* ===== LOGIN OVERLAY ===== */
+#login-overlay { background: linear-gradient(180deg, #0a0807 0%, #120b09 50%, #0a0807 100%); }
+#login-overlay .login-card { background: rgba(24,21,19,.8); backdrop-filter: blur(24px); border-radius: var(--radius-xl); border: 1px solid var(--border); padding: 2rem; max-width: 340px; width: 100%; text-align: center; }
+#login-overlay .login-icon { font-size: 3rem; margin-bottom: .5rem; }
+#login-overlay .login-title { font-size: 1.3rem; font-weight: 800; color: var(--text); margin-bottom: .3rem; }
+#login-overlay .login-sub { font-size: .82rem; color: var(--text2); margin-bottom: 1.2rem; line-height: 1.4; }
+
+/* ===== SPLASH V2 ===== */
+#splash { background: linear-gradient(135deg, #0a0807 0%, #120a08 50%, #0a0807 100%) !important; }
+#splash::before { content: ""; position: absolute; top: -30%; right: -20%; width: 60%; height: 60%; background: radial-gradient(circle, rgba(230,57,70,.06) 0%, transparent 70%); pointer-events: none; }
+#splash .splash-logo { position: relative; z-index: 1; }
