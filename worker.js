@@ -69,7 +69,7 @@ async function handleRequest(request) {
         { role: 'system', content: 'Si pomocník plánovača jedál. Odpovedaj v slovenčine. Odpovedaj stručne, len to čo treba. Formátuj zrozumiteľne. Nepoužívaj markdown.' },
         ...messages
       ],
-      max_tokens: 1500,
+      max_tokens: 600,
       temperature: 0.7,
     };
 

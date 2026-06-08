@@ -1049,6 +1049,7 @@ function connectToFamily(code) {
   bindPath('mealPlanKids', 'mealPlanKids');
   bindPath('tasks', 'tasks');
   bindPath('planType', 'planType');
+  bindPath('childAge', 'childAge');
 
   // Listen for recipe changes (merge by id, keep local-only recipes)
   bindPath('recipes', 'recipes', mergeRecipes);
@@ -1059,7 +1060,7 @@ function connectToFamily(code) {
   presenceRef.onDisconnect().update({ online: false, lastSeen: firebase.database.ServerValue.TIMESTAMP });
 }
 
-function pushAllLocalData() { pushToFirebase('shoppingItems', 'shoppingItems'); pushToFirebase('mealPlan', 'mealPlan'); pushToFirebase('mealPlanKids', 'mealPlanKids'); pushToFirebase('tasks', 'tasks'); pushToFirebase('recipes', 'recipes'); pushToFirebase('planType', 'planType'); }
+function pushAllLocalData() { pushToFirebase('shoppingItems', 'shoppingItems'); pushToFirebase('mealPlan', 'mealPlan'); pushToFirebase('mealPlanKids', 'mealPlanKids'); pushToFirebase('tasks', 'tasks'); pushToFirebase('childAge', 'childAge'); pushToFirebase('recipes', 'recipes'); pushToFirebase('planType', 'planType'); }
 
 function firebaseHardTest() {
   try {
@@ -1219,6 +1220,7 @@ function autoPullFromFirebase() {
     if (val.mealPlanKids) { mealPlanKids = val.mealPlanKids; }
     if (val.tasks) { tasks = Array.isArray(val.tasks) ? val.tasks : []; }
     if (val.planType && !planType) { planType = val.planType; }
+    if (val.childAge) { localStorage.setItem('childAge', val.childAge); }
     try { render(); } catch(e) {}
     try { renderPlanner(); } catch(e) {}
     try { renderShoppingList(); } catch(e) {}
@@ -2036,6 +2038,7 @@ function translateRecipeQuery(name) {
 
 // ======================== AI: CELÝ TÝŽDEŇ + NÁKUP ========================
 async function aiGenerateFullWeek() {
+  if (!confirm(lang==='en'?'Generate full week + shopping list? This will replace your current plan.':'Vygenerovať celý týždeň + nákupný zoznam? Prepíše sa aktuálny plán.')) return;
   const menuText = await aiWeeklyPlan();
   if (!menuText) return;
   // Remove any existing AI plan modal
