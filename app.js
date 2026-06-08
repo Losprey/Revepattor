@@ -2284,7 +2284,9 @@ function applySettings() {
   if (fab) fab.style.display = appSettings.quickAdd.enabled ? '' : 'none';
   // Re-check after DOM fully loads (FAB element is after the script tag)
   setTimeout(() => { const f = document.getElementById('fab-quick-add'); if (f) f.style.display = appSettings.quickAdd.enabled ? '' : 'none'; }, 100);
-  if (langChanged) { try { render(); } catch(e) {} try { showTipOfDay(); } catch(e) {} }
+  if (langChanged) { try { render(); } catch(e) {} try {   // Init Lucide icons
+  if (typeof lucide !== "undefined") { try { lucide.createIcons(); } catch(e) {} }
+  showTipOfDay(); } catch(e) {} }
   try { initNotifications(); } catch(e) {}
 }
 
