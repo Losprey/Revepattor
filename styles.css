@@ -680,6 +680,45 @@ body:not(.dark) .recipe-card .fav-btn.fav-active { background: linear-gradient(1
   .summary-grid { grid-template-columns: repeat(4, 1fr); }
 }
 
+
+/* ===== DASHBOARD V2 ===== */
+.dash-hero { display: flex; flex-direction: column; gap: .6rem; margin-bottom: .4rem; }
+.dash-greeting { display: flex; align-items: center; gap: .7rem; background: var(--card-gradient); border-radius: var(--radius-md); padding: .8rem; border: 1px solid var(--border); }
+.dh-emoji { font-size: 2rem; }
+.dh-title { font-weight: 800; font-size: 1rem; color: var(--text); }
+.dh-sub { font-size: .75rem; color: var(--text2); margin-top: .05rem; }
+.dash-stats { display: flex; gap: .4rem; }
+.dash-stat-card { flex: 1; background: var(--card-gradient); border-radius: var(--radius-sm); padding: .6rem .4rem; text-align: center; border: 1px solid var(--border); }
+.dsc-value { font-size: 1.4rem; font-weight: 800; color: var(--primary); line-height: 1.2; }
+.dsc-label { font-size: .6rem; color: var(--text3); margin-top: .1rem; }
+
+.dash-card { background: var(--card-gradient); border-radius: var(--radius-md); padding: .8rem; margin-bottom: .5rem; border: 1px solid var(--border); }
+.dash-card-compact { padding: .4rem .8rem; }
+.dash-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: .5rem; }
+.dash-card-title { font-weight: 700; font-size: .8rem; color: var(--text); }
+.dash-card-link { font-size: .7rem; color: var(--primary); cursor: pointer; font-weight: 600; }
+.dash-card-link:hover { color: var(--primary-light); }
+
+.dash-card-cta { cursor: pointer; transition: all .3s var(--ease-smooth); border-color: rgba(230,57,70,.2); background: linear-gradient(135deg, rgba(230,57,70,.08), rgba(249,115,22,.05)); }
+.dash-card-cta:hover { border-color: rgba(230,57,70,.4); box-shadow: 0 4px 16px rgba(230,57,70,.1); }
+.dash-card-cta:active { transform: scale(.98); }
+.dash-cta-content { display: flex; align-items: center; gap: .7rem; }
+.dash-cta-icon { font-size: 1.6rem; }
+.dash-cta-title { font-weight: 700; font-size: .85rem; color: var(--text); }
+.dash-cta-sub { font-size: .68rem; color: var(--text2); margin-top: .05rem; }
+.dash-cta-arrow { font-size: 1.2rem; color: var(--primary); margin-left: auto; font-weight: 700; }
+
+.dash-progress-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: .5rem; }
+.dpr-label { font-weight: 600; font-size: .78rem; color: var(--text); }
+.dpr-value { font-size: .75rem; color: var(--text2); font-weight: 600; }
+.dash-progress-bar { height: 6px; background: var(--border); border-radius: 6px; overflow: hidden; }
+.dash-progress-fill { height: 100%; background: var(--accent-gradient); border-radius: 6px; transition: width .6s var(--ease-smooth); }
+
+/* Keep old dash-section class for compatibility but improve it */
+.dash-section { background: var(--card-gradient); border-radius: var(--radius-md); padding: .8rem; margin-bottom: .5rem; border: 1px solid var(--border); }
+.dash-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: .5rem; }
+.dash-section-title { font-weight: 700; font-size: .8rem; color: var(--text); }
+.dash-section-link { font-size: .7rem; color: var(--primary); cursor: pointer; font-weight: 600; }
 /* ===== WATER REMINDER ===== */
 .water-reminder { display: flex; align-items: center; gap: .5rem; background: linear-gradient(135deg, rgba(59,130,246,.04), rgba(59,130,246,.01)); border: 1px solid rgba(59,130,246,.08); border-radius: var(--radius-md); padding: .4rem .55rem; margin-bottom: .4rem; }
 .water-reminder .water-icon { font-size: 1.1rem; animation: waterDrop 2s ease-in-out infinite; }
