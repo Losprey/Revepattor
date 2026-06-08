@@ -1020,7 +1020,7 @@ body:not(.dark) .recipe-card .fav-btn.fav-active { background: linear-gradient(1
 
 
 /* ===== 2. GLASSMORFIZMUS ===== */
-.modal-overlay.active { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+/* glass backdrop-filter removed - kept original modal overlay */
 
 /* Settings glass */
 .settings-card { background: rgba(24,21,19,.8); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: var(--radius-md); border: 1px solid var(--border); overflow: hidden; }
