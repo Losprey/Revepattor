@@ -15,3 +15,5 @@ yarn-error.log*
 
 # OS
 __MACOSX/
+package-lock.json
+package.json
