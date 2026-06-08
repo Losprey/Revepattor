@@ -568,7 +568,9 @@ async function aiGenerate(messages) {
 async function aiWeeklyPlan() {
   const members = (appSettings.family && appSettings.family.householdMembers) || 2;
   const season = ['jar','jar','jar','leto','leto','leto','leto','leto','jeseň','jeseň','jeseň','zima'][new Date().getMonth()];
-  const prompt = 'Navrhni jedálniček na 7 dní (pondelok až nedeľa) pre '+members+' člennú domácnosť. Ročné obdobie: '+season+'. Pre každý deň navrhni: raňajky, desiatu, obed, olovrant, večeru. Formát: Pondelok: Raňajky: ... Desiata: ... Obed: ... Olovrant: ... Večera: ... (a tak 7 dní). Každé jedlo na nový riadok začína "Raňajky:", "Desiata:", "Obed:", "Olovrant:", "Večera:". Použi slovenské názvy.';
+  const isKids = planType === 'kids';
+  const style = isKids ? 'Jedlá vhodné pre deti (nie príliš korenené, jednoduché, obľúbené u detí).' : '';
+  const prompt = 'Navrhni jedálniček na 7 dní (pondelok až nedeľa) pre '+members+' člennú domácnosť. Ročné obdobie: '+season+'. '+style+' Pre každý deň navrhni: raňajky, desiatu, obed, olovrant, večeru. Formát: Pondelok: Raňajky: ... Desiata: ... Obed: ... Olovrant: ... Večera: ... (a tak 7 dní). Každé jedlo na nový riadok začína "Raňajky:", "Desiata:", "Obed:", "Olovrant:", "Večera:". Použi slovenské názvy.';
   return aiGenerate([{ role: 'user', content: prompt }]);
 }
 
