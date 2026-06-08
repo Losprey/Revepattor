@@ -1,12 +1,25 @@
 {
   "rules": {
+    // ⚠️ Rodinné dáta sú prístupné cez unikátny familyCode (8 znakov, A-Z, 2-9)
+    // FamilyCode slúži ako de facto "password" pre zdieľanie v režime host/guest
+    // preto ponechávame read/write otvorené pre families/* uzly
     "families": {
-      ".read": true,
-      ".write": true
+      "$familyCode": {
+        ".read": true,
+        ".write": true,
+        // Validácia pre member záznamy
+        "members": {
+          "$memberId": {
+            ".validate": "newData.hasChildren(['name', 'lastSeen']) && newData.child('name').isString() && newData.child('name').val().length < 50"
+          }
+        }
+      }
     },
+    // 🔐 Push notifikačné tokeny sú chránené — vyžadujú Firebase Auth
+    // Toto zabraňuje zneužitiu tokenov na spamovanie notifikácií
     "pushTokens": {
-      ".read": true,
-      ".write": true
+      ".read": "auth !== null",
+      ".write": "auth !== null"
     }
   }
 }

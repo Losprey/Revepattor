@@ -1599,7 +1599,8 @@ function signOutUser() {
     localStorage.removeItem('authUser');
     localStorage.setItem('authGuest', '1');
     updateAuthUI();
-    location.reload();
+    // onAuthStateChanged callback už prekreslí UI a načíta správny namespace
+    // location.reload() nie je potrebný a spôsobuje zbytočné bliknutie
   }).catch(() => {});
 }
 
@@ -1611,7 +1612,8 @@ function continueAsGuest() {
   localStorage.removeItem('authUser');
   document.getElementById('login-overlay').style.display = 'none';
   updateAuthUI();
-  location.reload();
+  // onAuthStateChanged callback už prekreslí UI a načíta správny namespace
+  // location.reload() nie je potrebný a spôsobuje zbytočné bliknutie
 }
 
 function migrateGuestToUser() {
