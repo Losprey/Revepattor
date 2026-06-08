@@ -2327,10 +2327,14 @@ function openSettings() {
 
   // 1. Vzhľad
   const accentColors = [
-    { val: '#dc2626', label: 'Červená' },
-    { val: '#f59e0b', label: 'Oranžová' },
     { val: '#10b981', label: 'Zelená' },
+    { val: '#06b6d4', label: 'Tyrkysová' },
+    { val: '#3b82f6', label: 'Modrá' },
+    { val: '#e63946', label: 'Červená' },
+    { val: '#f59e0b', label: 'Oranžová' },
+    { val: '#8b5cf6', label: 'Fialová' },
     { val: '#ec4899', label: 'Ružová' },
+    { val: '#ffffff', label: 'Biela' },
   ];
   html += `<div class="settings-group">
     <div class="settings-group-title">🎨 ${t('Vzhľad','Appearance')}</div>
