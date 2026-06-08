@@ -3491,12 +3491,7 @@ function renderDashboard() {
     <div class="dash-progress-bar"><div class="dash-progress-fill" style="width:${mealPct}%;"></div></div>
   </div>`;
 
-  // Daily summary
-  if (w.calories) {
-    html += `<div class="dash-card"><div class="dash-card-header"><span class="dash-card-title">📊 ${lang === "en" ? "Daily Summary" : "Denný súhrn"}</span></div><div class="summary-grid" id="dash-summary">${renderDailySummary()}</div></div>`;
-  }
-
-  // AI CTA
+    // AI CTA
   html += `<div class="dash-card dash-card-cta" onclick="aiGenerateFullWeek()">
     <div class="dash-cta-content">
       <span class="dash-cta-icon">🚀</span>
