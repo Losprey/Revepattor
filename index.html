@@ -4050,93 +4050,62 @@ function saveRecipe() {
 }
 
 // ======================== DETAIL ========================
-function viewRecipe(id) {
-  viewingId = id;
-  basePortion = 2;
-  currentPortion = basePortion;
-  const r = recipes.find(rec => rec.id === id);
+
+// ======================== PREPOČET PORCIÍ ========================
+function scaleAmount(text, factor) {
+  if (factor === 1) return text;
+  // Nájdi číslo na začiatku (aj s desatinnou čiarkou: 1.5, 200, 1/2)
+  const m = text.match(/^(\d+(?:\.\d+)?(?:\/\d+)?)\s*/);
+  if (!m) return text; // "soľ", "maslo" — bez množstva, necháme
+  const val = parseFloat(m[1]);
+  if (isNaN(val)) return text;
+  const scaled = val * factor;
+  // Zaokrúhli: celé čísla na celé, inak na 1 desatinné
+  const rounded = Math.abs(scaled - Math.round(scaled)) < 0.05 
+    ? Math.round(scaled) 
+    : Math.round(scaled * 10) / 10;
+  // "2 vajcia" -> "3 vajcia" (ak factor 1.5), "200g" -> "300g"
+  return text.replace(m[1], String(rounded));
+}
+
+function scaleIngredients(ingredients, oldPortions, newPortions) {
+  if (!ingredients || !ingredients.length) return ingredients;
+  if (oldPortions === newPortions) return ingredients;
+  // "nové" / "staré" — napr. 6/4 = 1.5
+  const displayFactor = newPortions / oldPortions;
+  // Pre skutočný prepočet použijeme pomer k 1 porcii
+  // ingredients sú pre oldPortions, chceme ich prepočítať na newPortions
+  return ingredients.map(ing => scaleAmount(ing, displayFactor));
+}
+
+// ======================== ZMENA POČTU PORCIÍ ========================
+// Uchováva pôvodné suroviny pre prepočet
+let _origIngredients = [];
+
+function changePortions(delta) {
+  const r = getCurrentRecipe();
   if (!r) return;
-  const name = lang === 'en' && r.nameEn ? r.nameEn : r.name;
-  const ingr = (lang === 'en' && r.ingredientsEn ? r.ingredientsEn : r.ingredients) || [];
-  const stps = (lang === 'en' && r.stepsEn ? r.stepsEn : r.steps) || [];
-  const tgs = (lang === 'en' && r.tagsEn ? r.tagsEn : r.tags) || [];
-  const n = r.nutrition;
-  const el = document.getElementById('recipe-detail');
-  const san = esc(name), sanCat = esc(r.category), sanTime = esc(r.time);
-  el.innerHTML = `
-    <div id="detail-img-wrap" class="detail-img ${r.image||r.imageData?'':'img-skeleton'}">${r.image || r.imageData
-      ? `<img src="${escAttr(r.imageData||r.image)}" alt="${san}" onerror="this.outerHTML='<span style=\\'font-size:3.4rem\\'>🍽️</span>'" onload="this.parentElement.classList.remove('img-skeleton')">`
-      : `<span style="font-size:3.4rem">🍽️</span>`}</div>
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.4rem;">
-      <h2 style="font-size:1.05rem;flex:1;">${san}</h2>
-      <div style="display:flex;align-items:center;gap:.3rem;flex-shrink:0;">
-        ${'●'.repeat(r.difficulty||1)}${Math.max(0,3-(r.difficulty||1)) > 0 ? '○'.repeat(Math.max(0,3-(r.difficulty||1))) : ''}
-        <span style="font-size:.75rem;color:var(--text2);">⏱ ${sanTime}</span>
-      </div>
-    </div>
-    <div class="detail-meta">
-      <span>📂 ${sanCat}</span>
-      <span>🏷 ${tgs.map(esc).join(', ')}</span>
-      ${(r.allergens||[]).length ? `<span>⚠️ ${r.allergens.map(esc).join(', ')}</span>` : ''}
-    </div>
-    <div style="display:flex;gap:.3rem;margin-bottom:.5rem;flex-wrap:wrap;">
-      <button class="btn btn-secondary" onclick="editCurrent()" style="padding:.2rem .5rem;font-size:.75rem;">✏️ <span data-lang="btnEdit">Upraviť</span></button>
-      <button class="btn btn-danger" onclick="deleteCurrent()" style="padding:.2rem .5rem;font-size:.75rem;">🗑️ <span data-lang="btnDelete">Zmazať</span></button>
-    </div>
-    <div class="detail-section">
-      <div style="display:flex;align-items:center;justify-content:space-between;">
-        <h3>⭐ ${t('formTitle') === 'New Recipe' ? 'Rating' : 'Hodnotenie'}</h3>
-        <div class="star-rating">${[1,2,3,4,5].map(i => `<span class="star ${i<=Math.round(r.rating)?'active':''}" tabindex="0" role="button" onclick="setRating(${id},${i})" onkeydown="if(event.key==='Enter'||event.key===' ')event.preventDefault(),setRating(${id},${i})">★</span>`).join('')}</div>
-      </div>
-    </div>
-    ${appSettings.mealPlanner.showNutrition && n && (n.kcal||n.protein||n.fat||n.carbs) ? `<div class="detail-section">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:.3rem;flex-wrap:wrap;">
-        <h3>🥗 ${t('recipeNutri')}</h3>
-        <div style="display:flex;align-items:center;gap:.25rem;">
-          <button class="btn btn-sm ${!(window._showTotalNutri || false) ? 'btn-primary' : 'btn-secondary'}" onclick="window._showTotalNutri=false;viewRecipe(${id})" style="padding:.1rem .4rem;font-size:.65rem;" data-lang="nutritionPerPortion">Na porciu</button>
-          <button class="btn btn-sm ${window._showTotalNutri ? 'btn-primary' : 'btn-secondary'}" onclick="window._showTotalNutri=true;viewRecipe(${id})" style="padding:.1rem .4rem;font-size:.65rem;" data-lang="nutritionTotal">Celý recept</button>
-        </div>
-      </div>
-      ${window._showTotalNutri ? '' : `<div style="font-size:.7rem;color:var(--text2);margin-bottom:.3rem;">${t('nutritionPerPortion')} — ${r.portions||4} ${t('portionUnit')}</div>`}
-      <div class="nutrition-grid">
-        <div class="nutrition-item"><div class="val">🔥 ${esc(window._showTotalNutri ? Math.round((n.kcal||0)*(r.portions||4)) : n.kcal||'?')}</div><div class="lbl">${t('kcal')}</div></div>
-        <div class="nutrition-item"><div class="val">💪 ${esc(window._showTotalNutri ? Math.round((n.protein||0)*(r.portions||4)) : n.protein||'?')}g</div><div class="lbl">${t('protein')}</div></div>
-        <div class="nutrition-item"><div class="val">🧈 ${esc(window._showTotalNutri ? Math.round((n.fat||0)*(r.portions||4)) : n.fat||'?')}g</div><div class="lbl">${t('fat')}</div></div>
-        <div class="nutrition-item"><div class="val">🍚 ${esc(window._showTotalNutri ? Math.round((n.carbs||0)*(r.portions||4)) : n.carbs||'?')}g</div><div class="lbl">${t('carbs')}</div></div>
-      </div>
-      ${!window._showTotalNutri && n.kcal > 800 && n.fat > 40 ? `<div style="font-size:.7rem;color:var(--gold);margin-top:.2rem;">🍖 ${t('nutritionHearty')}</div>` : ''}
-      ${window._showTotalNutri ? `<div style="font-size:.7rem;color:var(--text3);margin-top:.2rem;">${t('nutritionTotalLabel')} — ${r.portions||4} ${t('portionUnit')}</div>` : ''}
-      ${!window._showTotalNutri && (n.kcal > 1200 || n.fat > 80 || n.protein > 80 || n.carbs > 150) ? `<div style="font-size:.7rem;color:var(--danger);margin-top:.2rem;">⚠️ ${t('nutritionCheck')}</div>` : ''}
-    </div>` : ''}
-    <div class="detail-section">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.3rem;">
-        <h3>🥕 ${t('formIngredients')}</h3>
-        <div style="display:flex;align-items:center;gap:.35rem;">
-          <button class="btn btn-secondary" onclick="changePortion(-1)" style="padding:.1rem .45rem;font-size:.85rem;">−</button>
-          <span id="portion-num" style="font-weight:700;font-size:.9rem;min-width:1.5rem;text-align:center;">${basePortion}</span>
-          <button class="btn btn-secondary" onclick="changePortion(1)" style="padding:.1rem .45rem;font-size:.85rem;">+</button>
-        </div>
-      </div>
-      <ul id="ingredient-list" style="margin-top:.3rem;">${ingr.map(i=>`<li>${esc(i)}</li>`).join('')}</ul>
-    </div>
-    <div class="detail-section"><h3>📝 ${t('formSteps')}</h3><ol>${stps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol></div>
-    <div class="detail-section"><h3>📓 ${t('formTitle')==='New Recipe'?'Notes':'Poznámky'}</h3>
-      <textarea id="recipe-notes" style="width:100%;padding:.45rem;border:1px solid var(--border);border-radius:6px;min-height:45px;font-family:inherit;font-size:.82rem;background:var(--input-bg);color:var(--text);" onchange="saveNotes(${id},this.value)">${esc((lang==='en'&&r.notesEn?r.notesEn:r.notes)||'')}</textarea></div>
-  `;
-  history.pushState({ modal: 'detail', id: id }, '', '#recipe-' + id);
-  openModal('detail-modal');
-  // Async image fetch in background
-  if (!r.image && !r.imageData) {
-    getRecipeImage(r).then(url => {
-      if (url) {
-        const wrap = document.getElementById('detail-img-wrap');
-        if (wrap) {
-          wrap.innerHTML = `<img src="${escAttr(url)}" alt="${san}" onerror="this.outerHTML='<span style=\\'font-size:3.4rem\\'>🍽️</span>'">`;
-          wrap.classList.remove('img-skeleton');
-        }
-      }
-    });
-  }
+  const newP = Math.max(1, Math.min(50, (r.portions || 4) + delta));
+  if (newP === (r.portions || 4)) return;
+  r.portions = newP;
+  saveToLS();
+  viewRecipe(r.id);
+}
+
+function resetPortions() {
+  const r = getCurrentRecipe();
+  if (!r) return;
+  r.portions = 4;
+  saveToLS();
+  viewRecipe(r.id);
+}
+
+function getCurrentRecipe() {
+  const el = document.getElementById(ecipe-detail\);
+  if (!el || !el.dataset.rid) return null;
+  return recipes.find(r => r.id === parseInt(el.dataset.rid));
+}
+
 }
 
 function setRating(id, val) {
