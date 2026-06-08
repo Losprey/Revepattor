@@ -2720,7 +2720,7 @@ function saveRecipe() {
 // ======================== PREPOČET PORCIÍ ========================
 function scaleAmount(text, factor) {
   if (factor === 1) return text;
-  const m = text.match(/^(\d+(?:\.\d+)?(?:\\/\d+)?)\s*/);
+  const m = text.match(/^(\d+(?:\.\d+)?(?:\/\d+)?)\s*/);
   if (!m) return text;
   const val = parseFloat(m[1]);
   if (isNaN(val)) return text;
@@ -2856,9 +2856,6 @@ function viewRecipe(id) {
       }
     });
   }
-}
-
-
 }
 
 // ======================== SHARE ========================
@@ -4248,7 +4245,6 @@ function copyShopList() {
   }).join('\n');
   navigator.clipboard.writeText(text).catch(() => {});
   showToast(lang==='en'?'Copied ' + unchecked.length + ' items.':'Skopírovaných ' + unchecked.length + ' položiek.','success');
-  else showToast(lang==='en'?'Copied '+unchecked.length+' items.':'Skopírovaných '+unchecked.length+' položiek.','success');
 }
 
 function openAddItemSheet(editId) {
