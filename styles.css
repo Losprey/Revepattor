@@ -1020,10 +1020,7 @@ body:not(.dark) .recipe-card .fav-btn.fav-active { background: linear-gradient(1
 
 
 /* ===== 2. GLASSMORFIZMUS ===== */
-.modal-overlay.active { display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.6); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); animation: fadeIn .3s var(--ease-smooth); }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-.modal { background: rgba(24,21,19,.88); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid rgba(255,255,255,.08); animation: modalIn .35s var(--ease-spring); }
-@keyframes modalIn { from { opacity: 0; transform: scale(.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+.modal-overlay.active { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
 
 /* Settings glass */
 .settings-card { background: rgba(24,21,19,.8); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: var(--radius-md); border: 1px solid var(--border); overflow: hidden; }
@@ -1040,9 +1037,9 @@ body::before { content: ""; position: fixed; top: -50%; right: -50%; width: 100%
 body::after { content: ""; position: fixed; bottom: -30%; left: -30%; width: 80%; height: 80%; background: radial-gradient(ellipse, rgba(249,115,22,.02) 0%, transparent 70%); pointer-events: none; z-index: 0; }
 
 /* Ensure all content is above background */
-#app, .modal-overlay, nav { position: relative; z-index: 1; }
+#app, nav { position: relative; z-index: 1; }
 /* But modal overlays need higher z-index */
-.modal-overlay { z-index: 200; }
+/* modal-overlay z-index je v zakladnom CSS (z-index: 1000) */
 
 /* ===== 4. MIKROANIMÁCIE ===== */
 /* Button press */
