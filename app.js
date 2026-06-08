@@ -3343,6 +3343,7 @@ function dismissTip() {
 }
 
 function switchTab(tab) {
+  try { localStorage.setItem('lastTab', tab); } catch(e) {}
   document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
   const btn = document.querySelector(`.nav-item[data-tab="${tab}"]`);
   if (btn) btn.classList.add('active');
@@ -5203,8 +5204,8 @@ document.getElementById('recipe-grid').addEventListener('click', function(e) {
   }
 });
 try { applyLang(); } catch(e) {}
-document.body.dataset.tab = 'dashboard';
-switchTab('dashboard');
+document.body.dataset.tab = localStorage.getItem('lastTab') || 'dashboard';
+switchTab(localStorage.getItem('lastTab') || 'dashboard');
 
 render();
 showTipOfDay();
