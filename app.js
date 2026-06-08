@@ -32,6 +32,7 @@ const LANG = {
     recipeNutri: 'Nutričné hodnoty', kcal: 'kcal', protein: 'bielkoviny', fat: 'tuky', carbs: 'sacharidy',
     perPortion: 'na porciu',
     allAges: 'Všetky veky', age6m: '6m+', age1: '1r+', age2: '2r+', age3: '3r+',
+        childAge: 'Vek dieťaťa', childAgeHint: 'rokov (nastav pre lepšie AI návrhy)',
     difficulty:'Obtiažnosť',
     diffEasy:'Ľahké', diffMedium:'Stredné', diffHard:'Ťažké',
     btnCopy:'📋 Kopírovať',
@@ -106,6 +107,7 @@ const LANG = {
     recipeNutri: 'Nutrition', kcal: 'kcal', protein: 'protein', fat: 'fat', carbs: 'carbs',
     perPortion: 'per serving',
     allAges: 'All ages', age6m: '6m+', age1: '1y+', age2: '2y+', age3: '3y+',
+        childAge: 'Child age', childAgeHint: 'years (set for better AI suggestions)',
     difficulty:'Difficulty',
     diffEasy:'Easy', diffMedium:'Medium', diffHard:'Hard',
     btnCopy:'📋 Copy',
@@ -163,7 +165,7 @@ try {
 } catch(e) { storeNs = 'guest_'; }
 
 // Shared keys that are NOT user-scoped
-const GLOBAL_KEYS = new Set(['lang','dark','accent','appSettings','notifFired','notifFiredToday','familyCode','deviceId','tipDismissed','authUser','authGuest','authMigrateFromGuest','_appVersion','_migrated_v2','_imgcache_cleared_v4','onboardingCompleted']);
+const GLOBAL_KEYS = new Set(['lang','dark','accent','appSettings','notifFired','notifFiredToday','familyCode','deviceId','tipDismissed','authUser','authGuest','authMigrateFromGuest','_appVersion','_migrated_v2','_imgcache_cleared_v4','onboardingCompleted','childAge']);
 
 // Patch localStorage to auto-namespace data keys
 (function patchLocalStorage() {
@@ -569,7 +571,9 @@ async function aiWeeklyPlan() {
   const members = (appSettings.family && appSettings.family.householdMembers) || 2;
   const season = ['jar','jar','jar','leto','leto','leto','leto','leto','jeseň','jeseň','jeseň','zima'][new Date().getMonth()];
   const isKids = planType === 'kids';
-  const style = isKids ? 'Jedlá vhodné pre deti (nie príliš korenené, jednoduché, obľúbené u detí).' : '';
+  const childAge = isKids ? (localStorage.getItem('childAge') || '') : '';
+  const ageHint = childAge ? ' Jedlá pre dieťa vo veku '+childAge+' rokov (prispôsob tomu porcie, veľkosť porcií a vhodnosť jedál).' : '';
+  const style = isKids ? 'Jedlá vhodné pre deti (nie príliš korenené, jednoduché, obľúbené u detí).'+ageHint : '';
   const prompt = 'Navrhni jedálniček na 7 dní (pondelok až nedeľa) pre '+members+' člennú domácnosť. Ročné obdobie: '+season+'. '+style+' Pre každý deň navrhni: raňajky, desiatu, obed, olovrant, večeru. Formát: Pondelok: Raňajky: ... Desiata: ... Obed: ... Olovrant: ... Večera: ... (a tak 7 dní). Každé jedlo na nový riadok začína "Raňajky:", "Desiata:", "Obed:", "Olovrant:", "Večera:". Použi slovenské názvy.';
   return aiGenerate([{ role: 'user', content: prompt }]);
 }
@@ -2409,6 +2413,12 @@ function openSettings() {
         </div>
       `}
       <div style="font-size:.6rem;color:var(--text3);padding:.2rem 0 0;">${t('Nákupný zoznam a plánovač sa zdieľajú v reálnom čase.','Shopping list & planner shared in real-time.')}</div>
+      <div style="border-top:1px solid var(--border);margin:.4rem 0;"></div>
+      <div class="settings-row" onclick="var v=prompt('${t('childAge')} ${t('childAgeHint')}','${localStorage.getItem('childAge')||''}');if(v!==null&&!isNaN(v)){localStorage.setItem('childAge',v);showToast(lang==='en'?'Saved':'Uložené','success');openSettings()}">
+        <span class="sr-label"><span class="sr-icon">👶</span> ${t('childAge')}</span>
+        <span class="sr-value">${localStorage.getItem('childAge')||'—'} ${t('childAgeHint','rokov')} <span class="sr-arrow">›</span></span>
+      </div>
+      <div style="border-top:1px solid var(--border);margin:.4rem 0;"></div>
       <div style="font-size:.65rem;font-weight:600;color:var(--text3);margin:.6rem 0 .2rem;text-transform:uppercase;letter-spacing:.05em;">🔔 ${t('Notifikácie','Notifications')}</div>
       ${[['breakfastReminder','breakfast','🌅',t('Pripomenutie raňajok','Breakfast reminder')],
          ['todayCookingReminder','whatCook','🍳',t('Čo variť dnes','What to cook today')],
