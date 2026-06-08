@@ -585,6 +585,7 @@ function showAIPlanModal(text) {
   div.id = 'ai-plan-modal';
   div.className = 'modal-overlay active';
   div.style.cssText = 'z-index:2000;';
+  div.onclick = function(e) { if (e.target === this) this.remove(); };
   div.innerHTML = `<div class="modal" style="max-width:500px;max-height:85vh;overflow-y:auto;">
     <button class="modal-close" onclick="document.getElementById('ai-plan-modal').remove()">✕</button>
     <h2>🤖 AI návrh jedálnička</h2>
@@ -665,6 +666,7 @@ async function aiIngredientSuggest() {
     div.id = 'ai-modal';
     div.className = 'modal-overlay active';
     div.style.cssText = 'z-index:2000;';
+  div.onclick = function(e) { if (e.target === this) this.remove(); };
     div.innerHTML = '<div class="modal" style="max-width:500px;max-height:80vh;overflow-y:auto;"><button class="modal-close" onclick="document.getElementById(\'ai-modal\').remove()">✕</button><h2>🤖 '+t('Čo uvariť','What to cook')+'</h2><pre style="white-space:pre-wrap;font-size:.78rem;font-family:inherit;background:var(--bg);padding:.8rem;border-radius:8px;">'+esc(reply)+'</pre></div>';
     document.body.appendChild(div);
   }
@@ -732,7 +734,8 @@ async function aiSubstituteIngredient() {
   const ingr = prompt(t('Ktorú surovinu chceš nahradiť?','Which ingredient to substitute?'), '');
   if (!ingr) return;
   const reply = await aiGenerate([{ role: 'user', content: 'Čím môžem nahradiť "'+ingr+'" pri varení? Daj mi 2-3 alternatívy s vysvetlením. Odpovedaj v slovenčine.' }]);
-  if (reply) { const old = document.getElementById('ai-modal'); if (old) old.remove(); const div = document.createElement('div'); div.id = 'ai-modal'; div.className = 'modal-overlay active'; div.style.cssText = 'z-index:2000;'; div.innerHTML = '<div class="modal" style="max-width:500px;"><button class="modal-close" onclick="document.getElementById(\'ai-modal\').remove()">✕</button><h2>🔄 '+t('Náhrada: ','Substitute: ')+esc(ingr)+'</h2><pre style="white-space:pre-wrap;font-size:.78rem;font-family:inherit;background:var(--bg);padding:.8rem;border-radius:8px;">'+esc(reply)+'</pre></div>'; document.body.appendChild(div); }
+  if (reply) { const old = document.getElementById('ai-modal'); if (old) old.remove(); const div = document.createElement('div'); div.id = 'ai-modal'; div.className = 'modal-overlay active'; div.style.cssText = 'z-index:2000;';
+  div.onclick = function(e) { if (e.target === this) this.remove(); }; div.innerHTML = '<div class="modal" style="max-width:500px;"><button class="modal-close" onclick="document.getElementById(\'ai-modal\').remove()">✕</button><h2>🔄 '+t('Náhrada: ','Substitute: ')+esc(ingr)+'</h2><pre style="white-space:pre-wrap;font-size:.78rem;font-family:inherit;background:var(--bg);padding:.8rem;border-radius:8px;">'+esc(reply)+'</pre></div>'; document.body.appendChild(div); }
 }
 
 async function aiSimplifyRecipe(recipeId) {
@@ -2037,12 +2040,13 @@ async function aiGenerateFullWeek() {
   div.id = 'ai-plan-modal';
   div.className = 'modal-overlay active';
   div.style.cssText = 'z-index:2000;';
+  div.onclick = function(e) { if (e.target === this) this.remove(); };
   div.innerHTML = '<div class="modal" style="max-width:500px;max-height:85vh;overflow-y:auto;">' +
-    '<button class="modal-close" onclick="this.closest(\'modal-overlay\').remove()">✕</button>' +
+    '<button class="modal-close" onclick="this.closest(\'.modal-overlay\').remove()">✕</button>' +
     '<h2>🤖 ' + t('AI návrh jedálnička','AI meal plan') + '</h2>' +
     '<pre id="ai-plan-text" style="white-space:pre-wrap;font-size:.75rem;font-family:inherit;background:var(--bg);padding:.8rem;border-radius:8px;max-height:50vh;overflow-y:auto;">' + esc(menuText) + '</pre>' +
     '<div style="display:flex;gap:.5rem;margin-top:.8rem;flex-wrap:wrap;">' +
-      '<button class="btn btn-primary" onclick="parseAndFillAIPlan();showToast(\'Shopping will be generated...\',\'info\');setTimeout(function(){aiGenerateShoppingList()},3000)" style="flex:1;">' + (lang === 'en' ? 'Apply + shopping' : 'PouÅ¾iÅ¥ + nÃ¡kup') + '</button>' +
+      '<button class="btn btn-primary" onclick="parseAndFillAIPlan();showToast(\'Shopping will be generated...\',\'info\');setTimeout(function(){aiGenerateShoppingList()},3000)" style="flex:1;">' + (lang === 'en' ? 'Apply + shopping' : 'Použiť + nákup') + '</button>' +
       '<button class="btn btn-secondary" onclick="parseAndFillAIPlan();this.closest(\'.modal-overlay\').remove()">' + t('Len použiť','Just apply') + '</button>' +
     '</div></div>';
   document.body.appendChild(div);
