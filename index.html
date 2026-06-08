@@ -6185,29 +6185,23 @@ function importFromUrl() {
   const btn = document.getElementById('import-url-btn');
   status.textContent = '⏳ Načítavam...';
   btn.disabled = true;
-  const proxies = [
-    u => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u),
-    u => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u),
-    u => 'https://corsproxy.io/?' + encodeURIComponent(u),
-  ];
-  let proxyIdx = 0;
-  let retries = 0;
-  const maxRetries = 2;
-  function tryFetch() {
-    if (proxyIdx >= proxies.length) {
-      status.textContent = t('importUrlFail') + ' — skús znova neskôr';
-      btn.disabled = false;
-      return;
-    }
-    const proxyUrl = proxies[proxyIdx](url);
-    const label = proxyIdx === 0 ? 'codetabs' : 'allorigins';
-    status.textContent = '⏳ Načítavam... (' + label + ')';
+  const SCRAPER_URL = 'https://mealnest-scraper.waldis994.workers.dev';
+  let maxRetries = 2;
+  function tryFetch(retriesLeft) {
+    if (retriesLeft === undefined) retriesLeft = maxRetries;
+    const proxyUrl = SCRAPER_URL + '?url=' + encodeURIComponent(url);
+    status.textContent = retriesLeft < maxRetries ? '⏳ Opakujem...' : '⏳ Načítavam...';
     fetch(proxyUrl)
       .then(r => {
         if (!r.ok) throw new Error('HTTP ' + r.status);
         return r.text();
       })
+      .catch(err => {
+        if (retriesLeft > 0) { setTimeout(() => tryFetch(retriesLeft - 1), 1500); return; }
+        throw err;
+      })
       .then(raw => {
+        if (!raw) return;
         let html = raw;
         try {
           const parsed = JSON.parse(raw);
@@ -6312,18 +6306,15 @@ function importFromUrl() {
         status.textContent = t('importUrlOk');
         closeModal('import-url-modal');
       })
-      .catch(() => {
-        retries++;
-        if (retries < maxRetries) {
-          setTimeout(tryFetch, 800);
-        } else {
-          retries = 0;
-          proxyIdx++;
-          setTimeout(tryFetch, 300);
-        }
+      .catch(err => {
+        // Chyba už je ošetrená v .catch() pred .then()
+        // Ak by sa dostala sem, skúsime ešte raz
+        status.textContent = t('importUrlFail');
+        btn.disabled = false;
+        console.error('Scraper error:', err);
       });
   }
-  tryFetch();
+  tryFetch(maxRetries);
 }
 
 // ======================== BACK BUTTON + HISTORY ========================
