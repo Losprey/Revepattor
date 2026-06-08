@@ -2333,7 +2333,7 @@ function openSettings() {
     <div class="settings-group-title">🎨 ${t('Vzhľad','Appearance')}</div>
     <div class="settings-card">
       <div class="settings-row">
-        <span class="sr-label"><span class="sr-icon">🌙</span> ${t('Tmavý režim','Dark mode')}</span>
+        <span class="sr-label"><span class="sr-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></span> ${t('Tmavý režim','Dark mode')}</span>
         <label class="toggle-switch"><input type="checkbox" ${s.theme==='dark'?'checked':''} onchange="s.theme=this.checked?'dark':'light';saveSettings()"><span class="toggle-slider"></span></label>
       </div>
       <div class="settings-row" onclick="cycleLang()">
@@ -2384,11 +2384,11 @@ function openSettings() {
       <div style="font-size:.65rem;font-weight:600;color:var(--text3);margin:.6rem 0 .2rem;text-transform:uppercase;letter-spacing:.05em;">👨‍👩‍👧 ${t('Rodina','Family')}</div>
       ${familyCode ? `
         <div class="settings-row" onclick="navigator.clipboard.writeText('${familyCode}').then(()=>showToast('${t('Kód skopírovaný!','Code copied!')}','success'))">
-          <span class="sr-label"><span class="sr-icon">🔗</span> ${t('Rodinný kód','Family code')}</span>
+          <span class="sr-label"><span class="sr-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span> ${t('Rodinný kód','Family code')}</span>
           <span class="sr-value" style="font-weight:700;letter-spacing:.08em;">${familyCode} 📋</span>
         </div>
         <div class="settings-row" onclick="pushAllLocalData();showToast('${t('Dáta odoslané.','Data synced.')}','success')">
-          <span class="sr-label"><span class="sr-icon">🔄</span> ${t('Synchronizovať teraz','Sync now')}</span>
+          <span class="sr-label"><span class="sr-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span> ${t('Synchronizovať teraz','Sync now')}</span>
           <span class="sr-value"><span class="sr-arrow">›</span></span>
         </div>
         <div class="settings-row" onclick="showFamilyMembers()">
@@ -2416,7 +2416,7 @@ function openSettings() {
       <div style="font-size:.6rem;color:var(--text3);padding:.2rem 0 0;">${t('Nákupný zoznam a plánovač sa zdieľajú v reálnom čase.','Shopping list & planner shared in real-time.')}</div>
       <div style="border-top:1px solid var(--border);margin:.4rem 0;"></div>
       <div class="settings-row" onclick="var v=prompt('${t('childAge')} ${t('childAgeHint')}','${localStorage.getItem('childAge')||''}');if(v!==null&&!isNaN(v)){localStorage.setItem('childAge',v);showToast(lang==='en'?'Saved':'Uložené','success');openSettings()}">
-        <span class="sr-label"><span class="sr-icon">👶</span> ${t('childAge')}</span>
+        <span class="sr-label"><span class="sr-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 0-4 4v1a4 4 0 0 0 8 0V6a4 4 0 0 0-4-4z"/><path d="M6 12h.01M18 12h.01"/><path d="M6 20h12"/><path d="m8 16 4 4 4-4"/></svg></span> ${t('childAge')}</span>
         <span class="sr-value">${localStorage.getItem('childAge')||'—'} ${t('childAgeHint','rokov')} <span class="sr-arrow">›</span></span>
       </div>
       <div style="border-top:1px solid var(--border);margin:.4rem 0;"></div>
@@ -2483,26 +2483,26 @@ function openSettings() {
     <div class="settings-group-title">💾 ${t('Dáta','Data')}</div>
     <div class="settings-card">
       <div class="settings-row" onclick="refreshRecipeImages();closeSettings()">
-        <span class="sr-label"><span class="sr-icon">🖼️</span> ${t('Obnoviť obrázky','Refresh images')}</span>
+        <span class="sr-label"><span class="sr-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></span> ${t('Obnoviť obrázky','Refresh images')}</span>
         <span class="sr-value"><span class="sr-arrow">›</span></span>
       </div>
       <!-- Debug tools — skryté, tapnutím na nadpis sa zobrazia -->
       <div class="form-section-title" style="cursor:pointer;user-select:none;opacity:.4;font-size:.55rem;" onclick="var n=this.nextElementSibling;n.style.display=n.style.display==='none'?'block':'none'">🔬 ${t('Debug (klepni pre zobrazenie)','Debug (tap to show)')}</div>
       <div style="display:none;">
       <div class="settings-row" onclick="debugFirebase();showToast('Debug info v konzole','info')">
-        <span class="sr-label"><span class="sr-icon">🔬</span> ${t('Debug Firebase','Debug Firebase')}</span>
+        <span class="sr-label"><span class="sr-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span> ${t('Debug Firebase','Debug Firebase')}</span>
         <span class="sr-value"><span class="sr-arrow">›</span></span>
       </div>
       <div class="settings-row" onclick="firebaseHardTest();showToast('Test zapísaný','info')">
-        <span class="sr-label"><span class="sr-icon">🛠️</span> ${t('Hard Test','Hard Test')}</span>
+        <span class="sr-label"><span class="sr-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span> ${t('Hard Test','Hard Test')}</span>
         <span class="sr-value"><span class="sr-arrow">›</span></span>
       </div>
       <div class="settings-row" onclick="debugFirebaseWrite();showToast('Test zapísaný','info')">
-        <span class="sr-label"><span class="sr-icon">📤</span> ${t('Force Push','Force Push')}</span>
+        <span class="sr-label"><span class="sr-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span> ${t('Force Push','Force Push')}</span>
         <span class="sr-value"><span class="sr-arrow">›</span></span>
       </div>
       <div class="settings-row" onclick="debugFirebasePull()">
-        <span class="sr-label"><span class="sr-icon">📥</span> ${t('Force Pull','Force Pull')}</span>
+        <span class="sr-label"><span class="sr-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span> ${t('Force Pull','Force Pull')}</span>
         <span class="sr-value"><span class="sr-arrow">›</span></span>
       </div>
       </div>
@@ -2515,7 +2515,7 @@ function openSettings() {
         <span class="sr-value"><span class="sr-arrow">›</span></span>
       </div>
       <div class="settings-row" onclick="if(confirm('${t('Naozaj obnoviť demo recepty? Všetky existujúce sa stratia.','Reset to demo recipes? All existing recipes will be lost.')}')){resetRecipes();closeSettings()}">
-        <span class="sr-label"><span class="sr-icon">🔄</span> ${t('Obnoviť demo','Reset demo')}</span>
+        <span class="sr-label"><span class="sr-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span> ${t('Obnoviť demo','Reset demo')}</span>
         <span class="sr-value"><span class="sr-arrow">›</span></span>
       </div>
       <div class="settings-row" onclick="aiBatchNutrition()">
