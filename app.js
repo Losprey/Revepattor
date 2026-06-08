@@ -3431,68 +3431,86 @@ function renderDashboard() {
   let html = '';
   const w = appSettings.homeWidgets;
 
+    // Greeting + stats hero
+  const todayMeals = getTodayMealCount();
+  const todayTasksArr = getTodayTasks();
+  const todayDone = todayTasksArr.filter(t => t.done).length;
+  const streak = calcPlanningStreak();
+
+  // Hero greeting
+  html += `<div class="dash-hero">
+    <div class="dash-greeting">
+      <span class="dh-emoji">${todayMeals >= 4 ? "⭐" : todayMeals > 0 ? "👋" : "🌅"}</span>
+      <div class="dh-text">
+        <div class="dh-title">${lang === "en" ? "Hello!" : "Ahoj!"}</div>
+        <div class="dh-sub">${lang === "en"
+          ? (todayMeals >= 4 ? "Great day planned!" : "Time to plan meals")
+          : (todayMeals >= 4 ? "Skvelý deň!" : "Čas naplánovať jedlá")}</div>
+      </div>
+    </div>
+    <div class="dash-stats">
+      <div class="dash-stat-card"><div class="dsc-value">${todayMeals}</div><div class="dsc-label">🍽️ ${lang === "en" ? "Meals" : "Jedál"}</div></div>
+      ${w.todayTasks ? `<div class="dash-stat-card"><div class="dsc-value">${todayTasksArr.length}</div><div class="dsc-label">✅ ${lang === "en" ? "Tasks" : "Ôloh"}</div></div>` : ""}
+      <div class="dash-stat-card"><div class="dsc-value">${streak}</div><div class="dsc-label">🔥 ${lang === "en" ? "Days" : "Dní"}</div></div>
+    </div>
+  </div>`;
+
   // Weather widget
   if (w.weather) {
     if (appSettings.weather.location) {
-      html += `<div class="dash-section"><div class="weather-widget" id="weather-widget" onclick="editText('weather.location','${t('Mesto','City')}')">
-        <span class="weather-icon">🌤️</span>
-        <span class="weather-info"><strong>${esc(appSettings.weather.location)}</strong><span class="weather-temp">${t('Načítavam...','Loading...')}</span></span>
-      </div></div>`;
+      html += `<div class="dash-card"><div class="weather-widget" id="weather-widget" onclick="editText('weather.location','${t("Mesto","City")}')"><span class="weather-icon">🌤️</span><span class="weather-info"><strong>${esc(appSettings.weather.location)}</strong><span class="weather-temp">${t("Načítavam...","Loading...")}</span></span></div></div>`;
     } else {
-      html += `<div class="dash-section"><div class="weather-widget weather-fallback" id="weather-widget" onclick="editText('weather.location','${t('Mesto','City')}')">
-        <span class="weather-icon">🌤️</span>
-        <span class="weather-info"><strong>${t('Počasie','Weather')}</strong><span class="weather-temp">${t('Zadaj mesto','Enter city')}</span></span>
-      </div></div>`;
+      html += `<div class="dash-card"><div class="weather-widget weather-fallback" id="weather-widget" onclick="editText('weather.location','${t("Počasie","Weather")}')"><span class="weather-icon">🌤️</span><span class="weather-info"><strong>${t("Počasie","Weather")}</strong><span class="weather-temp">${t("Zadaj mesto","Enter city")}</span></span></div></div>`;
     }
   }
 
   // Task widget
   if (w.todayTasks) {
-    html += `<div id="dash-tasks"></div>`;
+    html += `<div id="dash-tasks" class="dash-card"></div>`;
   }
 
   // Water reminder
   if (w.hydration) {
-    html += `<div class="water-reminder" id="water-reminder">
-      <span class="water-icon">💧</span>
-      <span class="water-text">${lang === 'en' ? 'Don\'t forget to drink water! 🚰' : 'Nezabudni na pitný režim! 🚰'}</span>
-      <button class="water-btn" onclick="dismissWaterReminder()">${lang === 'en' ? 'OK ✓' : 'OK ✓'}</button>
-    </div>`;
+    html += `<div class="dash-card"><div class="water-reminder" id="water-reminder"><span class="water-icon">💧</span><span class="water-text">${lang === "en" ? "Don't forget to drink water! 🚰" : "Nezabudni na pitný režím! 🚰"}</span><button class="water-btn" onclick="dismissWaterReminder()">OK ✓</button></div></div>`;
   }
 
-  // Today's meals timeline
-  html += `<div class="dash-section">
-    <div class="dash-section-header">
-      <span class="dash-section-title">📋 ${lang === 'en' ? 'Today\'s meals' : 'Dnešné jedlá'}</span>
-      <span class="dash-section-link" onclick="switchTab('planner')">${lang === 'en' ? 'Full week' : 'Celý týždeň'} ›</span>
+  // Today meals card
+  html += `<div class="dash-card">
+    <div class="dash-card-header">
+      <span class="dash-card-title">📋 ${lang === "en" ? "Today's meals" : "Dnešné jedlá"}</span>
+      <span class="dash-card-link" onclick="switchTab('planner')">${lang === "en" ? "Full week" : "Celý týždeň"} ›</span>
     </div>
     <div class="meal-timeline" id="dash-timeline">${renderMealTimeline()}</div>
   </div>`;
 
-  // Daily summary (controlled by calories + nutrition settings)
+  // Progress bar
+  const mealPct = Math.round((todayMeals / 5) * 100);
+  html += `<div class="dash-card">
+    <div class="dash-progress-row"><span class="dpr-label">📅 ${lang === "en" ? "Daily progress" : "Dnešný progress"}</span><span class="dpr-value">${todayMeals}/5</span></div>
+    <div class="dash-progress-bar"><div class="dash-progress-fill" style="width:${mealPct}%;"></div></div>
+  </div>`;
+
+  // Daily summary
   if (w.calories) {
-    html += `<div class="dash-section">
-      <div class="dash-section-header">
-        <span class="dash-section-title">📊 ${lang === 'en' ? 'Daily Summary' : 'Denný súhrn'}</span>
-      </div>
-      <div class="summary-grid" id="dash-summary">${renderDailySummary()}</div>
-    </div>`;
+    html += `<div class="dash-card"><div class="dash-card-header"><span class="dash-card-title">📊 ${lang === "en" ? "Daily Summary" : "Denný súhrn"}</span></div><div class="summary-grid" id="dash-summary">${renderDailySummary()}</div></div>`;
   }
 
-  // AI: Full week + shopping
-  html += '<div class="dash-section" style="text-align:center;padding:.8rem;"><button class="btn btn-primary" onclick="aiGenerateFullWeek()" style="width:100%;padding:.7rem;font-size:.9rem;font-weight:700;">🚀 ' + (lang === 'en' ? 'Generate week + shopping' : 'Celý týždeň + nákup') + '</button></div>';
+  // AI CTA
+  html += `<div class="dash-card dash-card-cta" onclick="aiGenerateFullWeek()">
+    <div class="dash-cta-content">
+      <span class="dash-cta-icon">🚀</span>
+      <div>
+        <div class="dash-cta-title">${lang === "en" ? "Generate week + shopping" : "Celý týždeň + nákup"}</div>
+        <div class="dash-cta-sub">${lang === "en" ? "AI plans your week and creates shopping in one click" : "AI naplánuje týždeň aj nákup jedným kliknutím"}</div>
+      </div>
+      <span class="dash-cta-arrow">→</span>
+    </div>
+  </div>`;
 
   // Smart suggestions
   if (w.quickRecipes) {
-    html += `<div class="dash-section">
-      <div class="dash-section-header">
-        <span class="dash-section-title">💡 ${lang === 'en' ? 'Suggestions' : 'Tipy na dnes'}</span>
-      </div>
-      <div class="suggestion-scroll" id="dash-suggestions">${renderSuggestions()}</div>
-    </div>`;
-  }
-
-  // Safe fallback: if no widgets rendered, show restore CTA
+    html += `<div class="dash-card"><div class="dash-card-header"><span class="dash-card-title">💡 ${lang === "en" ? "Suggestions" : "Tipy na dnes"}</span></div><div class="suggestion-scroll" id="dash-suggestions">${renderSuggestions()}</div></div>`;
+  }// Safe fallback: if no widgets rendered, show restore CTA
   if (!html.trim()) {
     html = `<div class="dash-section" style="text-align:center;padding:32px 20px;">
       <div style="font-size:2.5rem;margin-bottom:8px;">🏠</div>
