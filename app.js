@@ -2207,19 +2207,15 @@ function render() {
       <div class="recipe-card-img${r.image||r.imageData?'':' img-skeleton'}" id="rcimg-${r.id}">${r.image||r.imageData
         ? `<img src="${escAttr(imgUrl(r.imageData||r.image))}" alt="${san}" loading="lazy" onerror="this.outerHTML='<span style=\\'font-size:2.4rem\\'>🍽️</span>'" onload="this.parentElement.classList.remove('img-skeleton')">`
         : `<span style="font-size:2.4rem">🍽️</span>`}</div>
-      <div class="recipe-card-body">
-        <h3>${san}</h3>
-        <div class="meta-line">
-          <span>📂 ${sanCat}</span>
-          <span>⏱ ${sanTime}</span>
-          ${r.nutrition && appSettings.mealPlanner.showNutrition ? `<span class="kcal-badge">🔥 ${esc(r.nutrition.kcal||'?')}</span>` : ''}
+      <div class="rc-info">
+        <div class="rc-name">${san}</div>
+        <div class="rc-meta">
+          <span class="rc-time">⏱ ${sanTime}</span>
+          ${r.nutrition && appSettings.mealPlanner.showNutrition ? `<span>🔥 ${esc(r.nutrition.kcal||'?')}</span>` : ''}
+          <span>${diffLabel(diff)}</span>
         </div>
-        ${r.rating > 0 ? `<div class="stars" style="margin-top:.1rem;">${'★'.repeat(Math.round(r.rating))}${'☆'.repeat(5-Math.round(r.rating))}</div>` : ''}
-        <div style="display:flex;align-items:center;gap:.15rem;margin-top:.15rem;">
-          ${[1,2,3].map(i => `<span class="difficulty-dot ${i<=diff?'filled':'empty'}"></span>`).join('')}
-          <span style="font-size:.6rem;color:var(--text3);margin-left:.15rem;">${diffLabel(diff)}</span>
-        </div>
-        <div class="tags">${tags.map(t => `<span class="tag${t.startsWith('deti-')||t.startsWith('baby')?' baby-tag':''}${t==='vegan'||t==='vegetarian'?' vegan-tag':''}">${esc(t)}</span>`).join('')}</div>
+        ${r.rating > 0 ? `<div class="stars" style="margin-top:.2rem;">${'★'.repeat(Math.round(r.rating))}${'☆'.repeat(5-Math.round(r.rating))}</div>` : ''}
+        ${tags.length ? `<div class="tags" style="margin-top:.25rem;">${tags.map(t => `<span class="tag">${esc(t)}</span>`).join('')}</div>` : ''}
       </div>
     </div>`;
   }).join('');
