@@ -5157,13 +5157,6 @@ function renderPickerRecipes() {
   if (!list) return;
   const search = norm(document.getElementById('picker-search')?.value || '');
   let filtered = recipes;
-  if (planType === 'kids') {
-    filtered = recipes.filter(r => {
-      const tags = [...(r.tags||[]), ...(r.tagsEn||[])];
-      return tags.some(t => ['deti','baby','detské','kids','easy'].includes(t.toLowerCase()));
-    });
-    if (filtered.length < 3) filtered = recipes;
-  }
   if (_pickerCat === '__favs__') filtered = filtered.filter(r => r.favorite);
   else if (_pickerCat) filtered = filtered.filter(r => r.category === _pickerCat);
   if (search) filtered = filtered.filter(r => {
