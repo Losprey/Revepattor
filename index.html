@@ -1573,7 +1573,7 @@ function initFirebaseAuth() {
 }
 
 function signInWithGoogle() {
-  if (!firebaseReady || !firebase.auth) { alert('Firebase Auth nie je dostupná.'); return; }
+  if (!firebaseReady || !firebase.auth) { showToast('Firebase Auth nie je dostupná.','error'); return; }
   const provider = new firebase.auth.GoogleAuthProvider();
   const doSignIn = () => firebase.auth().signInWithPopup(provider).catch(err => {
     if (err.code === 'auth/popup-blocked' || err.code === 'auth/cancelled-popup-request') {
@@ -1874,7 +1874,7 @@ const AI_PROXY_URL = 'https://receptar.waldis994.workers.dev'; // Cloudflare Wor
 
 async function aiGenerate(messages) {
   if (!AI_PROXY_URL || AI_PROXY_URL.includes('YOUR_CLOUDFLARE')) {
-    alert(t('AI nie je nastavená. Nastav AI_PROXY_URL v index.html.','AI not configured. Set AI_PROXY_URL in index.html.'));
+    showToast(t('AI nie je nastavená.','AI not configured.'),'error');
     return null;
   }
   try {
@@ -1886,15 +1886,15 @@ async function aiGenerate(messages) {
     if (!r.ok) {
       const txt = await r.text().catch(() => '');
       console.error('AI proxy error', r.status, txt.slice(0,200));
-      alert(t('AI chyba: ','AI error: ') + r.status + ' ' + (txt.slice(0,80) || ''));
+      showToast(t('AI chyba: ','AI error: ')+r.status,'error');console.error('AI error:',r.status,txt);
       return null;
     }
     const data = await r.json();
-    if (data.error) { alert(t('AI chyba: ','AI error: ') + data.error); return null; }
+    if (data.error) { showToast(t('AI chyba: ','AI error: ')+data.error,'error'); return null; }
     return data.reply || '';
   } catch(e) {
     console.error('AI fetch failed:', e.message);
-    alert(t('AI nie je dostupná. Skontroluj pripojenie.','AI not available. Check connection.'));
+    showToast(t('AI nie je dostupná.','AI not available.'),'error');
     return null;
   }
 }
@@ -2043,7 +2043,7 @@ async function aiFillEmptySlots() {
       if (!weekPlan[d] || !weekPlan[d][m.id]) emptySlots.push({ day: d, slot: m.id });
     });
   });
-  if (!emptySlots.length) { alert(t('Všetky sloty sú vyplnené.','All slots are filled.')); return; }
+  if (!emptySlots.length) { showToast(t('Všetky sloty sú vyplnené.','All slots are filled.'),'warning'); return; }
   // Fill up to 10 empty slots
   const toFill = emptySlots.slice(0, 10);
   for (const { day, slot } of toFill) {
@@ -2090,14 +2090,14 @@ async function aiEstimateNutrition(recipeId) {
 async function aiBatchNutrition() {
   if (!confirm(t('Aktualizovať nutričné hodnoty pre VŠETKY recepty cez AI? Môže to chvíľu trvať.','Update nutrition for ALL recipes via AI? This may take a while.'))) return;
   const needUpdate = recipes.filter(r => !r.nutrition || !r.nutrition.kcal || r.nutrition.kcal < 10);
-  if (!needUpdate.length) { alert(t('Všetky recepty už majú nutričné hodnoty.','All recipes already have nutrition data.')); return; }
+  if (!needUpdate.length) { showToast(t('Všetky recepty už majú nutričné hodnoty.','All recipes already have nutrition.'),'info'); return; }
   let count = 0; const total = needUpdate.length;
   for (const r of needUpdate) { const name = lang==='en'&&r.nameEn?r.nameEn:r.name; const ingr = (lang==='en'&&r.ingredientsEn?r.ingredientsEn:r.ingredients).join('\n'); const portions = r.portions||4; const reply = await aiGenerate([{role:'user',content:'Odhadni nutričné hodnoty tohto receptu na JEDNU PORCIU. Recept: '+name+'\nIngrediencie:\n'+ingr+'\n\nOdpovedz IBA:\nkcal: [číslo]\nprotein: [číslo g]\nfat: [číslo g]\ncarbs: [číslo g]'}]);
     if (reply) { const kcal = parseInt((reply.match(/kcal[:\s]*(\d+)/i)||[])[1])||0; const protein = parseInt((reply.match(/protein[:\s]*(\d+)/i)||[])[1])||0; const fat = parseInt((reply.match(/fat[:\s]*(\d+)/i)||[])[1])||0; const carbs = parseInt((reply.match(/carbs[:\s]*(\d+)/i)||[])[1])||0; if (kcal>0) { r.nutrition={kcal,protein,fat,carbs}; r.portions=portions; count++; } }
     if (count%5===0) saveToLS();
   }
   saveToLS(); render();
-  alert(t('Hotovo! '+count+'/'+total+' receptov.','Done! '+count+'/'+total+' recipes.'));
+  showToast(t('Hotovo! ','Done! ')+count+'/'+total+' '+(lang==='en'?'recipes.':'receptov.'),'success');
 }
 
 async function aiGenerateShoppingList() {
@@ -2204,7 +2204,7 @@ function addAIShoppingItems() {
       }
     });
     if (added > 0) { saveShopItems(); try { localStorage.setItem('shoppingItems', JSON.stringify(shopItems)); } catch(e) {} }
-    else { alert(t('Nepodarilo sa pridať položky.','Failed to add items.')); return; }
+    else { showToast(t('Nepodarilo sa pridať položky.','Failed to add items.'),'error'); return; }
   }
   renderShoppingList();
   switchTab('shopping');
@@ -3440,7 +3440,7 @@ async function refreshRecipeImages() {
   saveToLS();
   await batchFetchImages();
   render();
-  alert(t('Obrázky boli obnovené','Images refreshed'));
+  showToast(t('Obrázky boli obnovené','Images refreshed'),'info');
 }
 
 async function batchFetchImages() {
@@ -3780,15 +3780,18 @@ function openSettings() {
         <span class="sr-label"><span class="sr-icon">🖼️</span> ${t('Obnoviť obrázky','Refresh images')}</span>
         <span class="sr-value"><span class="sr-arrow">›</span></span>
       </div>
-      <div class="settings-row" onclick="debugFirebase()">
+      <!-- Debug tools — skryté, tapnutím na nadpis sa zobrazia -->
+      <div class="form-section-title" style="cursor:pointer;user-select:none;opacity:.4;font-size:.55rem;" onclick="var n=this.nextElementSibling;n.style.display=n.style.display==='none'?'block':'none'">🔬 ${t('Debug (klepni pre zobrazenie)','Debug (tap to show)')}</div>
+      <div style="display:none;">
+      <div class="settings-row" onclick="debugFirebase();showToast('Debug info v konzole','info')">
         <span class="sr-label"><span class="sr-icon">🔬</span> ${t('Debug Firebase','Debug Firebase')}</span>
         <span class="sr-value"><span class="sr-arrow">›</span></span>
       </div>
-      <div class="settings-row" onclick="firebaseHardTest()">
+      <div class="settings-row" onclick="firebaseHardTest();showToast('Test zapísaný','info')">
         <span class="sr-label"><span class="sr-icon">🛠️</span> ${t('Hard Test','Hard Test')}</span>
         <span class="sr-value"><span class="sr-arrow">›</span></span>
       </div>
-      <div class="settings-row" onclick="debugFirebaseWrite()">
+      <div class="settings-row" onclick="debugFirebaseWrite();showToast('Test zapísaný','info')">
         <span class="sr-label"><span class="sr-icon">📤</span> ${t('Force Push','Force Push')}</span>
         <span class="sr-value"><span class="sr-arrow">›</span></span>
       </div>
@@ -3796,9 +3799,6 @@ function openSettings() {
         <span class="sr-label"><span class="sr-icon">📥</span> ${t('Force Pull','Force Pull')}</span>
         <span class="sr-value"><span class="sr-arrow">›</span></span>
       </div>
-      <div class="settings-row" onclick="var d={t:Date.now()};firebase.database().ref('_test').set(d,function(e){alert(e?'FAIL:'+e.message:'OK')})">
-        <span class="sr-label"><span class="sr-icon">🔬</span> Test sync</span>
-        <span class="sr-value"><span class="sr-arrow">›</span></span>
       </div>
       <div class="settings-row" onclick="localStorage.removeItem('onboardingCompleted');showOnboarding(true);closeSettings()">
         <span class="sr-label"><span class="sr-icon">❓</span> ${t('Zobraziť onboarding','Show onboarding')}</span>
@@ -4186,7 +4186,18 @@ function printRecipe() {
     h1{font-size:1.8rem;} .meta{color:#64748b;} h2{border-bottom:2px solid #fef3c7;padding-bottom:.3rem;margin-top:1.5rem;}
     ul,ol{padding-left:1.25rem;} li{margin-bottom:.3rem;}
     @media print{body{padding:0;}}
-  </style></head><body>
+  
+/* ===== TOAST NOTIFICATIONS ===== */
+.toast-container { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: .5rem; pointer-events: none; width: calc(100% - 2rem); max-width: 400px; }
+.toast { background: var(--surface-solid); color: var(--text); padding: .7rem 1rem; border-radius: var(--radius-md); font-size: .82rem; box-shadow: 0 8px 32px rgba(0,0,0,.4); border: 1px solid var(--border); animation: toastIn .35s var(--ease-smooth); display: flex; align-items: center; gap: .5rem; pointer-events: auto; backdrop-filter: blur(12px); }
+.toast.toast-success { border-color: var(--success); box-shadow: 0 4px 16px var(--success-glow); }
+.toast.toast-error { border-color: var(--danger); }
+.toast.toast-info { border-color: var(--primary-light); }
+.toast .toast-icon { font-size: 1.1rem; flex-shrink: 0; }
+.toast .toast-text { flex: 1; line-height: 1.4; }
+@keyframes toastIn { from { opacity: 0; transform: translateY(20px) scale(.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes toastOut { from { opacity: 1; transform: translateY(0) scale(1); } to { opacity: 0; transform: translateY(-10px) scale(.95); } }
+</style></head><body>
     <h1>🍽️ ${san}</h1>
     <p class="meta">⏱ ${sanTime} min | 📂 ${sanCat}${kcalHtml}</p>
     <h2>🥕 Ingredients / Suroviny</h2><ul>${ingr.map(i=>`<li>${esc(i)}</li>`).join('')}</ul>
@@ -4230,7 +4241,7 @@ function shareRecipe() {
 }
 
 function copyText(text) {
-  navigator.clipboard.writeText(text).then(() => alert('Copied!')).catch(() => prompt('Copy:', text));
+  navigator.clipboard.writeText(text).then(() => showToast(lang==='en'?'Copied!':'Skopírované!','success')).catch(() => prompt('Copy:', text));
 }
 
 // ======================== COPY RECIPE ========================
@@ -4279,9 +4290,9 @@ function importRecipes(e) {
         });
         saveToLS();
         render();
-        alert(`${t('importOk')} ${data.length}.`);
+        showToast(t('importOk')+' '+data.length+'.','success');
       }
-    } catch(err) { alert(t('exportError')); }
+    } catch(err) { showToast(t('exportError'),'error'); }
   };
   reader.readAsText(file);
   e.target.value = '';
@@ -4340,7 +4351,7 @@ function cookingNext() {
   const r = recipes.find(rec => rec.id === cookingRecipeId);
   if (!r) return;
   if (cookingStep < r.steps.length - 1) { cookingStep++; renderCookingStep(); }
-  else { logCooking(cookingRecipeId); closeCookingMode(); alert(t('cookingDone')); }
+  else { logCooking(cookingRecipeId); closeCookingMode(); showToast(t('cookingDone'),'success'); }
 }
 function cookingPrev() { if (cookingStep > 0) { cookingStep--; renderCookingStep(); } }
 
@@ -4364,7 +4375,7 @@ function toggleTimer() {
     const mins = prompt(lang==='en'?'Timer (minutes):' : 'Timer (minúty):', '5');
     if (mins === null) return;
     const val = parseInt(mins);
-    if (isNaN(val) || val < 1 || val > 999) { alert(lang==='en'?'Enter 1-999 minutes.':'Zadaj 1-999 minút.'); return; }
+    if (isNaN(val) || val < 1 || val > 999) { showToast(lang==='en'?'Enter 1-999 minutes.':'Zadaj 1-999 minút.','warning'); return; }
     cookingTimerSeconds = val * 60;
     startTimer();
   }
@@ -4376,7 +4387,7 @@ function startTimer() {
   updateTimerDisplay();
   cookingTimer = setInterval(() => {
     cookingTimerSeconds--;
-    if (cookingTimerSeconds <= 0) { stopTimer(); alert('⏰ ' + (lang==='en'?'Time\'s up!':'Timer dobehol!')); }
+    if (cookingTimerSeconds <= 0) { stopTimer(); showToast('⏰ '+(lang==='en'?'Time up!':'Timer dobehol!'),'warning'); }
     else updateTimerDisplay();
   }, 1000);
 }
@@ -4401,7 +4412,7 @@ function toggleVoice() {
   if (voiceSearchListening) stopVoiceSearch();
   if (voiceListening) { stopVoice(); return; }
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition) { alert(lang==='en'?'Voice control not supported in this browser.' : 'Hlasové ovládanie nie je podporované v tomto prehliadači.'); return; }
+  if (!SpeechRecognition) { showToast(lang==='en'?'Voice not supported.':'Hlasové ovládanie nie je podporené.','warning'); return; }
   voiceRecognition = new SpeechRecognition();
   voiceRecognition.lang = lang === 'en' ? 'en-US' : 'sk-SK';
   voiceRecognition.continuous = true;
@@ -5245,7 +5256,7 @@ function copyWeekPlan() {
     }).filter(Boolean);
     if (meals.length) lines.push(dayName + ': ' + meals.join(', '));
   });
-  if (!lines.length) { alert(lang==='en'?'No meals planned':'Žiadne naplánované jedlá'); return; }
+  if (!lines.length) { showToast(lang==='en'?'No meals planned':'Žiadne naplánované jedlá','info'); return; }
   navigator.clipboard.writeText(lines.join('\n')).then(() => {
     const btn = event?.target?.closest?.('.pa-btn');
     if (btn) { btn.textContent = '✓ Skopírované'; setTimeout(() => renderPlanner(), 1500); }
@@ -5460,8 +5471,7 @@ function toggleShopItem(id) {
 function clearCheckedShopItems() {
   const checked = shopItems.filter(i => i.checked);
   if (!checked.length) {
-    if (lang === 'en') alert('No checked items to clear.');
-    else alert('Žiadne zaškrtnuté položky na vymazanie.');
+    showToast(lang==='en'?'No checked items.':'Žiadne zaškrtnuté položky.','info');
     return;
   }
   if (!confirm(lang === 'en' ? `Remove ${checked.length} checked items?` : `Odstrániť ${checked.length} zaškrtnutých položiek?`)) return;
@@ -5501,8 +5511,8 @@ function mergeDuplicateShopItems() {
   shopItems = Object.values(merged);
   saveShopItems();
   renderShoppingList();
-  if (changed) alert(lang === 'en' ? 'Merged ' + changed + ' duplicate items.' : 'Zlúčených ' + changed + ' duplicitných položiek.');
-  else alert(lang === 'en' ? 'No duplicates found.' : 'Žiadne duplicity.');
+  if (changed) showToast(lang==='en'?'Merged '+changed+' items.':'Zlúčených '+changed+' položiek.','success');
+  else showToast(lang==='en'?'No duplicates.':'Žiadne duplicity.','info');
 }
 
 function copyShopList() {
@@ -5514,7 +5524,7 @@ function copyShopList() {
   }).join('\n');
   navigator.clipboard.writeText(text).catch(() => {});
   if (lang === 'en') alert('Copied ' + unchecked.length + ' items to clipboard.');
-  else alert('Skopírovaných ' + unchecked.length + ' položiek do schránky.');
+  else showToast(lang==='en'?'Copied '+unchecked.length+' items.':'Skopírovaných '+unchecked.length+' položiek.','success');
 }
 
 function openAddItemSheet(editId) {
@@ -6644,6 +6654,28 @@ renderDashboard = function() {
   }
 };
 
+
+
+// ======================== TOAST NOTIFICATIONS ========================
+function showToast(msg, type) {
+  type = type || 'info';
+  const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
+  let container = document.getElementById('toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+  }
+  const toast = document.createElement('div');
+  toast.className = 'toast toast-' + type;
+  toast.innerHTML = '<span class="toast-icon">' + (icons[type] || 'ℹ️') + '</span><span class="toast-text">' + msg + '</span>';
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.animation = 'toastOut .3s ease forwards';
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
+}
 
 </script>
 
