@@ -767,7 +767,7 @@ async function aiBatchNutrition() {
 }
 
 async function aiGenerateShoppingList() {
-  if (!(appSettings.shopping && appSettings.shopping.aiShoppingList)) { alert(t('AI nákupný zoznam je vypnutý.','AI shopping list is off.')); return; }
+  if (!(appSettings.shopping && appSettings.shopping.aiShoppingList)) { showToast(t('AI nákupný zoznam je vypnutý.','AI shopping is off.'),'info'); return; }
 
   function collectMeals(plan) {
     var meals = [];
@@ -801,7 +801,7 @@ async function aiGenerateShoppingList() {
 
   // If local empty but family is connected, try Firebase
   if (!allMeals.length && familyCode && firebaseReady && familyDbRef) {
-    alert(t('Plánovač je prázdny. Skúšam načítať rodinné dáta...','Planner empty. Loading family data...'));
+    showToast(t('Načítavam rodinné dáta...','Loading family data...'),'info');
     try {
       var snap = await new Promise(function(resolve, reject) {
         familyDbRef.child('mealPlan').once('value', resolve, reject);
@@ -817,7 +817,7 @@ async function aiGenerateShoppingList() {
   }
 
   if (!allMeals.length) {
-    alert(t('V rodinnom plánovači nie sú žiadne jedlá na tento týždeň.','No meals in the family planner for this week.'));
+    showToast(t('V rodinnom plánovači nie sú jedlá.','No meals in family planner.'),'info');
     return;
   }
 
@@ -974,10 +974,10 @@ function joinFamily(code) {
 }
 
 function showFamilyMembers() {
-  if (!familyDbRef) { alert(t('Nie si v rodine.','Not in a family.')); return; }
+  if (!familyDbRef) { showToast(t('Nie si v rodine.','Not in a family.'),'warning'); return; }
   familyDbRef.child('members').once('value', function(snap) {
     var members = snap.val();
-    if (!members) { alert(t('Žiadni členovia.','No members.')); return; }
+    if (!members) { showToast(t('Žiadni členovia.','No members.'),'info'); return; }
     var list = Object.keys(members).map(function(id) {
       var m = members[id];
       var name = m.name || id.slice(0,8);
@@ -985,7 +985,7 @@ function showFamilyMembers() {
       var seen = m.lastSeen ? new Date(m.lastSeen).toLocaleString() : '?';
       return online + ' ' + name + '\n  ' + (m.online ? t('Online','Online') : t('Naposledy: ','Last seen: ') + seen);
     }).join('\n\n');
-    alert(t('Členovia rodiny:','Family members:') + '\n\n' + list);
+    showToast(t('Členovia rodiny','Family members'),'info');console.log(t('Členovia:','Members:'),list);
   });
 }
 
@@ -2349,11 +2349,11 @@ function openSettings() {
       <div style="font-size:.6rem;color:var(--text3);padding:.2rem 0 0;">${t('Widget Počasie musí byť zapnutý vyššie.','Weather widget must be enabled above.')}</div>
       <div style="font-size:.65rem;font-weight:600;color:var(--text3);margin:.6rem 0 .2rem;text-transform:uppercase;letter-spacing:.05em;">👨‍👩‍👧 ${t('Rodina','Family')}</div>
       ${familyCode ? `
-        <div class="settings-row" onclick="navigator.clipboard.writeText('${familyCode}').then(()=>alert('${t('Kód skopírovaný!','Code copied!')}'))">
+        <div class="settings-row" onclick="navigator.clipboard.writeText('${familyCode}').then(()=>showToast('${t('Kód skopírovaný!','Code copied!')}','success'))">
           <span class="sr-label"><span class="sr-icon">🔗</span> ${t('Rodinný kód','Family code')}</span>
           <span class="sr-value" style="font-weight:700;letter-spacing:.08em;">${familyCode} 📋</span>
         </div>
-        <div class="settings-row" onclick="pushAllLocalData();alert('${t('Dáta odoslané.','Data synced.')}')">
+        <div class="settings-row" onclick="pushAllLocalData();showToast('${t('Dáta odoslané.','Data synced.')}','success')">
           <span class="sr-label"><span class="sr-icon">🔄</span> ${t('Synchronizovať teraz','Sync now')}</span>
           <span class="sr-value"><span class="sr-arrow">›</span></span>
         </div>
@@ -2690,8 +2690,8 @@ function saveRecipe() {
   const fat = parseInt(document.getElementById('r-fat').value) || 0;
   const carbs = parseInt(document.getElementById('r-carbs').value) || 0;
   const portions = parseInt(document.getElementById('r-portions').value) || 4;
-  if (!name) return alert(t('formName') + ' je povinný.');
-  if (!ingredients.length) return alert(t('formIngredients') + ' sú povinné.');
+  if (!name) return showToast(t('formName')+(lang==='en'?' is required.':' je povinný.'),'error');
+  if (!ingredients.length) return showToast(t('formIngredients')+(lang==='en'?' are required.':' sú povinné.'),'error');
   const nutrition = {kcal,protein,fat,carbs};
   // Sanity check
   const check = sanitizeNutrition(nutrition, portions);
@@ -3170,7 +3170,7 @@ function toggleVoiceSearch() {
   if (voiceListening) stopVoice();
   if (voiceSearchListening) { stopVoiceSearch(); return; }
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) { alert(lang==='en'?'Voice search not supported.':'Hlasové vyhľadávanie nie je podporované.'); return; }
+  if (!SR) { showToast(lang==='en'?'Voice search not supported.':'Hlasové vyhľadávanie nie je podporené.','warning'); return; }
   voiceSearch = new SR();
   voiceSearch.lang = lang === 'en' ? 'en-US' : 'sk-SK';
   voiceSearch.interimResults = false;
@@ -4247,7 +4247,7 @@ function copyShopList() {
     return `${i.name}${amount ? ' ' + amount : ''}${i.note ? ' — ' + i.note : ''}`;
   }).join('\n');
   navigator.clipboard.writeText(text).catch(() => {});
-  if (lang === 'en') alert('Copied ' + unchecked.length + ' items to clipboard.');
+  showToast(lang==='en'?'Copied ' + unchecked.length + ' items.':'Skopírovaných ' + unchecked.length + ' položiek.','success');
   else showToast(lang==='en'?'Copied '+unchecked.length+' items.':'Skopírovaných '+unchecked.length+' položiek.','success');
 }
 
@@ -5106,7 +5106,7 @@ window.addEventListener('popstate', function(e) {
       history.go(-1);
     } else {
       _backPressTimer = now;
-      alert(t('Stlač ešte raz pre ukončenie','Press again to exit'));
+      showToast(t('Stlač ešte raz','Press again'),'info');
       history.pushState({ tab: 'dashboard' }, '', '#dashboard');
     }
   }

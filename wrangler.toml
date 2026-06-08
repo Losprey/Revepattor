@@ -1,0 +1,12 @@
+name = "receptar"
+main = "worker.js"
+compatibility_date = "2024-12-01"
+
+# 🔐 DeepSeek API kľúč — nastav cez:
+#   npx wrangler secret put DEEPSEEK_KEY
+[vars]
+# DEEPSEEK_KEY sa číta z Cloudflare Workers secrets
+
+# Pre lokálny vývoj:
+#   npx wrangler secret put DEEPSEEK_KEY
+#   npx wrangler dev
