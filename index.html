@@ -21,6 +21,29 @@
 </head>
 <body>
 
+<!-- SPLASH SCREEN -->
+<div id="splash" style="position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .6s var(--ease-smooth);">
+  <div style="font-size:3.5rem;margin-bottom:.8rem;animation:splashPulse 1.2s var(--ease-smooth) infinite alternate;">🍽️</div>
+  <div style="font-size:1rem;font-weight:800;color:var(--text);letter-spacing:-.03em;">Mealnest</div>
+  <div style="font-size:.7rem;color:var(--text3);margin-top:.3rem;">Plánovač jedál</div>
+  <div id="splash-progress" style="margin-top:1.2rem;width:120px;height:3px;background:var(--border);border-radius:3px;overflow:hidden;">
+    <div style="width:30%;height:100%;background:var(--accent-gradient);border-radius:3px;animation:splashLoad 1.8s var(--ease-smooth) infinite;"></div>
+  </div>
+  <style>
+    @keyframes splashPulse { from { transform: scale(1); opacity:.6; } to { transform: scale(1.08); opacity:1; } }
+    @keyframes splashLoad { 0% { width:10%;margin-left:0; } 50% { width:60%;margin-left:20%; } 100% { width:10%;margin-left:90%; } }
+  </style>
+</div>
+<script>
+  // Hide splash when app is ready
+  document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+      var s = document.getElementById('splash');
+      if (s) { s.style.opacity = '0'; setTimeout(function() { s.remove(); }, 600); }
+    }, 1200);
+  });
+</script>
+
 <!-- LOGIN OVERLAY -->
 <div id="login-overlay" style="display:none;">
   <div class="login-card">
