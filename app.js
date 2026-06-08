@@ -3438,25 +3438,7 @@ function renderDashboard() {
   const todayDone = todayTasksArr.filter(t => t.done).length;
   const streak = calcPlanningStreak();
 
-  // Hero greeting
-  html += `<div class="dash-hero">
-    <div class="dash-greeting">
-      <span class="dh-emoji">${todayMeals >= 4 ? "⭐" : todayMeals > 0 ? "👋" : "🌅"}</span>
-      <div class="dh-text">
-        <div class="dh-title">${lang === "en" ? "Hello!" : "Ahoj!"}</div>
-        <div class="dh-sub">${lang === "en"
-          ? (todayMeals >= 4 ? "Great day planned!" : "Time to plan meals")
-          : (todayMeals >= 4 ? "Skvelý deň!" : "Čas naplánovať jedlá")}</div>
-      </div>
-    </div>
-    <div class="dash-stats">
-      <div class="dash-stat-card"><div class="dsc-value">${todayMeals}</div><div class="dsc-label">🍽️ ${lang === "en" ? "Meals" : "Jedál"}</div></div>
-      ${w.todayTasks ? `<div class="dash-stat-card"><div class="dsc-value">${todayTasksArr.length}</div><div class="dsc-label">✅ ${lang === "en" ? "Tasks" : "Ôloh"}</div></div>` : ""}
-      <div class="dash-stat-card"><div class="dsc-value">${streak}</div><div class="dsc-label">🔥 ${lang === "en" ? "Days" : "Dní"}</div></div>
-    </div>
-  </div>`;
-
-  // Weather widget
+    // Weather widget
   if (w.weather) {
     if (appSettings.weather.location) {
       html += `<div class="dash-card"><div class="weather-widget" id="weather-widget" onclick="editText('weather.location','${t("Mesto","City")}')"><span class="weather-icon">🌤️</span><span class="weather-info"><strong>${esc(appSettings.weather.location)}</strong><span class="weather-temp">${t("Načítavam...","Loading...")}</span></span></div></div>`;
