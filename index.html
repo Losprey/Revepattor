@@ -917,6 +917,17 @@ body:not(.dark) .recipe-card .fav-btn.fav-active { background: linear-gradient(1
 .user-avatar { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; cursor: pointer; }
 .guest-badge { font-size: .6rem; background: var(--text3); color: var(--bg); padding: 1px 6px; border-radius: 6px; font-weight: 600; }
 
+/* ===== TOAST NOTIFICATIONS ===== */
+.toast-container { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: .5rem; pointer-events: none; width: calc(100% - 2rem); max-width: 400px; }
+.toast { background: var(--surface-solid); color: var(--text); padding: .7rem 1rem; border-radius: var(--radius-md); font-size: .82rem; box-shadow: 0 8px 32px rgba(0,0,0,.4); border: 1px solid var(--border); animation: toastIn .35s var(--ease-smooth); display: flex; align-items: center; gap: .5rem; pointer-events: auto; backdrop-filter: blur(12px); }
+.toast.toast-success { border-color: var(--success); box-shadow: 0 4px 16px var(--success-glow); }
+.toast.toast-error { border-color: var(--danger); }
+.toast.toast-warning { border-color: var(--gold); }
+.toast.toast-info { border-color: var(--primary-light); }
+.toast .toast-icon { font-size: 1.1rem; flex-shrink: 0; }
+.toast .toast-text { flex: 1; line-height: 1.4; }
+@keyframes toastIn { from { opacity: 0; transform: translateY(20px) scale(.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes toastOut { from { opacity: 1; transform: translateY(0) scale(1); } to { opacity: 0; transform: translateY(-10px) scale(.95); } }
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -4192,72 +4203,7 @@ function viewRecipe(id) {
   }
 }
 
-function setRating(id, val) {
-  const r = recipes.find(rec => rec.id === id);
-  if (!r) return;
-  r.rating = r.rating === val ? 0 : val;
-  saveToLS();
-  viewRecipe(id);
-  render();
-}
 
-function saveNotes(id, val) {
-  const r = recipes.find(rec => rec.id === id);
-  if (!r) return;
-  if (lang === 'en') r.notesEn = val;
-  else r.notes = val;
-  saveToLS();
-}
-
-function editCurrent() {
-  const r = recipes.find(rec => rec.id === viewingId);
-  if (!r) return;
-  closeModal('detail-modal');
-  openFormModal(r);
-}
-
-function deleteCurrent() {
-  if (!confirm(t('deleteConfirm'))) return;
-  recipes = recipes.filter(r => r.id !== viewingId);
-  saveToLS();
-  closeModal('detail-modal');
-  render();
-}
-
-// ======================== PRINT ========================
-function printRecipe() {
-  const r = recipes.find(rec => rec.id === viewingId);
-  if (!r) return;
-  const name = lang === 'en' && r.nameEn ? r.nameEn : r.name;
-  const ingr = (lang === "en" && r.ingredientsEn ? r.ingredientsEn : r.ingredients) || [];
-  const stps = (lang === "en" && r.stepsEn ? r.stepsEn : r.steps) || [];
-  const san = esc(name), sanCat = esc(r.category), sanTime = esc(r.time);
-  const kcalHtml = r.nutrition && r.nutrition.kcal ? ` | 🔥 ${esc(r.nutrition.kcal)} kcal` : '';
-  const win = window.open('', '_blank');
-  win.document.write(`<!DOCTYPE html><html><head><title>${san}</title><style>
-    body{font-family:system-ui,sans-serif;padding:2rem;max-width:700px;margin:0 auto;color:#1e293b;}
-    h1{font-size:1.8rem;} .meta{color:#64748b;} h2{border-bottom:2px solid #fef3c7;padding-bottom:.3rem;margin-top:1.5rem;}
-    ul,ol{padding-left:1.25rem;} li{margin-bottom:.3rem;}
-    @media print{body{padding:0;}}
-  
-/* ===== TOAST NOTIFICATIONS ===== */
-.toast-container { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: .5rem; pointer-events: none; width: calc(100% - 2rem); max-width: 400px; }
-.toast { background: var(--surface-solid); color: var(--text); padding: .7rem 1rem; border-radius: var(--radius-md); font-size: .82rem; box-shadow: 0 8px 32px rgba(0,0,0,.4); border: 1px solid var(--border); animation: toastIn .35s var(--ease-smooth); display: flex; align-items: center; gap: .5rem; pointer-events: auto; backdrop-filter: blur(12px); }
-.toast.toast-success { border-color: var(--success); box-shadow: 0 4px 16px var(--success-glow); }
-.toast.toast-error { border-color: var(--danger); }
-.toast.toast-info { border-color: var(--primary-light); }
-.toast .toast-icon { font-size: 1.1rem; flex-shrink: 0; }
-.toast .toast-text { flex: 1; line-height: 1.4; }
-@keyframes toastIn { from { opacity: 0; transform: translateY(20px) scale(.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
-@keyframes toastOut { from { opacity: 1; transform: translateY(0) scale(1); } to { opacity: 0; transform: translateY(-10px) scale(.95); } }
-</style></head><body>
-    <h1>🍽️ ${san}</h1>
-    <p class="meta">⏱ ${sanTime} min | 📂 ${sanCat}${kcalHtml}</p>
-    <h2>🥕 Ingredients / Suroviny</h2><ul>${ingr.map(i=>`<li>${esc(i)}</li>`).join('')}</ul>
-    <h2>📝 Steps / Postup</h2><ol>${stps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol>
-    <script>window.print();window.close();<\/script>
-  </body></html>`);
-  win.document.close();
 }
 
 // ======================== SHARE ========================
