@@ -3340,13 +3340,7 @@ function dismissTip() {
   localStorage.setItem('tipDismissed', new Date().toISOString().slice(0,10));
 }
 
-function closeAllModals() {
-  document.querySelectorAll(".modal-overlay.active").forEach(function(m) { m.classList.remove("active"); });
-  document.body.style.overflow = "";
-}
-
 function switchTab(tab) {
-  closeAllModals();
   try { localStorage.setItem('lastTab', tab); } catch(e) {}
   document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
   const btn = document.querySelector(`.nav-item[data-tab="${tab}"]`);
