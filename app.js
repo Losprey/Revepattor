@@ -2025,6 +2025,29 @@ function translateRecipeQuery(name) {
     .replace(/[ž]/g,'z');
 }
 
+// ======================== AI: CELÝ TÝŽDEŇ + NÁKUP ========================
+async function aiGenerateFullWeek() {
+  const menuText = await aiWeeklyPlan();
+  if (!menuText) return;
+  // Remove any existing AI plan modal
+  const old = document.getElementById('ai-plan-modal');
+  if (old) old.remove();
+  // Show the plan in a modal with a custom button
+  const div = document.createElement('div');
+  div.id = 'ai-plan-modal';
+  div.className = 'modal-overlay active';
+  div.style.cssText = 'z-index:2000;';
+  div.innerHTML = '<div class="modal" style="max-width:500px;max-height:85vh;overflow-y:auto;">' +
+    '<button class="modal-close" onclick="this.closest(\'modal-overlay\').remove()">✕</button>' +
+    '<h2>🤖 ' + t('AI návrh jedálnička','AI meal plan') + '</h2>' +
+    '<pre id="ai-plan-text" style="white-space:pre-wrap;font-size:.75rem;font-family:inherit;background:var(--bg);padding:.8rem;border-radius:8px;max-height:50vh;overflow-y:auto;">' + esc(menuText) + '</pre>' +
+    '<div style="display:flex;gap:.5rem;margin-top:.8rem;flex-wrap:wrap;">' +
+      '<button class="btn btn-primary" onclick="parseAndFillAIPlan();showToast(\'Shopping will be generated...\',\'info\');setTimeout(function(){aiGenerateShoppingList()},3000)" style="flex:1;">' + (lang === 'en' ? 'Apply + shopping' : 'PouÅ¾iÅ¥ + nÃ¡kup') + '</button>' +
+      '<button class="btn btn-secondary" onclick="parseAndFillAIPlan();this.closest(\'.modal-overlay\').remove()">' + t('Len použiť','Just apply') + '</button>' +
+    '</div></div>';
+  document.body.appendChild(div);
+}
+
 async function fetchPexelsImage(query) {
   if (!query) return null;
   const url = 'https://api.pexels.com/v1/search?query=' + encodeURIComponent(query + ' food') + '&per_page=5&orientation=landscape&size=medium';
@@ -3436,6 +3459,9 @@ function renderDashboard() {
       <div class="summary-grid" id="dash-summary">${renderDailySummary()}</div>
     </div>`;
   }
+
+  // AI: Full week + shopping
+  html += '<div class="dash-section" style="text-align:center;padding:.8rem;"><button class="btn btn-primary" onclick="aiGenerateFullWeek()" style="width:100%;padding:.7rem;font-size:.9rem;font-weight:700;">🚀 ' + (lang === 'en' ? 'Generate week + shopping' : 'Celý týždeň + nákup') + '</button></div>';
 
   // Smart suggestions
   if (w.quickRecipes) {
