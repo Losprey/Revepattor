@@ -1518,7 +1518,11 @@ function switchLang() {
 
 function setAgeFilter(age) {
   ageFilter = age;
-  document.querySelectorAll('#age-filter .age-btn').forEach(b => b.classList.toggle('active', b.dataset.age === age));
+  document.querySelectorAll('#age-filter .age-btn').forEach(b => {
+    const isActive = b.dataset.age === age;
+    b.classList.toggle('active', isActive);
+    if (isActive) springBounce(b);
+  });
   render();
 }
 
@@ -2648,6 +2652,7 @@ function toggleFav(id) {
     if (btn) {
       btn.classList.toggle('fav-active', r.favorite);
       btn.textContent = r.favorite ? '❤️' : '🤍';
+      springBounce(btn);
     }
   }
   const grid = document.getElementById('recipe-grid');
@@ -3342,8 +3347,71 @@ function showTipOfDay() {
   card.classList.add('show');
 }
 
+// =================== SKELETON HELPERS ===================
+function renderSkeletonGrid(container, count) {
+  if (!container) return;
+  count = count || 6;
+  let html = '<div class="skeleton-grid">';
+  for (let i = 0; i < count; i++) {
+    html += '<div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-body"><div class="skeleton-line"></div><div class="skeleton-line-short"></div></div></div>';
+  }
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+function renderSkeletonPlanner(container) {
+  if (!container) return;
+  let html = '';
+  for (let i = 0; i < 3; i++) {
+    html += '<div class="skeleton-planner-day"><div class="skeleton-line" style="width:40%"></div><div class="skeleton-row"></div><div class="skeleton-row"></div><div class="skeleton-row"></div></div>';
+  }
+  container.innerHTML = html;
+}
+
+function renderSkeletonShopping(container) {
+  if (!container) return;
+  container.innerHTML = '<div class="skeleton-shopping"><div class="skeleton-summary"></div><div class="skeleton-cat"></div><div class="skeleton-cat"></div><div class="skeleton-cat"></div></div>';
+}
+
+function animateSkeletonOut(container) {
+  if (!container) return;
+  container.querySelectorAll('.skeleton-grid, .skeleton-planner-day, .skeleton-shopping').forEach(function(el) {
+    el.style.transition = 'opacity .25s ease, transform .25s ease';
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(8px)';
+    setTimeout(function() { el.remove(); }, 280);
+  });
+}
+
+function applyPageTransition(el, duration) {
+  if (!el) return;
+  duration = duration || 400;
+  el.style.animation = 'none';
+  void el.offsetHeight;
+  el.style.animation = 'pageEnter ' + duration + 'ms cubic-bezier(.22,1,.36,1) both';
+}
+
+function springBounce(el) {
+  if (!el) return;
+  el.classList.remove('spring-bounce');
+  void el.offsetWidth;
+  el.classList.add('spring-bounce');
+}
+
+function microCheckmark(el) {
+  if (!el) return;
+  el.classList.remove('check-pop');
+  void el.offsetWidth;
+  el.classList.add('check-pop');
+}
+
 function dismissTip() {
-  document.getElementById('hero-card').classList.remove('show');
+  const hero = document.getElementById('hero-card');
+  hero.style.animation = 'pageExit .25s cubic-bezier(.55,0,.1,1) both';
+  setTimeout(() => {
+    hero.classList.remove('show');
+    hero.style.animation = '';
+  }, 260);
   localStorage.setItem('tipDismissed', new Date().toISOString().slice(0,10));
 }
 
@@ -3351,9 +3419,8 @@ function switchTab(tab) {
   try { localStorage.setItem('lastTab', tab); } catch(e) {}
   document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
   const btn = document.querySelector(`.nav-item[data-tab="${tab}"]`);
-  if (btn) btn.classList.add('active');
+  if (btn) { btn.classList.add('active'); springBounce(btn); }
   document.body.dataset.tab = tab;
-  // Push to history for back-button navigation
   if (window._skipHistory) { window._skipHistory = false; }
   else { history.pushState({ tab }, '', '#' + tab); }
   const dashboard = document.getElementById('dashboard');
@@ -3361,13 +3428,29 @@ function switchTab(tab) {
   const plannerContainer = document.getElementById('planner-container');
   const shoppingContainer = document.getElementById('shopping-container');
   const tasksContainer = document.getElementById('tasks-container');
-  [dashboard, recipeContainer, plannerContainer, shoppingContainer, tasksContainer].forEach(el => { if (el) el.style.display = 'none'; });
-  document.getElementById('main-title').style.display = tab === 'dashboard' ? 'none' : '';
-  if (tab === 'dashboard' && dashboard) { dashboard.style.display = ''; try { renderDashboard(); } catch(e) {} }
-  if (tab === 'home' && recipeContainer) { recipeContainer.style.display = ''; try { render(); } catch(e) {} }
-  if (tab === 'shopping' && shoppingContainer) { shoppingContainer.style.display = 'block'; try { renderShoppingList(); } catch(e) {} }
-  if (tab === 'planner' && plannerContainer) { plannerContainer.style.display = 'block'; try { renderPlanner(); } catch(e) {} }
-  if (tab === 'tasks' && tasksContainer) { tasksContainer.style.display = 'block'; try { renderTasks(); } catch(e) {} }
+  const mainTitle = document.getElementById('main-title');
+  [dashboard, recipeContainer, plannerContainer, shoppingContainer, tasksContainer].forEach(function(el) { if (el) el.style.display = 'none'; });
+  if (mainTitle) mainTitle.style.display = tab === 'dashboard' ? 'none' : '';
+  if (tab === 'dashboard' && dashboard) {
+    dashboard.style.display = ''; applyPageTransition(dashboard, 350);
+    try { renderDashboard(); } catch(e) {}
+  } else if (tab === 'home' && recipeContainer) {
+    recipeContainer.style.display = ''; applyPageTransition(recipeContainer, 350);
+    var grid = document.getElementById('recipe-grid');
+    if (grid && grid.children.length === 0) renderSkeletonGrid(grid, 6);
+    try { render(); } catch(e) {}
+  } else if (tab === 'shopping' && shoppingContainer) {
+    shoppingContainer.style.display = 'block'; applyPageTransition(shoppingContainer, 350);
+    var shopView = document.getElementById('shopping-list-view');
+    if (shopView && !shopView.children.length) renderSkeletonShopping(shopView);
+    try { renderShoppingList(); } catch(e) {}
+  } else if (tab === 'planner' && plannerContainer) {
+    plannerContainer.style.display = 'block'; applyPageTransition(plannerContainer, 350);
+    try { renderPlanner(); } catch(e) {}
+  } else if (tab === 'tasks' && tasksContainer) {
+    tasksContainer.style.display = 'block'; applyPageTransition(tasksContainer, 350);
+    try { renderTasks(); } catch(e) {}
+  }
 }
 
 // ======================== DASHBOARD ========================
@@ -3832,7 +3915,10 @@ function setPlanType(type) {
   if (type === planType) return;
   planType = type;
   saveWeekPlan();
+  applyPageTransition(document.getElementById('planner-container'), 300);
   renderPlanner();
+  const activeBtn = document.querySelector('.plan-type-btn.active');
+  if (activeBtn) springBounce(activeBtn);
 }
 function getSlotRecipe(entry) {
   if (!entry) return null;
@@ -4222,7 +4308,7 @@ function renderShoppingList() {
   });
 
   // Add item button
-  html += `<button class="shop-add-btn" onclick="openAddItemSheet()">➕ ${lang==='en'?'Add food item':'Pridať potravinu'}</button>`;
+  html += `<button class="shop-add-btn" onclick="openAddItemSheet();springBounce(this)">➕ ${lang==='en'?'Add food item':'Pridať potravinu'}</button>`;
 
   container.innerHTML = html;
 }
@@ -4232,7 +4318,11 @@ function toggleShopItem(id) {
   if (!it) return;
   it.checked = !it.checked;
   saveShopItems();
-  renderShoppingList();
+  var checkEl = document.querySelector('.shop-item[data-id="' + id + '"] .si-check');
+  if (checkEl) microCheckmark(checkEl);
+  var itemEl = document.querySelector('.shop-item[data-id="' + id + '"]');
+  if (itemEl) springBounce(itemEl);
+  setTimeout(function() { renderShoppingList(); }, 300);
 }
 
 function clearCheckedShopItems() {

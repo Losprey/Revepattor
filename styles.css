@@ -1142,6 +1142,109 @@ body::after { content: ""; position: fixed; bottom: -30%; left: -30%; width: 80%
 #login-overlay .login-title { font-size: 1.3rem; font-weight: 800; color: var(--text); margin-bottom: .3rem; }
 #login-overlay .login-sub { font-size: .82rem; color: var(--text2); margin-bottom: 1.2rem; line-height: 1.4; }
 
+/* =================== SKELETON SCREENS =================== */
+.skeleton { background: linear-gradient(90deg, var(--surface) 25%, var(--hover-bg) 50%, var(--surface) 75%); background-size: 200% 100%; animation: shimmer 1.5s ease-in-out infinite; border-radius: var(--radius-sm); }
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+.skeleton-card { background: var(--surface); border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--border); }
+.skeleton-card .skeleton-img { width: 100%; height: 145px; background: linear-gradient(90deg, var(--border) 25%, var(--hover-bg) 50%, var(--border) 75%); background-size: 200% 100%; animation: shimmer 1.5s ease-in-out infinite; }
+.skeleton-card .skeleton-body { padding: .7rem .75rem; }
+.skeleton-card .skeleton-line { height: 12px; margin-bottom: 8px; background: linear-gradient(90deg, var(--border) 25%, var(--hover-bg) 50%, var(--border) 75%); background-size: 200% 100%; animation: shimmer 1.5s ease-in-out infinite; border-radius: 6px; }
+.skeleton-card .skeleton-line:last-child { width: 60%; }
+.skeleton-card .skeleton-line-short { width: 40%; height: 10px; background: linear-gradient(90deg, var(--border) 25%, var(--hover-bg) 50%, var(--border) 75%); background-size: 200% 100%; animation: shimmer 1.5s ease-in-out infinite; border-radius: 6px; }
+
+.skeleton-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: .8rem; padding: .5rem 0; }
+
+.skeleton-planner-day { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); padding: 1rem; margin-bottom: .55rem; }
+.skeleton-planner-day .skeleton-line { height: 14px; margin-bottom: 10px; background: linear-gradient(90deg, var(--border) 25%, var(--hover-bg) 50%, var(--border) 75%); background-size: 200% 100%; animation: shimmer 1.5s ease-in-out infinite; border-radius: 6px; }
+.skeleton-planner-day .skeleton-row { height: 40px; margin-bottom: 6px; border-radius: 10px; background: linear-gradient(90deg, var(--border) 25%, var(--hover-bg) 50%, var(--border) 75%); background-size: 200% 100%; animation: shimmer 1.5s ease-in-out infinite; }
+
+.skeleton-shopping { padding: 1rem; }
+.skeleton-shopping .skeleton-summary { height: 60px; border-radius: var(--radius-md); background: linear-gradient(90deg, var(--surface) 25%, var(--hover-bg) 50%, var(--surface) 75%); background-size: 200% 100%; animation: shimmer 1.5s ease-in-out infinite; margin-bottom: 1rem; }
+.skeleton-shopping .skeleton-cat { height: 80px; border-radius: var(--radius-md); margin-bottom: .7rem; background: linear-gradient(90deg, var(--surface) 25%, var(--hover-bg) 50%, var(--surface) 75%); background-size: 200% 100%; animation: shimmer 1.5s ease-in-out infinite; }
+
+/* =================== VIEW TRANSITIONS =================== */
+.page-enter { animation: pageEnter .4s cubic-bezier(.22,1,.36,1) both; }
+@keyframes pageEnter { from { opacity: 0; transform: translateY(12px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+.page-exit { animation: pageExit .25s cubic-bezier(.55,0,.1,1) both; }
+@keyframes pageExit { from { opacity: 1; transform: translateY(0) scale(1); } to { opacity: 0; transform: translateY(-8px) scale(.97); } }
+
+/* =================== MICRO-INTERACTIONS =================== */
+@keyframes springBounce { 0% { transform: scale(1); } 30% { transform: scale(1.15); } 50% { transform: scale(.92); } 70% { transform: scale(1.04); } 100% { transform: scale(1); } }
+.spring-bounce { animation: springBounce .45s cubic-bezier(.34,1.56,.64,1); }
+
+@keyframes checkPop { 0% { transform: scale(0) rotate(-45deg); opacity: 0; } 60% { transform: scale(1.25) rotate(0deg); opacity: 1; } 100% { transform: scale(1) rotate(0deg); opacity: 1; } }
+.check-pop { animation: checkPop .35s cubic-bezier(.34,1.56,.64,1); }
+
+@keyframes rippleFade { 0% { transform: scale(0); opacity: .5; } 100% { transform: scale(4); opacity: 0; } }
+
+.btn:active .btn-ripple { animation: rippleFade .4s ease-out; }
+
+/* Ripple effect container for buttons */
+.btn { position: relative; overflow: hidden; }
+.btn-ripple { position: absolute; inset: 0; border-radius: inherit; background: rgba(255,255,255,.15); pointer-events: none; }
+
+@keyframes slideUpIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.slide-up-in { animation: slideUpIn .3s cubic-bezier(.22,1,.36,1) both; }
+
+@keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 8px rgba(16,185,129,.15); } 50% { box-shadow: 0 0 20px rgba(16,185,129,.3); } }
+.pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+
+/* Shopping item check animation */
+.shop-item .si-check { transition: all .25s cubic-bezier(.34,1.56,.64,1); position: relative; }
+.shop-item.checked .si-check { background: var(--success); color: #fff !important; transform: scale(1.05); box-shadow: 0 2px 8px rgba(16,185,129,.35); }
+.shop-item.checked .si-name { text-decoration: line-through; opacity: .55; }
+
+/* Shopping category color accents */
+.shop-cat-card[data-cat="meat"] { border-left: 3px solid #ef4444; }
+.shop-cat-card[data-cat="dairy"] { border-left: 3px solid #e0e7ff; }
+.shop-cat-card[data-cat="veg"] { border-left: 3px solid #22c55e; }
+.shop-cat-card[data-cat="fruit"] { border-left: 3px solid #f97316; }
+.shop-cat-card[data-cat="grain"] { border-left: 3px solid #d97706; }
+.shop-cat-card[data-cat="canned"] { border-left: 3px solid #a855f7; }
+.shop-cat-card[data-cat="spice"] { border-left: 3px solid #f59e0b; }
+.shop-cat-card[data-cat="drink"] { border-left: 3px solid #06b6d4; }
+.shop-cat-card[data-cat="frozen"] { border-left: 3px solid #60a5fa; }
+.shop-cat-card[data-cat="sweet"] { border-left: 3px solid #ec4899; }
+.shop-cat-card[data-cat="drug"] { border-left: 3px solid #78716c; }
+.shop-cat-card[data-cat="other"] { border-left: 3px solid var(--text3); }
+
+/* Category header progress bar colors */
+.shop-cat-card[data-cat="meat"] .shop-cat-progress-bar { background: linear-gradient(90deg, #ef4444, #f87171); }
+.shop-cat-card[data-cat="dairy"] .shop-cat-progress-bar { background: linear-gradient(90deg, #6366f1, #818cf8); }
+.shop-cat-card[data-cat="veg"] .shop-cat-progress-bar { background: linear-gradient(90deg, #22c55e, #4ade80); }
+.shop-cat-card[data-cat="fruit"] .shop-cat-progress-bar { background: linear-gradient(90deg, #f97316, #fb923c); }
+.shop-cat-card[data-cat="grain"] .shop-cat-progress-bar { background: linear-gradient(90deg, #d97706, #f59e0b); }
+.shop-cat-card[data-cat="canned"] .shop-cat-progress-bar { background: linear-gradient(90deg, #a855f7, #c084fc); }
+.shop-cat-card[data-cat="spice"] .shop-cat-progress-bar { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+.shop-cat-card[data-cat="drink"] .shop-cat-progress-bar { background: linear-gradient(90deg, #06b6d4, #22d3ee); }
+.shop-cat-card[data-cat="frozen"] .shop-cat-progress-bar { background: linear-gradient(90deg, #60a5fa, #93c5fd); }
+.shop-cat-card[data-cat="sweet"] .shop-cat-progress-bar { background: linear-gradient(90deg, #ec4899, #f472b6); }
+.shop-cat-card[data-cat="drug"] .shop-cat-progress-bar { background: linear-gradient(90deg, #78716c, #a8a29e); }
+.shop-cat-card[data-cat="other"] .shop-cat-progress-bar { background: linear-gradient(90deg, var(--text3), var(--text2)); }
+
+/* Smooth category collapse */
+.shop-cat-body { transition: max-height .3s ease, opacity .25s ease; overflow: hidden; }
+.shop-cat-card.collapsed .shop-cat-body { max-height: 0 !important; opacity: 0; padding: 0; }
+.shop-cat-card .shop-cat-arrow { transition: transform .25s ease; }
+.shop-cat-card.collapsed .shop-cat-arrow { transform: rotate(-90deg); }
+
+/* Shopping item micro bounce */
+.shop-item { transition: all .2s cubic-bezier(.34,1.56,.64,1); }
+.shop-item:active { transform: scale(.98); }
+.shop-item .si-check:active { transform: scale(.85); }
+
+/* FAB micro bounce */
+.fab-trigger { transition: transform .25s cubic-bezier(.34,1.56,.64,1); }
+#fab-quick-add.open .fab-trigger { transform: rotate(45deg); }
+
+/* Nav item micro animation */
+.nav-item { transition: all .25s cubic-bezier(.34,1.56,.64,1); }
+.nav-item:active { transform: scale(.88); }
+.nav-item.active .nav-icon { animation: navPop .35s cubic-bezier(.34,1.56,.64,1); }
+@keyframes navPop { 0% { transform: scale(1) translateY(0); } 50% { transform: scale(1.25) translateY(-3px); } 100% { transform: scale(1) translateY(-2px); } }
+
 /* ===== SPLASH V2 ===== */
 #splash { background: linear-gradient(135deg, #0a0807 0%, #120a08 50%, #0a0807 100%) !important; }
 #splash::before { content: ""; position: absolute; top: -30%; right: -20%; width: 60%; height: 60%; background: radial-gradient(circle, rgba(16,185,129,.06) 0%, transparent 70%); pointer-events: none; }
