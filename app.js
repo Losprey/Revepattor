@@ -3397,6 +3397,25 @@ function applyPageTransition(el, duration) {
   el.style.animation = 'pageEnter ' + duration + 'ms cubic-bezier(.22,1,.36,1) both';
 }
 
+// =================== COUNT-UP ANIMATION ===================
+function animateCountUp(el, target) {
+  if (!el) return;
+  target = parseInt(target) || 0;
+  var current = 0;
+  var step = Math.max(1, Math.floor(target / 30));
+  var duration = 800;
+  var interval = Math.max(10, Math.floor(duration / (target / step)));
+  if (target < 1) { el.textContent = '0'; return; }
+  var timer = setInterval(function() {
+    current += step;
+    if (current >= target) {
+      current = target;
+      clearInterval(timer);
+    }
+    el.textContent = current;
+  }, interval);
+}
+
 function springBounce(el) {
   if (!el) return;
   el.classList.remove('spring-bounce');
@@ -3459,6 +3478,40 @@ function switchTab(tab) {
   }
 }
 
+// =================== SWIPE BETWEEN TABS ===================
+var _swipeTabData = null;
+function initSwipeTabs() {
+  var main = document.querySelector('.container') || document.body;
+  main.addEventListener('touchstart', function(e) {
+    // Don't swipe on interactive elements
+    if (e.target.closest('input') || e.target.closest('button') || e.target.closest('.bottom-nav') || e.target.closest('.modal-overlay.active') || e.target.closest('.sheet-overlay') || e.target.closest('.cooking-overlay.active')) return;
+    _swipeTabData = { startX: e.touches[0].clientX, startY: e.touches[0].clientY };
+  }, { passive: true });
+  
+  main.addEventListener('touchmove', function(e) {
+    if (!_swipeTabData) return;
+    var dx = e.touches[0].clientX - _swipeTabData.startX;
+    var dy = Math.abs(e.touches[0].clientY - _swipeTabData.startY);
+    if (Math.abs(dx) < 30 || dy > Math.abs(dx) * 0.5) { _swipeTabData = null; return; }
+    e.preventDefault();
+  }, { passive: false });
+  
+  main.addEventListener('touchend', function(e) {
+    if (!_swipeTabData) return;
+    var dx = e.changedTouches[0].clientX - _swipeTabData.startX;
+    var dy = Math.abs(e.changedTouches[0].clientY - _swipeTabData.startY);
+    if (Math.abs(dx) < 60 || dy > Math.abs(dx) * 0.6) { _swipeTabData = null; return; }
+    var tabs = ['dashboard', 'home', 'planner', 'shopping', 'tasks'];
+    var current = document.body.dataset.tab || 'dashboard';
+    var idx = tabs.indexOf(current);
+    if (dx > 0 && idx > 0) { switchTab(tabs[idx - 1]); }
+    else if (dx < 0 && idx < tabs.length - 1) { switchTab(tabs[idx + 1]); }
+    _swipeTabData = null;
+  }, { passive: true });
+}
+// Initialize on load
+setTimeout(initSwipeTabs, 500);
+
 // ======================== DASHBOARD ========================
 function renderDashboard() {
   const now = new Date();
@@ -3516,11 +3569,14 @@ function renderDashboard() {
   const favCount = recipes.filter(r => r.favorite).length;
   const totalKcal = getTodayKcal();
   document.getElementById('dash-stats-row').innerHTML = `
-    <span class="dash-stat-pill">📅 <strong>${plannedToday}</strong>/${MEALS.length} ${lang === 'en' ? 'meals' : 'jedál'}</span>
-    <span class="dash-stat-pill">❤️ <strong>${favCount}</strong> ${lang === 'en' ? 'favorites' : 'obľúbených'}</span>
-    <span class="dash-stat-pill">🔥 <strong>${totalKcal}</strong> kcal</span>
-    <span class="dash-stat-pill">📖 <strong>${recipes.length}</strong> ${lang === 'en' ? 'recipes' : 'receptov'}</span>
+    <span class="dash-stat-pill">📅 <strong class="count-up" data-target="${plannedToday}">0</strong>/${MEALS.length} ${lang === 'en' ? 'meals' : 'jedál'}</span>
+    <span class="dash-stat-pill">❤️ <strong class="count-up" data-target="${favCount}">0</strong> ${lang === 'en' ? 'favorites' : 'obľúbených'}</span>
+    <span class="dash-stat-pill">🔥 <strong class="count-up" data-target="${totalKcal}">0</strong> kcal</span>
+    <span class="dash-stat-pill">📖 <strong class="count-up" data-target="${recipes.length}">0</strong> ${lang === 'en' ? 'recipes' : 'receptov'}</span>
   `;
+  setTimeout(function() {
+    document.querySelectorAll('.count-up').forEach(function(el) { animateCountUp(el, el.dataset.target); });
+  }, 100);
 
   // Dashboard sections
   let html = '';
