@@ -1,0 +1,4843 @@
+[
+  {
+    "id": 1,
+    "name": "Špagety aglio e olio",
+    "nameEn": "Spaghetti aglio e olio",
+    "category": "Hlavné jedlá",
+    "time": 20,
+    "image": "https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20%C5%A0pagety%20aglio%20e%20olio",
+    "imageData": "",
+    "ingredients": [
+      "200g špagiet",
+      "4 strúčiky cesnaku",
+      "5 lyžíc olivového oleja",
+      "1 čili paprička",
+      "soľ",
+      "petržlenová vňať"
+    ],
+    "ingredientsEn": [
+      "200g spaghetti",
+      "4 garlic cloves",
+      "5 tbsp olive oil",
+      "1 chili pepper",
+      "salt",
+      "parsley"
+    ],
+    "steps": [
+      "Dajte variť osolenú vodu a uvarte cestoviny al dente.",
+      "Na panvici zohrejte olivový olej a pridajte cesnak a čili.",
+      "Keď cesnak začne zlatnúť, pridajte uvarené cestoviny.",
+      "Ozdobte petržlenom a podávajte."
+    ],
+    "stepsEn": [
+      "Boil salted water and cook pasta al dente.",
+      "Heat olive oil in a pan, add sliced garlic and chili.",
+      "When garlic turns golden, add cooked pasta and toss.",
+      "Garnish with parsley and serve."
+    ],
+    "tags": [
+      "rýchle",
+      "taliančina"
+    ],
+    "tagsEn": [
+      "quick",
+      "italian"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 420,
+      "protein": 12,
+      "fat": 18,
+      "carbs": 55
+    }
+  },
+  {
+    "id": 2,
+    "name": "Mrkvová polievka",
+    "nameEn": "Creamy carrot soup",
+    "category": "Polievky",
+    "time": 35,
+    "image": "https://placehold.co/400x300/c2410c/fff?text=%F0%9F%A5%A3%20Mrkvov%C3%A1%20polievka",
+    "imageData": "",
+    "ingredients": [
+      "500g mrkvy",
+      "1 cibuľa",
+      "1 zemiak",
+      "2 strúčiky cesnaku",
+      "1l zeleninového vývaru",
+      "smotana na ozdobenie",
+      "soľ, korenie, rasca"
+    ],
+    "ingredientsEn": [
+      "500g carrots",
+      "1 onion",
+      "1 potato",
+      "2 garlic cloves",
+      "1L vegetable broth",
+      "cream for garnish",
+      "salt, pepper, cumin"
+    ],
+    "steps": [
+      "Mrkvu, zemiak a cibuľu ošúpte a nakrájajte na kocky.",
+      "Opečte cibuľu a cesnak, pridajte mrkvu a zemiak.",
+      "Zalejte vývarom a varte 20 minút do zmäknutia.",
+      "Rozmixujte do hladka, dochuťte soľou, korením a rascou.",
+      "Podávajte s kvapkou smotany."
+    ],
+    "stepsEn": [
+      "Peel and dice carrots, potato and onion.",
+      "Sauté onion and garlic, add carrot and potato.",
+      "Add broth and boil 20 min until soft.",
+      "Blend until smooth, season with salt, pepper, cumin.",
+      "Serve with a drizzle of cream."
+    ],
+    "tags": [
+      "zdravé",
+      "jednoduché"
+    ],
+    "tagsEn": [
+      "healthy",
+      "easy"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 185,
+      "protein": 4,
+      "fat": 7,
+      "carbs": 28
+    }
+  },
+  {
+    "id": 3,
+    "name": "Čokoládový fondant",
+    "nameEn": "Chocolate fondant",
+    "category": "Dezerty",
+    "time": 25,
+    "image": "https://placehold.co/400x300/be185d/fff?text=%F0%9F%8D%B0%20%C4%8Cokol%C3%A1dov%C3%BD%20fondant",
+    "imageData": "",
+    "ingredients": [
+      "200g horkej čokolády",
+      "100g masla",
+      "2 vajcia",
+      "2 žĺtky",
+      "80g cukru",
+      "40g hladkej múky"
+    ],
+    "ingredientsEn": [
+      "200g dark chocolate",
+      "100g butter",
+      "2 eggs",
+      "2 egg yolks",
+      "80g sugar",
+      "40g flour"
+    ],
+    "steps": [
+      "Rúru predhrejte na 200°C a vymastite 4 formičky.",
+      "Vo vodnom kúpeli roztopte čokoládu s maslom.",
+      "Vyšľahajte vajcia, žĺtky a cukor do peny.",
+      "Vmiešajte čokoládovú zmes a múku.",
+      "Rozdeľte do formičiek a pečte 10-12 minút."
+    ],
+    "stepsEn": [
+      "Preheat oven to 200°C and grease 4 ramekins.",
+      "Melt chocolate and butter in a double boiler.",
+      "Whisk eggs, yolks and sugar until fluffy.",
+      "Fold in chocolate mixture and flour.",
+      "Divide into ramekins and bake 10-12 min."
+    ],
+    "tags": [
+      "dezert",
+      "čokoláda"
+    ],
+    "tagsEn": [
+      "dessert",
+      "chocolate"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 480,
+      "protein": 8,
+      "fat": 32,
+      "carbs": 42
+    }
+  },
+  {
+    "id": 4,
+    "name": "Cézar šalát",
+    "nameEn": "Caesar salad",
+    "category": "Šaláty",
+    "time": 15,
+    "image": "https://placehold.co/400x300/15803d/fff?text=%F0%9F%A5%97%20C%C3%A9zar%20%C5%A1al%C3%A1t",
+    "imageData": "",
+    "ingredients": [
+      "1 hlávka rímskeho šalátu",
+      "2 kuracie prsia",
+      "50g parmezánu",
+      "krutóny",
+      "3 lyžice olivového oleja",
+      "1 lyžica citrónu",
+      "1 strúčik cesnaku",
+      "1ČL horčice",
+      "soľ, korenie"
+    ],
+    "ingredientsEn": [
+      "1 romaine lettuce",
+      "2 chicken breasts",
+      "50g parmesan",
+      "croutons",
+      "3 tbsp olive oil",
+      "1 tbsp lemon juice",
+      "1 garlic clove",
+      "1 tsp mustard",
+      "salt, pepper"
+    ],
+    "steps": [
+      "Kuracie prsia osoľte, okoreňte a opečte dozlatista.",
+      "Šalát natrhajte na kúsky.",
+      "Zmiešajte dressing z oleja, citrónu, cesnaku a horčice.",
+      "Zmiešajte šalát s dressingom, pridajte kura, krutóny a parmezán."
+    ],
+    "stepsEn": [
+      "Season chicken breasts and pan-fry until golden.",
+      "Tear lettuce into pieces.",
+      "Mix dressing from oil, lemon, garlic and mustard.",
+      "Toss salad with dressing, add chicken, croutons and parmesan."
+    ],
+    "tags": [
+      "rýchle",
+      "zdravé",
+      "šalát"
+    ],
+    "tagsEn": [
+      "quick",
+      "healthy",
+      "salad"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 350,
+      "protein": 28,
+      "fat": 22,
+      "carbs": 12
+    }
+  },
+  {
+    "id": 5,
+    "name": "Lievance s jahodami",
+    "nameEn": "Pancakes with strawberries",
+    "category": "Raňajky",
+    "time": 25,
+    "image": "https://placehold.co/400x300/a16207/fff?text=%F0%9F%8C%85%20Lievance%20s%20jahodami",
+    "imageData": "",
+    "ingredients": [
+      "250g hladkej múky",
+      "2 vajcia",
+      "300ml mlieka",
+      "1 prášok do pečiva",
+      "2 lyžice cukru",
+      "štipka soli",
+      "maslo",
+      "jahody"
+    ],
+    "ingredientsEn": [
+      "250g flour",
+      "2 eggs",
+      "300ml milk",
+      "1 baking powder",
+      "2 tbsp sugar",
+      "pinch of salt",
+      "butter",
+      "strawberries"
+    ],
+    "steps": [
+      "Zmiešajte múku, prášok do pečiva, cukor a soľ.",
+      "Rozšľahajte vajcia s mliekom a spojte so suchými surovinami.",
+      "Na panvici roztopte maslo a dávkujte cesto.",
+      "Opekajte z oboch strán dozlatista.",
+      "Podávajte s jahodami a javorovým sirupom."
+    ],
+    "stepsEn": [
+      "Mix flour, baking powder, sugar and salt.",
+      "Whisk eggs with milk and combine with dry ingredients.",
+      "Melt butter in a pan and pour batter.",
+      "Cook both sides until golden.",
+      "Serve with strawberries and maple syrup."
+    ],
+    "tags": [
+      "raňajky",
+      "sladké"
+    ],
+    "tagsEn": [
+      "breakfast",
+      "sweet"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 320,
+      "protein": 10,
+      "fat": 8,
+      "carbs": 52
+    }
+  },
+  {
+    "id": 6,
+    "name": "Bryndzové halušky",
+    "nameEn": "Bryndza potato dumplings",
+    "category": "Hlavné jedlá",
+    "time": 40,
+    "image": "https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20Bryndzov%C3%A9%20halu%C5%A1ky",
+    "imageData": "",
+    "ingredients": [
+      "500g zemiakov",
+      "250g hladkej múky",
+      "1 vajce",
+      "soľ",
+      "250g bryndze",
+      "100g slaniny",
+      "kyslá smotana"
+    ],
+    "ingredientsEn": [
+      "500g potatoes",
+      "250g flour",
+      "1 egg",
+      "salt",
+      "250g bryndza cheese",
+      "100g bacon",
+      "sour cream"
+    ],
+    "steps": [
+      "Zemiaky ošúpte a nastrúhajte najemno.",
+      "Zmiešajte s múkou, vajcom a soľou na cesto.",
+      "Cesto pretláčajte cez sitko do vriacej osolenej vody.",
+      "Halušky vyberte keď vyplávajú na povrch.",
+      "Slaninu opečte do chrumkava.",
+      "Zmiešajte halušky s bryndzou, posypte slaninou a ozdobte smotanou."
+    ],
+    "stepsEn": [
+      "Peel and finely grate potatoes.",
+      "Mix with flour, egg and salt into a dough.",
+      "Press dough through a colander into boiling salted water.",
+      "Remove dumplings when they float to surface.",
+      "Fry bacon until crispy.",
+      "Mix dumplings with bryndza, top with bacon and sour cream."
+    ],
+    "tags": [
+      "slovenské",
+      "tradičné"
+    ],
+    "tagsEn": [
+      "slovak",
+      "traditional"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 580,
+      "protein": 22,
+      "fat": 28,
+      "carbs": 58
+    }
+  },
+  {
+    "id": 7,
+    "name": "Kuracie prsia na smotane",
+    "nameEn": "Chicken in cream sauce",
+    "category": "Hlavné jedlá",
+    "time": 30,
+    "image": "https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20Kuracie%20prsia%20na%20smotane",
+    "imageData": "",
+    "ingredients": [
+      "2 kuracie prsia",
+      "1 cibuľa",
+      "200ml smotany na varenie",
+      "1ČL horčice",
+      "soľ, korenie",
+      "olej",
+      "kôpor"
+    ],
+    "ingredientsEn": [
+      "2 chicken breasts",
+      "1 onion",
+      "200ml cooking cream",
+      "1 tsp mustard",
+      "salt, pepper",
+      "oil",
+      "dill"
+    ],
+    "steps": [
+      "Kuracie prsia nakrájajte na plátky, osoľte a okoreňte.",
+      "Opečte z oboch strán a vyberte.",
+      "Na výpeku opečte cibuľu, pridajte horčicu.",
+      "Zalejte smotanou, vráťte kura a duste 10 minút.",
+      "Ozdobte kôprom a podávajte s ryžou."
+    ],
+    "stepsEn": [
+      "Slice chicken breasts, season with salt and pepper.",
+      "Sear both sides until golden, set aside.",
+      "Sauté onion in the pan, add mustard.",
+      "Add cream, return chicken and simmer 10 min.",
+      "Garnish with dill and serve with rice."
+    ],
+    "tags": [
+      "rýchle",
+      "smotanové"
+    ],
+    "tagsEn": [
+      "quick",
+      "creamy"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 380,
+      "protein": 32,
+      "fat": 24,
+      "carbs": 6
+    }
+  },
+  {
+    "id": 8,
+    "name": "Zeleninové rizoto",
+    "nameEn": "Vegetable risotto",
+    "category": "Hlavné jedlá",
+    "time": 35,
+    "image": "https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20Zeleninov%C3%A9%20rizoto",
+    "imageData": "",
+    "ingredients": [
+      "300g ryže arborio",
+      "1 cibuľa",
+      "2 mrkvy",
+      "1 cuketa",
+      "1 červená paprika",
+      "1l zeleninového vývaru",
+      "50g parmezánu",
+      "soľ, korenie, bylinky"
+    ],
+    "ingredientsEn": [
+      "300g arborio rice",
+      "1 onion",
+      "2 carrots",
+      "1 zucchini",
+      "1 red bell pepper",
+      "1L vegetable broth",
+      "50g parmesan",
+      "salt, pepper, herbs"
+    ],
+    "steps": [
+      "Cibuľu opečte na olivovom oleji.",
+      "Pridajte na kocky nakrájanú zeleninu a opekajte 5 minút.",
+      "Pridajte ryžu, zalejte naberačkou vývaru a miešajte.",
+      "Postupne pridávajte vývar, kým ryža nezmäkne.",
+      "Zmiešajte s parmezánom a dochuťte."
+    ],
+    "stepsEn": [
+      "Sauté onion in olive oil.",
+      "Add diced vegetables and cook 5 minutes.",
+      "Add rice, pour in a ladle of broth and stir.",
+      "Gradually add broth until rice is tender.",
+      "Stir in parmesan and season."
+    ],
+    "tags": [
+      "vegetariánske",
+      "taliančina"
+    ],
+    "tagsEn": [
+      "vegetarian",
+      "italian"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 320,
+      "protein": 10,
+      "fat": 8,
+      "carbs": 54
+    }
+  },
+  {
+    "id": 9,
+    "name": "Kapustnica",
+    "nameEn": "Sauerkraut soup",
+    "category": "Polievky",
+    "time": 90,
+    "image": "https://placehold.co/400x300/c2410c/fff?text=%F0%9F%A5%A3%20Kapustnica",
+    "imageData": "",
+    "ingredients": [
+      "500g kyslej kapusty",
+      "200g údeného mäsa",
+      "100g klobásy",
+      "1 cibuľa",
+      "2 strúčiky cesnaku",
+      "soľ, korenie, bobkový list",
+      "200ml smotany",
+      "hrsť sušených húb"
+    ],
+    "ingredientsEn": [
+      "500g sauerkraut",
+      "200g smoked meat",
+      "100g sausage",
+      "1 onion",
+      "2 garlic cloves",
+      "salt, pepper, bay leaf",
+      "200ml cream",
+      "handful dried mushrooms"
+    ],
+    "steps": [
+      "Huby namočte na 30 minút.",
+      "Kapustu, mäso, cibuľu a huby dajte variť.",
+      "Pridajte bobkový list a varte 45 minút.",
+      "Pridajte nakrájanú klobásu a varte 15 minút.",
+      "Zahustite smotanou a dochuťte cesnakom."
+    ],
+    "stepsEn": [
+      "Soak mushrooms for 30 min.",
+      "Boil sauerkraut, meat, onion and mushrooms.",
+      "Add bay leaf and cook 45 minutes.",
+      "Add sliced sausage and cook 15 more minutes.",
+      "Stir in cream and season with garlic."
+    ],
+    "tags": [
+      "slovenské",
+      "vianoce",
+      "sýta"
+    ],
+    "tagsEn": [
+      "slovak",
+      "christmas",
+      "hearty"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 290,
+      "protein": 16,
+      "fat": 18,
+      "carbs": 14
+    }
+  },
+  {
+    "id": 10,
+    "name": "Slepačí vývar",
+    "nameEn": "Chicken broth",
+    "category": "Polievky",
+    "time": 120,
+    "image": "https://placehold.co/400x300/c2410c/fff?text=%F0%9F%A5%A3%20Slepa%C4%8D%C3%AD%20v%C3%BDvar",
+    "imageData": "",
+    "ingredients": [
+      "1 kura",
+      "3 mrkvy",
+      "2 petržleny",
+      "1 zeler",
+      "1 cibuľa",
+      "soľ, celé korenie, bobkový list",
+      "domáce rezance"
+    ],
+    "ingredientsEn": [
+      "1 chicken",
+      "3 carrots",
+      "2 parsley roots",
+      "1 celeriac",
+      "1 onion",
+      "salt, peppercorns, bay leaf",
+      "homemade noodles"
+    ],
+    "steps": [
+      "Kura dajte do hrnca a zalejte studenou vodou.",
+      "Priveďte do varu, zbavte peny.",
+      "Pridajte zeleninu, soľ, korenie a bobkový list.",
+      "Varte na miernom ohni 1,5 hodiny.",
+      "Vývar precedte a podávajte s rezancami."
+    ],
+    "stepsEn": [
+      "Place chicken in a pot and cover with cold water.",
+      "Bring to a boil, skim off foam.",
+      "Add vegetables, salt, pepper and bay leaf.",
+      "Simmer gently for 1.5 hours.",
+      "Strain and serve with noodles."
+    ],
+    "tags": [
+      "tradičné",
+      "polievka",
+      "zdravé"
+    ],
+    "tagsEn": [
+      "traditional",
+      "soup",
+      "healthy"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 120,
+      "protein": 10,
+      "fat": 5,
+      "carbs": 8
+    }
+  },
+  {
+    "id": 11,
+    "name": "Losos na bylinkovom masle",
+    "nameEn": "Salmon with herb butter",
+    "category": "Hlavné jedlá",
+    "time": 25,
+    "image": "https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20Losos%20na%20bylinkovom%20masle",
+    "imageData": "",
+    "ingredients": [
+      "4 filety lososa",
+      "80g masla",
+      "3 strúčiky cesnaku",
+      "bylinky (kôpor, petržlen)",
+      "citrón",
+      "soľ, korenie"
+    ],
+    "ingredientsEn": [
+      "4 salmon fillets",
+      "80g butter",
+      "3 garlic cloves",
+      "herbs (dill, parsley)",
+      "lemon",
+      "salt, pepper"
+    ],
+    "steps": [
+      "Maslo zmiešajte s nasekanými bylinkami a cesnakom.",
+      "Lososa osoľte, okoreňte a pokvapkajte citrónom.",
+      "Opečte na bylinkovom masle 3-4 min z každej strany.",
+      "Podávajte so šalátom."
+    ],
+    "stepsEn": [
+      "Mix butter with chopped herbs and garlic.",
+      "Season salmon with salt, pepper and lemon juice.",
+      "Pan-fry in herb butter 3-4 min per side.",
+      "Serve with a green salad."
+    ],
+    "tags": [
+      "ryba",
+      "rýchle"
+    ],
+    "tagsEn": [
+      "fish",
+      "quick"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 410,
+      "protein": 34,
+      "fat": 28,
+      "carbs": 2
+    }
+  },
+  {
+    "id": 12,
+    "name": "Hovädzí guláš",
+    "nameEn": "Beef goulash",
+    "category": "Hlavné jedlá",
+    "time": 120,
+    "image": "https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20Hov%C3%A4dz%C3%AD%20gul%C3%A1%C5%A1",
+    "imageData": "",
+    "ingredients": [
+      "500g hovädzieho mäsa",
+      "2 cibule",
+      "3 strúčiky cesnaku",
+      "2 lyžice mletej červenej papriky",
+      "1 paradajka",
+      "1 zemiak",
+      "soľ, korenie, majorán",
+      "500ml vývaru"
+    ],
+    "ingredientsEn": [
+      "500g beef",
+      "2 onions",
+      "3 garlic cloves",
+      "2 tbsp paprika powder",
+      "1 tomato",
+      "1 potato",
+      "salt, pepper, marjoram",
+      "500ml broth"
+    ],
+    "steps": [
+      "Cibuľu nakrájajte a opečte dozlatista na masti.",
+      "Pridajte na kocky nakrájané mäso a opečte.",
+      "Zaprášte paprikou, zalejte vývarom.",
+      "Pridajte paradajku, cesnak, soľ a korenie.",
+      "Duste domäkka asi 1,5 hodiny.",
+      "Zahustite nastrúhaným zemiakom a dochuťte majoránom."
+    ],
+    "stepsEn": [
+      "Chop onion and fry until golden in lard.",
+      "Add diced beef and brown.",
+      "Sprinkle with paprika, pour in broth.",
+      "Add tomato, garlic, salt and pepper.",
+      "Stew until tender, about 1.5 hours.",
+      "Thicken with grated potato, season with marjoram."
+    ],
+    "tags": [
+      "slovenské",
+      "sýte",
+      "pomalé"
+    ],
+    "tagsEn": [
+      "slovak",
+      "hearty",
+      "slow"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 450,
+      "protein": 32,
+      "fat": 26,
+      "carbs": 15
+    }
+  },
+  {
+    "id": 13,
+    "name": "Vyprážaný syr",
+    "nameEn": "Fried cheese",
+    "category": "Hlavné jedlá",
+    "time": 15,
+    "image": "https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20Vypr%C3%A1%C5%BEan%C3%BD%20syr",
+    "imageData": "",
+    "ingredients": [
+      "4 plátky eidamu",
+      "2 vajcia",
+      "100g strúhanky",
+      "100g hladkej múky",
+      "soľ",
+      "olej na vyprážanie"
+    ],
+    "ingredientsEn": [
+      "4 slices edam cheese",
+      "2 eggs",
+      "100g breadcrumbs",
+      "100g flour",
+      "salt",
+      "frying oil"
+    ],
+    "steps": [
+      "Syr nakrájajte na hrubšie plátky.",
+      "Obaľte v múke, vajci a strúhanke.",
+      "Smažte na oleji 2-3 min z každej strany.",
+      "Podávajte s hranolkami a tatárskou omáčkou."
+    ],
+    "stepsEn": [
+      "Cut cheese into thick slices.",
+      "Coat in flour, egg and breadcrumbs.",
+      "Deep fry in oil 2-3 min per side.",
+      "Serve with fries and tartar sauce."
+    ],
+    "tags": [
+      "rýchle",
+      "slovenské"
+    ],
+    "tagsEn": [
+      "quick",
+      "slovak"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 520,
+      "protein": 24,
+      "fat": 34,
+      "carbs": 28
+    }
+  },
+  {
+    "id": 14,
+    "name": "Šalát Caprese",
+    "nameEn": "Caprese salad",
+    "category": "Šaláty",
+    "time": 10,
+    "image": "https://placehold.co/400x300/15803d/fff?text=%F0%9F%A5%97%20%C5%A0al%C3%A1t%20Caprese",
+    "imageData": "",
+    "ingredients": [
+      "2 veľké paradajky",
+      "200g mozzarelly",
+      "čerstvá bazalka",
+      "olivový olej",
+      "balzamikový ocot",
+      "soľ, korenie"
+    ],
+    "ingredientsEn": [
+      "2 large tomatoes",
+      "200g mozzarella",
+      "fresh basil",
+      "olive oil",
+      "balsamic vinegar",
+      "salt, pepper"
+    ],
+    "steps": [
+      "Paradajky a mozzarellu nakrájajte na plátky.",
+      "Striedavo ukladajte na tanier s bazalkou.",
+      "Pokvapkajte olejom a balzamikom.",
+      "Osoľte a okoreňte."
+    ],
+    "stepsEn": [
+      "Slice tomatoes and mozzarella.",
+      "Layer alternately with basil on a plate.",
+      "Drizzle with oil and balsamic vinegar.",
+      "Season with salt and pepper."
+    ],
+    "tags": [
+      "rýchle",
+      "taliančina",
+      "predjedlo"
+    ],
+    "tagsEn": [
+      "quick",
+      "italian",
+      "starter"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 280,
+      "protein": 18,
+      "fat": 20,
+      "carbs": 6
+    }
+  },
+  {
+    "id": 15,
+    "name": "Tvarohové koláče",
+    "nameEn": "Cottage cheese pastries",
+    "category": "Dezerty",
+    "time": 45,
+    "image": "https://placehold.co/400x300/be185d/fff?text=%F0%9F%8D%B0%20Tvarohov%C3%A9%20kol%C3%A1%C4%8De",
+    "imageData": "",
+    "ingredients": [
+      "500g tvarohu",
+      "2 vajcia",
+      "100g cukru",
+      "200g hladkej múky",
+      "1 prášok do pečiva",
+      "100g masla",
+      "štipka soli"
+    ],
+    "ingredientsEn": [
+      "500g cottage cheese",
+      "2 eggs",
+      "100g sugar",
+      "200g flour",
+      "1 baking powder",
+      "100g butter",
+      "pinch of salt"
+    ],
+    "steps": [
+      "Z múky, masla, prášku a soli vypracujte cesto.",
+      "Tvaroh zmiešajte s vajcami a cukrom.",
+      "Cesto rozvaľkajte, vykrajujte kolieska.",
+      "Naplňte tvarohom a preložte.",
+      "Pečte na 180°C 20-25 minút."
+    ],
+    "stepsEn": [
+      "Make dough from flour, butter, baking powder and salt.",
+      "Mix cottage cheese with eggs and sugar.",
+      "Roll out dough, cut into circles.",
+      "Fill with cheese mixture and fold.",
+      "Bake at 180°C for 20-25 min."
+    ],
+    "tags": [
+      "sladké",
+      "jednoduché"
+    ],
+    "tagsEn": [
+      "sweet",
+      "easy"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 340,
+      "protein": 14,
+      "fat": 14,
+      "carbs": 40
+    }
+  },
+  {
+    "id": 16,
+    "name": "Medovník",
+    "nameEn": "Honey cake",
+    "category": "Dezerty",
+    "time": 90,
+    "image": "https://placehold.co/400x300/be185d/fff?text=%F0%9F%8D%B0%20Medovn%C3%ADk",
+    "imageData": "",
+    "ingredients": [
+      "400g hladkej múky",
+      "150g cukru",
+      "100g masla",
+      "3 lyžice medu",
+      "3 vajcia",
+      "1 prášok do pečiva",
+      "500ml šľahačkovej smotany",
+      "1 kyslá smotana"
+    ],
+    "ingredientsEn": [
+      "400g flour",
+      "150g sugar",
+      "100g butter",
+      "3 tbsp honey",
+      "3 eggs",
+      "1 baking powder",
+      "500ml whipping cream",
+      "1 sour cream"
+    ],
+    "steps": [
+      "Z múky, cukru, masla, medu, vajec a prášku vypracujte cesto.",
+      "Rozdeľte na 8 častí, vyvaľkajte na tenké pláty.",
+      "Pečte na 180°C 5-7 minút každý plát.",
+      "Vyšľahajte smotanu s kyslou smotanou.",
+      "Vrstvite: plát, krém, plát, krém.",
+      "Nechajte v chlade odstáť aspoň 4 hodiny."
+    ],
+    "stepsEn": [
+      "Make dough from flour, sugar, butter, honey, eggs and baking powder.",
+      "Divide into 8 pieces, roll into thin sheets.",
+      "Bake each sheet at 180°C for 5-7 min.",
+      "Whip cream with sour cream.",
+      "Layer: sheet, cream, sheet, cream.",
+      "Refrigerate for at least 4 hours."
+    ],
+    "tags": [
+      "sladké",
+      "tradičné"
+    ],
+    "tagsEn": [
+      "sweet",
+      "traditional"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 380,
+      "protein": 6,
+      "fat": 20,
+      "carbs": 46
+    }
+  },
+  {
+    "id": 17,
+    "name": "Brownies",
+    "nameEn": "Brownies",
+    "category": "Dezerty",
+    "time": 35,
+    "image": "https://placehold.co/400x300/be185d/fff?text=%F0%9F%8D%B0%20Brownies",
+    "imageData": "",
+    "ingredients": [
+      "200g horkej čokolády",
+      "150g masla",
+      "200g cukru",
+      "3 vajcia",
+      "100g hladkej múky",
+      "1ČL vanilkového extraktu",
+      "štipka soli"
+    ],
+    "ingredientsEn": [
+      "200g dark chocolate",
+      "150g butter",
+      "200g sugar",
+      "3 eggs",
+      "100g flour",
+      "1 tsp vanilla extract",
+      "pinch of salt"
+    ],
+    "steps": [
+      "Rúru predhrejte na 180°C.",
+      "Čokoládu s maslom roztopte vo vodnom kúpeli.",
+      "Vyšľahajte vajcia s cukrom do peny.",
+      "Vmiešajte čokoládovú zmes, múku, vanilku a soľ.",
+      "Pečte 25-30 minút – vnútri má byť vláčne."
+    ],
+    "stepsEn": [
+      "Preheat oven to 180°C.",
+      "Melt chocolate and butter in a double boiler.",
+      "Whisk eggs and sugar until fluffy.",
+      "Fold in chocolate mixture, flour, vanilla and salt.",
+      "Bake 25-30 min – should be fudgy inside."
+    ],
+    "tags": [
+      "sladké",
+      "čokoláda",
+      "rýchle"
+    ],
+    "tagsEn": [
+      "sweet",
+      "chocolate",
+      "quick"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 420,
+      "protein": 6,
+      "fat": 24,
+      "carbs": 48
+    }
+  },
+  {
+    "id": 18,
+    "name": "Domáci chlieb",
+    "nameEn": "Homemade bread",
+    "category": "Pečivo",
+    "time": 180,
+    "image": "https://placehold.co/400x300/b45309/fff?text=%F0%9F%A5%96%20Dom%C3%A1ci%20chlieb",
+    "imageData": "",
+    "ingredients": [
+      "500g hladkej múky",
+      "300ml vlažnej vody",
+      "1 kocka droždia (42g)",
+      "1ČL cukru",
+      "1ČL soli",
+      "2 lyžice oleja"
+    ],
+    "ingredientsEn": [
+      "500g flour",
+      "300ml warm water",
+      "42g fresh yeast",
+      "1 tsp sugar",
+      "1 tsp salt",
+      "2 tbsp oil"
+    ],
+    "steps": [
+      "Z droždia, cukru a trochy vody urobte kvások (10 minút).",
+      "Zmiešajte múku, soľ, kvások, olej a vodu.",
+      "Vypracujte cesto a nechajte kysnúť 1 hodinu.",
+      "Prelejte do formy a nechajte kysnúť 30 minút.",
+      "Pečte na 200°C 40-45 minút."
+    ],
+    "stepsEn": [
+      "Mix yeast, sugar and a bit of water (10 min starter).",
+      "Combine flour, salt, starter, oil and water.",
+      "Knead into dough and let rise 1 hour.",
+      "Transfer to a loaf pan and let rise 30 min.",
+      "Bake at 200°C for 40-45 min."
+    ],
+    "tags": [
+      "pečivo",
+      "tradičné"
+    ],
+    "tagsEn": [
+      "baking",
+      "traditional"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 180,
+      "protein": 5,
+      "fat": 2,
+      "carbs": 35
+    }
+  },
+  {
+    "id": 19,
+    "name": "Pizza Margherita",
+    "nameEn": "Pizza Margherita",
+    "category": "Hlavné jedlá",
+    "time": 60,
+    "image": "https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20Pizza%20Margherita",
+    "imageData": "",
+    "ingredients": [
+      "500g hladkej múky",
+      "300ml vlažnej vody",
+      "1 kocka droždia",
+      "1ČL soli",
+      "2 lyžice olivového oleja",
+      "200ml paradajkovej omáčky",
+      "200g mozzarelly",
+      "čerstvá bazalka"
+    ],
+    "ingredientsEn": [
+      "500g flour",
+      "300ml warm water",
+      "42g fresh yeast",
+      "1 tsp salt",
+      "2 tbsp olive oil",
+      "200ml tomato sauce",
+      "200g mozzarella",
+      "fresh basil"
+    ],
+    "steps": [
+      "Z múky, vody, droždia, soli a oleja vypracujte cesto.",
+      "Nechajte kysnúť 1 hodinu.",
+      "Rozvaľkajte na tenký kruh.",
+      "Natrite omáčkou a poukladajte mozzarellu.",
+      "Pečte na 250°C 12-15 minút.",
+      "Ozdobte bazalkou."
+    ],
+    "stepsEn": [
+      "Make dough from flour, water, yeast, salt and oil.",
+      "Let rise for 1 hour.",
+      "Roll out into a thin circle.",
+      "Spread sauce and top with mozzarella.",
+      "Bake at 250°C for 12-15 min.",
+      "Garnish with basil."
+    ],
+    "tags": [
+      "taliančina",
+      "rýchle"
+    ],
+    "tagsEn": [
+      "italian",
+      "quick"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 280,
+      "protein": 12,
+      "fat": 8,
+      "carbs": 40
+    }
+  },
+  {
+    "id": 20,
+    "name": "Fazuľová polievka",
+    "nameEn": "Bean soup",
+    "category": "Polievky",
+    "time": 90,
+    "image": "https://placehold.co/400x300/c2410c/fff?text=%F0%9F%A5%A3%20Fazu%C4%BEov%C3%A1%20polievka",
+    "imageData": "",
+    "ingredients": [
+      "300g sušenej fazule",
+      "1 cibuľa",
+      "2 mrkvy",
+      "1 petržlen",
+      "2 strúčiky cesnaku",
+      "soľ, korenie, majorán",
+      "200ml smotany",
+      "1 lyžica hladkej múky"
+    ],
+    "ingredientsEn": [
+      "300g dried beans",
+      "1 onion",
+      "2 carrots",
+      "1 parsley root",
+      "2 garlic cloves",
+      "salt, pepper, marjoram",
+      "200ml cream",
+      "1 tbsp flour"
+    ],
+    "steps": [
+      "Fazuľu namočte deň vopred.",
+      "Uvarte domäkka (asi 1 hodinu).",
+      "Opečte cibuľu, pridajte na kocky nakrájanú zeleninu.",
+      "Pridajte k fazuli a ochuťte.",
+      "Zahustite smotanou s múkou."
+    ],
+    "stepsEn": [
+      "Soak beans overnight.",
+      "Cook until tender (about 1 hour).",
+      "Sauté onion, add diced vegetables.",
+      "Add to beans and season.",
+      "Thicken with cream and flour mixture."
+    ],
+    "tags": [
+      "sýta",
+      "tradičné"
+    ],
+    "tagsEn": [
+      "hearty",
+      "traditional"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 250,
+      "protein": 12,
+      "fat": 10,
+      "carbs": 28
+    }
+  },
+  {
+    "id": 21,
+    "name": "Avokádový toast",
+    "nameEn": "Avocado toast",
+    "category": "Raňajky",
+    "time": 10,
+    "image": "https://placehold.co/400x300/a16207/fff?text=%F0%9F%8C%85%20Avok%C3%A1dov%C3%BD%20toast",
+    "imageData": "",
+    "ingredients": [
+      "2 krajce chleba",
+      "1 zrelé avokádo",
+      "citrónová šťava",
+      "soľ, korenie",
+      "čili vločky"
+    ],
+    "ingredientsEn": [
+      "2 slices bread",
+      "1 ripe avocado",
+      "lemon juice",
+      "salt, pepper",
+      "chili flakes"
+    ],
+    "steps": [
+      "Chlieb opečte dozlatista.",
+      "Avokádo rozpučte s citrónovou šťavou, soľou a korením.",
+      "Natrite na toast.",
+      "Posypte čili vločkami."
+    ],
+    "stepsEn": [
+      "Toast bread until golden.",
+      "Mash avocado with lemon juice, salt and pepper.",
+      "Spread on toast.",
+      "Sprinkle with chili flakes."
+    ],
+    "tags": [
+      "rýchle",
+      "raňajky",
+      "zdravé"
+    ],
+    "tagsEn": [
+      "quick",
+      "breakfast",
+      "healthy"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 220,
+      "protein": 5,
+      "fat": 14,
+      "carbs": 20
+    }
+  },
+  {
+    "id": 22,
+    "name": "Smoothie bowl",
+    "nameEn": "Smoothie bowl",
+    "category": "Raňajky",
+    "time": 10,
+    "image": "https://placehold.co/400x300/a16207/fff?text=%F0%9F%8C%85%20Smoothie%20bowl",
+    "imageData": "",
+    "ingredients": [
+      "1 banán",
+      "hrsť mrazeného ovocia",
+      "200ml mandľového mlieka",
+      "granola",
+      "čerstvé ovocie",
+      "chia semienka"
+    ],
+    "ingredientsEn": [
+      "1 banana",
+      "handful frozen fruit",
+      "200ml almond milk",
+      "granola",
+      "fresh fruit",
+      "chia seeds"
+    ],
+    "steps": [
+      "Banán, ovocie a mlieko rozmixujte dohladka.",
+      "Nalejte do misky.",
+      "Ozdobte granolou, ovocím a chia semienkami."
+    ],
+    "stepsEn": [
+      "Blend banana, frozen fruit and milk until smooth.",
+      "Pour into a bowl.",
+      "Top with granola, fresh fruit and chia seeds."
+    ],
+    "tags": [
+      "raňajky",
+      "zdravé",
+      "rýchle"
+    ],
+    "tagsEn": [
+      "breakfast",
+      "healthy",
+      "quick"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 280,
+      "protein": 6,
+      "fat": 8,
+      "carbs": 48
+    }
+  },
+  {
+    "id": 23,
+    "name": "Horúca čokoláda",
+    "nameEn": "Hot chocolate",
+    "category": "Nápoje",
+    "time": 10,
+    "image": "https://placehold.co/400x300/1d4ed8/fff?text=%F0%9F%8D%B9%20Hor%C3%BAca%20%C4%8Dokol%C3%A1da",
+    "imageData": "",
+    "ingredients": [
+      "500ml mlieka",
+      "100g horkej čokolády",
+      "1 lyžica kakaa",
+      "1 lyžica cukru",
+      "šľahačka"
+    ],
+    "ingredientsEn": [
+      "500ml milk",
+      "100g dark chocolate",
+      "1 tbsp cocoa",
+      "1 tbsp sugar",
+      "whipped cream"
+    ],
+    "steps": [
+      "Mlieko zohrejte v hrnci.",
+      "Pridajte čokoládu, kakao a cukor.",
+      "Miešajte, kým sa čokoláda nerozpustí.",
+      "Nalejte do pohárov a ozdobte šľahačkou."
+    ],
+    "stepsEn": [
+      "Heat milk in a pot.",
+      "Add chocolate, cocoa and sugar.",
+      "Stir until chocolate melts.",
+      "Pour into mugs and top with whipped cream."
+    ],
+    "tags": [
+      "nápoj",
+      "sladké",
+      "zima"
+    ],
+    "tagsEn": [
+      "drink",
+      "sweet",
+      "winter"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 350,
+      "protein": 10,
+      "fat": 20,
+      "carbs": 36
+    }
+  },
+  {
+    "id": 24,
+    "name": "Bazová limonáda",
+    "nameEn": "Elderflower lemonade",
+    "category": "Nápoje",
+    "time": 10,
+    "image": "https://placehold.co/400x300/1d4ed8/fff?text=%F0%9F%8D%B9%20Bazov%C3%A1%20limon%C3%A1da",
+    "imageData": "",
+    "ingredients": [
+      "500ml bazového sirupu",
+      "1l perlivej vody",
+      "1 citrón",
+      "1 limetka",
+      "lístky mäty",
+      "kocky ľadu"
+    ],
+    "ingredientsEn": [
+      "500ml elderflower syrup",
+      "1L sparkling water",
+      "1 lemon",
+      "1 lime",
+      "mint leaves",
+      "ice cubes"
+    ],
+    "steps": [
+      "Zmiešajte sirup s perlivou vodou.",
+      "Pridajte na plátky nakrájaný citrón a limetku.",
+      "Pridajte mätu a ľad."
+    ],
+    "stepsEn": [
+      "Mix syrup with sparkling water.",
+      "Add sliced lemon and lime.",
+      "Add mint and ice."
+    ],
+    "tags": [
+      "nápoj",
+      "osviežujúce",
+      "leto"
+    ],
+    "tagsEn": [
+      "drink",
+      "refreshing",
+      "summer"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 120,
+      "protein": 0,
+      "fat": 0,
+      "carbs": 30
+    }
+  },
+  {
+    "id": 25,
+    "name": "Pečené zemiaky s rozmarínom",
+    "nameEn": "Roasted rosemary potatoes",
+    "category": "Prílohy",
+    "time": 40,
+    "image": "https://placehold.co/400x300/57534e/fff?text=%F0%9F%A5%94%20Pe%C4%8Den%C3%A9%20zemiaky%20s%20rozmar%C3%ADnom",
+    "imageData": "",
+    "ingredients": [
+      "800g zemiakov",
+      "4 lyžice olivového oleja",
+      "3 vetvičky rozmarínu",
+      "3 strúčiky cesnaku",
+      "soľ, korenie, rasca"
+    ],
+    "ingredientsEn": [
+      "800g potatoes",
+      "4 tbsp olive oil",
+      "3 rosemary sprigs",
+      "3 garlic cloves",
+      "salt, pepper, cumin"
+    ],
+    "steps": [
+      "Zemiaky nakrájajte na mesiačiky (nešúpte).",
+      "Premiešajte s olejom, rozmarínom, cesnakom, soľou a korením.",
+      "Rozložte na plech a pečte 30-35 minút na 200°C."
+    ],
+    "stepsEn": [
+      "Cut potatoes into wedges (unpeeled).",
+      "Toss with oil, rosemary, garlic, salt and pepper.",
+      "Spread on a baking sheet and roast at 200°C for 30-35 min."
+    ],
+    "tags": [
+      "jednoduché",
+      "príloha"
+    ],
+    "tagsEn": [
+      "easy",
+      "side"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 220,
+      "protein": 4,
+      "fat": 8,
+      "carbs": 34
+    }
+  },
+  {
+    "id": 26,
+    "name": "Kuracie rizoto s hráškom",
+    "nameEn": "Chicken risotto with peas",
+    "category": "Hlavné jedlá",
+    "time": 35,
+    "image": "https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20Kuracie%20rizoto%20s%20hr%C3%A1%C5%A1kom",
+    "imageData": "",
+    "ingredients": [
+      "300g ryže arborio",
+      "2 kuracie prsia",
+      "1 cibuľa",
+      "150g hrášku",
+      "1l vývaru",
+      "50g parmezánu",
+      "soľ, korenie"
+    ],
+    "ingredientsEn": [
+      "300g arborio rice",
+      "2 chicken breasts",
+      "1 onion",
+      "150g peas",
+      "1L broth",
+      "50g parmesan",
+      "salt, pepper"
+    ],
+    "steps": [
+      "Kura nakrájajte a opečte, vyberte.",
+      "Opečte cibuľu, pridajte ryžu.",
+      "Postupne prilievajte vývar a miešajte.",
+      "Po 15 min pridajte hrášok a kura, dochuťte.",
+      "Primiešajte parmezán."
+    ],
+    "stepsEn": [
+      "Dice and sear chicken, set aside.",
+      "Sauté onion, add rice.",
+      "Gradually add broth while stirring.",
+      "After 15 min add peas and chicken, season.",
+      "Stir in parmesan."
+    ],
+    "tags": [
+      "rýchle",
+      "ryža"
+    ],
+    "tagsEn": [
+      "quick",
+      "rice"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 380,
+      "protein": 25,
+      "fat": 10,
+      "carbs": 48
+    }
+  },
+  {
+    "id": 27,
+    "name": "Špenátové rizoto s vajíčkom",
+    "nameEn": "Spinach risotto with egg",
+    "category": "Hlavné jedlá",
+    "time": 30,
+    "image": "https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20%C5%A0pen%C3%A1tov%C3%A9%20rizoto%20s%20vaj%C3%AD%C4%8Dkom",
+    "imageData": "",
+    "ingredients": [
+      "300g ryže arborio",
+      "200g čerstvého špenátu",
+      "2 vajcia",
+      "1 cibuľa",
+      "750ml vývaru",
+      "50g parmezánu",
+      "soľ, korenie"
+    ],
+    "ingredientsEn": [
+      "300g arborio rice",
+      "200g fresh spinach",
+      "2 eggs",
+      "1 onion",
+      "750ml broth",
+      "50g parmesan",
+      "salt, pepper"
+    ],
+    "steps": [
+      "Opečte cibuľu, pridajte ryžu.",
+      "Postupne prilievajte vývar.",
+      "Keď je ryža takmer hotová, pridajte špenát.",
+      "Opečte vajíčka.",
+      "Podávajte rizoto s vajíčkom navrchu."
+    ],
+    "stepsEn": [
+      "Sauté onion, add rice.",
+      "Gradually add broth.",
+      "When rice is almost done, add spinach.",
+      "Fry eggs sunny-side up.",
+      "Serve risotto topped with egg."
+    ],
+    "tags": [
+      "vegetariánske",
+      "rýchle"
+    ],
+    "tagsEn": [
+      "vegetarian",
+      "quick"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 350,
+      "protein": 14,
+      "fat": 12,
+      "carbs": 46
+    }
+  },
+  {
+    "id": 28,
+    "name": "Pečené kuracie stehná so zeleninou",
+    "nameEn": "Baked chicken thighs with vegetables",
+    "category": "Hlavné jedlá",
+    "time": 55,
+    "image": "https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20Pe%C4%8Den%C3%A9%20kuracie%20stehn%C3%A1%20so%20zeleninou",
+    "imageData": "",
+    "ingredients": [
+      "4 kuracie stehná",
+      "3 mrkvy",
+      "2 zemiaky",
+      "1 cuketa",
+      "1 cibuľa",
+      "4 strúčiky cesnaku",
+      "olej, soľ, korenie, rozmarín"
+    ],
+    "ingredientsEn": [
+      "4 chicken thighs",
+      "3 carrots",
+      "2 potatoes",
+      "1 zucchini",
+      "1 onion",
+      "4 garlic cloves",
+      "oil, salt, pepper, rosemary"
+    ],
+    "steps": [
+      "Zeleninu nakrájajte na kocky.",
+      "Zmiešajte s olejom a korením na plechu.",
+      "Stehná osoľte a položte na zeleninu.",
+      "Pečte na 200°C 40-45 minút."
+    ],
+    "stepsEn": [
+      "Dice vegetables.",
+      "Toss with oil and seasoning on a baking sheet.",
+      "Season chicken and place on vegetables.",
+      "Bake at 200°C for 40-45 min."
+    ],
+    "tags": [
+      "jednoduché",
+      "pečené"
+    ],
+    "tagsEn": [
+      "easy",
+      "baked"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 450,
+      "protein": 30,
+      "fat": 28,
+      "carbs": 18
+    }
+  },
+  {
+    "id": 29,
+    "name": "Špagety bolognese",
+    "nameEn": "Spaghetti bolognese",
+    "category": "Hlavné jedlá",
+    "time": 45,
+    "image": "https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20%C5%A0pagety%20bolognese",
+    "imageData": "",
+    "ingredients": [
+      "500g špagiet",
+      "300g mletého mäsa",
+      "1 cibuľa",
+      "2 strúčiky cesnaku",
+      "400g paradajkového pyré",
+      "1 mrkva",
+      "soľ, korenie, oregano"
+    ],
+    "ingredientsEn": [
+      "500g spaghetti",
+      "300g ground beef",
+      "1 onion",
+      "2 garlic cloves",
+      "400g tomato puree",
+      "1 carrot",
+      "salt, pepper, oregano"
+    ],
+    "steps": [
+      "Opečte cibuľu a cesnak, pridajte mäso.",
+      "Pridajte nastrúhanú mrkvu a paradajkové pyré.",
+      "Duste 20 minút, dochuťte.",
+      "Uvarte špagety a zmiešajte s omáčkou."
+    ],
+    "stepsEn": [
+      "Sauté onion and garlic, add meat.",
+      "Add grated carrot and tomato puree.",
+      "Simmer 20 min, season.",
+      "Cook spaghetti and mix with sauce."
+    ],
+    "tags": [
+      "taliančina",
+      "mäso"
+    ],
+    "tagsEn": [
+      "italian",
+      "meat"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 480,
+      "protein": 24,
+      "fat": 14,
+      "carbs": 62
+    }
+  },
+  {
+    "id": 30,
+    "name": "Kurací paprikáš",
+    "nameEn": "Chicken paprikash",
+    "category": "Hlavné jedlá",
+    "time": 40,
+    "image": "https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20Kurac%C3%AD%20paprik%C3%A1%C5%A1",
+    "imageData": "",
+    "ingredients": [
+      "4 kuracie stehná",
+      "2 cibule",
+      "2 lyžice mletej červenej papriky",
+      "200ml smotany",
+      "soľ, korenie"
+    ],
+    "ingredientsEn": [
+      "4 chicken thighs",
+      "2 onions",
+      "2 tbsp paprika",
+      "200ml cream",
+      "salt, pepper"
+    ],
+    "steps": [
+      "Cibuľu opečte dosklovita.",
+      "Pridajte kura a opečte.",
+      "Zaprášte paprikou, podlejte vodou a duste 30 min.",
+      "Zalejte smotanou a dochuťte."
+    ],
+    "stepsEn": [
+      "Sauté onion until translucent.",
+      "Add chicken and brown.",
+      "Sprinkle with paprika, add water, simmer 30 min.",
+      "Add cream and season."
+    ],
+    "tags": [
+      "slovenské",
+      "rýchle"
+    ],
+    "tagsEn": [
+      "slovak",
+      "quick"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 420,
+      "protein": 28,
+      "fat": 30,
+      "carbs": 8
+    }
+  },
+  {
+    "id": 31,
+    "name": "Plnené papriky",
+    "nameEn": "Stuffed bell peppers",
+    "category": "Hlavné jedlá",
+    "time": 60,
+    "image": "https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20Plnen%C3%A9%20papriky",
+    "imageData": "",
+    "ingredients": [
+      "6 väčších paprík",
+      "300g mletého mäsa",
+      "100g ryže",
+      "1 cibuľa",
+      "500ml paradajkového pretlaku",
+      "soľ, korenie, rasca, kyslá smotana"
+    ],
+    "ingredientsEn": [
+      "6 large bell peppers",
+      "300g ground meat",
+      "100g rice",
+      "1 onion",
+      "500ml tomato passata",
+      "salt, pepper, cumin, sour cream"
+    ],
+    "steps": [
+      "Ryžu uvarte do polomäkka.",
+      "Zmiešajte s mäsom, cibuľou a korením.",
+      "Plnkou naplňte papriky.",
+      "Zalejte pretlakom a duste 35 min.",
+      "Podávajte s kyslou smotanou."
+    ],
+    "stepsEn": [
+      "Cook rice until half-done.",
+      "Mix with meat, onion and spices.",
+      "Stuff peppers with filling.",
+      "Cover with passata and simmer 35 min.",
+      "Serve with sour cream."
+    ],
+    "tags": [
+      "slovenské",
+      "sýte"
+    ],
+    "tagsEn": [
+      "slovak",
+      "hearty"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 380,
+      "protein": 22,
+      "fat": 14,
+      "carbs": 38
+    }
+  },
+  {
+    "id": 32,
+    "name": "Lasagne",
+    "nameEn": "Lasagna",
+    "category": "Hlavné jedlá",
+    "time": 60,
+    "image": "https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20Lasagne",
+    "imageData": "",
+    "ingredients": [
+      "12 plátov lasagne",
+      "400g mletého mäsa",
+      "1 cibuľa",
+      "3 strúčiky cesnaku",
+      "500ml paradajkovej omáčky",
+      "500ml bešamelu",
+      "200g mozzarelly",
+      "soľ, korenie, oregano"
+    ],
+    "ingredientsEn": [
+      "12 lasagna sheets",
+      "400g ground meat",
+      "1 onion",
+      "3 garlic cloves",
+      "500ml tomato sauce",
+      "500ml béchamel",
+      "200g mozzarella",
+      "salt, pepper, oregano"
+    ],
+    "steps": [
+      "Opečte cibuľu, cesnak a mäso.",
+      "Pridajte paradajkovú omáčku a duste 10 min.",
+      "Vrstvite: pláty, mäso, bešamel, syr.",
+      "Pečte na 180°C 30 minút."
+    ],
+    "stepsEn": [
+      "Sauté onion, garlic and meat.",
+      "Add tomato sauce and simmer 10 min.",
+      "Layer: sheets, meat, béchamel, cheese.",
+      "Bake at 180°C for 30 min."
+    ],
+    "tags": [
+      "taliančina",
+      "rúra"
+    ],
+    "tagsEn": [
+      "italian",
+      "baked"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 520,
+      "protein": 28,
+      "fat": 22,
+      "carbs": 48
+    }
+  },
+  {
+    "id": 33,
+    "name": "Zapekané zemiaky s mäsom",
+    "nameEn": "Baked potatoes with meat",
+    "category": "Hlavné jedlá",
+    "time": 50,
+    "image": "https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20Zapekan%C3%A9%20zemiaky%20s%20m%C3%A4som",
+    "imageData": "",
+    "ingredients": [
+      "600g zemiakov",
+      "300g mletého mäsa",
+      "1 cibuľa",
+      "200ml smotany",
+      "100g syru",
+      "soľ, korenie, majorán"
+    ],
+    "ingredientsEn": [
+      "600g potatoes",
+      "300g ground meat",
+      "1 onion",
+      "200ml cream",
+      "100g cheese",
+      "salt, pepper, marjoram"
+    ],
+    "steps": [
+      "Zemiaky nakrájajte na plátky.",
+      "Opečte mäso s cibuľou.",
+      "Vrstvite do formy: zemiaky, mäso, zemiaky.",
+      "Zalejte smotanou, posypte syrom.",
+      "Pečte na 180°C 35-40 min."
+    ],
+    "stepsEn": [
+      "Slice potatoes.",
+      "Brown meat with onion.",
+      "Layer: potatoes, meat, potatoes.",
+      "Pour cream, top with cheese.",
+      "Bake at 180°C for 35-40 min."
+    ],
+    "tags": [
+      "sýte",
+      "rúra"
+    ],
+    "tagsEn": [
+      "hearty",
+      "baked"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 460,
+      "protein": 22,
+      "fat": 24,
+      "carbs": 36
+    }
+  },
+  {
+    "id": 34,
+    "name": "Ryžový nákyp",
+    "nameEn": "Rice pudding",
+    "category": "Dezerty",
+    "time": 45,
+    "image": "https://placehold.co/400x300/be185d/fff?text=%F0%9F%8D%B0%20Ry%C5%BEov%C3%BD%20n%C3%A1kyp",
+    "imageData": "",
+    "ingredients": [
+      "200g ryže",
+      "500ml mlieka",
+      "2 vajcia",
+      "3 lyžice cukru",
+      "1 vanilkový cukor",
+      "hrsť hrozienok",
+      "maslo"
+    ],
+    "ingredientsEn": [
+      "200g rice",
+      "500ml milk",
+      "2 eggs",
+      "3 tbsp sugar",
+      "vanilla sugar",
+      "handful raisins",
+      "butter"
+    ],
+    "steps": [
+      "Ryžu uvarte v mlieku domäkka.",
+      "Zmiešajte s vajcami, cukrom a hrozienkami.",
+      "Vlejte do vymastenej formy.",
+      "Pečte na 180°C 25 minút."
+    ],
+    "stepsEn": [
+      "Cook rice in milk until soft.",
+      "Mix with eggs, sugar and raisins.",
+      "Pour into greased dish.",
+      "Bake at 180°C for 25 min."
+    ],
+    "tags": [
+      "sladké",
+      "rúra"
+    ],
+    "tagsEn": [
+      "sweet",
+      "baked"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 340,
+      "protein": 10,
+      "fat": 8,
+      "carbs": 62
+    }
+  },
+  {
+    "id": 35,
+    "name": "Pečené kura so zeleninou",
+    "nameEn": "Roasted chicken with vegetables",
+    "category": "Hlavné jedlá",
+    "time": 70,
+    "image": "https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20Pe%C4%8Den%C3%A9%20kura%20so%20zeleninou",
+    "imageData": "",
+    "ingredients": [
+      "1 celé kura",
+      "4 mrkvy",
+      "3 zemiaky",
+      "2 cibule",
+      "4 strúčiky cesnaku",
+      "olej, soľ, korenie, rozmarín"
+    ],
+    "ingredientsEn": [
+      "1 whole chicken",
+      "4 carrots",
+      "3 potatoes",
+      "2 onions",
+      "4 garlic cloves",
+      "oil, salt, pepper, rosemary"
+    ],
+    "steps": [
+      "Kura umyte a osoľte.",
+      "Zeleninu nakrájajte a dajte na plech.",
+      "Položte kura na zeleninu, potrite olejom.",
+      "Pečte na 190°C 55-60 min."
+    ],
+    "stepsEn": [
+      "Clean and season chicken.",
+      "Chop vegetables on a baking sheet.",
+      "Place chicken on vegetables, brush with oil.",
+      "Roast at 190°C for 55-60 min."
+    ],
+    "tags": [
+      "slovenské",
+      "rúra",
+      "nedeľa"
+    ],
+    "tagsEn": [
+      "slovak",
+      "baked",
+      "sunday"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 480,
+      "protein": 35,
+      "fat": 32,
+      "carbs": 16
+    }
+  },
+  {
+    "id": 36,
+    "name": "Šošovicová polievka",
+    "nameEn": "Lentil soup",
+    "category": "Polievky",
+    "time": 40,
+    "image": "https://placehold.co/400x300/c2410c/fff?text=%F0%9F%A5%A3%20%C5%A0o%C5%A1ovicov%C3%A1%20polievka",
+    "imageData": "",
+    "ingredients": [
+      "300g červenej šošovice",
+      "1 cibuľa",
+      "2 mrkvy",
+      "2 strúčiky cesnaku",
+      "1l zeleninového vývaru",
+      "soľ, korenie, majorán",
+      "citrónová šťava"
+    ],
+    "ingredientsEn": [
+      "300g red lentils",
+      "1 onion",
+      "2 carrots",
+      "2 garlic cloves",
+      "1L vegetable broth",
+      "salt, pepper, marjoram",
+      "lemon juice"
+    ],
+    "steps": [
+      "Opečte cibuľu a cesnak.",
+      "Pridajte na kocky nakrájanú mrkvu.",
+      "Pridajte šošovicu a zalejte vývarom.",
+      "Varte 20 minút do zmäknutia.",
+      "Dochuťte soľou, korením a citrónom."
+    ],
+    "stepsEn": [
+      "Sauté onion and garlic.",
+      "Add diced carrots.",
+      "Add lentils and pour broth.",
+      "Cook 20 min until soft.",
+      "Season with salt, pepper and lemon."
+    ],
+    "tags": [
+      "zdravé",
+      "rýchle",
+      "vegánske"
+    ],
+    "tagsEn": [
+      "healthy",
+      "quick",
+      "vegan"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 220,
+      "protein": 14,
+      "fat": 3,
+      "carbs": 36
+    }
+  },
+  {
+    "id": 37,
+    "name": "Tekvicová polievka",
+    "nameEn": "Pumpkin soup",
+    "category": "Polievky",
+    "time": 35,
+    "image": "https://placehold.co/400x300/c2410c/fff?text=%F0%9F%A5%A3%20Tekvicov%C3%A1%20polievka",
+    "imageData": "",
+    "ingredients": [
+      "500g tekvice Hokkaido",
+      "1 cibuľa",
+      "2 strúčiky cesnaku",
+      "400ml kokosového mlieka",
+      "200ml vývaru",
+      "soľ, korenie, zázvor, tekvicové semienka"
+    ],
+    "ingredientsEn": [
+      "500g Hokkaido pumpkin",
+      "1 onion",
+      "2 garlic cloves",
+      "400ml coconut milk",
+      "200ml broth",
+      "salt, pepper, ginger, pumpkin seeds"
+    ],
+    "steps": [
+      "Tekvicu nakrájajte na kocky (nešúpte).",
+      "Opečte cibuľu a cesnak.",
+      "Pridajte tekvicu, zázvor a vývar.",
+      "Varte 20 minút, zmäknite.",
+      "Rozmixujte, pridajte kokosové mlieko a dochuťte."
+    ],
+    "stepsEn": [
+      "Dice pumpkin (keep skin on).",
+      "Sauté onion and garlic.",
+      "Add pumpkin, ginger and broth.",
+      "Cook 20 min until soft.",
+      "Blend, add coconut milk and season."
+    ],
+    "tags": [
+      "zdravé",
+      "vegánske",
+      "jeseň"
+    ],
+    "tagsEn": [
+      "healthy",
+      "vegan",
+      "fall"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 180,
+      "protein": 4,
+      "fat": 10,
+      "carbs": 20
+    }
+  },
+  {
+    "id": 38,
+    "name": "Brokolicová polievka",
+    "nameEn": "Broccoli soup",
+    "category": "Polievky",
+    "time": 25,
+    "image": "https://placehold.co/400x300/c2410c/fff?text=%F0%9F%A5%A3%20Brokolicov%C3%A1%20polievka",
+    "imageData": "",
+    "ingredients": [
+      "1 brokolica",
+      "1 cibuľa",
+      "2 strúčiky cesnaku",
+      "500ml vývaru",
+      "200ml smotany",
+      "soľ, korenie, muškátový oriešok"
+    ],
+    "ingredientsEn": [
+      "1 broccoli",
+      "1 onion",
+      "2 garlic cloves",
+      "500ml broth",
+      "200ml cream",
+      "salt, pepper, nutmeg"
+    ],
+    "steps": [
+      "Brokolicu rozdeľte na ružičky.",
+      "Opečte cibuľu a cesnak.",
+      "Pridajte brokolicu a vývar, varte 15 min.",
+      "Rozmixujte, pridajte smotanu a dochuťte."
+    ],
+    "stepsEn": [
+      "Cut broccoli into florets.",
+      "Sauté onion and garlic.",
+      "Add broccoli and broth, cook 15 min.",
+      "Blend, add cream and season."
+    ],
+    "tags": [
+      "zdravé",
+      "rýchle"
+    ],
+    "tagsEn": [
+      "healthy",
+      "quick"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 200,
+      "protein": 6,
+      "fat": 12,
+      "carbs": 16
+    }
+  },
+  {
+    "id": 39,
+    "name": "Cuketová polievka",
+    "nameEn": "Zucchini soup",
+    "category": "Polievky",
+    "time": 25,
+    "image": "https://placehold.co/400x300/c2410c/fff?text=%F0%9F%A5%A3%20Cuketov%C3%A1%20polievka",
+    "imageData": "",
+    "ingredients": [
+      "2 cukety",
+      "1 cibuľa",
+      "2 strúčiky cesnaku",
+      "500ml vývaru",
+      "200ml smotany",
+      "soľ, korenie, bazalka"
+    ],
+    "ingredientsEn": [
+      "2 zucchinis",
+      "1 onion",
+      "2 garlic cloves",
+      "500ml broth",
+      "200ml cream",
+      "salt, pepper, basil"
+    ],
+    "steps": [
+      "Cukety nakrájajte na kocky.",
+      "Opečte cibuľu a cesnak.",
+      "Pridajte cuketu a vývar, varte 15 min.",
+      "Rozmixujte, pridajte smotanu a dochuťte."
+    ],
+    "stepsEn": [
+      "Dice zucchinis.",
+      "Sauté onion and garlic.",
+      "Add zucchini and broth, cook 15 min.",
+      "Blend, add cream and season."
+    ],
+    "tags": [
+      "rýchle",
+      "letné"
+    ],
+    "tagsEn": [
+      "quick",
+      "summer"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 160,
+      "protein": 4,
+      "fat": 10,
+      "carbs": 12
+    }
+  },
+  {
+    "id": 40,
+    "name": "Gazpacho",
+    "nameEn": "Gazpacho",
+    "category": "Polievky",
+    "time": 15,
+    "image": "https://placehold.co/400x300/c2410c/fff?text=%F0%9F%A5%A3%20Gazpacho",
+    "imageData": "",
+    "ingredients": [
+      "6 paradajok",
+      "1 uhorka",
+      "1 červená paprika",
+      "1 strúčik cesnaku",
+      "3 lyžice olivového oleja",
+      "2 lyžice červeného octu",
+      "soľ, korenie"
+    ],
+    "ingredientsEn": [
+      "6 tomatoes",
+      "1 cucumber",
+      "1 red bell pepper",
+      "1 garlic clove",
+      "3 tbsp olive oil",
+      "2 tbsp red wine vinegar",
+      "salt, pepper"
+    ],
+    "steps": [
+      "Všetku zeleninu nakrájajte.",
+      "Rozmixujte s olejom a octom dohladka.",
+      "Dochuťte a dajte vychladiť na 1 hod."
+    ],
+    "stepsEn": [
+      "Chop all vegetables.",
+      "Blend with oil and vinegar.",
+      "Season and chill for 1 hour."
+    ],
+    "tags": [
+      "letné",
+      "studené",
+      "vegánske"
+    ],
+    "tagsEn": [
+      "summer",
+      "cold",
+      "vegan"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 140,
+      "protein": 3,
+      "fat": 8,
+      "carbs": 14
+    }
+  },
+  {
+    "id": 41,
+    "name": "Grécky šalát",
+    "nameEn": "Greek salad",
+    "category": "Šaláty",
+    "time": 10,
+    "image": "https://placehold.co/400x300/15803d/fff?text=%F0%9F%A5%97%20Gr%C3%A9cky%20%C5%A1al%C3%A1t",
+    "imageData": "",
+    "ingredients": [
+      "3 paradajky",
+      "1 uhorka",
+      "1 červená cibuľa",
+      "200g fety",
+      "čierne olivy",
+      "olivový olej",
+      "oregano"
+    ],
+    "ingredientsEn": [
+      "3 tomatoes",
+      "1 cucumber",
+      "1 red onion",
+      "200g feta",
+      "black olives",
+      "olive oil",
+      "oregano"
+    ],
+    "steps": [
+      "Zeleninu nakrájajte na kocky.",
+      "Pridajte olivy a na kocky nakrájanú fetu.",
+      "Pokvapkajte olejom, posypte oreganom."
+    ],
+    "stepsEn": [
+      "Dice vegetables.",
+      "Add olives and cubed feta.",
+      "Drizzle with oil, sprinkle oregano."
+    ],
+    "tags": [
+      "rýchle",
+      "zdravé",
+      "letné"
+    ],
+    "tagsEn": [
+      "quick",
+      "healthy",
+      "summer"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 240,
+      "protein": 10,
+      "fat": 18,
+      "carbs": 8
+    }
+  },
+  {
+    "id": 42,
+    "name": "Quinoa šalát s avokádom",
+    "nameEn": "Quinoa salad with avocado",
+    "category": "Šaláty",
+    "time": 25,
+    "image": "https://placehold.co/400x300/15803d/fff?text=%F0%9F%A5%97%20Quinoa%20%C5%A1al%C3%A1t%20s%20avok%C3%A1dom",
+    "imageData": "",
+    "ingredients": [
+      "200g quinoi",
+      "1 avokádo",
+      "1 uhorka",
+      "1 červená paprika",
+      "100g cherry paradajok",
+      "citrónová šťava",
+      "olivový olej, soľ, korenie"
+    ],
+    "ingredientsEn": [
+      "200g quinoa",
+      "1 avocado",
+      "1 cucumber",
+      "1 red bell pepper",
+      "100g cherry tomatoes",
+      "lemon juice",
+      "olive oil, salt, pepper"
+    ],
+    "steps": [
+      "Quinou uvarte podľa návodu.",
+      "Zeleninu nakrájajte na kocky.",
+      "Zmiešajte s quinoou, pokvapkajte citrónom a olejom."
+    ],
+    "stepsEn": [
+      "Cook quinoa per package.",
+      "Dice vegetables.",
+      "Mix with quinoa, drizzle lemon and oil."
+    ],
+    "tags": [
+      "zdravé",
+      "vegánske",
+      "bezlepkové"
+    ],
+    "tagsEn": [
+      "healthy",
+      "vegan",
+      "gluten-free"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 320,
+      "protein": 10,
+      "fat": 14,
+      "carbs": 40
+    }
+  },
+  {
+    "id": 43,
+    "name": "Falafel pečený",
+    "nameEn": "Baked falafel",
+    "category": "Hlavné jedlá",
+    "time": 35,
+    "image": "https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20Falafel%20pe%C4%8Den%C3%BD",
+    "imageData": "",
+    "ingredients": [
+      "400g cíceru (konzerva)",
+      "1 cibuľa",
+      "3 strúčiky cesnaku",
+      "hrsť petržlenu",
+      "1ČL rímskej rasce",
+      "1ČL koriandra",
+      "2 lyžice múky",
+      "soľ, korenie"
+    ],
+    "ingredientsEn": [
+      "400g chickpeas (canned)",
+      "1 onion",
+      "3 garlic cloves",
+      "handful parsley",
+      "1 tsp cumin",
+      "1 tsp coriander",
+      "2 tbsp flour",
+      "salt, pepper"
+    ],
+    "steps": [
+      "Cícer scedite.",
+      "Rozmixujte s cibuľou, cesnakom, bylinkami a korením.",
+      "Pridajte múku a vytvarujte guľôčky.",
+      "Pečte na 200°C 20-25 min."
+    ],
+    "stepsEn": [
+      "Drain chickpeas.",
+      "Blend with onion, garlic, herbs and spices.",
+      "Add flour and shape into balls.",
+      "Bake at 200°C for 20-25 min."
+    ],
+    "tags": [
+      "vegánske",
+      "zdravé",
+      "rúra"
+    ],
+    "tagsEn": [
+      "vegan",
+      "healthy",
+      "baked"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 280,
+      "protein": 14,
+      "fat": 8,
+      "carbs": 38
+    }
+  },
+  {
+    "id": 44,
+    "name": "Hummus",
+    "nameEn": "Hummus",
+    "category": "Predjedlá",
+    "time": 10,
+    "image": "https://placehold.co/400x300/0f766e/fff?text=%F0%9F%A5%9F%20Hummus",
+    "imageData": "",
+    "ingredients": [
+      "400g cíceru",
+      "2 lyžice tahini",
+      "2 lyžice olivového oleja",
+      "1 citrón",
+      "1 strúčik cesnaku",
+      "soľ, rasca"
+    ],
+    "ingredientsEn": [
+      "400g chickpeas",
+      "2 tbsp tahini",
+      "2 tbsp olive oil",
+      "1 lemon",
+      "1 garlic clove",
+      "salt, cumin"
+    ],
+    "steps": [
+      "Cícer scedite.",
+      "Rozmixujte s tahini, olejom, citrónom a cesnakom.",
+      "Dochuťte soľou a rascou."
+    ],
+    "stepsEn": [
+      "Drain chickpeas.",
+      "Blend with tahini, oil, lemon and garlic.",
+      "Season with salt and cumin."
+    ],
+    "tags": [
+      "vegánske",
+      "rýchle",
+      "nátierka"
+    ],
+    "tagsEn": [
+      "vegan",
+      "quick",
+      "spread"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 190,
+      "protein": 8,
+      "fat": 10,
+      "carbs": 18
+    }
+  },
+  {
+    "id": 45,
+    "name": "Tuniakový šalát",
+    "nameEn": "Tuna salad",
+    "category": "Šaláty",
+    "time": 10,
+    "image": "https://placehold.co/400x300/15803d/fff?text=%F0%9F%A5%97%20Tuniakov%C3%BD%20%C5%A1al%C3%A1t",
+    "imageData": "",
+    "ingredients": [
+      "1 konzerva tuniaka",
+      "2 vajcia uvarené natvrdo",
+      "1 červená cibuľa",
+      "2 lyžice majonézy",
+      "1 lyžica citrónovej šťavy",
+      "soľ, korenie"
+    ],
+    "ingredientsEn": [
+      "1 can tuna",
+      "2 hard-boiled eggs",
+      "1 red onion",
+      "2 tbsp mayo",
+      "1 tbsp lemon juice",
+      "salt, pepper"
+    ],
+    "steps": [
+      "Tuniaka scedite a rozpučte.",
+      "Vajcia nakrájajte nadrobno.",
+      "Zmiešajte s cibuľou, majonézou a citrónom."
+    ],
+    "stepsEn": [
+      "Drain and flake tuna.",
+      "Chop eggs.",
+      "Mix with onion, mayo and lemon."
+    ],
+    "tags": [
+      "rýchle",
+      "jednoduché"
+    ],
+    "tagsEn": [
+      "quick",
+      "easy"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 250,
+      "protein": 20,
+      "fat": 16,
+      "carbs": 4
+    }
+  },
+  {
+    "id": 46,
+    "name": "Pečená zelenina s fetou",
+    "nameEn": "Roasted vegetables with feta",
+    "category": "Hlavné jedlá",
+    "time": 35,
+    "image": "https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20Pe%C4%8Den%C3%A1%20zelenina%20s%20fetou",
+    "imageData": "",
+    "ingredients": [
+      "1 cuketa",
+      "1 baklažán",
+      "1 červená paprika",
+      "200g cherry paradajok",
+      "200g fety",
+      "olivový olej, soľ, korenie, oregano"
+    ],
+    "ingredientsEn": [
+      "1 zucchini",
+      "1 eggplant",
+      "1 red bell pepper",
+      "200g cherry tomatoes",
+      "200g feta",
+      "olive oil, salt, pepper, oregano"
+    ],
+    "steps": [
+      "Zeleninu nakrájajte na kocky.",
+      "Zmiešajte s olejom a korením na plechu.",
+      "Položte fetu na zeleninu.",
+      "Pečte na 200°C 25-30 min."
+    ],
+    "stepsEn": [
+      "Dice vegetables.",
+      "Toss with oil on a baking sheet.",
+      "Place feta on top.",
+      "Roast at 200°C for 25-30 min."
+    ],
+    "tags": [
+      "vegetariánske",
+      "rúra",
+      "jednoduché"
+    ],
+    "tagsEn": [
+      "vegetarian",
+      "baked",
+      "easy"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 280,
+      "protein": 12,
+      "fat": 18,
+      "carbs": 16
+    }
+  },
+  {
+    "id": 47,
+    "name": "Cícerová polievka",
+    "nameEn": "Chickpea soup",
+    "category": "Polievky",
+    "time": 30,
+    "image": "https://placehold.co/400x300/c2410c/fff?text=%F0%9F%A5%A3%20C%C3%ADcerov%C3%A1%20polievka",
+    "imageData": "",
+    "ingredients": [
+      "400g cíceru",
+      "1 cibuľa",
+      "2 mrkvy",
+      "2 strúčiky cesnaku",
+      "1l zeleninového vývaru",
+      "rasca, soľ, korenie",
+      "citrónová šťava"
+    ],
+    "ingredientsEn": [
+      "400g chickpeas",
+      "1 onion",
+      "2 carrots",
+      "2 garlic cloves",
+      "1L vegetable broth",
+      "cumin, salt, pepper",
+      "lemon juice"
+    ],
+    "steps": [
+      "Opečte cibuľu a cesnak.",
+      "Pridajte mrkvu, cícer a vývar.",
+      "Varte 15 minút, dochuťte a pridajte citrón."
+    ],
+    "stepsEn": [
+      "Sauté onion and garlic.",
+      "Add carrots, chickpeas and broth.",
+      "Cook 15 min, season and add lemon."
+    ],
+    "tags": [
+      "vegánske",
+      "zdravé",
+      "sýta"
+    ],
+    "tagsEn": [
+      "vegan",
+      "healthy",
+      "hearty"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 250,
+      "protein": 12,
+      "fat": 5,
+      "carbs": 38
+    }
+  },
+  {
+    "id": 48,
+    "name": "Domáci burger",
+    "nameEn": "Homemade burger",
+    "category": "Hlavné jedlá",
+    "time": 30,
+    "image": "https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20Dom%C3%A1ci%20burger",
+    "imageData": "",
+    "ingredients": [
+      "500g mletého mäsa",
+      "4 žemle",
+      "1 cibuľa",
+      "listy šalátu",
+      "2 paradajky",
+      "syr čedar",
+      "soľ, korenie, horčica, kečup"
+    ],
+    "ingredientsEn": [
+      "500g ground beef",
+      "4 buns",
+      "1 onion",
+      "lettuce",
+      "2 tomatoes",
+      "cheddar",
+      "salt, pepper, mustard, ketchup"
+    ],
+    "steps": [
+      "Mäso osoľte a vytvarujte fašírky.",
+      "Opečte na panvici 4-5 min z každej strany.",
+      "Žemle opečte, vrstvite ingrediencie."
+    ],
+    "stepsEn": [
+      "Season meat and shape patties.",
+      "Pan-fry 4-5 min per side.",
+      "Toast buns, layer ingredients."
+    ],
+    "tags": [
+      "mäso",
+      "rýchle"
+    ],
+    "tagsEn": [
+      "meat",
+      "quick"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 550,
+      "protein": 32,
+      "fat": 30,
+      "carbs": 36
+    }
+  },
+  {
+    "id": 49,
+    "name": "Slané palacinky so špenátom",
+    "nameEn": "Savory spinach pancakes",
+    "category": "Hlavné jedlá",
+    "time": 30,
+    "image": "https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20Slan%C3%A9%20palacinky%20so%20%C5%A1pen%C3%A1tom",
+    "imageData": "",
+    "ingredients": [
+      "250g hladkej múky",
+      "2 vajcia",
+      "300ml mlieka",
+      "200g špenátu",
+      "200g ricotty",
+      "50g parmezánu",
+      "soľ, korenie"
+    ],
+    "ingredientsEn": [
+      "250g flour",
+      "2 eggs",
+      "300ml milk",
+      "200g spinach",
+      "200g ricotta",
+      "50g parmesan",
+      "salt, pepper"
+    ],
+    "steps": [
+      "Z múky, vajec a mlieka urobte cesto.",
+      "Špenát poduste na panvici.",
+      "Zmiešajte s ricottou a parmezánom.",
+      "Naplňte palacinky a zrolujte."
+    ],
+    "stepsEn": [
+      "Make pancake batter.",
+      "Wilt spinach.",
+      "Mix with ricotta and parmesan.",
+      "Fill pancakes and roll."
+    ],
+    "tags": [
+      "vegetariánske"
+    ],
+    "tagsEn": [
+      "vegetarian"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 320,
+      "protein": 16,
+      "fat": 12,
+      "carbs": 36
+    }
+  },
+  {
+    "id": 50,
+    "name": "Hubové rizoto",
+    "nameEn": "Mushroom risotto",
+    "category": "Hlavné jedlá",
+    "time": 35,
+    "image": "https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20Hubov%C3%A9%20rizoto",
+    "imageData": "",
+    "ingredients": [
+      "300g ryže arborio",
+      "300g húb",
+      "1 cibuľa",
+      "2 strúčiky cesnaku",
+      "750ml vývaru",
+      "50g parmezánu",
+      "soľ, korenie, tymian"
+    ],
+    "ingredientsEn": [
+      "300g arborio rice",
+      "300g mushrooms",
+      "1 onion",
+      "2 garlic cloves",
+      "750ml broth",
+      "50g parmesan",
+      "salt, pepper, thyme"
+    ],
+    "steps": [
+      "Huby opečte a vyberte.",
+      "Opečte cibuľu a cesnak, pridajte ryžu.",
+      "Postupne prilievajte vývar.",
+      "Pridajte huby a parmezán."
+    ],
+    "stepsEn": [
+      "Sauté mushrooms, set aside.",
+      "Sauté onion and garlic, add rice.",
+      "Gradually add broth.",
+      "Stir in mushrooms and parmesan."
+    ],
+    "tags": [
+      "vegetariánske",
+      "taliančina"
+    ],
+    "tagsEn": [
+      "vegetarian",
+      "italian"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 340,
+      "protein": 12,
+      "fat": 8,
+      "carbs": 54
+    }
+  },
+  {
+    "id": 51,
+    "name": "Krémová kukuričná polievka",
+    "nameEn": "Creamy corn soup",
+    "category": "Polievky",
+    "time": 20,
+    "image": "https://placehold.co/400x300/c2410c/fff?text=%F0%9F%A5%A3%20Kr%C3%A9mov%C3%A1%20kukuri%C4%8Dn%C3%A1%20polievka",
+    "imageData": "",
+    "ingredients": [
+      "400g kukurice",
+      "1 cibuľa",
+      "2 zemiaky",
+      "500ml vývaru",
+      "200ml smotany",
+      "soľ, korenie"
+    ],
+    "ingredientsEn": [
+      "400g corn",
+      "1 onion",
+      "2 potatoes",
+      "500ml broth",
+      "200ml cream",
+      "salt, pepper"
+    ],
+    "steps": [
+      "Opečte cibuľu.",
+      "Pridajte na kocky zemiaky a vývar.",
+      "Varte 15 min, pridajte kukuricu.",
+      "Rozmixujte, pridajte smotanu a dochuťte."
+    ],
+    "stepsEn": [
+      "Sauté onion.",
+      "Add diced potatoes and broth.",
+      "Cook 15 min, add corn.",
+      "Blend, add cream and season."
+    ],
+    "tags": [
+      "rýchle",
+      "jednoduché"
+    ],
+    "tagsEn": [
+      "quick",
+      "easy"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 220,
+      "protein": 6,
+      "fat": 10,
+      "carbs": 28
+    }
+  },
+  {
+    "id": 52,
+    "name": "Grilovaný hermelín",
+    "nameEn": "Grilled hermelín cheese",
+    "category": "Predjedlá",
+    "time": 15,
+    "image": "https://placehold.co/400x300/0f766e/fff?text=%F0%9F%A5%9F%20Grilovan%C3%BD%20hermel%C3%ADn",
+    "imageData": "",
+    "ingredients": [
+      "2 hermelíny",
+      "4 plátky slaniny",
+      "brusnicová omáčka",
+      "paprika"
+    ],
+    "ingredientsEn": [
+      "2 hermelín cheeses",
+      "4 bacon slices",
+      "cranberry sauce",
+      "paprika"
+    ],
+    "steps": [
+      "Hermelín zabaľte do slaniny.",
+      "Grilujte 4-5 min z každej strany.",
+      "Podávajte s brusnicovou omáčkou."
+    ],
+    "stepsEn": [
+      "Wrap hermelín in bacon.",
+      "Grill 4-5 min each side.",
+      "Serve with cranberry sauce."
+    ],
+    "tags": [
+      "slovenské",
+      "rýchle"
+    ],
+    "tagsEn": [
+      "slovak",
+      "quick"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 380,
+      "protein": 18,
+      "fat": 32,
+      "carbs": 4
+    }
+  },
+  {
+    "id": 53,
+    "name": "Bravčové riadky",
+    "nameEn": "Pork steaks",
+    "category": "Hlavné jedlá",
+    "time": 25,
+    "image": "https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20Brav%C4%8Dov%C3%A9%20riadky",
+    "imageData": "",
+    "ingredients": [
+      "4 bravčové riadky",
+      "2 strúčiky cesnaku",
+      "soľ, korenie, rasca",
+      "olej",
+      "1 cibuľa"
+    ],
+    "ingredientsEn": [
+      "4 pork steaks",
+      "2 garlic cloves",
+      "salt, pepper, cumin",
+      "oil",
+      "1 onion"
+    ],
+    "steps": [
+      "Mäso naklepte a osoľte.",
+      "Opečte na oleji z oboch strán.",
+      "Pridajte cibuľu a cesnak, poduste 10 min."
+    ],
+    "stepsEn": [
+      "Tenderize and season steaks.",
+      "Pan-fry in oil both sides.",
+      "Add onion and garlic, simmer 10 min."
+    ],
+    "tags": [
+      "rýchle",
+      "mäso"
+    ],
+    "tagsEn": [
+      "quick",
+      "meat"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 320,
+      "protein": 34,
+      "fat": 18,
+      "carbs": 4
+    }
+  },
+  {
+    "id": 54,
+    "name": "Pečené bataty",
+    "nameEn": "Baked sweet potatoes",
+    "category": "Prílohy",
+    "time": 40,
+    "image": "https://placehold.co/400x300/57534e/fff?text=%F0%9F%A5%94%20Pe%C4%8Den%C3%A9%20bataty",
+    "imageData": "",
+    "ingredients": [
+      "4 bataty",
+      "olivový olej",
+      "soľ, korenie, rozmarín"
+    ],
+    "ingredientsEn": [
+      "4 sweet potatoes",
+      "olive oil",
+      "salt, pepper, rosemary"
+    ],
+    "steps": [
+      "Bataty nakrájajte na mesiačiky.",
+      "Premiešajte s olejom a korením.",
+      "Pečte na 200°C 30-35 min."
+    ],
+    "stepsEn": [
+      "Cut sweet potatoes into wedges.",
+      "Toss with oil and seasoning.",
+      "Roast at 200°C for 30-35 min."
+    ],
+    "tags": [
+      "zdravé",
+      "príloha"
+    ],
+    "tagsEn": [
+      "healthy",
+      "side"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 200,
+      "protein": 3,
+      "fat": 5,
+      "carbs": 38
+    }
+  },
+  {
+    "id": 55,
+    "name": "Jablkový závin",
+    "nameEn": "Apple strudel",
+    "category": "Dezerty",
+    "time": 50,
+    "image": "https://placehold.co/400x300/be185d/fff?text=%F0%9F%8D%B0%20Jablkov%C3%BD%20z%C3%A1vin",
+    "imageData": "",
+    "ingredients": [
+      "1 lístkové cesto",
+      "4 jablká",
+      "2 lyžice cukru",
+      "1ČL škorice",
+      "hrsť hrozienok",
+      "strúhanka",
+      "maslo"
+    ],
+    "ingredientsEn": [
+      "1 puff pastry",
+      "4 apples",
+      "2 tbsp sugar",
+      "1 tsp cinnamon",
+      "handful raisins",
+      "breadcrumbs",
+      "butter"
+    ],
+    "steps": [
+      "Jablká nastrúhajte s cukrom a škoricou.",
+      "Posypte cesto strúhankou, rozložte plnku.",
+      "Zrolujte a potrite maslom.",
+      "Pečte na 180°C 30 minút."
+    ],
+    "stepsEn": [
+      "Grate apples with sugar and cinnamon.",
+      "Sprinkle pastry with breadcrumbs, spread filling.",
+      "Roll up and brush with butter.",
+      "Bake at 180°C for 30 min."
+    ],
+    "tags": [
+      "sladké",
+      "rúra",
+      "tradičné"
+    ],
+    "tagsEn": [
+      "sweet",
+      "baked",
+      "traditional"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 320,
+      "protein": 4,
+      "fat": 14,
+      "carbs": 46
+    }
+  },
+  {
+    "id": 56,
+    "name": "Škoricové rožteky",
+    "nameEn": "Cinnamon rolls",
+    "category": "Pečivo",
+    "time": 120,
+    "image": "https://placehold.co/400x300/b45309/fff?text=%F0%9F%A5%96%20%C5%A0koricov%C3%A9%20ro%C5%BEteky",
+    "imageData": "",
+    "ingredients": [
+      "500g hladkej múky",
+      "250ml mlieka",
+      "1 kocka droždia",
+      "80g cukru",
+      "80g masla",
+      "1 vajce",
+      "2ČL škorice",
+      "štipka soli"
+    ],
+    "ingredientsEn": [
+      "500g flour",
+      "250ml milk",
+      "42g yeast",
+      "80g sugar",
+      "80g butter",
+      "1 egg",
+      "2 tsp cinnamon",
+      "pinch salt"
+    ],
+    "steps": [
+      "Vypracujte cesto a nechajte kysnúť 1 hod.",
+      "Rozvaľkajte, potrite maslom a posypte cukrom so škoricou.",
+      "Zrolujte a nakrájajte na rožteky.",
+      "Pečte na 180°C 20-25 min."
+    ],
+    "stepsEn": [
+      "Make dough, let rise 1 hour.",
+      "Roll out, brush with butter, sprinkle cinnamon sugar.",
+      "Roll up and slice.",
+      "Bake at 180°C for 20-25 min."
+    ],
+    "tags": [
+      "pečivo",
+      "sladké"
+    ],
+    "tagsEn": [
+      "baking",
+      "sweet"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 280,
+      "protein": 6,
+      "fat": 8,
+      "carbs": 46
+    }
+  },
+  {
+    "id": 57,
+    "name": "Domáca granola",
+    "nameEn": "Homemade granola",
+    "category": "Raňajky",
+    "time": 30,
+    "image": "https://placehold.co/400x300/a16207/fff?text=%F0%9F%8C%85%20Dom%C3%A1ca%20granola",
+    "imageData": "",
+    "ingredients": [
+      "300g ovsených vločiek",
+      "100g orechov",
+      "50g medu",
+      "50g masla",
+      "100g sušeného ovocia",
+      "1ČL škorice"
+    ],
+    "ingredientsEn": [
+      "300g rolled oats",
+      "100g nuts",
+      "50g honey",
+      "50g butter",
+      "100g dried fruit",
+      "1 tsp cinnamon"
+    ],
+    "steps": [
+      "Zmiešajte vločky s orechmi a škoricou.",
+      "Roztopte med s maslom a vlejte do suchých surovín.",
+      "Rozložte na plech a pečte na 160°C 20-25 min."
+    ],
+    "stepsEn": [
+      "Mix oats with nuts and cinnamon.",
+      "Melt honey with butter, pour into dry mix.",
+      "Spread on baking sheet, bake at 160°C 20-25 min."
+    ],
+    "tags": [
+      "raňajky",
+      "zdravé"
+    ],
+    "tagsEn": [
+      "breakfast",
+      "healthy"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 380,
+      "protein": 8,
+      "fat": 16,
+      "carbs": 52
+    }
+  },
+  {
+    "id": 58,
+    "name": "Plnené paradajky",
+    "nameEn": "Stuffed tomatoes",
+    "category": "Predjedlá",
+    "time": 25,
+    "image": "https://placehold.co/400x300/0f766e/fff?text=%F0%9F%A5%9F%20Plnen%C3%A9%20paradajky",
+    "imageData": "",
+    "ingredients": [
+      "8 paradajok",
+      "200g ricotty",
+      "2 lyžice bazalky",
+      "1 strúčik cesnaku",
+      "soľ, korenie, olivový olej"
+    ],
+    "ingredientsEn": [
+      "8 tomatoes",
+      "200g ricotta",
+      "2 tbsp basil",
+      "1 garlic clove",
+      "salt, pepper, olive oil"
+    ],
+    "steps": [
+      "Paradajkám odrežte vršky a vydlabte.",
+      "Zmiešajte ricottu s bazalkou, cesnakom a korením.",
+      "Plnkou naplňte paradajky.",
+      "Pečte na 180°C 15 minút."
+    ],
+    "stepsEn": [
+      "Cut tops off tomatoes, scoop out pulp.",
+      "Mix ricotta with basil, garlic and seasoning.",
+      "Stuff tomatoes with mixture.",
+      "Bake at 180°C for 15 min."
+    ],
+    "tags": [
+      "vegetariánske",
+      "predjedlo"
+    ],
+    "tagsEn": [
+      "vegetarian",
+      "starter"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 180,
+      "protein": 10,
+      "fat": 12,
+      "carbs": 8
+    }
+  },
+  {
+    "id": 59,
+    "name": "Syr na grile",
+    "nameEn": "Grilled cheese",
+    "category": "Predjedlá",
+    "time": 10,
+    "image": "https://placehold.co/400x300/0f766e/fff?text=%F0%9F%A5%9F%20Syr%20na%20grile",
+    "imageData": "",
+    "ingredients": [
+      "200g syru halloumi",
+      "olivový olej",
+      "citrón",
+      "oregano"
+    ],
+    "ingredientsEn": [
+      "200g halloumi cheese",
+      "olive oil",
+      "lemon",
+      "oregano"
+    ],
+    "steps": [
+      "Syru nakrájajte na plátky.",
+      "Grilujte 2-3 min z každej strany.",
+      "Pokvapkajte citrónom a posypte oreganom."
+    ],
+    "stepsEn": [
+      "Slice halloumi.",
+      "Grill 2-3 min each side.",
+      "Drizzle lemon and sprinkle oregano."
+    ],
+    "tags": [
+      "rýchle",
+      "vegetariánske"
+    ],
+    "tagsEn": [
+      "quick",
+      "vegetarian"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 280,
+      "protein": 18,
+      "fat": 22,
+      "carbs": 2
+    }
+  },
+  {
+    "id": 60,
+    "name": "Jablkový kompót",
+    "nameEn": "Apple compote",
+    "category": "Dezerty",
+    "time": 30,
+    "image": "https://placehold.co/400x300/be185d/fff?text=%F0%9F%8D%B0%20Jablkov%C3%BD%20komp%C3%B3t",
+    "imageData": "",
+    "ingredients": [
+      "6 jabĺk",
+      "3 lyžice cukru",
+      "1l vody",
+      "1 škorica",
+      "3 klinčeky"
+    ],
+    "ingredientsEn": [
+      "6 apples",
+      "3 tbsp sugar",
+      "1L water",
+      "1 cinnamon",
+      "3 cloves"
+    ],
+    "steps": [
+      "Jablká ošúpte a nakrájajte.",
+      "Vodu s cukrom a korením priveďte do varu.",
+      "Pridajte jablká a varte 15 minút.",
+      "Nechajte vychladnúť."
+    ],
+    "stepsEn": [
+      "Peel and slice apples.",
+      "Boil water with sugar and spices.",
+      "Add apples and cook 15 min.",
+      "Let cool."
+    ],
+    "tags": [
+      "sladké",
+      "jednoduché",
+      "tradičné"
+    ],
+    "tagsEn": [
+      "sweet",
+      "easy",
+      "traditional"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 130,
+      "protein": 0,
+      "fat": 0,
+      "carbs": 32
+    }
+  },
+  {
+    "id": 61,
+    "name": "Bylinkové maslo",
+    "nameEn": "Herb butter",
+    "category": "Predjedlá",
+    "time": 10,
+    "image": "https://placehold.co/400x300/0f766e/fff?text=%F0%9F%A5%9F%20Bylinkov%C3%A9%20maslo",
+    "imageData": "",
+    "ingredients": [
+      "100g masla",
+      "2 strúčiky cesnaku",
+      "bylinky (pažítka, petržlen)",
+      "soľ, korenie"
+    ],
+    "ingredientsEn": [
+      "100g butter",
+      "2 garlic cloves",
+      "herbs (chives, parsley)",
+      "salt, pepper"
+    ],
+    "steps": [
+      "Maslo nechajte zmäknúť.",
+      "Zmiešajte s prelisovaným cesnakom a nasekanými bylinkami.",
+      "Dochuťte a dajte stuhnúť."
+    ],
+    "stepsEn": [
+      "Soften butter.",
+      "Mix with crushed garlic and chopped herbs.",
+      "Season and refrigerate."
+    ],
+    "tags": [
+      "rýchle",
+      "nátierka"
+    ],
+    "tagsEn": [
+      "quick",
+      "spread"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 180,
+      "protein": 1,
+      "fat": 20,
+      "carbs": 2
+    }
+  },
+  {
+    "id": 62,
+    "name": "Pečená cvikla s kozím syrom",
+    "nameEn": "Roasted beetroot with goat cheese",
+    "category": "Predjedlá",
+    "time": 50,
+    "image": "https://placehold.co/400x300/0f766e/fff?text=%F0%9F%A5%9F%20Pe%C4%8Den%C3%A1%20cvikla%20s%20koz%C3%ADm%20syrom",
+    "imageData": "",
+    "ingredients": [
+      "4 cvikly",
+      "100g kozieho syra",
+      "vlašské orechy",
+      "olivový olej, soľ, korenie, balzamiko"
+    ],
+    "ingredientsEn": [
+      "4 beetroots",
+      "100g goat cheese",
+      "walnuts",
+      "olive oil, salt, pepper, balsamic"
+    ],
+    "steps": [
+      "Cvikly zabaľte do alobalu.",
+      "Pečte na 200°C 40 minút.",
+      "Nechajte vychladnúť a ošúpte.",
+      "Nakrájajte na plátky, posypte syrom a orechmi."
+    ],
+    "stepsEn": [
+      "Wrap beetroots in foil.",
+      "Roast at 200°C for 40 min.",
+      "Cool and peel.",
+      "Slice, top with cheese and walnuts."
+    ],
+    "tags": [
+      "vegetariánske",
+      "rúra"
+    ],
+    "tagsEn": [
+      "vegetarian",
+      "baked"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 220,
+      "protein": 8,
+      "fat": 14,
+      "carbs": 18
+    }
+  },
+  {
+    "id": 63,
+    "name": "Šalát s grilovaným kuracím",
+    "nameEn": "Grilled chicken salad",
+    "category": "Šaláty",
+    "time": 20,
+    "image": "https://placehold.co/400x300/15803d/fff?text=%F0%9F%A5%97%20%C5%A0al%C3%A1t%20s%20grilovan%C3%BDm%20kurac%C3%ADm",
+    "imageData": "",
+    "ingredients": [
+      "2 kuracie prsia",
+      "mix listových šalátov",
+      "100g cherry paradajok",
+      "1 uhorka",
+      "avokádo",
+      "olivový olej, citrón, soľ"
+    ],
+    "ingredientsEn": [
+      "2 chicken breasts",
+      "mixed salad greens",
+      "100g cherry tomatoes",
+      "1 cucumber",
+      "avocado",
+      "olive oil, lemon, salt"
+    ],
+    "steps": [
+      "Kura osoľte a grilujte 5-6 min z každej strany.",
+      "Zeleninu a avokádo nakrájajte.",
+      "Zmiešajte s kúskami kuraťa.",
+      "Pokvapkajte olejom a citrónom."
+    ],
+    "stepsEn": [
+      "Season and grill chicken 5-6 min each side.",
+      "Chop vegetables and avocado.",
+      "Mix with chicken pieces.",
+      "Drizzle with oil and lemon."
+    ],
+    "tags": [
+      "rýchle",
+      "zdravé"
+    ],
+    "tagsEn": [
+      "quick",
+      "healthy"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 320,
+      "protein": 28,
+      "fat": 18,
+      "carbs": 10
+    }
+  },
+  {
+    "id": 64,
+    "name": "Domáce hranolky",
+    "nameEn": "Homemade fries",
+    "category": "Prílohy",
+    "time": 35,
+    "image": "https://placehold.co/400x300/57534e/fff?text=%F0%9F%A5%94%20Dom%C3%A1ce%20hranolky",
+    "imageData": "",
+    "ingredients": [
+      "600g zemiakov",
+      "olej",
+      "soľ, korenie, paprika"
+    ],
+    "ingredientsEn": [
+      "600g potatoes",
+      "oil",
+      "salt, pepper, paprika"
+    ],
+    "steps": [
+      "Zemiaky nakrájajte na hranolčeky.",
+      "Premiešajte s olejom a korením.",
+      "Pečte na 220°C 25-30 minút."
+    ],
+    "stepsEn": [
+      "Cut potatoes into fries.",
+      "Toss with oil and seasoning.",
+      "Bake at 220°C for 25-30 min."
+    ],
+    "tags": [
+      "rýchle",
+      "príloha"
+    ],
+    "tagsEn": [
+      "quick",
+      "side"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 260,
+      "protein": 4,
+      "fat": 10,
+      "carbs": 38
+    }
+  },
+  {
+    "id": 65,
+    "name": "Čokoládová pena",
+    "nameEn": "Chocolate mousse",
+    "category": "Dezerty",
+    "time": 15,
+    "image": "https://placehold.co/400x300/be185d/fff?text=%F0%9F%8D%B0%20%C4%8Cokol%C3%A1dov%C3%A1%20pena",
+    "imageData": "",
+    "ingredients": [
+      "200g horkej čokolády",
+      "3 vajcia",
+      "2 lyžice cukru",
+      "200ml šľahačkovej smotany"
+    ],
+    "ingredientsEn": [
+      "200g dark chocolate",
+      "3 eggs",
+      "2 tbsp sugar",
+      "200ml whipping cream"
+    ],
+    "steps": [
+      "Čokoládu roztopte vo vodnom kúpeli.",
+      "Oddelte bielky od žĺtkov.",
+      "Vyšľahajte bielky s cukrom na tuhý sneh.",
+      "Vmiešajte čokoládu a vyšľahanú smotanu.",
+      "Dajte stuhnúť do chladničky."
+    ],
+    "stepsEn": [
+      "Melt chocolate in a double boiler.",
+      "Separate eggs.",
+      "Whip egg whites with sugar to stiff peaks.",
+      "Fold in chocolate and whipped cream.",
+      "Refrigerate until set."
+    ],
+    "tags": [
+      "sladké",
+      "studené"
+    ],
+    "tagsEn": [
+      "sweet",
+      "cold"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 380,
+      "protein": 8,
+      "fat": 28,
+      "carbs": 28
+    }
+  },
+  {
+    "id": 66,
+    "name": "Jablková presnidávka",
+    "nameEn": "Apple puree",
+    "category": "Detské",
+    "time": 20,
+    "image": "https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Jablkov%C3%A1%20presnid%C3%A1vka",
+    "imageData": "",
+    "ingredients": [
+      "4 jablká",
+      "trocha vody"
+    ],
+    "ingredientsEn": [
+      "4 apples",
+      "a little water"
+    ],
+    "steps": [
+      "Jablká ošúpte a nakrájajte na kocky.",
+      "Dajte do hrnca s trochou vody.",
+      "Duste 10-15 minút domäkka.",
+      "Rozmixujte dohladka."
+    ],
+    "stepsEn": [
+      "Peel and dice apples.",
+      "Put in a pot with a little water.",
+      "Stew 10-15 min until soft.",
+      "Blend until smooth."
+    ],
+    "tags": [
+      "deti-6m",
+      "baby",
+      "prvé jedlo"
+    ],
+    "tagsEn": [
+      "baby-6m",
+      "baby",
+      "first food"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 80,
+      "protein": 0,
+      "fat": 0,
+      "carbs": 20
+    }
+  },
+  {
+    "id": 67,
+    "name": "Mrkvové pyré",
+    "nameEn": "Carrot puree",
+    "category": "Detské",
+    "time": 25,
+    "image": "https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Mrkvov%C3%A9%20pyr%C3%A9",
+    "imageData": "",
+    "ingredients": [
+      "4 mrkvy",
+      "trocha vody",
+      "kvapka olivového oleja"
+    ],
+    "ingredientsEn": [
+      "4 carrots",
+      "a little water",
+      "drop of olive oil"
+    ],
+    "steps": [
+      "Mrkvy ošúpte a nakrájajte na kolieska.",
+      "Varte v malom množstve vody 15 minút.",
+      "Rozmixujte s vodou z varenia a olejom."
+    ],
+    "stepsEn": [
+      "Peel and slice carrots.",
+      "Boil in a little water for 15 min.",
+      "Blend with cooking water and oil."
+    ],
+    "tags": [
+      "deti-6m",
+      "baby",
+      "prvé jedlo"
+    ],
+    "tagsEn": [
+      "baby-6m",
+      "baby",
+      "first food"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 60,
+      "protein": 1,
+      "fat": 1,
+      "carbs": 12
+    }
+  },
+  {
+    "id": 68,
+    "name": "Tekvicové pyré",
+    "nameEn": "Pumpkin puree",
+    "category": "Detské",
+    "time": 25,
+    "image": "https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Tekvicov%C3%A9%20pyr%C3%A9",
+    "imageData": "",
+    "ingredients": [
+      "300g tekvice",
+      "trocha vody"
+    ],
+    "ingredientsEn": [
+      "300g pumpkin",
+      "a little water"
+    ],
+    "steps": [
+      "Tekvicu nakrájajte na kocky.",
+      "Duste v malom množstve vody 15-20 minút.",
+      "Rozmixujte dohladka."
+    ],
+    "stepsEn": [
+      "Dice pumpkin.",
+      "Stew in a little water 15-20 min.",
+      "Blend until smooth."
+    ],
+    "tags": [
+      "deti-6m",
+      "baby",
+      "prvé jedlo"
+    ],
+    "tagsEn": [
+      "baby-6m",
+      "baby",
+      "first food"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 50,
+      "protein": 1,
+      "fat": 0,
+      "carbs": 12
+    }
+  },
+  {
+    "id": 69,
+    "name": "Batatové pyré",
+    "nameEn": "Sweet potato puree",
+    "category": "Detské",
+    "time": 25,
+    "image": "https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Batatov%C3%A9%20pyr%C3%A9",
+    "imageData": "",
+    "ingredients": [
+      "2 bataty",
+      "trocha vody"
+    ],
+    "ingredientsEn": [
+      "2 sweet potatoes",
+      "a little water"
+    ],
+    "steps": [
+      "Bataty ošúpte a nakrájajte na kocky.",
+      "Varte v malom množstve vody 15 minút.",
+      "Rozmixujte dohladka."
+    ],
+    "stepsEn": [
+      "Peel and dice sweet potatoes.",
+      "Boil in a little water for 15 min.",
+      "Blend until smooth."
+    ],
+    "tags": [
+      "deti-6m",
+      "baby",
+      "prvé jedlo"
+    ],
+    "tagsEn": [
+      "baby-6m",
+      "baby",
+      "first food"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 90,
+      "protein": 1,
+      "fat": 0,
+      "carbs": 21
+    }
+  },
+  {
+    "id": 70,
+    "name": "Banánové pyré",
+    "nameEn": "Banana puree",
+    "category": "Detské",
+    "time": 2,
+    "image": "https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Ban%C3%A1nov%C3%A9%20pyr%C3%A9",
+    "imageData": "",
+    "ingredients": [
+      "1 zrelý banán"
+    ],
+    "ingredientsEn": [
+      "1 ripe banana"
+    ],
+    "steps": [
+      "Banán roztlačte vidličkou dohladka."
+    ],
+    "stepsEn": [
+      "Mash banana with a fork until smooth."
+    ],
+    "tags": [
+      "deti-6m",
+      "baby",
+      "prvé jedlo",
+      "rýchle"
+    ],
+    "tagsEn": [
+      "baby-6m",
+      "baby",
+      "first food",
+      "quick"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 90,
+      "protein": 1,
+      "fat": 0,
+      "carbs": 22
+    }
+  },
+  {
+    "id": 71,
+    "name": "Zeleninová zmes (mrkva, zemiak, hrášok)",
+    "nameEn": "Mixed vegetable puree",
+    "category": "Detské",
+    "time": 30,
+    "image": "https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Zeleninov%C3%A1%20zmes%20%28mrkva%2C%20zemiak%2C%20hr%C3%A1%C5%A1ok%29",
+    "imageData": "",
+    "ingredients": [
+      "2 mrkvy",
+      "1 zemiak",
+      "hrsť hrášku",
+      "trocha vody",
+      "kvapka oleja"
+    ],
+    "ingredientsEn": [
+      "2 carrots",
+      "1 potato",
+      "handful peas",
+      "a little water",
+      "drop of oil"
+    ],
+    "steps": [
+      "Zeleninu ošúpte a nakrájajte na kocky.",
+      "Varte v malom množstve vody 20 minút.",
+      "Rozmixujte dohladka s olejom."
+    ],
+    "stepsEn": [
+      "Peel and dice vegetables.",
+      "Boil in a little water for 20 min.",
+      "Blend until smooth with oil."
+    ],
+    "tags": [
+      "deti-8m",
+      "baby"
+    ],
+    "tagsEn": [
+      "baby-8m",
+      "baby"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 100,
+      "protein": 2,
+      "fat": 1,
+      "carbs": 20
+    }
+  },
+  {
+    "id": 72,
+    "name": "Kuracie pyré so zeleninou",
+    "nameEn": "Chicken and vegetable puree",
+    "category": "Detské",
+    "time": 30,
+    "image": "https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Kuracie%20pyr%C3%A9%20so%20zeleninou",
+    "imageData": "",
+    "ingredients": [
+      "100g kuracieho mäsa",
+      "1 mrkva",
+      "1 zemiak",
+      "trocha vody"
+    ],
+    "ingredientsEn": [
+      "100g chicken meat",
+      "1 carrot",
+      "1 potato",
+      "a little water"
+    ],
+    "steps": [
+      "Mäso a zeleninu nakrájajte na kocky.",
+      "Varte vo vode 20-25 minút.",
+      "Rozmixujte dohladka aj s vývarom."
+    ],
+    "stepsEn": [
+      "Dice meat and vegetables.",
+      "Boil in water for 20-25 min.",
+      "Blend until smooth with the broth."
+    ],
+    "tags": [
+      "deti-8m",
+      "baby",
+      "mäso"
+    ],
+    "tagsEn": [
+      "baby-8m",
+      "baby",
+      "meat"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 140,
+      "protein": 12,
+      "fat": 3,
+      "carbs": 16
+    }
+  },
+  {
+    "id": 73,
+    "name": "Banánové lievance (deti 1r+)",
+    "nameEn": "Banana pancakes (toddler)",
+    "category": "Detské",
+    "time": 15,
+    "image": "https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Ban%C3%A1nov%C3%A9%20lievance%20%28deti%201r%2B%29",
+    "imageData": "",
+    "ingredients": [
+      "1 zrelý banán",
+      "1 vajce",
+      "2 lyžice ovsených vločiek",
+      "trocha masla"
+    ],
+    "ingredientsEn": [
+      "1 ripe banana",
+      "1 egg",
+      "2 tbsp rolled oats",
+      "little butter"
+    ],
+    "steps": [
+      "Banán roztlačte.",
+      "Zmiešajte s vajcom a pomletými ovsenými vločkami.",
+      "Opekajte malé lievance z oboch strán."
+    ],
+    "stepsEn": [
+      "Mash banana.",
+      "Mix with egg and ground oats.",
+      "Fry small pancakes both sides."
+    ],
+    "tags": [
+      "deti-1",
+      "raňajky",
+      "sladké"
+    ],
+    "tagsEn": [
+      "baby-1y",
+      "breakfast",
+      "sweet"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 180,
+      "protein": 6,
+      "fat": 6,
+      "carbs": 26
+    }
+  },
+  {
+    "id": 74,
+    "name": "Zemiaková kaša s mrkvou",
+    "nameEn": "Mashed potatoes with carrot",
+    "category": "Detské",
+    "time": 25,
+    "image": "https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Zemiakov%C3%A1%20ka%C5%A1a%20s%20mrkvou",
+    "imageData": "",
+    "ingredients": [
+      "2 zemiaky",
+      "1 mrkva",
+      "trocha masla",
+      "trocha mlieka",
+      "soľ"
+    ],
+    "ingredientsEn": [
+      "2 potatoes",
+      "1 carrot",
+      "little butter",
+      "little milk",
+      "salt"
+    ],
+    "steps": [
+      "Zeleninu ošúpte a nakrájajte.",
+      "Uvarte domäkka.",
+      "Roztlačte s maslom a mliekom."
+    ],
+    "stepsEn": [
+      "Peel and dice.",
+      "Boil until soft.",
+      "Mash with butter and milk."
+    ],
+    "tags": [
+      "deti-1",
+      "príloha"
+    ],
+    "tagsEn": [
+      "baby-1y",
+      "side"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 160,
+      "protein": 3,
+      "fat": 4,
+      "carbs": 28
+    }
+  },
+  {
+    "id": 75,
+    "name": "Dusená mrkva s hráškom",
+    "nameEn": "Steamed carrots with peas",
+    "category": "Detské",
+    "time": 20,
+    "image": "https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Dusen%C3%A1%20mrkva%20s%20hr%C3%A1%C5%A1kom",
+    "imageData": "",
+    "ingredients": [
+      "2 mrkvy",
+      "hrsť hrášku",
+      "trocha masla",
+      "soľ"
+    ],
+    "ingredientsEn": [
+      "2 carrots",
+      "handful peas",
+      "little butter",
+      "salt"
+    ],
+    "steps": [
+      "Mrkvu nakrájajte.",
+      "Duste s hráškom 15 minút.",
+      "Pridajte maslo."
+    ],
+    "stepsEn": [
+      "Slice carrots.",
+      "Steam with peas 15 min.",
+      "Add butter."
+    ],
+    "tags": [
+      "deti-1",
+      "zelenina"
+    ],
+    "tagsEn": [
+      "baby-1y",
+      "vegetable"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 90,
+      "protein": 3,
+      "fat": 3,
+      "carbs": 14
+    }
+  },
+  {
+    "id": 76,
+    "name": "Kuracie fašírky v pare",
+    "nameEn": "Steamed chicken patties",
+    "category": "Detské",
+    "time": 25,
+    "image": "https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Kuracie%20fa%C5%A1%C3%ADrky%20v%20pare",
+    "imageData": "",
+    "ingredients": [
+      "200g mletého kura",
+      "1 vajce",
+      "2 lyžice strúhanky",
+      "1 mrkva"
+    ],
+    "ingredientsEn": [
+      "200g ground chicken",
+      "1 egg",
+      "2 tbsp breadcrumbs",
+      "1 carrot"
+    ],
+    "steps": [
+      "Zmiešajte mäso s vajcom, strúhankou a mrkvou.",
+      "Vytvarujte malé fašírky.",
+      "Parenie 15 minút."
+    ],
+    "stepsEn": [
+      "Mix meat with egg, breadcrumbs and carrot.",
+      "Shape patties.",
+      "Steam 15 min."
+    ],
+    "tags": [
+      "deti-1",
+      "mäso"
+    ],
+    "tagsEn": [
+      "baby-1y",
+      "meat"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 180,
+      "protein": 20,
+      "fat": 8,
+      "carbs": 6
+    }
+  },
+  {
+    "id": 77,
+    "name": "Tvarohová nátierka",
+    "nameEn": "Cottage cheese spread",
+    "category": "Detské",
+    "time": 5,
+    "image": "https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Tvarohov%C3%A1%20n%C3%A1tierka",
+    "imageData": "",
+    "ingredients": [
+      "200g jemného tvarohu",
+      "2 lyžice mlieka",
+      "soľ"
+    ],
+    "ingredientsEn": [
+      "200g cottage cheese",
+      "2 tbsp milk",
+      "salt"
+    ],
+    "steps": [
+      "Tvaroh zmiešajte s mliekom.",
+      "Dochuťte."
+    ],
+    "stepsEn": [
+      "Mix cheese with milk.",
+      "Season."
+    ],
+    "tags": [
+      "deti-1",
+      "rýchle",
+      "nátierka"
+    ],
+    "tagsEn": [
+      "baby-1y",
+      "quick",
+      "spread"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 120,
+      "protein": 12,
+      "fat": 6,
+      "carbs": 4
+    }
+  },
+  {
+    "id": 78,
+    "name": "Cestoviny s jemnou omáčkou",
+    "nameEn": "Pasta with mild sauce",
+    "category": "Detské",
+    "time": 20,
+    "image": "https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Cestoviny%20s%20jemnou%20om%C3%A1%C4%8Dkou",
+    "imageData": "",
+    "ingredients": [
+      "200g malých cestovín",
+      "4 paradajky",
+      "1 mrkva",
+      "1 cibuľa",
+      "olivový olej"
+    ],
+    "ingredientsEn": [
+      "200g small pasta",
+      "4 tomatoes",
+      "1 carrot",
+      "1 onion",
+      "olive oil"
+    ],
+    "steps": [
+      "Cestoviny uvarte.",
+      "Opečte cibuľu, pridajte mrkvu a paradajky.",
+      "Duste 10 minút, rozmixujte.",
+      "Zmiešajte s cestovinami."
+    ],
+    "stepsEn": [
+      "Cook pasta.",
+      "Sauté onion, add carrot and tomatoes.",
+      "Simmer 10 min, blend.",
+      "Mix with pasta."
+    ],
+    "tags": [
+      "deti-1",
+      "cestoviny"
+    ],
+    "tagsEn": [
+      "baby-1y",
+      "pasta"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 280,
+      "protein": 8,
+      "fat": 4,
+      "carbs": 54
+    }
+  },
+  {
+    "id": 79,
+    "name": "Tvarohový dezert s ovocím",
+    "nameEn": "Cottage cheese dessert",
+    "category": "Detské",
+    "time": 5,
+    "image": "https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Tvarohov%C3%BD%20dezert%20s%20ovoc%C3%ADm",
+    "imageData": "",
+    "ingredients": [
+      "200g tvarohu",
+      "2 lyžice jogurtu",
+      "1 lyžica medu",
+      "ovocie"
+    ],
+    "ingredientsEn": [
+      "200g cottage cheese",
+      "2 tbsp yogurt",
+      "1 tbsp honey",
+      "fruit"
+    ],
+    "steps": [
+      "Zmiešajte tvaroh s jogurtom a medom.",
+      "Ozdobte ovocím."
+    ],
+    "stepsEn": [
+      "Mix cheese with yogurt and honey.",
+      "Top with fruit."
+    ],
+    "tags": [
+      "deti-1",
+      "rýchle",
+      "sladké"
+    ],
+    "tagsEn": [
+      "baby-1y",
+      "quick",
+      "sweet"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 180,
+      "protein": 14,
+      "fat": 6,
+      "carbs": 20
+    }
+  },
+  {
+    "id": 80,
+    "name": "Rybie prsty domáce",
+    "nameEn": "Homemade fish sticks",
+    "category": "Detské",
+    "time": 25,
+    "image": "https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Rybie%20prsty%20dom%C3%A1ce",
+    "imageData": "",
+    "ingredients": [
+      "400g tresky",
+      "1 vajce",
+      "100g strúhanky",
+      "soľ"
+    ],
+    "ingredientsEn": [
+      "400g cod",
+      "1 egg",
+      "100g breadcrumbs",
+      "salt"
+    ],
+    "steps": [
+      "Rybu nakrájajte na prúžky.",
+      "Obaľte vo vajci a strúhanke.",
+      "Pečte na 200°C 15 minút."
+    ],
+    "stepsEn": [
+      "Cut fish into strips.",
+      "Coat in egg and breadcrumbs.",
+      "Bake at 200°C 15 min."
+    ],
+    "tags": [
+      "deti-2",
+      "ryba"
+    ],
+    "tagsEn": [
+      "baby-2y",
+      "fish"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 220,
+      "protein": 24,
+      "fat": 8,
+      "carbs": 12
+    }
+  },
+  {
+    "id": 81,
+    "name": "Pečené kuracie nugetky",
+    "nameEn": "Baked chicken nuggets",
+    "category": "Detské",
+    "time": 25,
+    "image": "https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Pe%C4%8Den%C3%A9%20kuracie%20nugetky",
+    "imageData": "",
+    "ingredients": [
+      "300g kuracích pŕs",
+      "1 vajce",
+      "100g strúhanky",
+      "soľ"
+    ],
+    "ingredientsEn": [
+      "300g chicken",
+      "1 egg",
+      "100g breadcrumbs",
+      "salt"
+    ],
+    "steps": [
+      "Kura nakrájajte na kocky.",
+      "Obaľte vo vajci a strúhanke.",
+      "Pečte na 200°C 15 minút."
+    ],
+    "stepsEn": [
+      "Cube chicken.",
+      "Coat in egg and breadcrumbs.",
+      "Bake at 200°C 15 min."
+    ],
+    "tags": [
+      "deti-2",
+      "kura"
+    ],
+    "tagsEn": [
+      "baby-2y",
+      "chicken"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 250,
+      "protein": 26,
+      "fat": 8,
+      "carbs": 16
+    }
+  },
+  {
+    "id": 82,
+    "name": "Brokolica v pare so syrom",
+    "nameEn": "Steamed broccoli with cheese",
+    "category": "Detské",
+    "time": 15,
+    "image": "https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Brokolica%20v%20pare%20so%20syrom",
+    "imageData": "",
+    "ingredients": [
+      "1 brokolica",
+      "50g syra",
+      "maslo"
+    ],
+    "ingredientsEn": [
+      "1 broccoli",
+      "50g cheese",
+      "butter"
+    ],
+    "steps": [
+      "Brokolicu rozdeľte na ružičky.",
+      "Varte v pare 8-10 minút.",
+      "Posypte syrom."
+    ],
+    "stepsEn": [
+      "Cut broccoli into florets.",
+      "Steam 8-10 min.",
+      "Top with cheese."
+    ],
+    "tags": [
+      "deti-2",
+      "zelenina"
+    ],
+    "tagsEn": [
+      "baby-2y",
+      "vegetable"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 120,
+      "protein": 8,
+      "fat": 6,
+      "carbs": 8
+    }
+  },
+  {
+    "id": 83,
+    "name": "Zapekané cestoviny so syrom",
+    "nameEn": "Baked mac and cheese",
+    "category": "Detské",
+    "time": 35,
+    "image": "https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Zapekan%C3%A9%20cestoviny%20so%20syrom",
+    "imageData": "",
+    "ingredients": [
+      "300g cestovín",
+      "300ml smotany",
+      "200g syru",
+      "2 lyžice masla"
+    ],
+    "ingredientsEn": [
+      "300g pasta",
+      "300ml cream",
+      "200g cheese",
+      "2 tbsp butter"
+    ],
+    "steps": [
+      "Cestoviny uvarte.",
+      "Zmiešajte so smotanou a syrom.",
+      "Zapečte na 180°C 15 minút."
+    ],
+    "stepsEn": [
+      "Cook pasta.",
+      "Mix with cream and cheese.",
+      "Bake at 180°C 15 min."
+    ],
+    "tags": [
+      "deti-2",
+      "rúra"
+    ],
+    "tagsEn": [
+      "baby-2y",
+      "baked"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 450,
+      "protein": 18,
+      "fat": 22,
+      "carbs": 44
+    }
+  },
+  {
+    "id": 84,
+    "name": "Mini pizza",
+    "nameEn": "Mini pizza",
+    "category": "Detské",
+    "time": 20,
+    "image": "https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Mini%20pizza",
+    "imageData": "",
+    "ingredients": [
+      "4 pita chleby",
+      "4 lyžice paradajkovej omáčky",
+      "100g mozzarelly"
+    ],
+    "ingredientsEn": [
+      "4 pita breads",
+      "4 tbsp tomato sauce",
+      "100g mozzarella"
+    ],
+    "steps": [
+      "Potrite omáčkou.",
+      "Posypte syrom.",
+      "Pečte na 200°C 10 minút."
+    ],
+    "stepsEn": [
+      "Spread sauce.",
+      "Top with cheese.",
+      "Bake at 200°C 10 min."
+    ],
+    "tags": [
+      "deti-3",
+      "rýchle"
+    ],
+    "tagsEn": [
+      "baby-3y",
+      "quick"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 250,
+      "protein": 10,
+      "fat": 8,
+      "carbs": 34
+    }
+  },
+  {
+    "id": 85,
+    "name": "Vajíčková nátierka",
+    "nameEn": "Egg spread",
+    "category": "Detské",
+    "time": 10,
+    "image": "https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Vaj%C3%AD%C4%8Dkov%C3%A1%20n%C3%A1tierka",
+    "imageData": "",
+    "ingredients": [
+      "4 vajcia",
+      "2 lyžice masla",
+      "soľ"
+    ],
+    "ingredientsEn": [
+      "4 eggs",
+      "2 tbsp butter",
+      "salt"
+    ],
+    "steps": [
+      "Vajcia uvarte natvrdo.",
+      "Nastrúhajte a zmiešajte s maslom."
+    ],
+    "stepsEn": [
+      "Hard-boil eggs.",
+      "Grate and mix with butter."
+    ],
+    "tags": [
+      "deti-3",
+      "rýchle"
+    ],
+    "tagsEn": [
+      "baby-3y",
+      "quick"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 220,
+      "protein": 12,
+      "fat": 18,
+      "carbs": 2
+    }
+  },
+  {
+    "id": 86,
+    "name": "Krupicová kaša s ovocím",
+    "nameEn": "Semolina pudding",
+    "category": "Detské",
+    "time": 15,
+    "image": "https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Krupicov%C3%A1%20ka%C5%A1a%20s%20ovoc%C3%ADm",
+    "imageData": "",
+    "ingredients": [
+      "500ml mlieka",
+      "4 lyžice krupice",
+      "2 lyžice cukru",
+      "maslo"
+    ],
+    "ingredientsEn": [
+      "500ml milk",
+      "4 tbsp semolina",
+      "2 tbsp sugar",
+      "butter"
+    ],
+    "steps": [
+      "Mlieko zohrejte.",
+      "Za stáleho miešania vsypte krupicu.",
+      "Varte 2 minúty, pridajte cukor a maslo."
+    ],
+    "stepsEn": [
+      "Heat milk.",
+      "Whisk in semolina.",
+      "Cook 2 min, add sugar and butter."
+    ],
+    "tags": [
+      "deti-1",
+      "raňajky",
+      "sladké"
+    ],
+    "tagsEn": [
+      "baby-1y",
+      "breakfast",
+      "sweet"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 280,
+      "protein": 8,
+      "fat": 8,
+      "carbs": 44
+    }
+  },
+  {
+    "id": 87,
+    "name": "Ovsená kaša s ovocím",
+    "nameEn": "Oatmeal with fruit",
+    "category": "Detské",
+    "time": 10,
+    "image": "https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Ovsen%C3%A1%20ka%C5%A1a%20s%20ovoc%C3%ADm",
+    "imageData": "",
+    "ingredients": [
+      "50g ovsených vločiek",
+      "200ml mlieka",
+      "banán",
+      "ovocie"
+    ],
+    "ingredientsEn": [
+      "50g oats",
+      "200ml milk",
+      "banana",
+      "fruit"
+    ],
+    "steps": [
+      "Vločky zalejte mliekom a varte 5 minút.",
+      "Podávajte s ovocím."
+    ],
+    "stepsEn": [
+      "Cook oats with milk 5 min.",
+      "Serve with fruit."
+    ],
+    "tags": [
+      "deti-1",
+      "raňajky",
+      "zdravé"
+    ],
+    "tagsEn": [
+      "baby-1y",
+      "breakfast",
+      "healthy"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 280,
+      "protein": 10,
+      "fat": 6,
+      "carbs": 46
+    }
+  },
+  {
+    "id": 88,
+    "name": "Jogurt s ovocím",
+    "nameEn": "Yogurt with fruit",
+    "category": "Detské",
+    "time": 2,
+    "image": "https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Jogurt%20s%20ovoc%C3%ADm",
+    "imageData": "",
+    "ingredients": [
+      "200g bieleho jogurtu",
+      "ovocie",
+      "med"
+    ],
+    "ingredientsEn": [
+      "200g yogurt",
+      "fruit",
+      "honey"
+    ],
+    "steps": [
+      "Jogurt dajte do misky.",
+      "Pridajte ovocie a med."
+    ],
+    "stepsEn": [
+      "Put yogurt in bowl.",
+      "Add fruit and honey."
+    ],
+    "tags": [
+      "deti-1",
+      "rýchle",
+      "raňajky"
+    ],
+    "tagsEn": [
+      "baby-1y",
+      "quick",
+      "breakfast"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 180,
+      "protein": 8,
+      "fat": 4,
+      "carbs": 28
+    }
+  },
+  {
+    "id": 89,
+    "name": "Zelené smoothie",
+    "nameEn": "Green smoothie",
+    "category": "Detské",
+    "time": 5,
+    "image": "https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Zelen%C3%A9%20smoothie",
+    "imageData": "",
+    "ingredients": [
+      "1 banán",
+      "hrsť špenátu",
+      "1 jablko",
+      "200ml mlieka"
+    ],
+    "ingredientsEn": [
+      "1 banana",
+      "spinach",
+      "1 apple",
+      "200ml milk"
+    ],
+    "steps": [
+      "Všetko rozmixujte dohladka."
+    ],
+    "stepsEn": [
+      "Blend until smooth."
+    ],
+    "tags": [
+      "deti-1",
+      "nápoj",
+      "zdravé"
+    ],
+    "tagsEn": [
+      "baby-1y",
+      "drink",
+      "healthy"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 160,
+      "protein": 4,
+      "fat": 2,
+      "carbs": 32
+    }
+  }
+]
