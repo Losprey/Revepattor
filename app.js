@@ -1171,13 +1171,87 @@ function getDeviceId() {
   return id;
 }
 
+// Network and sync state
+var _isOnline = navigator.onLine !== false;
+var _isSyncing = false;
+var _justConnected = false;
+
 function updateSyncIndicator() {
-  const el = document.getElementById('sync-indicator');
+  var el = document.getElementById('sync-indicator');
   if (!el) return;
-  if (!familyCode) { el.textContent = '⚪'; el.title = 'Nie si pripojený k rodine'; }
-  else if (firebaseReady) { el.textContent = '🟢'; el.title = 'Synchronizované — kód: ' + familyCode; }
-  else { el.textContent = '🔴'; el.title = 'Firebase nie je pripojený'; }
+  el.classList.remove('syncing', 'offline', 'connected', 'error', 'sync-just-connected');
+  
+  if (_isSyncing) {
+    el.textContent = '🔄';
+    el.title = 'Synchronizujem...';
+    el.classList.add('syncing');
+    return;
+  }
+  
+  if (!_isOnline) {
+    el.textContent = '📵';
+    el.title = 'Offline — zmeny sa uložia lokálne';
+    el.classList.add('offline');
+    return;
+  }
+  
+  if (!familyCode) {
+    el.textContent = '⚪';
+    el.title = 'Nie si pripojený k rodine';
+    return;
+  }
+  
+  if (firebaseReady) {
+    el.textContent = '🟢';
+    el.title = 'Synchronizované — kód: ' + familyCode;
+    el.classList.add('connected');
+    if (_justConnected) {
+      el.classList.add('sync-just-connected');
+      setTimeout(function() { _justConnected = false; updateSyncIndicator(); }, 1000);
+    }
+  } else {
+    el.textContent = '🔴';
+    el.title = 'Firebase nie je pripojený';
+    el.classList.add('error');
+  }
 }
+
+function setSyncing(syncing) {
+  _isSyncing = syncing;
+  updateSyncIndicator();
+}
+
+// Online/offline listeners
+window.addEventListener('online', function() {
+  _isOnline = true;
+  updateSyncIndicator();
+  var bar = document.getElementById('network-status');
+  if (bar) {
+    bar.className = 'online show';
+    bar.textContent = '🔗 Späť online — synchronizujem...';
+    setTimeout(function() { bar.classList.remove('show'); }, 2000);
+  }
+  // Reconnect to Firebase
+  if (familyCode && firebaseReady) {
+    _isSyncing = true;
+    updateSyncIndicator();
+    setTimeout(function() {
+      connectToFamily(familyCode);
+      autoPullFromFirebase();
+      setTimeout(function() { _isSyncing = false; updateSyncIndicator(); }, 1500);
+    }, 500);
+  }
+});
+
+window.addEventListener('offline', function() {
+  _isOnline = false;
+  updateSyncIndicator();
+  var bar = document.getElementById('network-status');
+  if (bar) {
+    bar.className = 'offline show';
+    bar.textContent = '📵 Offline — zmeny sa uložia lokálne';
+  }
+});
 
 function refreshActiveTab() {
   const tab = document.body.dataset.tab;
@@ -4302,6 +4376,7 @@ function renderShoppingList() {
             <button class="si-btn" onclick="event.stopPropagation();openAddItemSheet('${it.id}')" title="${lang==='en'?'Edit':'Upraviť'}">✏️</button>
             <button class="si-btn danger" onclick="event.stopPropagation();deleteShopItem('${it.id}')" title="${lang==='en'?'Delete':'Vymazať'}">🗑</button>
           </div>
+          <div class="si-swipe-delete" onclick="event.stopPropagation();deleteShopItem('${it.id}')">🗑 ${lang==='en'?'Delete':'Vymazať'}</div>
         </div>`;
       }).join('')}</div>
     </div>`;
@@ -4311,6 +4386,101 @@ function renderShoppingList() {
   html += `<button class="shop-add-btn" onclick="openAddItemSheet();springBounce(this)">➕ ${lang==='en'?'Add food item':'Pridať potravinu'}</button>`;
 
   container.innerHTML = html;
+  initShopSwipe();
+}
+
+// =================== SWIPE TO DELETE ===================
+var _swipeData = null;
+// Close any open swipe when tapping elsewhere
+document.addEventListener('touchstart', function(e) {
+  if (_swipeData || !e.target.closest) return; // tracking active swipe
+  if (!e.target.closest('.shop-item')) {
+    document.querySelectorAll('.si-swipe-delete.revealed').forEach(function(d) {
+      var item = d.closest('.shop-item');
+      if (item) {
+        var check = item.querySelector('.si-check');
+        var info = item.querySelector('.si-info');
+        var actions = item.querySelector('.si-actions');
+        [check, info, actions].forEach(function(el) {
+          if (el) { el.style.transition = 'transform .25s cubic-bezier(.22,1,.36,1)'; el.style.transform = ''; }
+        });
+      }
+      d.classList.remove('revealed');
+    });
+  }
+}, { passive: true });
+
+function initShopSwipe() {
+  document.querySelectorAll('.shop-item').forEach(function(item) {
+    item.addEventListener('touchstart', onSwipeStart, { passive: true });
+    item.addEventListener('touchmove', onSwipeMove, { passive: false });
+    item.addEventListener('touchend', onSwipeEnd, { passive: true });
+    // Reset any existing revealed state
+    var del = item.querySelector('.si-swipe-delete');
+    if (del) del.classList.remove('revealed');
+  });
+}
+
+function onSwipeStart(e) {
+  var item = e.currentTarget;
+  // Don't swipe-checked items
+  if (item.classList.contains('checked')) return;
+  // Close any other open swipe
+  document.querySelectorAll('.si-swipe-delete.revealed').forEach(function(d) {
+    d.closest('.shop-item').querySelector('.si-swipe-delete').classList.remove('revealed');
+  });
+  _swipeData = { item: item, startX: e.touches[0].clientX, startY: e.touches[0].clientY, moved: false };
+}
+
+function onSwipeMove(e) {
+  if (!_swipeData) return;
+  var dx = e.touches[0].clientX - _swipeData.startX;
+  var dy = Math.abs(e.touches[0].clientY - _swipeData.startY);
+  // If scrolling vertically, don't swipe
+  if (dy > 20 && Math.abs(dx) < 10) {
+    _swipeData = null;
+    return;
+  }
+  if (dx > 0) { _swipeData = null; return; } // Only left swipe
+  _swipeData.moved = true;
+  var translateX = Math.max(dx, -80);
+  _swipeData.item.querySelector('.si-check').style.transform = 'translateX(' + translateX + 'px)';
+  _swipeData.item.querySelector('.si-info').style.transform = 'translateX(' + translateX + 'px)';
+  _swipeData.item.querySelector('.si-actions').style.transform = 'translateX(' + translateX + 'px)';
+  var del = _swipeData.item.querySelector('.si-swipe-delete');
+  if (del) del.style.transition = 'none';
+  e.preventDefault();
+}
+
+function onSwipeEnd(e) {
+  if (!_swipeData) return;
+  var del = _swipeData.item.querySelector('.si-swipe-delete');
+  var dx = e.changedTouches[0].clientX - _swipeData.startX;
+  var snapBack = function() {
+    var check = _swipeData.item.querySelector('.si-check');
+    var info = _swipeData.item.querySelector('.si-info');
+    var actions = _swipeData.item.querySelector('.si-actions');
+    [check, info, actions].forEach(function(el) {
+      if (el) { el.style.transition = 'transform .25s cubic-bezier(.22,1,.36,1)'; el.style.transform = ''; }
+    });
+    if (del) { del.style.transition = ''; del.classList.remove('revealed'); }
+  };
+  
+  if (dx < -50 && _swipeData.moved) {
+    // Reveal delete button
+    if (del) {
+      del.classList.add('revealed');
+      var check = _swipeData.item.querySelector('.si-check');
+      var info = _swipeData.item.querySelector('.si-info');
+      var actions = _swipeData.item.querySelector('.si-actions');
+      [check, info, actions].forEach(function(el) {
+        if (el) { el.style.transition = 'transform .25s cubic-bezier(.22,1,.36,1)'; el.style.transform = 'translateX(-80px)'; }
+      });
+    }
+  } else {
+    snapBack();
+  }
+  _swipeData = null;
 }
 
 function toggleShopItem(id) {
