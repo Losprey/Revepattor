@@ -2551,6 +2551,10 @@ function openSettings() {
         <span class="sr-label"><span class="sr-icon">🤖</span> ${t('AI nutričné hodnoty','AI nutrition estimates')}</span>
         <span class="sr-value"><span class="sr-arrow">›</span></span>
       </div>
+      <div class="settings-row" onclick="createBackup()">
+        <span class="sr-label"><span class="sr-icon">💾</span> ${t('Vytvoriť zálohu','Create backup')}</span>
+        <span class="sr-value"><span class="sr-arrow">›</span></span>
+      </div>
       <div class="settings-row" onclick="if(confirm('${t('Naozaj vymazať všetky dáta? Táto akcia je nenávratná.','Delete all data? This cannot be undone.')}')){deleteAllData()}">
         <span class="sr-label" style="color:var(--danger);"><span class="sr-icon">🗑</span> ${t('Vymazať všetky dáta','Delete all data')}</span>
         <span class="sr-value" style="color:var(--danger);"><span class="sr-arrow">›</span></span>
@@ -3089,6 +3093,84 @@ function importRecipes(e) {
   reader.readAsText(file);
   e.target.value = '';
 }
+
+// ======================== AUTOMATED BACKUP ========================
+function createBackup() {
+  var data = {
+    version: '1.7',
+    exportedAt: new Date().toISOString(),
+    app: 'Mealnest',
+    recipes: recipes,
+    mealPlan: mealPlan,
+    mealPlanKids: mealPlanKids,
+    planType: planType,
+    shoppingItems: shopItems || [],
+    tasks: tasks,
+    cookingHistory: JSON.parse(localStorage.getItem('cookingHistory') || '[]'),
+    appSettings: appSettings,
+    stats: {
+      recipeCount: recipes.length,
+      mealPlanned: (function() {
+        var c = 0;
+        Object.values(mealPlan).forEach(function(w) { Object.values(w).forEach(function(d) { Object.values(d).forEach(function(v) { if (v) c++; }); }); });
+        return c;
+      })(),
+      tasksTotal: tasks.length,
+      tasksDone: tasks.filter(function(t) { return t.completed; }).length,
+      shoppingItems: (shopItems||[]).length
+    }
+  };
+  var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  var date = new Date().toISOString().slice(0,10);
+  a.download = 'mealnest-backup-' + date + '.json';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function() {
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 100);
+  showToast(lang==='en' ? 'Backup downloaded ✓' : 'Záloha stiahnutá ✓', 'success');
+  // Store last backup timestamp
+  localStorage.setItem('_lastBackup', Date.now().toString());
+  return data;
+}
+
+// Daily backup into IndexedDB (local fallback)
+function saveLocalBackup() {
+  var data = {
+    date: new Date().toISOString().slice(0,10),
+    recipes: recipes,
+    mealPlan: mealPlan,
+    shoppingItems: shopItems || [],
+    tasks: tasks
+  };
+  dbSet('_dailyBackup', data);
+  // Keep last 3 backups
+  dbGet('_backupHistory').then(function(h) {
+    h = h || [];
+    h.push(data.date);
+    if (h.length > 3) h.shift();
+    dbSet('_backupHistory', h);
+  });
+}
+
+// Check and run daily backup
+function checkDailyBackup() {
+  var last = parseInt(localStorage.getItem('_lastBackup') || '0');
+  var now = Date.now();
+  if (now - last > 86400000) {
+    saveLocalBackup();
+  }
+}
+
+// Schedule daily backup check
+setTimeout(function() {
+  checkDailyBackup();
+  setInterval(checkDailyBackup, 3600000); // Check every hour
+}, 5000);
 
 // ======================== COOKING MODE ========================
 function openCookingMode() {
