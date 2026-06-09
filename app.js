@@ -1514,6 +1514,7 @@ function applyLang() {
 
 function toggleDark() {
   appSettings.theme = document.body.classList.contains('dark') ? 'light' : 'dark';
+  haptic(6);
   saveSettings();
 }
 
@@ -2180,6 +2181,7 @@ function render() {
   if (!Array.isArray(recipes)) recipes = [];
   recipes = recipes.filter(function(r) { return r != null && typeof r === 'object'; });
   const grid = document.getElementById('recipe-grid');
+  if (grid && appSettings.masonry) grid.classList.add('masonry');
   const search = document.getElementById('search').value.toLowerCase();
   const cat = document.getElementById('filter-category').value;
   const showFav = document.getElementById('filter-fav')?.checked;
@@ -2194,7 +2196,7 @@ function render() {
     return matchSearch && matchCat && matchFav && matchAge;
   });
   if (!filtered.length) {
-    document.getElementById('recipe-grid').innerHTML = `<div class="shop-empty" style="padding:2rem 0;"><div class="shop-empty-icon">🔍</div><div class="shop-empty-title">${t('noRecipes')}</div><div class="shop-empty-desc">${t('noRecipesHint')}</div></div>`;
+    document.getElementById('recipe-grid').innerHTML = '<div class="empty-state-v2"><div class="empty-svg">🔍</div><div class="empty-title">' + t('noRecipes') + '</div><div class="empty-desc">' + t('noRecipesHint') + '</div></div>';
     document.getElementById('recipe-count').textContent = '(0)';
     return;
   }
@@ -2651,6 +2653,7 @@ function toggleFav(id) {
   const r = recipes.find(rec => rec.id === id);
   if (!r) return;
   r.favorite = !r.favorite;
+  haptic(8);
   saveToLS();
   const card = document.querySelector(`.recipe-card[data-id="${id}"]`);
   if (card) {
@@ -3478,6 +3481,97 @@ function switchTab(tab) {
   }
 }
 
+// =================== PULL TO REFRESH ===================
+var _ptrState = null;
+function initPullToRefresh() {
+  var ptrEl = document.createElement('div');
+  ptrEl.className = 'ptr-indicator';
+  ptrEl.innerHTML = '<div class="ptr-spinner"></div><span class="ptr-text">' + (lang==='en'?'Pull to refresh':'Potiahnite pre obnovenie') + '</span>';
+  document.body.appendChild(ptrEl);
+  
+  var main = document.querySelector('.container') || document.body;
+  main.addEventListener('touchstart', function(e) {
+    if (window.scrollY > 5) return;
+    if (e.target.closest('input') || e.target.closest('button') || e.target.closest('.bottom-nav') || e.target.closest('.modal-overlay.active') || e.target.closest('.sheet-overlay') || e.target.closest('.cooking-overlay.active')) return;
+    _ptrState = { startY: e.touches[0].clientY, pulled: false, ready: false };
+  }, { passive: true });
+  
+  main.addEventListener('touchmove', function(e) {
+    if (!_ptrState || _ptrState.refreshing) return;
+    var dy = e.touches[0].clientY - _ptrState.startY;
+    if (dy < 0) { _ptrState = null; ptrEl.classList.remove('ptr-visible', 'ptr-ready'); return; }
+    dy = Math.min(dy, 120);
+    ptrEl.style.transform = 'translateY(' + (dy * 0.4) + 'px)';
+    ptrEl.style.opacity = Math.min(1, dy / 80);
+    _ptrState.pulled = dy > 40;
+    if (dy > 80 && !_ptrState.ready) {
+      _ptrState.ready = true;
+      ptrEl.classList.add('ptr-ready');
+      ptrEl.querySelector('.ptr-text').textContent = lang==='en' ? 'Release to refresh' : 'Pustite pre obnovenie';
+    } else if (dy <= 80 && _ptrState.ready) {
+      _ptrState.ready = false;
+      ptrEl.classList.remove('ptr-ready');
+      ptrEl.querySelector('.ptr-text').textContent = lang==='en' ? 'Pull to refresh' : 'Potiahnite pre obnovenie';
+    }
+  }, { passive: true });
+  
+  main.addEventListener('touchend', function(e) {
+    if (!_ptrState) return;
+    if (_ptrState.ready && _ptrState.pulled) {
+      ptrEl.classList.add('ptr-visible');
+      ptrEl.style.transform = '';
+      ptrEl.style.opacity = '1';
+      ptrEl.querySelector('.ptr-text').textContent = lang==='en' ? 'Refreshing...' : 'Obnovujem...';
+      _ptrState.refreshing = true;
+      doPullRefresh();
+    } else {
+      ptrEl.style.transform = '';
+      ptrEl.style.opacity = '0';
+      ptrEl.classList.remove('ptr-visible', 'ptr-ready');
+    }
+    _ptrState = null;
+  }, { passive: true });
+}
+
+function doPullRefresh() {
+  var tab = document.body.dataset.tab;
+  if (tab === 'home') render();
+  else if (tab === 'shopping') renderShoppingList();
+  else if (tab === 'planner') renderPlanner();
+  else if (tab === 'tasks') renderTasks();
+  else if (tab === 'dashboard') renderDashboard();
+  var ptrEl = document.querySelector('.ptr-indicator');
+  setTimeout(function() {
+    if (ptrEl) {
+      ptrEl.classList.remove('ptr-visible', 'ptr-ready');
+      ptrEl.querySelector('.ptr-text').textContent = lang==='en' ? 'Pull to refresh' : 'Potiahnite pre obnovenie';
+    }
+    var el = document.querySelector('.ptr-indicator');
+    if (el) { el.style.opacity = '0'; setTimeout(function() { el.style.opacity = ''; }, 300); }
+  }, 500);
+}
+
+// =================== HAPTIC FEEDBACK ===================
+function haptic(ms) {
+  try { navigator.vibrate && navigator.vibrate(ms || 8); } catch(e) {}
+}
+
+// =================== ANIMATED HEADER ON SCROLL ===================
+function initScrollHeader() {
+  var ticking = false;
+  var body = document.body;
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      requestAnimationFrame(function() {
+        var scrollY = window.scrollY || window.pageYOffset;
+        body.classList.toggle('header-collapsed', scrollY > 60);
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true });
+}
+
 // =================== SWIPE BETWEEN TABS ===================
 var _swipeTabData = null;
 function initSwipeTabs() {
@@ -3510,7 +3604,17 @@ function initSwipeTabs() {
   }, { passive: true });
 }
 // Initialize on load
-setTimeout(initSwipeTabs, 500);
+setTimeout(function() {
+  initSwipeTabs();
+  initPullToRefresh();
+  initScrollHeader();
+  // Toggle masonry grid if setting enabled
+  var grid = document.getElementById('recipe-grid');
+  if (grid && appSettings.masonry) grid.classList.add('masonry');
+  // Add staggered animation class to shopping
+  var shopView = document.getElementById('shopping-list-view');
+  if (shopView) shopView.classList.add('shop-animate-stagger');
+}, 500);
 
 // ======================== DASHBOARD ========================
 function renderDashboard() {
@@ -4270,14 +4374,7 @@ function renderShoppingList() {
   shopItems = shopItems.filter(function(it) { return it && it.source === 'manual'; });
 
     if (!shopItems.length) {
-    container.innerHTML = `<div class="shop-empty">
-      <div class="shop-empty-icon">🛒</div>
-      <div class="shop-empty-title">${lang === 'en' ? 'Shopping list is empty' : 'Nákupný zoznam je prázdny'}</div>
-      <div class="shop-empty-desc">${lang === 'en' ? 'Tap the button below to add your first item.' : 'Klikni na tlačidlo a pridaj prvú položku.'}</div>
-      <div class="shop-empty-actions">
-        <button class="btn btn-primary" onclick="openAddItemSheet()" style="font-size:.85rem;padding:12px 28px;">➕ ${lang === 'en' ? 'Add first item' : 'Pridať prvú položku'}</button>
-      </div>
-    </div>`;
+    container.innerHTML = '<div class="empty-state-v2"><div class="empty-svg">🛒</div><div class="empty-title">' + (lang==='en'?'Shopping list is empty':'Nákupný zoznam je prázdny') + '</div><div class="empty-desc">' + (lang==='en'?'Tap the button below to add your first item.':'Klikni na tlačidlo a pridaj prvú položku.') + '</div><button class="btn btn-primary" onclick="openAddItemSheet()">➕ ' + (lang==='en'?'Add first item':'Pridať prvú položku') + '</button></div>';
     return;
   }
 
@@ -4374,6 +4471,7 @@ function renderShoppingList() {
   html += `<button class="shop-add-btn" onclick="openAddItemSheet();springBounce(this)">➕ ${lang==='en'?'Add food item':'Pridať potravinu'}</button>`;
 
   container.innerHTML = html;
+  container.classList.add('shop-animate-stagger');
   initShopSwipe();
 }
 
@@ -4475,6 +4573,7 @@ function toggleShopItem(id) {
   const it = shopItems.find(i => i.id === id);
   if (!it) return;
   it.checked = !it.checked;
+  haptic(10);
   saveShopItems();
   var checkEl = document.querySelector('.shop-item[data-id="' + id + '"] .si-check');
   if (checkEl) microCheckmark(checkEl);
@@ -4979,6 +5078,7 @@ function toggleTask(id) {
   if (!t) return;
   t.completed = !t.completed;
   t.completedDate = t.completed ? new Date().toISOString().slice(0,10) : '';
+  haptic(10);
   saveTasks();
   const inTasks = document.getElementById('tasks-container')?.style.display !== 'none';
   if (inTasks) renderTasks();
@@ -5671,8 +5771,9 @@ renderDashboard = function() {
 
 
 // ======================== TOAST NOTIFICATIONS ========================
-function showToast(msg, type) {
+function showToast(msg, type, duration) {
   type = type || 'info';
+  duration = duration || 3000;
   const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
   let container = document.getElementById('toast-container');
   if (!container) {
@@ -5682,12 +5783,25 @@ function showToast(msg, type) {
     document.body.appendChild(container);
   }
   const toast = document.createElement('div');
-  toast.className = 'toast toast-' + type;
+  toast.className = 'toast toast-' + type + ' toast-stacked';
   toast.innerHTML = '<span class="toast-icon">' + (icons[type] || 'ℹ️') + '</span><span class="toast-text">' + msg + '</span>';
+  // Stack positioning - shift existing toasts up
+  var existing = container.querySelectorAll('.toast');
+  existing.forEach(function(t) {
+    t.style.transform = 'translateY(-' + (existing.length * 6) + 'px)';
+    t.style.opacity = Math.max(0.3, 1 - existing.length * 0.12);
+  });
   container.appendChild(toast);
-  setTimeout(() => {
+  setTimeout(function() {
     toast.style.animation = 'toastOut .3s ease forwards';
-    setTimeout(() => toast.remove(), 300);
-  }, 3000);
+    setTimeout(function() {
+      toast.remove();
+      // Restore remaining toasts
+      container.querySelectorAll('.toast').forEach(function(t, i) {
+        t.style.transform = '';
+        t.style.opacity = '';
+      });
+    }, 300);
+  }, duration);
 }
 
