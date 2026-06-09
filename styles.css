@@ -1357,3 +1357,14 @@ body.header-collapsed .controls-bar { top: 0; }
 .btn, .nav-item, .topbar-btn, .age-btn, .pln-btn, .plan-type-btn, .pa-btn, .sa-btn, .shop-add-btn, .fab-trigger, .hero-btn { position: relative; overflow: hidden; -webkit-tap-highlight-color: transparent; }
 .btn-ripple { position: absolute; border-radius: 50%; background: rgba(255,255,255,.2); pointer-events: none; animation: rippleOut .5s ease-out forwards; }
 @keyframes rippleOut { 0% { transform: scale(0); opacity: .5; } 100% { transform: scale(1); opacity: 0; } }
+
+/* =================== SEASONAL CALENDAR =================== */
+.seasonal-card { cursor: default; }
+.seasonal-header { display: flex; align-items: center; gap: .6rem; }
+.seasonal-icon { font-size: 2rem; line-height: 1; }
+.seasonal-title { font-weight: 700; font-size: .85rem; color: var(--text); }
+.seasonal-desc { font-size: .7rem; color: var(--text2); margin-top: .05rem; }
+.seasonal-recipes { margin-top: .5rem; display: flex; flex-direction: column; gap: .25rem; }
+.seasonal-recipe { background: var(--section-bg); border-radius: var(--radius-sm); padding: .35rem .5rem; font-size: .72rem; color: var(--text); cursor: pointer; transition: all .15s ease; display: flex; align-items: center; gap: .3rem; font-weight: 500; }
+.seasonal-recipe:hover { background: var(--hover-bg); }
+.seasonal-recipe:active { transform: scale(.97); }

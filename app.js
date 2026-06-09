@@ -2271,7 +2271,7 @@ function loadSettings() {
     lang: localStorage.getItem('lang') || 'en',
     accentColor: localStorage.getItem('accent') || '#dc2626',
     textSize: 'normal', uiDensity: 'normal',
-    homeWidgets: { weather: true, todayTasks: true, hydration: true, calories: true, quickRecipes: true },
+    homeWidgets: { weather: true, todayTasks: true, hydration: true, calories: true, quickRecipes: true, seasonal: true },
     mealPlanner: { defaultServings: 4, showNutrition: true },
     notifications: { breakfastReminder: false, todayCookingReminder: false, shoppingReminder: false, hydrationReminder: false, childMealReminder: false, eveningPlanningReminder: false },
     shopping: { storeMode: false, autoCategories: true, aiShoppingList: false },
@@ -2393,6 +2393,7 @@ function openSettings() {
     ['hydration','💧',t('Pitný režim','Hydration')],
     ['calories','🔥',t('Kalórie','Calories')],
     ['quickRecipes','🍽️',t('Rýchle recepty','Quick recipes')],
+    ['seasonal','🌿',t('Sezónny kalendár','Seasonal calendar')],
   ];
   html += `<div class="settings-group">
     <div class="settings-group-title">🏠 ${t('Domov','Home')}</div>
@@ -3745,6 +3746,55 @@ setTimeout(function() {
   if (shopView) shopView.classList.add('shop-animate-stagger');
 }, 500);
 
+// =================== SEASONAL CALENDAR ===================
+var SEASONAL_PROD = [
+  {m:0,produce:[],emoji:'❄️',label:'Zima',labelEn:'Winter',desc:'Koreňová zelenina, kapusta, citrusy',descEn:'Root veg, cabbage, citrus'},
+  {m:1,produce:[],emoji:'❄️',label:'Zima',labelEn:'Winter',desc:'Pór, zeler, petržlen, pomaranče',descEn:'Leek, celery, parsley, oranges'},
+  {m:2,produce:[],emoji:'🌸',label:'Jar',labelEn:'Spring',desc:'Rebarbora, špargľa, špenát, hlávkový šalát',descEn:'Rhubarb, asparagus, spinach, lettuce'},
+  {m:3,produce:[],emoji:'🌸',label:'Jar',labelEn:'Spring',desc:'Špargľa, reďkovka, jarná cibuľka, žerucha',descEn:'Asparagus, radish, spring onion, cress'},
+  {m:4,produce:[],emoji:'🌸',label:'Jar',labelEn:'Spring',desc:'Jahody, reďkovka, špenát, mladé zemiaky',descEn:'Strawberries, radish, spinach, new potatoes'},
+  {m:5,produce:[],emoji:'🌞',label:'Leto',labelEn:'Summer',desc:'Čerešne, jahody, hrach, cuketa, uhorky',descEn:'Cherries, strawberries, peas, zucchini'},
+  {m:6,produce:[],emoji:'🌞',label:'Leto',labelEn:'Summer',desc:'Maliny, ríbezle, broskyne, paradajky, paprika',descEn:'Raspberries, currants, peaches, tomatoes'},
+  {m:7,produce:[],emoji:'🌞',label:'Leto',labelEn:'Summer',desc:'Slivky, marhule, kukurica, baklažán, fazuľa',descEn:'Plums, apricots, corn, eggplant, beans'},
+  {m:8,produce:[],emoji:'🌞',label:'Leto',labelEn:'Summer',desc:'Hrozno, jablká, hrušky, tekvica, cesnak',descEn:'Grapes, apples, pears, pumpkin, garlic'},
+  {m:9,produce:[],emoji:'🍂',label:'Jeseň',labelEn:'Autumn',desc:'Hrozno, jablká, orechy, kapusta, mrkva',descEn:'Grapes, apples, nuts, cabbage, carrots'},
+  {m:10,produce:[],emoji:'🍂',label:'Jeseň',labelEn:'Autumn',desc:'Tekvica, gaštany, hrušky, cvikla, zemiaky',descEn:'Pumpkin, chestnuts, pears, beetroot'},
+  {m:11,produce:[],emoji:'❄️',label:'Zima',labelEn:'Winter',desc:'Kapusta, kel, citrusy, datle, orechy',descEn:'Cabbage, kale, citrus, dates, nuts'},
+];
+
+function getSeasonalMonth() {
+  var now = new Date();
+  var m = now.getMonth();
+  return SEASONAL_PROD[m] || SEASONAL_PROD[0];
+}
+
+function getSeasonalRecipes() {
+  // Find recipes with tags matching the current season
+  var seasonMap = {0:'zima',1:'zima',2:'jar',3:'jar',4:'jar',5:'leto',6:'leto',7:'leto',8:'leto',9:'jesen',10:'jesen',11:'zima'};
+  var season = seasonMap[new Date().getMonth()] || 'leto';
+  var seasonEn = {zima:'winter',jar:'spring',leto:'summer',jesen:'autumn'}[season];
+  return recipes.filter(function(r) {
+    var tags = (lang==='en' && r.tagsEn ? r.tagsEn : r.tags) || [];
+    return tags.some(function(t) { return t === season || t === seasonEn; });
+  }).slice(0, 3);
+}
+
+function renderSeasonalWidget() {
+  var sm = getSeasonalMonth();
+  var sr = getSeasonalRecipes();
+  var label = lang === 'en' ? sm.labelEn : sm.label;
+  var desc = lang === 'en' ? sm.descEn : sm.desc;
+  var html = '<div class="dash-card seasonal-card"><div class="seasonal-header"><span class="seasonal-icon">' + sm.emoji + '</span><div><div class="seasonal-title">' + (lang==='en'?'What\'s in season: ':'Čo je v sezóne: ') + label + '</div><div class="seasonal-desc">' + desc + '</div></div></div>';
+  if (sr.length) {
+    html += '<div class="seasonal-recipes">' + sr.map(function(r) {
+      var name = lang === 'en' && r.nameEn ? r.nameEn : r.name;
+      return '<div class="seasonal-recipe" onclick="viewRecipe(' + r.id + ')">🍽️ ' + esc(name) + '</div>';
+    }).join('') + '</div>';
+  }
+  html += '<div style="font-size:.62rem;color:var(--text3);margin-top:.25rem;">' + (lang==='en'?'Based on seasonal produce':'Podľa sezónnych surovín') + '</div></div>';
+  return html;
+}
+
 // ======================== DASHBOARD ========================
 function renderDashboard() {
   const now = new Date();
@@ -3828,6 +3878,9 @@ function renderDashboard() {
     } else {
       html += `<div class="dash-card"><div class="weather-widget weather-fallback" id="weather-widget" onclick="editText('weather.location','${t("Počasie","Weather")}')"><span class="weather-icon">🌤️</span><span class="weather-info"><strong>${t("Počasie","Weather")}</strong><span class="weather-temp">${t("Zadaj mesto","Enter city")}</span></span></div></div>`;
     }
+  }
+  if (w.seasonal) {
+    html += renderSeasonalWidget();
   }
 
   // Task widget
