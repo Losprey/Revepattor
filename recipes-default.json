@@ -37,11 +37,15 @@
     ],
     "tags": [
       "rýchle",
-      "taliančina"
+      "taliančina",
+      "jar",
+      "leto"
     ],
     "tagsEn": [
       "quick",
-      "italian"
+      "italian",
+      "spring",
+      "summer"
     ],
     "rating": 0,
     "notes": "",
@@ -96,11 +100,13 @@
     ],
     "tags": [
       "zdravé",
-      "jednoduché"
+      "jednoduché",
+      "zima"
     ],
     "tagsEn": [
       "healthy",
-      "easy"
+      "easy",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -153,11 +159,13 @@
     ],
     "tags": [
       "dezert",
-      "čokoláda"
+      "čokoláda",
+      "leto"
     ],
     "tagsEn": [
       "dessert",
-      "chocolate"
+      "chocolate",
+      "summer"
     ],
     "rating": 0,
     "notes": "",
@@ -215,12 +223,16 @@
     "tags": [
       "rýchle",
       "zdravé",
-      "šalát"
+      "šalát",
+      "jar",
+      "leto"
     ],
     "tagsEn": [
       "quick",
       "healthy",
-      "salad"
+      "salad",
+      "spring",
+      "summer"
     ],
     "rating": 0,
     "notes": "",
@@ -277,11 +289,13 @@
     ],
     "tags": [
       "raňajky",
-      "sladké"
+      "sladké",
+      "jar"
     ],
     "tagsEn": [
       "breakfast",
-      "sweet"
+      "sweet",
+      "spring"
     ],
     "rating": 0,
     "notes": "",
@@ -338,11 +352,13 @@
     ],
     "tags": [
       "slovenské",
-      "tradičné"
+      "tradičné",
+      "zima"
     ],
     "tagsEn": [
       "slovak",
-      "traditional"
+      "traditional",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -397,11 +413,15 @@
     ],
     "tags": [
       "rýchle",
-      "smotanové"
+      "smotanové",
+      "jar",
+      "leto"
     ],
     "tagsEn": [
       "quick",
-      "creamy"
+      "creamy",
+      "spring",
+      "summer"
     ],
     "rating": 0,
     "notes": "",
@@ -458,11 +478,15 @@
     ],
     "tags": [
       "vegetariánske",
-      "taliančina"
+      "taliančina",
+      "jar",
+      "leto"
     ],
     "tagsEn": [
       "vegetarian",
-      "italian"
+      "italian",
+      "spring",
+      "summer"
     ],
     "rating": 0,
     "notes": "",
@@ -520,12 +544,14 @@
     "tags": [
       "slovenské",
       "vianoce",
-      "sýta"
+      "sýta",
+      "zima"
     ],
     "tagsEn": [
       "slovak",
       "christmas",
-      "hearty"
+      "hearty",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -581,12 +607,16 @@
     "tags": [
       "tradičné",
       "polievka",
-      "zdravé"
+      "zdravé",
+      "jesen",
+      "zima"
     ],
     "tagsEn": [
       "traditional",
       "soup",
-      "healthy"
+      "healthy",
+      "autumn",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -637,11 +667,15 @@
     ],
     "tags": [
       "ryba",
-      "rýchle"
+      "rýchle",
+      "jar",
+      "zima"
     ],
     "tagsEn": [
       "fish",
-      "quick"
+      "quick",
+      "spring",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -701,12 +735,16 @@
     "tags": [
       "slovenské",
       "sýte",
-      "pomalé"
+      "pomalé",
+      "leto",
+      "zima"
     ],
     "tagsEn": [
       "slovak",
       "hearty",
-      "slow"
+      "slow",
+      "summer",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -757,11 +795,15 @@
     ],
     "tags": [
       "rýchle",
-      "slovenské"
+      "slovenské",
+      "leto",
+      "zima"
     ],
     "tagsEn": [
       "quick",
-      "slovak"
+      "slovak",
+      "summer",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -813,12 +855,14 @@
     "tags": [
       "rýchle",
       "taliančina",
-      "predjedlo"
+      "predjedlo",
+      "leto"
     ],
     "tagsEn": [
       "quick",
       "italian",
-      "starter"
+      "starter",
+      "summer"
     ],
     "rating": 0,
     "notes": "",
@@ -873,11 +917,13 @@
     ],
     "tags": [
       "sladké",
-      "jednoduché"
+      "jednoduché",
+      "leto"
     ],
     "tagsEn": [
       "sweet",
-      "easy"
+      "easy",
+      "summer"
     ],
     "rating": 0,
     "notes": "",
@@ -936,11 +982,13 @@
     ],
     "tags": [
       "sladké",
-      "tradičné"
+      "tradičné",
+      "leto"
     ],
     "tagsEn": [
       "sweet",
-      "traditional"
+      "traditional",
+      "summer"
     ],
     "rating": 0,
     "notes": "",
@@ -996,12 +1044,14 @@
     "tags": [
       "sladké",
       "čokoláda",
-      "rýchle"
+      "rýchle",
+      "leto"
     ],
     "tagsEn": [
       "sweet",
       "chocolate",
-      "quick"
+      "quick",
+      "summer"
     ],
     "rating": 0,
     "notes": "",
@@ -1054,11 +1104,13 @@
     ],
     "tags": [
       "pečivo",
-      "tradičné"
+      "tradičné",
+      "leto"
     ],
     "tagsEn": [
       "baking",
-      "traditional"
+      "traditional",
+      "summer"
     ],
     "rating": 0,
     "notes": "",
@@ -1117,11 +1169,15 @@
     ],
     "tags": [
       "taliančina",
-      "rýchle"
+      "rýchle",
+      "jar",
+      "leto"
     ],
     "tagsEn": [
       "italian",
-      "quick"
+      "quick",
+      "spring",
+      "summer"
     ],
     "rating": 0,
     "notes": "",
@@ -1178,11 +1234,15 @@
     ],
     "tags": [
       "sýta",
-      "tradičné"
+      "tradičné",
+      "jesen",
+      "zima"
     ],
     "tagsEn": [
       "hearty",
-      "traditional"
+      "traditional",
+      "autumn",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -1232,12 +1292,16 @@
     "tags": [
       "rýchle",
       "raňajky",
-      "zdravé"
+      "zdravé",
+      "leto",
+      "zima"
     ],
     "tagsEn": [
       "quick",
       "breakfast",
-      "healthy"
+      "healthy",
+      "summer",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -1287,12 +1351,14 @@
     "tags": [
       "raňajky",
       "zdravé",
-      "rýchle"
+      "rýchle",
+      "leto"
     ],
     "tagsEn": [
       "breakfast",
       "healthy",
-      "quick"
+      "quick",
+      "summer"
     ],
     "rating": 0,
     "notes": "",
@@ -1397,12 +1463,14 @@
     "tags": [
       "nápoj",
       "osviežujúce",
-      "leto"
+      "leto",
+      "zima"
     ],
     "tagsEn": [
       "drink",
       "refreshing",
-      "summer"
+      "summer",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -1449,11 +1517,13 @@
     ],
     "tags": [
       "jednoduché",
-      "príloha"
+      "príloha",
+      "zima"
     ],
     "tagsEn": [
       "easy",
-      "side"
+      "side",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -1508,11 +1578,15 @@
     ],
     "tags": [
       "rýchle",
-      "ryža"
+      "ryža",
+      "leto",
+      "zima"
     ],
     "tagsEn": [
       "quick",
-      "rice"
+      "rice",
+      "summer",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -1567,11 +1641,15 @@
     ],
     "tags": [
       "vegetariánske",
-      "rýchle"
+      "rýchle",
+      "jar",
+      "leto"
     ],
     "tagsEn": [
       "vegetarian",
-      "quick"
+      "quick",
+      "spring",
+      "summer"
     ],
     "rating": 0,
     "notes": "",
@@ -1624,11 +1702,13 @@
     ],
     "tags": [
       "jednoduché",
-      "pečené"
+      "pečené",
+      "zima"
     ],
     "tagsEn": [
       "easy",
-      "baked"
+      "baked",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -1681,11 +1761,15 @@
     ],
     "tags": [
       "taliančina",
-      "mäso"
+      "mäso",
+      "leto",
+      "zima"
     ],
     "tagsEn": [
       "italian",
-      "meat"
+      "meat",
+      "summer",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -1734,11 +1818,13 @@
     ],
     "tags": [
       "slovenské",
-      "rýchle"
+      "rýchle",
+      "leto"
     ],
     "tagsEn": [
       "slovak",
-      "quick"
+      "quick",
+      "summer"
     ],
     "rating": 0,
     "notes": "",
@@ -1791,11 +1877,15 @@
     ],
     "tags": [
       "slovenské",
-      "sýte"
+      "sýte",
+      "leto",
+      "jesen"
     ],
     "tagsEn": [
       "slovak",
-      "hearty"
+      "hearty",
+      "summer",
+      "autumn"
     ],
     "rating": 0,
     "notes": "",
@@ -1850,11 +1940,15 @@
     ],
     "tags": [
       "taliančina",
-      "rúra"
+      "rúra",
+      "leto",
+      "zima"
     ],
     "tagsEn": [
       "italian",
-      "baked"
+      "baked",
+      "summer",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -1907,11 +2001,13 @@
     ],
     "tags": [
       "sýte",
-      "rúra"
+      "rúra",
+      "zima"
     ],
     "tagsEn": [
       "hearty",
-      "baked"
+      "baked",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -1964,11 +2060,13 @@
     ],
     "tags": [
       "sladké",
-      "rúra"
+      "rúra",
+      "leto"
     ],
     "tagsEn": [
       "sweet",
-      "baked"
+      "baked",
+      "summer"
     ],
     "rating": 0,
     "notes": "",
@@ -2020,12 +2118,16 @@
     "tags": [
       "slovenské",
       "rúra",
-      "nedeľa"
+      "nedeľa",
+      "jesen",
+      "zima"
     ],
     "tagsEn": [
       "slovak",
       "baked",
-      "sunday"
+      "sunday",
+      "autumn",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -2081,12 +2183,14 @@
     "tags": [
       "zdravé",
       "rýchle",
-      "vegánske"
+      "vegánske",
+      "zima"
     ],
     "tagsEn": [
       "healthy",
       "quick",
-      "vegan"
+      "vegan",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -2140,12 +2244,14 @@
     "tags": [
       "zdravé",
       "vegánske",
-      "jeseň"
+      "jeseň",
+      "zima"
     ],
     "tagsEn": [
       "healthy",
       "vegan",
-      "fall"
+      "fall",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -2196,11 +2302,13 @@
     ],
     "tags": [
       "zdravé",
-      "rýchle"
+      "rýchle",
+      "zima"
     ],
     "tagsEn": [
       "healthy",
-      "quick"
+      "quick",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -2251,11 +2359,14 @@
     ],
     "tags": [
       "rýchle",
-      "letné"
+      "letné",
+      "leto",
+      "zima"
     ],
     "tagsEn": [
       "quick",
-      "summer"
+      "summer",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -2307,7 +2418,8 @@
     "tags": [
       "letné",
       "studené",
-      "vegánske"
+      "vegánske",
+      "leto"
     ],
     "tagsEn": [
       "summer",
@@ -2364,7 +2476,8 @@
     "tags": [
       "rýchle",
       "zdravé",
-      "letné"
+      "letné",
+      "leto"
     ],
     "tagsEn": [
       "quick",
@@ -2421,12 +2534,14 @@
     "tags": [
       "zdravé",
       "vegánske",
-      "bezlepkové"
+      "bezlepkové",
+      "leto"
     ],
     "tagsEn": [
       "healthy",
       "vegan",
-      "gluten-free"
+      "gluten-free",
+      "summer"
     ],
     "rating": 0,
     "notes": "",
@@ -2482,12 +2597,16 @@
     "tags": [
       "vegánske",
       "zdravé",
-      "rúra"
+      "rúra",
+      "jar",
+      "zima"
     ],
     "tagsEn": [
       "vegan",
       "healthy",
-      "baked"
+      "baked",
+      "spring",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -2537,12 +2656,14 @@
     "tags": [
       "vegánske",
       "rýchle",
-      "nátierka"
+      "nátierka",
+      "zima"
     ],
     "tagsEn": [
       "vegan",
       "quick",
-      "spread"
+      "spread",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -2591,11 +2712,15 @@
     ],
     "tags": [
       "rýchle",
-      "jednoduché"
+      "jednoduché",
+      "leto",
+      "zima"
     ],
     "tagsEn": [
       "quick",
-      "easy"
+      "easy",
+      "summer",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -2647,12 +2772,14 @@
     "tags": [
       "vegetariánske",
       "rúra",
-      "jednoduché"
+      "jednoduché",
+      "leto"
     ],
     "tagsEn": [
       "vegetarian",
       "baked",
-      "easy"
+      "easy",
+      "summer"
     ],
     "rating": 0,
     "notes": "",
@@ -2704,12 +2831,14 @@
     "tags": [
       "vegánske",
       "zdravé",
-      "sýta"
+      "sýta",
+      "zima"
     ],
     "tagsEn": [
       "vegan",
       "healthy",
-      "hearty"
+      "hearty",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -2760,11 +2889,13 @@
     ],
     "tags": [
       "mäso",
-      "rýchle"
+      "rýchle",
+      "leto"
     ],
     "tagsEn": [
       "meat",
-      "quick"
+      "quick",
+      "summer"
     ],
     "rating": 0,
     "notes": "",
@@ -2816,10 +2947,14 @@
       "Fill pancakes and roll."
     ],
     "tags": [
-      "vegetariánske"
+      "vegetariánske",
+      "jar",
+      "leto"
     ],
     "tagsEn": [
-      "vegetarian"
+      "vegetarian",
+      "spring",
+      "summer"
     ],
     "rating": 0,
     "notes": "",
@@ -2872,11 +3007,15 @@
     ],
     "tags": [
       "vegetariánske",
-      "taliančina"
+      "taliančina",
+      "jesen",
+      "zima"
     ],
     "tagsEn": [
       "vegetarian",
-      "italian"
+      "italian",
+      "autumn",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -2927,11 +3066,13 @@
     ],
     "tags": [
       "rýchle",
-      "jednoduché"
+      "jednoduché",
+      "zima"
     ],
     "tagsEn": [
       "quick",
-      "easy"
+      "easy",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -2976,11 +3117,13 @@
     ],
     "tags": [
       "slovenské",
-      "rýchle"
+      "rýchle",
+      "leto"
     ],
     "tagsEn": [
       "slovak",
-      "quick"
+      "quick",
+      "summer"
     ],
     "rating": 0,
     "notes": "",
@@ -3027,11 +3170,13 @@
     ],
     "tags": [
       "rýchle",
-      "mäso"
+      "mäso",
+      "zima"
     ],
     "tagsEn": [
       "quick",
-      "meat"
+      "meat",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -3074,11 +3219,15 @@
     ],
     "tags": [
       "zdravé",
-      "príloha"
+      "príloha",
+      "jesen",
+      "zima"
     ],
     "tagsEn": [
       "healthy",
-      "side"
+      "side",
+      "autumn",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -3132,12 +3281,14 @@
     "tags": [
       "sladké",
       "rúra",
-      "tradičné"
+      "tradičné",
+      "jesen"
     ],
     "tagsEn": [
       "sweet",
       "baked",
-      "traditional"
+      "traditional",
+      "autumn"
     ],
     "rating": 0,
     "notes": "",
@@ -3192,11 +3343,15 @@
     ],
     "tags": [
       "pečivo",
-      "sladké"
+      "sladké",
+      "leto",
+      "zima"
     ],
     "tagsEn": [
       "baking",
-      "sweet"
+      "sweet",
+      "summer",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -3245,11 +3400,13 @@
     ],
     "tags": [
       "raňajky",
-      "zdravé"
+      "zdravé",
+      "jesen"
     ],
     "tagsEn": [
       "breakfast",
-      "healthy"
+      "healthy",
+      "autumn"
     ],
     "rating": 0,
     "notes": "",
@@ -3298,11 +3455,15 @@
     ],
     "tags": [
       "vegetariánske",
-      "predjedlo"
+      "predjedlo",
+      "leto",
+      "zima"
     ],
     "tagsEn": [
       "vegetarian",
-      "starter"
+      "starter",
+      "summer",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -3347,11 +3508,15 @@
     ],
     "tags": [
       "rýchle",
-      "vegetariánske"
+      "vegetariánske",
+      "leto",
+      "zima"
     ],
     "tagsEn": [
       "quick",
-      "vegetarian"
+      "vegetarian",
+      "summer",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -3401,12 +3566,14 @@
     "tags": [
       "sladké",
       "jednoduché",
-      "tradičné"
+      "tradičné",
+      "jesen"
     ],
     "tagsEn": [
       "sweet",
       "easy",
-      "traditional"
+      "traditional",
+      "autumn"
     ],
     "rating": 0,
     "notes": "",
@@ -3451,11 +3618,15 @@
     ],
     "tags": [
       "rýchle",
-      "nátierka"
+      "nátierka",
+      "jar",
+      "zima"
     ],
     "tagsEn": [
       "quick",
-      "spread"
+      "spread",
+      "spring",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -3502,11 +3673,15 @@
     ],
     "tags": [
       "vegetariánske",
-      "rúra"
+      "rúra",
+      "leto",
+      "jesen"
     ],
     "tagsEn": [
       "vegetarian",
-      "baked"
+      "baked",
+      "summer",
+      "autumn"
     ],
     "rating": 0,
     "notes": "",
@@ -3557,11 +3732,13 @@
     ],
     "tags": [
       "rýchle",
-      "zdravé"
+      "zdravé",
+      "leto"
     ],
     "tagsEn": [
       "quick",
-      "healthy"
+      "healthy",
+      "summer"
     ],
     "rating": 0,
     "notes": "",
@@ -3604,11 +3781,15 @@
     ],
     "tags": [
       "rýchle",
-      "príloha"
+      "príloha",
+      "leto",
+      "zima"
     ],
     "tagsEn": [
       "quick",
-      "side"
+      "side",
+      "summer",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -3657,11 +3838,13 @@
     ],
     "tags": [
       "sladké",
-      "studené"
+      "studené",
+      "leto"
     ],
     "tagsEn": [
       "sweet",
-      "cold"
+      "cold",
+      "summer"
     ],
     "rating": 0,
     "notes": "",
@@ -3705,12 +3888,14 @@
     "tags": [
       "deti-6m",
       "baby",
-      "prvé jedlo"
+      "prvé jedlo",
+      "jesen"
     ],
     "tagsEn": [
       "baby-6m",
       "baby",
-      "first food"
+      "first food",
+      "autumn"
     ],
     "rating": 0,
     "notes": "",
@@ -3754,12 +3939,16 @@
     "tags": [
       "deti-6m",
       "baby",
-      "prvé jedlo"
+      "prvé jedlo",
+      "jesen",
+      "zima"
     ],
     "tagsEn": [
       "baby-6m",
       "baby",
-      "first food"
+      "first food",
+      "autumn",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -3801,12 +3990,14 @@
     "tags": [
       "deti-6m",
       "baby",
-      "prvé jedlo"
+      "prvé jedlo",
+      "jesen"
     ],
     "tagsEn": [
       "baby-6m",
       "baby",
-      "first food"
+      "first food",
+      "autumn"
     ],
     "rating": 0,
     "notes": "",
@@ -3848,12 +4039,16 @@
     "tags": [
       "deti-6m",
       "baby",
-      "prvé jedlo"
+      "prvé jedlo",
+      "jesen",
+      "zima"
     ],
     "tagsEn": [
       "baby-6m",
       "baby",
-      "first food"
+      "first food",
+      "autumn",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -3890,13 +4085,17 @@
       "deti-6m",
       "baby",
       "prvé jedlo",
-      "rýchle"
+      "rýchle",
+      "leto",
+      "zima"
     ],
     "tagsEn": [
       "baby-6m",
       "baby",
       "first food",
-      "quick"
+      "quick",
+      "summer",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -3943,11 +4142,15 @@
     ],
     "tags": [
       "deti-8m",
-      "baby"
+      "baby",
+      "jesen",
+      "zima"
     ],
     "tagsEn": [
       "baby-8m",
-      "baby"
+      "baby",
+      "autumn",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -3993,12 +4196,16 @@
     "tags": [
       "deti-8m",
       "baby",
-      "mäso"
+      "mäso",
+      "jesen",
+      "zima"
     ],
     "tagsEn": [
       "baby-8m",
       "baby",
-      "meat"
+      "meat",
+      "autumn",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -4044,12 +4251,16 @@
     "tags": [
       "deti-1",
       "raňajky",
-      "sladké"
+      "sladké",
+      "leto",
+      "zima"
     ],
     "tagsEn": [
       "baby-1y",
       "breakfast",
-      "sweet"
+      "sweet",
+      "summer",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -4096,11 +4307,13 @@
     ],
     "tags": [
       "deti-1",
-      "príloha"
+      "príloha",
+      "zima"
     ],
     "tagsEn": [
       "baby-1y",
-      "side"
+      "side",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -4145,11 +4358,15 @@
     ],
     "tags": [
       "deti-1",
-      "zelenina"
+      "zelenina",
+      "jesen",
+      "zima"
     ],
     "tagsEn": [
       "baby-1y",
-      "vegetable"
+      "vegetable",
+      "autumn",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -4194,11 +4411,15 @@
     ],
     "tags": [
       "deti-1",
-      "mäso"
+      "mäso",
+      "jesen",
+      "zima"
     ],
     "tagsEn": [
       "baby-1y",
-      "meat"
+      "meat",
+      "autumn",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -4240,12 +4461,16 @@
     "tags": [
       "deti-1",
       "rýchle",
-      "nátierka"
+      "nátierka",
+      "leto",
+      "zima"
     ],
     "tagsEn": [
       "baby-1y",
       "quick",
-      "spread"
+      "spread",
+      "summer",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -4294,11 +4519,15 @@
     ],
     "tags": [
       "deti-1",
-      "cestoviny"
+      "cestoviny",
+      "leto",
+      "jesen"
     ],
     "tagsEn": [
       "baby-1y",
-      "pasta"
+      "pasta",
+      "summer",
+      "autumn"
     ],
     "rating": 0,
     "notes": "",
@@ -4342,12 +4571,16 @@
     "tags": [
       "deti-1",
       "rýchle",
-      "sladké"
+      "sladké",
+      "leto",
+      "zima"
     ],
     "tagsEn": [
       "baby-1y",
       "quick",
-      "sweet"
+      "sweet",
+      "summer",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -4392,11 +4625,15 @@
     ],
     "tags": [
       "deti-2",
-      "ryba"
+      "ryba",
+      "leto",
+      "zima"
     ],
     "tagsEn": [
       "baby-2y",
-      "fish"
+      "fish",
+      "summer",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -4441,11 +4678,15 @@
     ],
     "tags": [
       "deti-2",
-      "kura"
+      "kura",
+      "leto",
+      "zima"
     ],
     "tagsEn": [
       "baby-2y",
-      "chicken"
+      "chicken",
+      "summer",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -4488,11 +4729,15 @@
     ],
     "tags": [
       "deti-2",
-      "zelenina"
+      "zelenina",
+      "leto",
+      "zima"
     ],
     "tagsEn": [
       "baby-2y",
-      "vegetable"
+      "vegetable",
+      "summer",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -4537,11 +4782,15 @@
     ],
     "tags": [
       "deti-2",
-      "rúra"
+      "rúra",
+      "leto",
+      "zima"
     ],
     "tagsEn": [
       "baby-2y",
-      "baked"
+      "baked",
+      "summer",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -4584,11 +4833,13 @@
     ],
     "tags": [
       "deti-3",
-      "rýchle"
+      "rýchle",
+      "leto"
     ],
     "tagsEn": [
       "baby-3y",
-      "quick"
+      "quick",
+      "summer"
     ],
     "rating": 0,
     "notes": "",
@@ -4629,11 +4880,15 @@
     ],
     "tags": [
       "deti-3",
-      "rýchle"
+      "rýchle",
+      "leto",
+      "zima"
     ],
     "tagsEn": [
       "baby-3y",
-      "quick"
+      "quick",
+      "summer",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -4679,12 +4934,16 @@
     "tags": [
       "deti-1",
       "raňajky",
-      "sladké"
+      "sladké",
+      "leto",
+      "zima"
     ],
     "tagsEn": [
       "baby-1y",
       "breakfast",
-      "sweet"
+      "sweet",
+      "summer",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -4728,12 +4987,16 @@
     "tags": [
       "deti-1",
       "raňajky",
-      "zdravé"
+      "zdravé",
+      "leto",
+      "zima"
     ],
     "tagsEn": [
       "baby-1y",
       "breakfast",
-      "healthy"
+      "healthy",
+      "summer",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -4775,12 +5038,16 @@
     "tags": [
       "deti-1",
       "rýchle",
-      "raňajky"
+      "raňajky",
+      "leto",
+      "zima"
     ],
     "tagsEn": [
       "baby-1y",
       "quick",
-      "breakfast"
+      "breakfast",
+      "summer",
+      "winter"
     ],
     "rating": 0,
     "notes": "",
@@ -4822,12 +5089,16 @@
     "tags": [
       "deti-1",
       "nápoj",
-      "zdravé"
+      "zdravé",
+      "jar",
+      "jesen"
     ],
     "tagsEn": [
       "baby-1y",
       "drink",
-      "healthy"
+      "healthy",
+      "spring",
+      "autumn"
     ],
     "rating": 0,
     "notes": "",
