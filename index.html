@@ -327,7 +327,7 @@
     </div>
     <div class="form-section">
       <div class="form-section-title" data-lang="formIngredients">Suroviny</div>
-      <textarea id="r-ingredients" data-lang="formIngrPlace" placeholder="200g múky" rows="3"></textarea>
+      <textarea id="r-ingredients" data-lang="formIngrPlace" placeholder="200g múky" rows="3" oninput="previewSeasonTags()"></textarea>
     </div>
     <div class="form-section">
       <div class="form-section-title" data-lang="formSteps">Postup</div>
@@ -336,6 +336,7 @@
     <div class="form-section">
       <div class="form-section-title" data-lang="formTags">Štítky</div>
       <input id="r-tags" data-lang="formTagsPlace" placeholder="rýchle, lacné, vegánske">
+      <div id="season-status" style="font-size:.68rem;color:var(--text3);margin-top:.15rem;min-height:1rem;"></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('form-modal')" data-lang="cancel">Zrušiť</button>

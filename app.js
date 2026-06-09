@@ -2766,6 +2766,13 @@ function saveRecipe() {
   const fat = parseInt(document.getElementById('r-fat').value) || 0;
   const carbs = parseInt(document.getElementById('r-carbs').value) || 0;
   const portions = parseInt(document.getElementById('r-portions').value) || 4;
+  // Auto-detect season from ingredients
+  var autoSeason = autoSeasonTag(ingredients, name);
+  autoSeason.tags.forEach(function(t) { if (tags.indexOf(t) < 0) tags.push(t); });
+  // Show a small indicator on save
+  if (autoSeason.tags.length) {
+    document.getElementById('season-status').textContent = (lang==='en'?'Detected season: ':'Detekovaná sezóna: ') + autoSeason.tags.map(function(t) { return {jar:'🌸',leto:'🌞',jesen:'🍂',zima:'❄️'}[t]||t; }).join(' ');
+  }
   if (!name) return showToast(t('formName')+(lang==='en'?' is required.':' je povinný.'),'error');
   if (!ingredients.length) return showToast(t('formIngredients')+(lang==='en'?' are required.':' sú povinné.'),'error');
   const nutrition = {kcal,protein,fat,carbs};
@@ -3793,6 +3800,53 @@ function renderSeasonalWidget() {
   }
   html += '<div style="font-size:.62rem;color:var(--text3);margin-top:.25rem;">' + (lang==='en'?'Based on seasonal produce':'Podľa sezónnych surovín') + '</div></div>';
   return html;
+}
+
+// =================== AUTO SEASON TAGGING ===================
+var SEASONAL_KEYS = {
+  jar: { en: 'spring', keywords: ['spargla','asparagus','rebarbora','rhubarb','mlady','mlada','mlade','redkovka','radish','jarna','jahoda','strawberry','jahody','strawberries','spenat','spinach','hrach','pea','pazitka','chives','bylinky','herbs','mata','mint','kopor','dill','zerucha','cress'] },
+  leto: { en: 'summer', keywords: ['paradajka','tomato','paradajky','tomatoes','uhorka','cucumber','paprika','pepper','cuketa','zucchini','baklazan','eggplant','kukurica','corn','fazula','bean','ceresne','cherries','bros kyna','peach','bros kyne','peaches','marhula','apricot','slivka','plum','malina','raspberry','maliny','raspberries','ribezle','currants','melon','gril','grill','salat','salad','cvikla','beetroot','sosovica','lentil','osviezujuci'] },
+  jesen: { en: 'autumn', keywords: ['tekvica','pumpkin','gastan','chestnut','gastany','chestnuts','hrozno','grapes','jablko','apple','jablka','apples','hruska','pear','hrusky','pears','orech','nut','orechy','nuts','huby','mushrooms','hrfb','hrfby','kapusta','cabbage','kel','kale','batat','sweet potato','pastrnak','parsnip','peeeny','peena','peene'] },
+  zima: { en: 'winter', keywords: ['pomaranc','orange','mandarinka','mandarin','citron','lemon','limetka','lime','datle','dates','figy','figs','zemiak','potato','zemiaky','potatoes','vyvar','broth','teply','klobasa','sausage','kapustnica','korenova','cibula','onion','cesnak','garlic'] }
+};
+
+function autoSeasonTag(ingredients, name) {
+  if (!ingredients || !ingredients.length) return { tags: [], tagsEn: [] };
+  var text = ingredients.join(' ').toLowerCase();
+  if (name) text += ' ' + name.toLowerCase();
+  // Normalize
+  text = text.replace(/\u010d/g,'c').replace(/\u010f/g,'d').replace(/\u013e/g,'l').replace(/\u0148/g,'n').replace(/\u0155/g,'r').replace(/\u0161/g,'s').replace(/\u0165/g,'t').replace(/\u017e/g,'z').replace(/\u00e1/g,'a').replace(/\u00e4/g,'a').replace(/\u00e9/g,'e').replace(/\u00ed/g,'i').replace(/\u00f3/g,'o').replace(/\u00f4/g,'o').replace(/\u00fa/g,'u').replace(/\u00fd/g,'y');
+  var result = [], resultEn = [];
+  for (var season in SEASONAL_KEYS) {
+    var data = SEASONAL_KEYS[season];
+    var score = 0;
+    for (var k = 0; k < data.keywords.length; k++) {
+      if (text.indexOf(data.keywords[k]) >= 0) score += data.keywords[k].length;
+    }
+    if (score >= 5) {
+      result.push(season);
+      resultEn.push(data.en);
+    }
+  }
+  if (result.length === 0) {
+    // Guess based on category if available
+    return { tags: [], tagsEn: [] };
+  }
+  return { tags: result, tagsEn: resultEn };
+}
+
+function previewSeasonTags() {
+  var text = document.getElementById('r-ingredients').value;
+  var name = document.getElementById('r-name').value;
+  var result = autoSeasonTag(text.split('\n').map(function(s) { return s.trim(); }).filter(Boolean), name);
+  var el = document.getElementById('season-status');
+  if (el) {
+    if (result.tags.length) {
+      el.textContent = (lang==='en'?'Season: ':'Sezóna: ') + result.tags.map(function(t) { return {jar:'🌸 jar',leto:'🌞 leto',jesen:'🍂 jeseň',zima:'❄️ zima'}[t]||t; }).join(', ');
+    } else {
+      el.textContent = '';
+    }
+  }
 }
 
 // ======================== DASHBOARD ========================
