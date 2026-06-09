@@ -931,6 +931,31 @@ body:not(.dark) .recipe-card .fav-btn.fav-active { background: linear-gradient(1
 .onboard-dots { display: flex; gap: .4rem; }
 .onboard-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); transition: all .3s ease; }
 .onboard-dot.active { background: var(--primary); width: 24px; border-radius: 4px; }
+
+/* ===== ONBOARDING V2 ===== */
+.onboard-slide { transition: transform .45s cubic-bezier(.22,1,.36,1), opacity .4s ease; }
+.onboard-slide.prev { transform: translateX(-25%) scale(.95); opacity: 0; }
+.onboard-slide.next { transform: translateX(25%) scale(.95); opacity: 0; }
+.onboard-illustration { animation: floatSlow 4s ease-in-out infinite; filter: drop-shadow(0 8px 24px rgba(16,185,129,.15)); }
+@keyframes floatSlow { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+/* ===== DYNAMIC BODY GRADIENT ===== */
+body { transition: background .8s ease, color .3s ease; }
+body.gradient-morning { background: linear-gradient(180deg, rgba(251,146,60,.04) 0%, var(--bg) 40%); }
+body.gradient-afternoon { background: linear-gradient(180deg, rgba(16,185,129,.03) 0%, var(--bg) 40%); }
+body.gradient-evening { background: linear-gradient(180deg, rgba(99,102,241,.04) 0%, var(--bg) 40%); }
+body.gradient-night { background: linear-gradient(180deg, rgba(15,23,42,.06) 0%, var(--bg) 40%); }
+
+/* ===== DARK MODE TRANSITION ===== */
+body * { transition: background .35s ease, color .3s ease, border-color .3s ease, box-shadow .3s ease !important; }
+#app-header { transition: background .35s ease, transform .3s ease, opacity .3s ease; }
+
+/* ===== LONG PRESS CONTEXT MENU ===== */
+.longpress-menu { position: fixed; z-index: 10000; background: var(--surface-solid); border-radius: var(--radius-md); border: 1px solid var(--border); box-shadow: 0 12px 48px rgba(0,0,0,.5); padding: .3rem; min-width: 160px; animation: menuIn .2s var(--ease-spring); overflow: hidden; }
+.longpress-menu button { display: flex; align-items: center; gap: .4rem; width: 100%; padding: .5rem .7rem; border: none; background: none; color: var(--text); font-size: .78rem; cursor: pointer; text-align: left; border-radius: var(--radius-sm); transition: background .15s; font-weight: 500; }
+.longpress-menu button:hover { background: var(--hover-bg); }
+.longpress-menu button.danger { color: var(--danger); }
+@keyframes menuIn { from { opacity: 0; transform: scale(.92) translateY(4px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 .onboard-btn { padding: .7rem 1.5rem; border-radius: 14px; border: none; font-size: .85rem; font-weight: 700; cursor: pointer; transition: all .2s; }
 .onboard-btn-primary { background: var(--primary); color: #fff; box-shadow: 0 3px 12px rgba(220,38,38,.3); }
 .onboard-btn-primary:hover { background: var(--primary-light); }

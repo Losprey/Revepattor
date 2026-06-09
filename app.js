@@ -1255,9 +1255,19 @@ window.addEventListener('offline', function() {
   }
 });
 
+function setDynamicGradient() {
+  var h = new Date().getHours();
+  document.body.classList.remove('gradient-morning', 'gradient-afternoon', 'gradient-evening', 'gradient-night');
+  if (h >= 5 && h < 11) document.body.classList.add('gradient-morning');
+  else if (h >= 11 && h < 17) document.body.classList.add('gradient-afternoon');
+  else if (h >= 17 && h < 21) document.body.classList.add('gradient-evening');
+  else document.body.classList.add('gradient-night');
+}
+
 function refreshActiveTab() {
   const tab = document.body.dataset.tab;
-    // Set season
+  setDynamicGradient();
+  // Set season
   const seasonNames = ["zima","zima","jar","jar","jar","leto","leto","leto","leto","leto","jesen","jesen"];
   document.body.dataset.season = seasonNames[new Date().getMonth()] || "leto";
   if (tab === 'shopping') renderShoppingList();
@@ -3459,6 +3469,7 @@ function switchTab(tab) {
   const mainTitle = document.getElementById('main-title');
   [dashboard, recipeContainer, plannerContainer, shoppingContainer, tasksContainer].forEach(function(el) { if (el) el.style.display = 'none'; });
   if (mainTitle) mainTitle.style.display = tab === 'dashboard' ? 'none' : '';
+  try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch(e) {}
   if (tab === 'dashboard' && dashboard) {
     dashboard.style.display = ''; applyPageTransition(dashboard, 350);
     try { renderDashboard(); } catch(e) {}
@@ -3603,11 +3614,47 @@ function initSwipeTabs() {
     _swipeTabData = null;
   }, { passive: true });
 }
+// =================== LONG PRESS ON RECIPES ===================
+function initLongPress() {
+  document.addEventListener('touchstart', function(e) {
+    var card = e.target.closest('.recipe-card');
+    if (!card) return;
+    _longPressTimer = setTimeout(function() {
+      showLongPressMenu(card, e.touches[0].clientX, e.touches[0].clientY);
+    }, 400);
+  }, { passive: true });
+  document.addEventListener('touchend', function() { clearTimeout(_longPressTimer); }, { passive: true });
+  document.addEventListener('touchmove', function() { clearTimeout(_longPressTimer); }, { passive: true });
+}
+
+var _longPressTimer = null;
+function showLongPressMenu(card, x, y) {
+  var id = card.dataset.id;
+  if (!id) return;
+  document.querySelectorAll('.longpress-menu').forEach(function(m) { m.remove(); });
+  var menu = document.createElement('div');
+  menu.className = 'longpress-menu';
+  var r = card.getBoundingClientRect();
+  var left = Math.min(x, window.innerWidth - 170);
+  var top = Math.min(y, window.innerHeight - 200);
+  menu.style.left = left + 'px';
+  menu.style.top = top + 'px';
+  menu.innerHTML = '<button onclick="viewRecipe(' + id + ');this.closest(\'.longpress-menu\').remove()">📖 ' + (lang==='en'?'View':'Zobraziť') + '</button><button onclick="var r=recipes.find(x=>x.id==' + id + ');if(r){openFormModal(r)};this.closest(\'.longpress-menu\').remove()">✏️ ' + (lang==='en'?'Edit':'Upraviť') + '</button><button onclick="toggleFav(' + id + ');this.closest(\'.longpress-menu\').remove()">❤️ ' + (lang==='en'?'Favorite':'Obľúbené') + '</button><button class=\"danger\" onclick=\"if(confirm(\'' + (lang==='en'?'Delete this recipe?':'Zmazať tento recept?') + '\')){var ri=recipes.findIndex(x=>x.id==' + id + ');if(ri>=0){recipes.splice(ri,1);saveToLS();render()}};this.closest(\'.longpress-menu\').remove()\">🗑 ' + (lang==='en'?'Delete':'Zmazať') + '</button>';
+  document.body.appendChild(menu);
+  haptic(15);
+  var closer = function(x) {
+    if (!x.target.closest('.longpress-menu')) { menu.remove(); document.removeEventListener('click', closer); }
+  };
+  setTimeout(function() { document.addEventListener('click', closer); }, 100);
+}
+
 // Initialize on load
 setTimeout(function() {
+  setDynamicGradient();
   initSwipeTabs();
   initPullToRefresh();
   initScrollHeader();
+  initLongPress();
   // Toggle masonry grid if setting enabled
   var grid = document.getElementById('recipe-grid');
   if (grid && appSettings.masonry) grid.classList.add('masonry');
