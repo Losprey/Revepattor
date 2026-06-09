@@ -2230,7 +2230,7 @@ function render() {
     return `<div class="recipe-card" style="animation-delay:${Math.random()*.25}s" data-id="${r.id}">
       <button class="fav-btn ${r.favorite?'fav-active':''}" onclick="event.stopPropagation();toggleFav(${r.id})">${r.favorite ? '❤️' : '🤍'}</button>
       <div class="recipe-card-img${r.image||r.imageData?'':' img-skeleton'}" id="rcimg-${r.id}">${r.image||r.imageData
-        ? `<img src="${escAttr(imgUrl(r.imageData||r.image))}" alt="${san}" loading="lazy" onerror="this.outerHTML='<span style=\\'font-size:2.4rem\\'>🍽️</span>'" onload="this.parentElement.classList.remove('img-skeleton')">`
+        ? `<img src="${escAttr(imgUrl(r.imageData||r.image))}" alt="${san}" loading="lazy" onerror="this.outerHTML='<span style=\\'font-size:2.4rem\\'>🍽️</span>'" onload="this.classList.add('loaded');this.parentElement.classList.remove('img-skeleton')">`
         : `<span style="font-size:2.4rem">🍽️</span>`}</div>
       <div class="rc-info">
         <div class="rc-name">${san}</div>
@@ -2849,7 +2849,7 @@ function viewRecipe(id) {
   const san = esc(name), sanCat = esc(r.category), sanTime = esc(r.time);
   el.innerHTML = `
     <div id="detail-img-wrap" class="detail-img ${r.image||r.imageData?'':'img-skeleton'}">${r.image || r.imageData
-      ? `<img src="${escAttr(r.imageData||r.image)}" alt="${san}" onerror="this.outerHTML='<span style=\\'font-size:3.4rem\\'>🍽️</span>'" onload="this.parentElement.classList.remove('img-skeleton')">`
+      ? `<img src="${escAttr(r.imageData||r.image)}" alt="${san}" onerror="this.outerHTML='<span style=\\'font-size:3.4rem\\'>🍽️</span>'" onload="this.classList.add('loaded');this.parentElement.classList.remove('img-skeleton')">`
       : `<span style="font-size:3.4rem">🍽️</span>`}</div>
     <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.4rem;">
       <h2 style="font-size:1.05rem;flex:1;">${san}</h2>
@@ -5851,4 +5851,138 @@ function showToast(msg, type, duration) {
     }, 300);
   }, duration);
 }
+
+// =================== INDEXEDDB WRAPPER ===================
+var DB_VERSION = 1;
+var DB_NAME = 'MealnestDB';
+var dbInstance = null;
+
+function openDB() {
+  return new Promise(function(resolve, reject) {
+    if (dbInstance) { resolve(dbInstance); return; }
+    try {
+      var req = indexedDB.open(DB_NAME, DB_VERSION);
+      req.onupgradeneeded = function(e) {
+        var db = e.target.result;
+        if (!db.objectStoreNames.contains('data')) {
+          db.createObjectStore('data', { keyPath: 'key' });
+        }
+      };
+      req.onsuccess = function(e) {
+        dbInstance = e.target.result;
+        resolve(dbInstance);
+      };
+      req.onerror = function(e) { reject(e.target.error); };
+    } catch(e) { reject(e); }
+  });
+}
+
+function dbGet(key) {
+  return openDB().then(function(db) {
+    return new Promise(function(resolve, reject) {
+      var tx = db.transaction('data', 'readonly');
+      var store = tx.objectStore('data');
+      var req = store.get(key);
+      req.onsuccess = function(e) { resolve(e.target.result ? e.target.result.value : null); };
+      req.onerror = function(e) { reject(e.target.error); };
+    });
+  }).catch(function() { return null; });
+}
+
+function dbSet(key, value) {
+  return openDB().then(function(db) {
+    return new Promise(function(resolve, reject) {
+      var tx = db.transaction('data', 'readwrite');
+      var store = tx.objectStore('data');
+      store.put({ key: key, value: value });
+      tx.oncomplete = function() { resolve(true); };
+      tx.onerror = function(e) { reject(e.target.error); };
+    });
+  }).catch(function() { return false; });
+}
+
+function checkStorageLimit() {
+  try {
+    var total = 0;
+    for (var i = 0; i < localStorage.length; i++) {
+      var key = localStorage.key(i);
+      var val = localStorage.getItem(key);
+      if (val) total += val.length * 2;
+    }
+    // Warn at ~4MB (80% of 5MB limit)
+    if (total > 4000000) {
+      var existing = document.querySelector('.storage-warning');
+      if (!existing) {
+        var warn = document.createElement('div');
+        warn.className = 'storage-warning';
+        warn.innerHTML = '💾 ' + (lang==='en'?'Local storage nearly full! Clean up old data.':'Úložisko je takmer plné! Vymaž staré dáta.');
+        document.body.appendChild(warn);
+        setTimeout(function() { warn.remove(); }, 8000);
+      }
+    }
+  } catch(e) {}
+}
+
+function dbDelete(key) {
+  return openDB().then(function(db) {
+    return new Promise(function(resolve, reject) {
+      var tx = db.transaction('data', 'readwrite');
+      var store = tx.objectStore('data');
+      store.delete(key);
+      tx.oncomplete = function() { resolve(true); };
+      tx.onerror = function(e) { reject(e.target.error); };
+    });
+  }).catch(function() { return false; });
+}
+
+// Migrate localStorage -> IndexedDB on first run
+function migrateToIndexedDB() {
+  if (localStorage.getItem('_idbMigrated') === '1') return;
+  var keys = ['recipes','mealPlan','mealPlanKids','shoppingItems','tasks','cookingHistory','planType'];
+  keys.forEach(function(key) {
+    try {
+      var val = localStorage.getItem(storeNs + key) || localStorage.getItem(key);
+      if (val) { var parsed = JSON.parse(val); if (parsed) dbSet(key, parsed); }
+    } catch(e) {}
+  });
+  localStorage.setItem('_idbMigrated', '1');
+}
+setTimeout(migrateToIndexedDB, 2000);
+setTimeout(checkStorageLimit, 3000);
+
+// =================== GLOBAL ERROR HANDLER ===================
+window.onerror = function(msg, url, line, col, err) {
+  var el = document.getElementById('boot-status');
+  if (el) {
+    el.style.display = 'block';
+    el.style.background = 'rgba(220,38,38,.9)';
+    el.textContent = '⚠️ Chyba: ' + (msg || '').slice(0,80);
+    setTimeout(function() { el.style.display = 'none'; }, 5000);
+  }
+  console.error('GLOBAL:', msg, url, line);
+};
+window.addEventListener('unhandledrejection', function(e) {
+  console.warn('Unhandled promise rejection:', e.reason);
+  e.preventDefault();
+});
+
+// =================== BUTTON TOUCH RIPPLE ===================
+function addRipple(e) {
+  var btn = e.currentTarget;
+  var rect = btn.getBoundingClientRect();
+  var ripple = document.createElement('span');
+  ripple.className = 'btn-ripple';
+  var size = Math.max(rect.width, rect.height) * 1.5;
+  var cx = (e.clientX || rect.left + rect.width/2) - rect.left;
+  var cy = (e.clientY || rect.top + rect.height/2) - rect.top;
+  ripple.style.width = ripple.style.height = size + 'px';
+  ripple.style.left = (cx - size/2) + 'px';
+  ripple.style.top = (cy - size/2) + 'px';
+  btn.appendChild(ripple);
+  setTimeout(function() { ripple.remove(); }, 500);
+}
+document.addEventListener('click', function(e) {
+  var btn = e.target.closest('.btn, .nav-item, .topbar-btn, .age-btn, .pln-btn, .plan-type-btn, .pa-btn, .sa-btn, .shop-add-btn, .fab-trigger, .hero-btn');
+  if (btn && !btn.closest('.bottom-nav')) addRipple(e);
+}, { passive: true });
 
