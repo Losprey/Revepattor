@@ -1267,9 +1267,8 @@ function setDynamicGradient() {
 function refreshActiveTab() {
   const tab = document.body.dataset.tab;
   setDynamicGradient();
-  // Set season
-  const seasonNames = ["zima","zima","jar","jar","jar","leto","leto","leto","leto","leto","jesen","jesen"];
-  document.body.dataset.season = seasonNames[new Date().getMonth()] || "leto";
+  // Set season in real time
+  updateSeason();
   if (tab === 'shopping') renderShoppingList();
   if (tab === 'planner') renderPlanner();
   if (tab === 'tasks') renderTasks();
@@ -1278,10 +1277,26 @@ function refreshActiveTab() {
   try { renderTaskWidget(); } catch(e) {}
 }
 
+// =================== AUTO DARK MODE ===================
+(function initAutoDark() {
+  var mq = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
+  if (!mq) return;
+  mq.addEventListener('change', function() {
+    if (appSettings.theme === 'auto') applySettings();
+  });
+})();
+
+// =================== SEASON UPDATE IN REAL TIME ===================
+function updateSeason() {
+  var seasons = ['zima','zima','jar','jar','jar','leto','leto','leto','leto','jesen','jesen','zima'];
+  document.body.dataset.season = seasons[new Date().getMonth()];
+}
+
 // =================== PARALLAX HERO COLLAPSE ===================
 var _plannerScrollHandler = null;
 function initPlannerParallax() {
   if (_plannerScrollHandler) { document.removeEventListener('scroll', _plannerScrollHandler, { passive: true }); }
+  var _pipAutoHide = null;
   _plannerScrollHandler = function() {
     var hero = document.getElementById('planner-hero');
     var pip = document.getElementById('planner-info-panel');
@@ -1289,6 +1304,14 @@ function initPlannerParallax() {
     var scrollY = window.pageYOffset || document.documentElement.scrollTop;
     hero.classList.toggle('collapsed', scrollY > 20);
     pip.classList.toggle('visible', scrollY > 80);
+    // Auto-hide floating panel after 2.5s of no scroll
+    if (scrollY > 80) {
+      if (_pipAutoHide) clearTimeout(_pipAutoHide);
+      _pipAutoHide = setTimeout(function() {
+        pip.classList.remove('visible');
+        _pipAutoHide = null;
+      }, 2500);
+    }
   };
   document.addEventListener('scroll', _plannerScrollHandler, { passive: true });
 }
@@ -2318,8 +2341,14 @@ function saveSettings() {
 }
 function applySettings() {
   try {
-    if (appSettings.theme === 'dark') { document.body.classList.add('dark'); document.getElementById('dark-toggle').textContent = '☀️'; }
+    // Auto dark mode: respect system preference
+    var sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (appSettings.theme === 'auto') {
+      if (sysDark) { document.body.classList.add('dark'); document.getElementById('dark-toggle').textContent = '☀️'; }
+      else { document.body.classList.remove('dark'); document.getElementById('dark-toggle').textContent = '🌙'; }
+    } else if (appSettings.theme === 'dark') { document.body.classList.add('dark'); document.getElementById('dark-toggle').textContent = '☀️'; }
     else { document.body.classList.remove('dark'); document.getElementById('dark-toggle').textContent = '🌙'; }
+    updateSeason();
   } catch(e) {}
   let langChanged = false;
   if (appSettings.lang !== lang) { lang = appSettings.lang; localStorage.setItem('lang', lang); try { applyLang(); } catch(e) {} langChanged = true; }
@@ -4542,6 +4571,8 @@ function selectRecipe(day, slot, id, wk) {
   var filled = Object.values(weekPlan[day]).filter(Boolean).length;
   if (filled === MEALS.length) triggerConfetti();
   if (day === DAYS[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1] && !plannerIsVisible()) renderDashboard();
+  // Toast feedback
+  showToast('✅ ' + (lang==='en'?'Added to planner':'Pridané do plánovača'), 'success', 1500);
 }
 
 function removeSlot(day, slot, wk) {
@@ -5401,6 +5432,15 @@ function deleteTask(id) {
   else { renderTaskWidget(); if (document.getElementById('dashboard')?.style.display !== 'none') renderDashboard(); }
 }
 
+function toggleTaskExtra() {
+  var el = document.getElementById('task-extra-fields');
+  var btn = document.getElementById('task-extra-toggle');
+  if (!el || !btn) return;
+  var isVisible = el.style.display !== 'none';
+  el.style.display = isVisible ? 'none' : '';
+  btn.textContent = isVisible ? '▼ ' + (lang==='en'?'More options':'Viac možností') : '▲ ' + (lang==='en'?'Less options':'Menej možností');
+}
+
 function openTaskSheet(editId) {
   const sheet = document.getElementById('task-sheet');
   document.getElementById('task-sheet-title').textContent = editId
@@ -5410,8 +5450,10 @@ function openTaskSheet(editId) {
     ? (lang==='en'?'💾 Save':'💾 Uložiť')
     : (lang==='en'?'💾 Add':'💾 Pridať');
 
-  // Set date to today if not editing
+  // Hide extra fields by default for new tasks
   if (!editId) {
+    document.getElementById('task-extra-fields').style.display = 'none';
+    document.getElementById('task-extra-toggle').textContent = '▼ ' + (lang==='en'?'More options':'Viac možností');
     document.getElementById('task-date').value = new Date().toISOString().slice(0,10);
     document.getElementById('task-time').value = '';
     document.getElementById('task-priority').value = 'medium';
@@ -5419,6 +5461,10 @@ function openTaskSheet(editId) {
     document.getElementById('task-note').value = '';
     document.getElementById('task-title').value = '';
     document.getElementById('task-edit-id').value = '';
+  } else {
+    // Show extra fields when editing
+    document.getElementById('task-extra-fields').style.display = '';
+    document.getElementById('task-extra-toggle').textContent = '▲ ' + (lang==='en'?'Less options':'Menej možností');
   }
 
   // Render category chips

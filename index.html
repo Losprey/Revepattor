@@ -53,7 +53,8 @@
 </div>
 <script>
   // Hide splash when app is ready
-  document.addEventListener('DOMContentLoaded', function() {
+  // Splash fade fast
+document.addEventListener('DOMContentLoaded', function() {
     setTimeout(function() {
       var s = document.getElementById('splash');
       if (s) { s.style.opacity = '0'; setTimeout(function() { s.remove(); }, 600); }
@@ -137,7 +138,7 @@
       </select>
       <button class="btn btn-primary" onclick="openFormModal()" data-lang="btnAdd">➕</button>
       <button class="btn" onclick="aiIngredientSuggest()" style="background:linear-gradient(135deg,var(--primary-light),var(--primary));color:#fff;border:none;padding:.35rem .55rem;border-radius:var(--radius-sm);font-size:.7rem;font-weight:600;cursor:pointer;" id="recipe-ai-btn">🤖 Čo uvariť?</button>
-      <button class="btn" onclick="showImportUrlModal()" style="background:var(--surface);color:var(--text2);border:1px solid var(--border);padding:.35rem .55rem;border-radius:var(--radius-sm);font-size:.7rem;font-weight:600;cursor:pointer;" title="Import receptu z URL">🌐 Import</button>
+      <button class="btn btn-primary" onclick="showImportUrlModal()" style="font-size:.7rem;padding:.35rem .55rem;" title="Import receptu z URL">🌐 Import</button>
     </div>
     <div class="controls-sub">
       <select id="sort-by" onchange="render()" style="padding:.3rem .5rem;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.72rem;background:var(--input-bg);color:var(--text);">
@@ -260,29 +261,32 @@
         <label class="shop-sheet-label" data-lang="tasksCategory" id="tl-cat">Kategória</label>
         <div class="shop-cat-chips" id="task-cat-chips"></div>
       </div>
-      <div class="form-row" style="gap:.35rem;">
-        <div class="form-group" style="flex:1;"><input id="task-date" type="date"></div>
-        <div class="form-group" style="flex:1;"><input id="task-time" type="time" placeholder="Čas"></div>
-      </div>
-      <div class="form-row" style="gap:.35rem;">
-        <div class="form-group" style="flex:1;">
-          <label class="shop-sheet-label" data-lang="tasksPriority" id="tl-priority">Priorita</label>
-          <select id="task-priority" style="width:100%;padding:.45rem .5rem;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.8rem;background:var(--input-bg);color:var(--text);">
-            <option value="low">🟢 Nízka</option>
-            <option value="medium" selected>🟡 Stredná</option>
-            <option value="high">🔴 Vysoká</option>
-          </select>
+      <div class="form-group" id="task-extra-fields" style="display:none;">
+        <div class="form-row" style="gap:.35rem;">
+          <div class="form-group" style="flex:1;"><input id="task-date" type="date"></div>
+          <div class="form-group" style="flex:1;"><input id="task-time" type="time" placeholder="Čas"></div>
         </div>
-        <div class="form-group" style="flex:1;">
-          <label class="shop-sheet-label" data-lang="tasksRepeat" id="tl-repeat">Opakovanie</label>
-          <select id="task-repeat" style="width:100%;padding:.45rem .5rem;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.8rem;background:var(--input-bg);color:var(--text);">
-            <option value="none">❌ Žiadne</option>
-            <option value="daily">🔄 Denne</option>
-            <option value="weekly">📅 Týždenne</option>
-          </select>
+        <div class="form-row" style="gap:.35rem;">
+          <div class="form-group" style="flex:1;">
+            <label class="shop-sheet-label" data-lang="tasksPriority" id="tl-priority">Priorita</label>
+            <select id="task-priority" style="width:100%;padding:.45rem .5rem;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.8rem;background:var(--input-bg);color:var(--text);">
+              <option value="low">🟢 Nízka</option>
+              <option value="medium" selected>🟡 Stredná</option>
+              <option value="high">🔴 Vysoká</option>
+            </select>
+          </div>
+          <div class="form-group" style="flex:1;">
+            <label class="shop-sheet-label" data-lang="tasksRepeat" id="tl-repeat">Opakovanie</label>
+            <select id="task-repeat" style="width:100%;padding:.45rem .5rem;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.8rem;background:var(--input-bg);color:var(--text);">
+              <option value="none">❌ Žiadne</option>
+              <option value="daily">🔄 Denne</option>
+              <option value="weekly">📅 Týždenne</option>
+            </select>
+          </div>
         </div>
+        <div class="form-group"><input id="task-note" placeholder="✏️ Poznámka (voliteľné)"></div>
       </div>
-      <div class="form-group"><input id="task-note" placeholder="✏️ Poznámka (voliteľné)"></div>
+      <button class="btn btn-secondary" onclick="toggleTaskExtra()" style="font-size:.7rem;margin-bottom:.3rem;width:100%;" id="task-extra-toggle">▼ Viac možností</button>
       <input type="hidden" id="task-edit-id" value="">
       <div class="form-row" style="gap:.35rem;margin-top:.3rem;">
         <button class="btn primary" onclick="saveTask()" style="flex:1;font-size:.82rem;" id="task-save-btn">💾 Pridať</button>
@@ -290,9 +294,7 @@
       </div>
     </div>
   </div>
-</div>
-
-<!-- FORM MODAL -->
+</div><!-- FORM MODAL -->
 <div class="modal-overlay" id="form-modal">
   <div class="modal">
     <button class="modal-close" onclick="closeModal('form-modal')">✕</button>

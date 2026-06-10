@@ -26,7 +26,7 @@ Moderná PWA aplikácia na plánovanie jedál, nákupov a úloh pre celú rodinu
 ## 📦 Inštalácia
 
 ```
-git clone https://github.com/Losprey/Revepattor.git
+git clone https://github.com/Losprey/Mealnest.git
 ```
 
 Otvoriť `index.html` v prehliadači alebo hostiť na ľubovoľnom statickom hostingu.
