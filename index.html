@@ -504,5 +504,19 @@ document.addEventListener('DOMContentLoaded', function() {
     <button id="fab-btn-food" class="fab-item" onclick="event.stopPropagation();this.closest('#fab-quick-add').classList.remove('open');switchTab('shopping');setTimeout(()=>openAddItemSheet(),100)">🛒 Potravina</button>
   </div>
 </div>
+
+<!-- CONFIRM MODAL -->
+<div class="modal-overlay" id="confirm-modal" style="display:none;z-index:10000;">
+  <div class="modal" style="max-width:380px;text-align:center;">
+    <button class="modal-close" onclick="closeConfirmModal()">✕</button>
+    <div style="font-size:2.2rem;margin-bottom:.5rem;" id="confirm-icon">⚠️</div>
+    <div style="font-size:.9rem;font-weight:600;margin-bottom:.6rem;line-height:1.3;" id="confirm-text">Naozaj chcete pokračovať?</div>
+    <div class="form-row" style="gap:.4rem;">
+      <button class="btn" onclick="closeConfirmModal()" style="flex:1;font-size:.8rem;" id="confirm-cancel-btn">Zrušiť</button>
+      <button class="btn primary" onclick="executeConfirm()" style="flex:1;font-size:.8rem;background:var(--danger);" id="confirm-ok-btn">Áno, vymazať</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>

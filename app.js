@@ -3019,11 +3019,13 @@ function editCurrent() {
 }
 
 function deleteCurrent() {
-  if (!confirm(t('deleteConfirm'))) return;
-  recipes = recipes.filter(r => r.id !== viewingId);
-  saveToLS();
-  closeModal('detail-modal');
-  render();
+  showConfirmModal(t('Naozaj chceš vymazať tento recept?','Delete this recipe?'), '🗑️', t('Áno, vymazať','Yes, delete'), function() {
+    recipes = recipes.filter(r => r.id !== viewingId);
+    saveToLS();
+    closeModal('detail-modal');
+    render();
+    showToast('🗑️ ' + (lang==='en'?'Deleted':'Vymazané'), 'info', 1500);
+  });
 }
 
 // ======================== PRINT ========================
@@ -4581,23 +4583,26 @@ function removeSlot(day, slot, wk) {
   if (!weekPlan[day] || !weekPlan[day][slot]) return;
   const entry = weekPlan[day][slot];
   const name = getSlotName(entry) || (lang==='en'?'this meal':'toto jedlo');
-  if (!confirm((lang==='en'?'Remove ':'Odstrániť ') + name + '?')) return;
-  delete weekPlan[day][slot];
-  saveWeekPlan();
-  // Force save both plans directly
-  try { localStorage.setItem('mealPlan', JSON.stringify(mealPlan)); } catch(e) {}
-  try { localStorage.setItem('mealPlanKids', JSON.stringify(mealPlanKids)); } catch(e) {}
-  renderPlanner();
-  if (day === DAYS[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1] && !plannerIsVisible()) renderDashboard();
+  showConfirmModal((lang==='en'?'Remove ':'Odstrániť ') + name + '?', '🗑️', lang==='en'?'Remove':'Odstrániť', function() {
+    delete weekPlan[day][slot];
+    saveWeekPlan();
+    try { localStorage.setItem('mealPlan', JSON.stringify(mealPlan)); } catch(e) {}
+    try { localStorage.setItem('mealPlanKids', JSON.stringify(mealPlanKids)); } catch(e) {}
+    loadTasks();
+    renderPlanner();
+    showToast('🗑️ ' + (lang==='en'?'Removed':'Odstránené'), 'info', 1200);
+  });
 }
 
 function clearPlan() {
-  if (!confirm(lang === 'en' ? 'Clear the whole week?' : 'Vymazať celý týždeň?')) return;
-  const weekKey = currentWeekKey();
-  const weekPlan = getWeekPlan(weekKey);
-  DAYS.forEach(d => { weekPlan[d] = {}; });
-  saveWeekPlan();
-  renderPlanner();
+  showConfirmModal(lang === 'en' ? 'Clear the whole week?' : 'Vymazať celý týždeň?', '🗑️', lang==='en'?'Clear':'Vymazať', function() {
+    const weekKey = currentWeekKey();
+    const weekPlan = getWeekPlan(weekKey);
+    DAYS.forEach(d => { weekPlan[d] = {}; });
+    saveWeekPlan();
+    renderPlanner();
+    showToast('🗑️ ' + (lang==='en'?'Week cleared':'Týždeň vymazaný'), 'info', 1200);
+  });
 }
 
 function copyWeekPlan() {
@@ -4926,17 +4931,21 @@ function clearCheckedShopItems() {
     showToast(lang==='en'?'No checked items.':'Žiadne zaškrtnuté položky.','info');
     return;
   }
-  if (!confirm(lang === 'en' ? `Remove ${checked.length} checked items?` : `Odstrániť ${checked.length} zaškrtnutých položiek?`)) return;
-  shopItems = shopItems.filter(i => !i.checked);
-  saveShopItems();
-  renderShoppingList();
+  showConfirmModal(lang === 'en' ? `Remove ${checked.length} checked items?` : `Odstrániť ${checked.length} zaškrtnutých položiek?`, '🗑️', lang==='en'?'Remove':'Odstrániť', function() {
+    shopItems = shopItems.filter(i => !i.checked);
+    saveShopItems();
+    renderShoppingList();
+    showToast('✅ ' + (lang==='en'?'Cleaned':'Vyčistené'), 'success', 1200);
+  });
 }
 
 function clearAllShopItems() {
-  if (!confirm(lang === 'en' ? 'Clear entire shopping list?' : 'Vymazať celý nákupný zoznam?')) return;
-  shopItems = [];
-  saveShopItems();
-  renderShoppingList();
+  showConfirmModal(lang === 'en' ? 'Clear entire shopping list?' : 'Vymazať celý nákupný zoznam?', '🗑️', lang==='en'?'Clear all':'Všetko vymazať', function() {
+    shopItems = [];
+    saveShopItems();
+    renderShoppingList();
+    showToast('🗑️ ' + (lang==='en'?'List cleared':'Zoznam vyčistený'), 'info', 1200);
+  });
 }
 
 function mergeDuplicateShopItems() {
@@ -5074,10 +5083,12 @@ function saveShopItem() {
 }
 
 function deleteShopItem(id) {
-  if (!confirm(lang === 'en' ? 'Delete this item?' : 'Vymazať túto položku?')) return;
-  shopItems = shopItems.filter(i => i.id !== id);
-  saveShopItems();
-  renderShoppingList();
+  showConfirmModal(lang === 'en' ? 'Delete this item?' : 'Vymazať túto položku?', '🗑️', lang==='en'?'Delete':'Vymazať', function() {
+    shopItems = shopItems.filter(i => i.id !== id);
+    saveShopItems();
+    renderShoppingList();
+    showToast('🗑️ ' + (lang==='en'?'Item deleted':'Položka vymazaná'), 'info', 1200);
+  });
 }
 
 function toggleShopCategory(headerEl) {
@@ -5424,12 +5435,14 @@ function toggleTask(id) {
 }
 
 function deleteTask(id) {
-  if (!confirm(lang === 'en' ? 'Delete this task?' : 'Vymazať túto úlohu?')) return;
-  tasks = tasks.filter(t => t.id !== id);
-  saveTasks();
-  const inTasks = document.getElementById('tasks-container')?.style.display !== 'none';
-  if (inTasks) renderTasks();
-  else { renderTaskWidget(); if (document.getElementById('dashboard')?.style.display !== 'none') renderDashboard(); }
+  showConfirmModal(lang === 'en' ? 'Delete this task?' : 'Vymazať túto úlohu?', '🗑️', lang==='en'?'Delete':'Vymazať', function() {
+    tasks = tasks.filter(t => t.id !== id);
+    saveTasks();
+    const inTasks = document.getElementById('tasks-container')?.style.display !== 'none';
+    if (inTasks) renderTasks();
+    else { renderTaskWidget(); if (document.getElementById('dashboard')?.style.display !== 'none') renderDashboard(); }
+    showToast('🗑️ ' + (lang==='en'?'Task deleted':'Úloha vymazaná'), 'info', 1200);
+  });
 }
 
 function toggleTaskExtra() {
@@ -5792,6 +5805,32 @@ let _backPressTimer = 0;
 
 function isAnyModalOpen() {
   return document.querySelector('.modal-overlay.active, #planner-picker.active, #login-overlay[style*="flex"], #settings-sheet.active, .sheet-overlay.active') !== null;
+}
+
+// =================== CUSTOM CONFIRM MODAL ===================
+var _confirmCallback = null;
+function showConfirmModal(msg, icon, okLabel, callback) {
+  var modal = document.getElementById('confirm-modal');
+  if (!modal) { if (callback) callback(); return; }
+  document.getElementById('confirm-text').textContent = msg || (lang==='en'?'Are you sure?':'Naozaj chcete pokračovať?');
+  document.getElementById('confirm-icon').textContent = icon || '⚠️';
+  document.getElementById('confirm-ok-btn').textContent = okLabel || (lang==='en'?'Yes, delete':'Áno, vymazať');
+  document.getElementById('confirm-ok-btn').style.background = okLabel === '💾 Uložiť' || okLabel === '✅ OK' ? 'var(--primary)' : 'var(--danger)';
+  document.getElementById('confirm-cancel-btn').textContent = lang==='en'?'Cancel':'Zrušiť';
+  _confirmCallback = callback;
+  modal.style.display = 'flex';
+  setTimeout(function() { modal.classList.add('active'); }, 10);
+}
+function closeConfirmModal() {
+  var modal = document.getElementById('confirm-modal');
+  if (!modal) return;
+  modal.classList.remove('active');
+  setTimeout(function() { modal.style.display = 'none'; _confirmCallback = null; }, 200);
+}
+function executeConfirm() {
+  var cb = _confirmCallback;
+  closeConfirmModal();
+  if (cb) setTimeout(cb, 250);
 }
 
 function closeTopModal() {
