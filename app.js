@@ -3679,6 +3679,7 @@ function switchTab(tab) {
     boardContainer.style.display = 'block'; applyPageTransition(boardContainer, 350);
     try { renderBoard(); } catch(e) {}
   }
+}
 
 // =================== PULL TO REFRESH ===================
 var _ptrState = null;
