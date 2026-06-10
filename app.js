@@ -6182,8 +6182,9 @@ window.addEventListener('unhandledrejection', function(e) {
 });
 
 // =================== BUTTON TOUCH RIPPLE ===================
-function addRipple(e) {
-  var btn = e.currentTarget;
+function addRipple(e, el) {
+  var btn = el || e.currentTarget;
+  if (!btn || typeof btn.getBoundingClientRect !== 'function') return;
   var rect = btn.getBoundingClientRect();
   var ripple = document.createElement('span');
   ripple.className = 'btn-ripple';
@@ -6198,6 +6199,6 @@ function addRipple(e) {
 }
 document.addEventListener('click', function(e) {
   var btn = e.target.closest('.btn, .nav-item, .topbar-btn, .age-btn, .pln-btn, .plan-type-btn, .pa-btn, .sa-btn, .shop-add-btn, .fab-trigger, .hero-btn');
-  if (btn && !btn.closest('.bottom-nav')) addRipple(e);
+  if (btn && !btn.closest('.bottom-nav')) addRipple(e, btn);
 }, { passive: true });
 
