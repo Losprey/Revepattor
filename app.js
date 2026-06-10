@@ -4217,8 +4217,8 @@ function renderPlanner() {
   // Week nav active state
   document.getElementById('pln-this').classList.toggle('active', plannerWeekOffset === 0);
   document.getElementById('pln-next').classList.toggle('active', plannerWeekOffset === 1);
-  document.getElementById('pln-this').textContent = lang==='en'?'This week':'Tento t\u00fd\u017ede\u0148';
-  document.getElementById('pln-next').textContent = lang==='en'?'Next week':'Bud\u00faci t\u00fd\u017ede\u0148';
+  document.getElementById('pln-this').textContent = lang==='en'?'This week':'Tento týždeň';
+  document.getElementById('pln-next').textContent = lang==='en'?'Next week':'Budúci týždeň';
 
   // ===== TODAY SECTION =====
   const dayNameToday = dayNames[todayIdx];
@@ -4241,35 +4241,37 @@ function renderPlanner() {
     var dt = new Date(startOfWeek); dt.setDate(startOfWeek.getDate()+i);
     var ds = dt.getDate()+'.'+(dt.getMonth()+1)+'.';
     var f = Object.values(day).filter(Boolean).length;
+    var dayIcon = getDayIcon(i, f);
     var dayKcal = 0;
     totalMeals += f;
     Object.values(day).filter(Boolean).forEach(function(e){var r=getSlotRecipe(e);if(r){if(r.nutrition)totalKcal+=r.nutrition.kcal||0;if(r.time)totalTime+=r.time;dayKcal+=r.nutrition.kcal||0;}});
     var isToday = dt.toISOString().slice(0,10) === todayStr;
-    // Build progress dots
-    var dotsHtml = '';
-    MEALS.forEach(function(mm, mi) {
-      dotsHtml += '<span class="' + (day[mm.id] ? 'filled' : '') + '"></span>';
-    });
-    s += '<div class="pvc-day'+(isToday?' pvc-today':'')+'"><div class="pvc-head"><div><span class="pvc-title">'+dayNames[i]+' '+ds+'</span>'+ (isToday?' <span class="pvc-badge">'+(lang==='en'?'TODAY':'DNES')+'</span>':'') +'</div><span class="pvc-progress">\ud83d\udd25 '+dayKcal+' kcal<span class="pvc-progress-dots">'+dotsHtml+'</span></span></div>';
+    // Progress ring state
+    var ringClass = 'pvc-progress-ring' + (f > 0 ? ' has-meals' : '') + (f === totalSlots ? ' full' : '');
+    s += '<div class="pvc-day'+(isToday?' pvc-today':'')+'"><div class="pvc-head"><div class="pvc-title-group"><span class="pvc-day-icon">'+dayIcon+'</span><span class="pvc-title">'+dayNames[i]+' '+ds+'</span>'+ (isToday?' <span class="pvc-badge">'+(lang==='en'?'TODAY':'DNES')+'</span>':'') +'</div><span class="pvc-progress"><span class="'+ringClass+'">'+f+'</span>🔥 '+dayKcal+'</span></div><div class="pvc-meals-grid">';
     MEALS.forEach(function(m){
       var e=day[m.id]; var r=getSlotRecipe(e); var nm=getSlotName(e); var ic=e&&e.type==='custom'; var ff=r||ic;
       var img = r ? (r.imageData||r.image||'') : '';
       var mealClass = 'meal-' + m.id.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-      s += '<div class="pvc-row'+(ff?' '+mealClass:' empty-slot')+'" onclick="'+(r?'viewRecipe('+r.id+')':(ff?'':'pickRecipe(\''+d+'\',\''+m.id+'\',\''+weekKey+'\')'))+'">'
-        +'<span class="pr-icon">'+m.icon+'</span><span class="pr-label">'+mealLabel(m.id)+'</span>';
       if(ff){
-        var thumb = img ? '<span class="pr-thumb" style="background-image:url(\''+escAttr(img)+'\')"></span>' : '';
-        s += thumb+'<span class="pr-name">'+esc(nm)+'</span>'+(r&&r.nutrition?'<span class="pr-kcal">\ud83d\udd25'+(r.nutrition.kcal||'?')+'</span>':'')+'<button class="pr-del" onclick="event.stopPropagation();removeSlot(\''+d+'\',\''+m.id+'\',\''+weekKey+'\')">\u2715</button>'; }
-      else { s += '<span class="pr-empty">'+(lang==='en'?'Add meal':'Prida\u0165 jedlo')+'</span>'; }
-      s += '</div>';
+        s += '<div class="pvc-meal filled '+mealClass+(ic?' custom':'')+'" onclick="'+(r?'viewRecipe('+r.id+')':'')+'">'
+          +'<div class="pvc-meal-header"><span class="pvc-meal-icon">'+m.icon+'</span><span class="pvc-meal-label">'+mealLabel(m.id)+'</span></div>'
+          +'<div class="pvc-meal-body">';
+        var thumb = img ? '<span class="pvc-meal-thumb" style="background-image:url(\''+escAttr(img)+'\')"></span>' : '';
+        s += thumb+'<span class="pvc-meal-name">'+esc(nm)+'</span>'+(r&&r.nutrition?'<span class="pvc-meal-kcal">🔥'+(r.nutrition.kcal||'?')+'</span>':'')+'</div>'
+          +'<button class="pvc-meal-del" onclick="event.stopPropagation();removeSlot(\''+d+'\',\''+m.id+'\',\''+weekKey+'\')">✕</button>'
+          +'</div>'; }
+      else {
+        s += '<div class="pvc-meal empty" onclick="pickRecipe(\''+d+'\',\''+m.id+'\',\''+weekKey+'\')"><button class="pvc-meal-add-btn"><span class="pvc-meal-add-icon">+</span>'+(lang==='en'?'Add':'Pridať')+'</button></div>'; }
     });
-    s += '</div>';
+    s += '</div></div>';
   });
 
   weekEl.innerHTML = s;
-  // Move stats to separate summary element — enhanced with progress bar
-  var mealPct = totalSlots > 0 ? Math.round((totalMeals / (DAYS.length * totalSlots)) * 100) : 0;
-  document.getElementById('planner-summary').innerHTML = '<div class="planner-summary-row"><div class="psr-item"><div class="psr-val">'+totalMeals+'/'+(DAYS.length*totalSlots)+'</div><div class="psr-label">'+(lang==='en'?'Meals planned':'Napl\u00e1novan\u00fdch')+'</div></div><div class="psr-item"><div class="psr-val">\ud83d\udd25 '+totalKcal+'</div><div class="psr-label">kcal / t\u00fd\u017ede\u0148</div></div><div class="psr-item"><div class="psr-val">\u23f1 '+totalTime+'min</div><div class="psr-label">'+(lang==='en'?'Prep time':'Pr\u00edprava')+'</div></div><div class="psr-progress-wrap"><div class="psr-progress-bar"><div class="psr-progress-fill" style="width:'+mealPct+'%"></div></div><div class="psr-progress-label">'+mealPct+'%</div></div></div>';
+  // Summary with progress bar
+  var maxMeals = DAYS.length * totalSlots;
+  var mealPct = maxMeals > 0 ? Math.round((totalMeals / maxMeals) * 100) : 0;
+  document.getElementById('planner-summary').innerHTML = '<div class="planner-summary-row"><div class="psr-item"><div class="psr-val">'+totalMeals+'/'+maxMeals+'</div><div class="psr-label">'+(lang==='en'?'Planned':'Naplán')+'</div></div><div class="psr-item"><div class="psr-val">🔥 '+totalKcal+'</div><div class="psr-label">kcal</div></div><div class="psr-item"><div class="psr-val">⏱ '+totalTime+'\'</div><div class="psr-label">'+(lang==='en'?'Prep':'Var')+'</div></div><div class="psr-progress-wrap"><div class="psr-progress-bar"><div class="psr-progress-fill" style="width:'+mealPct+'%"></div></div><div class="psr-progress-label">'+mealPct+'%</div></div></div>';
 }
 
 function goToWeek(offset) {
@@ -4328,6 +4330,12 @@ function setPlanType(type) {
   renderPlanner();
   const activeBtn = document.querySelector('.plan-type-btn.active');
   if (activeBtn) springBounce(activeBtn);
+}
+function getDayIcon(dayIndex, filledCount) {
+  if (filledCount === 0) return '📅';
+  if (filledCount <= 2) return '📋';
+  if (filledCount <= 4) return '📝';
+  return '✅';
 }
 function getSlotRecipe(entry) {
   if (!entry) return null;
