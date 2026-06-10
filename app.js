@@ -1278,6 +1278,26 @@ function refreshActiveTab() {
   try { renderTaskWidget(); } catch(e) {}
 }
 
+// =================== PARALLAX HERO COLLAPSE ===================
+var _plannerScrollHandler = null;
+function initPlannerParallax() {
+  if (_plannerScrollHandler) { document.removeEventListener('scroll', _plannerScrollHandler, { passive: true }); }
+  _plannerScrollHandler = function() {
+    var hero = document.getElementById('planner-hero');
+    if (!hero || document.getElementById('planner-container').style.display === 'none') return;
+    var scrollY = window.pageYOffset || document.documentElement.scrollTop;
+    hero.classList.toggle('collapsed', scrollY > 20);
+  };
+  document.addEventListener('scroll', _plannerScrollHandler, { passive: true });
+}
+
+// Call parallax init after each planner render
+var _origRenderPlanner2 = renderPlanner;
+renderPlanner = function() {
+  _origRenderPlanner2.apply(this, arguments);
+  initPlannerParallax();
+};
+
 // Load family code from localStorage on init
 try { familyCode = localStorage.getItem('familyCode') || ''; } catch(e) { familyCode = ''; }
 if (familyCode) { setTimeout(function() { initFirebase(); if (firebaseReady) { connectToFamily(familyCode); setTimeout(function() { autoPullFromFirebase(); }, 2500); } }, 1500); }
@@ -3576,6 +3596,8 @@ function switchTab(tab) {
     try { renderShoppingList(); } catch(e) {}
   } else if (tab === 'planner' && plannerContainer) {
     plannerContainer.style.display = 'block'; applyPageTransition(plannerContainer, 350);
+    var weekGrid = document.getElementById('planner-week-grid');
+    if (weekGrid && !weekGrid.children.length) renderSkeletonPlanner(weekGrid);
     try { renderPlanner(); } catch(e) {}
   } else if (tab === 'tasks' && tasksContainer) {
     tasksContainer.style.display = 'block'; applyPageTransition(tasksContainer, 350);
