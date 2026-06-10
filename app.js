@@ -4245,24 +4245,31 @@ function renderPlanner() {
     totalMeals += f;
     Object.values(day).filter(Boolean).forEach(function(e){var r=getSlotRecipe(e);if(r){if(r.nutrition)totalKcal+=r.nutrition.kcal||0;if(r.time)totalTime+=r.time;dayKcal+=r.nutrition.kcal||0;}});
     var isToday = dt.toISOString().slice(0,10) === todayStr;
-    s += '<div class="pvc-day'+(isToday?' pvc-today':'')+'"><div class="pvc-head"><div><span class="pvc-title">'+dayNames[i]+' '+ds+'</span>'+ (isToday?' <span class="pvc-badge">'+(lang==='en'?'TODAY':'DNES')+'</span>':'') +'</div><span class="pvc-progress">'+f+'/'+totalSlots+' · \ud83d\udd25 '+dayKcal+' kcal</span></div>';
+    // Build progress dots
+    var dotsHtml = '';
+    MEALS.forEach(function(mm, mi) {
+      dotsHtml += '<span class="' + (day[mm.id] ? 'filled' : '') + '"></span>';
+    });
+    s += '<div class="pvc-day'+(isToday?' pvc-today':'')+'"><div class="pvc-head"><div><span class="pvc-title">'+dayNames[i]+' '+ds+'</span>'+ (isToday?' <span class="pvc-badge">'+(lang==='en'?'TODAY':'DNES')+'</span>':'') +'</div><span class="pvc-progress">\ud83d\udd25 '+dayKcal+' kcal<span class="pvc-progress-dots">'+dotsHtml+'</span></span></div>';
     MEALS.forEach(function(m){
       var e=day[m.id]; var r=getSlotRecipe(e); var nm=getSlotName(e); var ic=e&&e.type==='custom'; var ff=r||ic;
       var img = r ? (r.imageData||r.image||'') : '';
-      s += '<div class="pvc-row" onclick="'+(r?'viewRecipe('+r.id+')':(ff?'':'pickRecipe(\''+d+'\',\''+m.id+'\',\''+weekKey+'\')'))+'">'
+      var mealClass = 'meal-' + m.id.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+      s += '<div class="pvc-row'+(ff?' '+mealClass:' empty-slot')+'" onclick="'+(r?'viewRecipe('+r.id+')':(ff?'':'pickRecipe(\''+d+'\',\''+m.id+'\',\''+weekKey+'\')'))+'">'
         +'<span class="pr-icon">'+m.icon+'</span><span class="pr-label">'+mealLabel(m.id)+'</span>';
       if(ff){
         var thumb = img ? '<span class="pr-thumb" style="background-image:url(\''+escAttr(img)+'\')"></span>' : '';
         s += thumb+'<span class="pr-name">'+esc(nm)+'</span>'+(r&&r.nutrition?'<span class="pr-kcal">\ud83d\udd25'+(r.nutrition.kcal||'?')+'</span>':'')+'<button class="pr-del" onclick="event.stopPropagation();removeSlot(\''+d+'\',\''+m.id+'\',\''+weekKey+'\')">\u2715</button>'; }
-      else { s += '<span class="pr-empty">+ '+(lang==='en'?'Add meal':'Prida\u0165 jedlo')+'</span>'; }
+      else { s += '<span class="pr-empty">'+(lang==='en'?'Add meal':'Prida\u0165 jedlo')+'</span>'; }
       s += '</div>';
     });
     s += '</div>';
   });
 
   weekEl.innerHTML = s;
-  // Move stats to separate summary element
-  document.getElementById('planner-summary').innerHTML = '<div class="planner-summary-row"><div class="psr-item"><div class="psr-val">'+totalMeals+'</div><div class="psr-label">'+(lang==='en'?'Meals':'Jed\u00e1l')+'</div></div><div class="psr-item"><div class="psr-val">\ud83d\udd25 '+totalKcal+'</div><div class="psr-label">kcal</div></div><div class="psr-item"><div class="psr-val">\u23f1 '+totalTime+'min</div><div class="psr-label">'+(lang==='en'?'Prep':'Pr\u00edprava')+'</div></div></div>';
+  // Move stats to separate summary element — enhanced with progress bar
+  var mealPct = totalSlots > 0 ? Math.round((totalMeals / (DAYS.length * totalSlots)) * 100) : 0;
+  document.getElementById('planner-summary').innerHTML = '<div class="planner-summary-row"><div class="psr-item"><div class="psr-val">'+totalMeals+'/'+(DAYS.length*totalSlots)+'</div><div class="psr-label">'+(lang==='en'?'Meals planned':'Napl\u00e1novan\u00fdch')+'</div></div><div class="psr-item"><div class="psr-val">\ud83d\udd25 '+totalKcal+'</div><div class="psr-label">kcal / t\u00fd\u017ede\u0148</div></div><div class="psr-item"><div class="psr-val">\u23f1 '+totalTime+'min</div><div class="psr-label">'+(lang==='en'?'Prep time':'Pr\u00edprava')+'</div></div><div class="psr-progress-wrap"><div class="psr-progress-bar"><div class="psr-progress-fill" style="width:'+mealPct+'%"></div></div><div class="psr-progress-label">'+mealPct+'%</div></div></div>';
 }
 
 function goToWeek(offset) {

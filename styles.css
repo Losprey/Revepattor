@@ -13,6 +13,21 @@
   --primary-light: #34d399;
   --primary-glow: rgba(16,185,129,.2);
   --primary-hover: #059669;
+  --meal-ranajky: #10b981;
+  --meal-ranajky-bg: rgba(16,185,129,.12);
+  --meal-ranajky-glow: rgba(16,185,129,.08);
+  --meal-obed: #f59e0b;
+  --meal-obed-bg: rgba(245,158,11,.12);
+  --meal-obed-glow: rgba(245,158,11,.08);
+  --meal-vecera: #a78bfa;
+  --meal-vecera-bg: rgba(167,139,250,.12);
+  --meal-vecera-glow: rgba(167,139,250,.08);
+  --meal-olovrant: #38bdf8;
+  --meal-olovrant-bg: rgba(56,189,248,.12);
+  --meal-olovrant-glow: rgba(56,189,248,.08);
+  --meal-snack: #f472b6;
+  --meal-snack-bg: rgba(244,114,182,.12);
+  --meal-snack-glow: rgba(244,114,182,.08);
   --accent-gradient: linear-gradient(135deg, #10b981, #06b6d4);
   --danger: #ef4444;
   --success: #10b981;
@@ -247,31 +262,220 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: rgba(22
 .pln-btn { flex: 1; padding: .45rem; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text2); font-size: .68rem; font-weight: 700; cursor: pointer; text-align: center; }
 .pln-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 
-/* ======== PLANNER — Vertical Day Cards ======== */
-.pvc-day { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); margin-bottom: .55rem; overflow: hidden; }
-.pvc-day.pvc-today { border-color: var(--primary); border-width: 2px; }
-.pvc-badge { font-size: .5rem; background: var(--primary); color: #fff; padding: .08rem .4rem; border-radius: 8px; margin-left: .3rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; vertical-align: middle; }
-.pvc-head { padding: .55rem .7rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
-.pvc-title { font-size: .78rem; font-weight: 800; color: var(--text); }
-.pvc-progress { font-size: .58rem; color: var(--text3); font-weight: 600; }
-.pvc-row { display: flex; align-items: center; gap: .5rem; padding: .45rem .65rem; border-bottom: 1px solid var(--border); cursor: pointer; transition: background .12s; min-height: 40px; }
-.pvc-row:last-child { border-bottom: none; }
-.pvc-row:active { background: var(--hover-bg); }
-.pvc-row .pr-icon { font-size: 1.1rem; width: 28px; text-align: center; flex-shrink: 0; }
-.pvc-row .pr-label { font-size: .58rem; text-transform: uppercase; letter-spacing: .03em; color: var(--text3); font-weight: 600; width: 58px; flex-shrink: 0; }
-.pvc-row .pr-name { flex: 1; font-size: .74rem; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.pr-thumb { width: 28px; height: 28px; border-radius: 6px; background-size: cover; background-position: center; flex-shrink: 0; }
-.pvc-row .pr-empty { flex: 1; font-size: .68rem; color: var(--text3); opacity: .35; }
-.pvc-row .pr-kcal { font-size: .55rem; color: var(--text3); margin-right: .2rem; white-space: nowrap; }
-.pvc-row .pr-del { width: 22px; height: 22px; border-radius: 50%; border: none; background: transparent; color: var(--text3); font-size: .52rem; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
-.pvc-row .pr-del:hover { color: var(--danger); }
+/* ======== PLANNER — Vertical Day Cards (Redesigned) ======== */
+.pvc-day {
+  background: var(--surface);
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  margin-bottom: .7rem;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 0 0 1px transparent;
+  transition: box-shadow .25s var(--ease-smooth);
+}
+.pvc-day:hover { box-shadow: var(--glow-lift); }
+.pvc-day.pvc-today {
+  border-color: var(--primary);
+  border-width: 1.5px;
+  box-shadow: 0 0 0 1px var(--primary-glow), 0 2px 12px var(--primary-glow);
+}
+.pvc-badge {
+  font-size: .5rem;
+  background: var(--primary);
+  color: #fff;
+  padding: .1rem .45rem;
+  border-radius: 8px;
+  margin-left: .35rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  vertical-align: middle;
+  animation: badgePop .35s var(--ease-spring);
+}
+@keyframes badgePop {
+  0% { transform: scale(.6); opacity:0; }
+  100% { transform: scale(1); opacity:1; }
+}
+.pvc-head {
+  padding: .6rem .75rem .45rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+.pvc-head::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: .75rem;
+  right: .75rem;
+  height: 1px;
+  background: var(--border);
+}
+.pvc-title { font-size: .8rem; font-weight: 800; color: var(--text); letter-spacing: -.01em; }
+.pvc-progress { font-size: .6rem; color: var(--text3); font-weight: 600; display: flex; align-items: center; gap: .25rem; }
+.pvc-progress-dots { display: inline-flex; gap: .2rem; margin-left: .25rem; }
+.pvc-progress-dots span {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--border);
+  transition: all .2s var(--ease-spring);
+}
+.pvc-progress-dots span.filled { background: var(--primary); box-shadow: 0 0 4px var(--primary-glow); }
+
+/* Meal slot as floating pill card — NOT table row */
+.pvc-row {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  padding: .35rem .7rem .35rem .65rem;
+  margin: .25rem .5rem;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all .2s var(--ease-smooth);
+  min-height: 40px;
+  background: var(--input-bg);
+  border: 1px solid transparent;
+  position: relative;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.pvc-row:last-child { margin-bottom: .35rem; }
+.pvc-row:hover {
+  background: var(--surface);
+  border-color: var(--border);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(0,0,0,.08);
+}
+.pvc-row:active { transform: scale(.97) translateY(0); }
+
+/* Color-coded left border per meal type */
+.pvc-row.meal-ranajky { border-left: 3px solid var(--meal-ranajky); background: linear-gradient(135deg, var(--meal-ranajky-bg), transparent 80%); }
+.pvc-row.meal-ranajky:hover { border-color: var(--meal-ranajky); border-left-width: 3px; }
+.pvc-row.meal-ranajky.empty-slot { border-left-color: transparent; }
+.pvc-row.meal-desiata { border-left: 3px solid var(--meal-snack); background: linear-gradient(135deg, var(--meal-snack-bg), transparent 80%); }
+.pvc-row.meal-desiata:hover { border-color: var(--meal-snack); border-left-width: 3px; }
+.pvc-row.meal-obed { border-left: 3px solid var(--meal-obed); background: linear-gradient(135deg, var(--meal-obed-bg), transparent 80%); }
+.pvc-row.meal-obed:hover { border-color: var(--meal-obed); border-left-width: 3px; }
+.pvc-row.meal-olovrant { border-left: 3px solid var(--meal-olovrant); background: linear-gradient(135deg, var(--meal-olovrant-bg), transparent 80%); }
+.pvc-row.meal-olovrant:hover { border-color: var(--meal-olovrant); border-left-width: 3px; }
+.pvc-row.meal-vecera { border-left: 3px solid var(--meal-vecera); background: linear-gradient(135deg, var(--meal-vecera-bg), transparent 80%); }
+.pvc-row.meal-vecera:hover { border-color: var(--meal-vecera); border-left-width: 3px; }
+
+/* Empty slot styling */
+.pvc-row.empty-slot {
+  border: 1.5px dashed rgba(255,255,255,.08);
+  background: transparent;
+  opacity: .6;
+  transition: all .25s var(--ease-smooth);
+}
+.pvc-row.empty-slot:hover {
+  opacity: 1;
+  border-color: var(--primary-light);
+  background: rgba(16,185,129,.04);
+  transform: translateY(-1px);
+  box-shadow: 0 0 12px rgba(16,185,129,.04);
+}
+.pvc-row.empty-slot:active { transform: scale(.97); }
+
+.pvc-row .pr-icon { font-size: 1rem; width: 26px; text-align: center; flex-shrink: 0; opacity: .85; }
+.pvc-row .pr-label {
+  font-size: .55rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--text3);
+  font-weight: 700;
+  width: 56px;
+  flex-shrink: 0;
+  opacity: .7;
+}
+.pvc-row .pr-name {
+  flex: 1;
+  font-size: .76rem;
+  font-weight: 600;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+.pr-thumb {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background-size: cover;
+  background-position: center;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  transition: transform .2s var(--ease-spring);
+}
+.pvc-row:hover .pr-thumb { transform: scale(1.08); }
+.pvc-row .pr-empty {
+  flex: 1;
+  font-size: .7rem;
+  color: var(--text3);
+  opacity: .5;
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+  font-weight: 500;
+}
+.pvc-row .pr-empty::before { content: '+'; font-weight: 700; font-size: 1rem; opacity: .6; }
+.pvc-row .pr-kcal {
+  font-size: .58rem;
+  color: var(--text3);
+  white-space: nowrap;
+  padding: .12rem .4rem;
+  border-radius: 99px;
+  background: rgba(255,255,255,.04);
+  font-weight: 600;
+}
+.pvc-row .pr-del {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,.03);
+  color: var(--text3);
+  font-size: .55rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .15s ease;
+  opacity: 0;
+}
+.pvc-row:hover .pr-del { opacity: .6; }
+.pvc-row .pr-del:hover { opacity: 1; background: rgba(239,68,68,.15); color: var(--danger); transform: scale(1.1); }
+
+/* Filled meal dot indicator */
+.pr-filled-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: all .2s var(--ease-spring);
+}
 .planner-bar { display: flex; gap: .5rem; margin-bottom: .5rem; }
 .planner-bar .pb-btn { flex: 1; padding: .5rem; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text2); font-size: .65rem; font-weight: 700; cursor: pointer; text-align: center; }
 .planner-bar .pb-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
-.planner-summary-row { display: flex; justify-content: space-around; padding: .4rem; background: var(--surface); border-radius: 14px; border: 1px solid var(--border); margin-top: .4rem; }
-.planner-summary-row .psr-item { text-align: center; }
-.planner-summary-row .psr-val { font-size: .72rem; font-weight: 800; color: var(--text); }
-.planner-summary-row .psr-label { font-size: .46rem; color: var(--text3); text-transform: uppercase; letter-spacing: .04em; font-weight: 600; }
+.planner-summary-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: .45rem .55rem;
+  background: var(--surface);
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  margin-top: .5rem;
+  gap: .4rem;
+  box-shadow: var(--card-shadow);
+}
+.planner-summary-row .psr-item { text-align: center; flex-shrink: 0; }
+.planner-summary-row .psr-val { font-size: .75rem; font-weight: 800; color: var(--text); }
+.planner-summary-row .psr-label { font-size: .48rem; color: var(--text3); text-transform: uppercase; letter-spacing: .04em; font-weight: 600; white-space: nowrap; }
+.psr-progress-wrap { display: flex; align-items: center; gap: .35rem; flex: 1; min-width: 0; }
+.psr-progress-bar { flex: 1; height: 4px; background: var(--border); border-radius: 4px; overflow: hidden; min-width: 30px; }
+.psr-progress-fill { height: 100%; background: var(--accent-gradient); border-radius: 4px; transition: width .5s var(--ease-smooth); }
+.psr-progress-label { font-size: .58rem; font-weight: 700; color: var(--primary); white-space: nowrap; }
 
 .planner-container { display: none; padding-top: .3rem; }
 .planner-today { margin-bottom: .6rem; }
@@ -368,6 +572,16 @@ body:not(.dark) {
   --text3: #a8a29e;
   --border: rgba(0,0,0,.06);
   --input-bg: rgba(255,255,255,.8);
+  --meal-ranajky-bg: rgba(16,185,129,.08);
+  --meal-ranajky-glow: rgba(16,185,129,.04);
+  --meal-obed-bg: rgba(245,158,11,.08);
+  --meal-obed-glow: rgba(245,158,11,.04);
+  --meal-vecera-bg: rgba(167,139,250,.08);
+  --meal-vecera-glow: rgba(167,139,250,.04);
+  --meal-olovrant-bg: rgba(56,189,248,.08);
+  --meal-olovrant-glow: rgba(56,189,248,.04);
+  --meal-snack-bg: rgba(244,114,182,.08);
+  --meal-snack-glow: rgba(244,114,182,.04);
   --tag-bg: #fef2f2;
   --tag-text: #dc2626;
   --primary-glow: rgba(220,38,38,.12);
