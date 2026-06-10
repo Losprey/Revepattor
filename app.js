@@ -2511,7 +2511,7 @@ function openSettings() {
         <span class="sr-value">${localStorage.getItem('childAge')||'—'} ${t('childAgeHint','rokov')} <span class="sr-arrow">›</span></span>
       </div>
       <div style="border-top:1px solid var(--border);margin:.4rem 0;"></div>
-      <div style="font-size:.65rem;font-weight:600;color:var(--text3);margin:.6rem 0 .2rem;text-transform:uppercase;letter-spacing:.05em;">🔔 ${t('Notifikácie','Notifications')}</div>
+      <div style="font-size:.65rem;font-weight:600;color:var(--text3);margin:.6rem 0 .2rem;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:.35rem;"><span>🔔 ${t('Notifikácie','Notifications')}</span><span id="notif-perm-badge" style="font-size:.6rem;padding:.1rem .35rem;border-radius:99px;font-weight:500;background:var(--border);color:var(--text2);">${({'granted':'🟢 '+t('Povolené','Allowed'),'denied':'🔴 '+t('Zakázané','Blocked'),'default':'⚪ '+t('Nepovolené','Not set')})[(typeof Notification!=='undefined'?Notification.permission:'')]||'⚪ '+t('Nepovolené','Not set')}</span></div>
       ${[['breakfastReminder','breakfast','🌅',t('Pripomenutie raňajok','Breakfast reminder')],
          ['todayCookingReminder','whatCook','🍳',t('Čo variť dnes','What to cook today')],
          ['shoppingReminder','shopping','🛒',t('Ísť nakúpiť','Go shopping')],
@@ -4710,8 +4710,15 @@ function loadShopItems() {
   // Keep only manual items (recipe auto-population removed)
   shopItems = shopItems.filter(function(it) { return it && it.source === 'manual'; });
 }
+let _mergingNow = false;
 function saveShopItems() {
   if (!Array.isArray(shopItems)) { shopItems = []; }
+  // Auto-merge duplicates before saving (unless already merging)
+  if (!_mergingNow) {
+    _mergingNow = true;
+    try { autoMergeShopItems(); } catch(e) {}
+    _mergingNow = false;
+  }
   var now = Date.now(), dev = getDeviceId();
   shopItems.forEach(function(it) {
     if (!it.createdAt) it.createdAt = now;
@@ -4719,6 +4726,29 @@ function saveShopItems() {
     it.updatedBy = dev;
   });
   localStorage.setItem('shoppingItems', JSON.stringify(shopItems));
+}
+
+function autoMergeShopItems() {
+  const merged = {};
+  let changed = 0;
+  shopItems.forEach(it => {
+    const key = norm(it.name.trim().toLowerCase());
+    if (merged[key]) {
+      const existing = merged[key];
+      const a1 = parseFloat(existing.amount) || 0;
+      const a2 = parseFloat(it.amount) || 0;
+      if (a1 && a2 && existing.unit === it.unit) {
+        existing.amount = String(a1 + a2);
+        changed++;
+      } else {
+        existing.note = (existing.note ? existing.note + '; ' : '') + it.amount + (it.unit||'');
+        changed++;
+      }
+    } else {
+      merged[key] = it;
+    }
+  });
+  if (changed) shopItems = Object.values(merged);
 }
 
 function mergeShoppingItems(localArr, remoteArr) {
@@ -4981,26 +5011,9 @@ function clearAllShopItems() {
 
 function mergeDuplicateShopItems() {
   loadShopItems();
-  const merged = {};
-  let changed = 0;
-  shopItems.forEach(it => {
-    const key = norm(it.name.trim().toLowerCase());
-    if (merged[key]) {
-      const existing = merged[key];
-      const a1 = parseFloat(existing.amount) || 0;
-      const a2 = parseFloat(it.amount) || 0;
-      if (a1 && a2 && existing.unit === it.unit) {
-        existing.amount = String(a1 + a2);
-        changed++;
-      } else {
-        existing.note = (existing.note ? existing.note + '; ' : '') + it.amount + (it.unit||'');
-        changed++;
-      }
-    } else {
-      merged[key] = it;
-    }
-  });
-  shopItems = Object.values(merged);
+  const before = shopItems.length;
+  autoMergeShopItems();
+  const changed = before - shopItems.length;
   saveShopItems();
   renderShoppingList();
   if (changed) showToast(lang==='en'?'Merged '+changed+' items.':'Zlúčených '+changed+' položiek.','success');
@@ -5930,6 +5943,51 @@ window.addEventListener('popstate', function(e) {
     }
   }
 });
+
+// ======================== EDGE SWIPE BACK GESTURE ========================
+(function() {
+  let _edgeSwipeData = null;
+  document.addEventListener('touchstart', function(e) {
+    // Only edge swipe from left edge (< 40px from left)
+    if (e.touches[0].clientX > 40) { _edgeSwipeData = null; return; }
+    // Don't swipe on inputs or when a sheet is open
+    if (e.target.closest('input, textarea, .sheet-overlay, #settings-sheet, .cooking-overlay')) { _edgeSwipeData = null; return; }
+    _edgeSwipeData = { startX: e.touches[0].clientX, startY: e.touches[0].clientY };
+  }, { passive: true });
+
+  document.addEventListener('touchmove', function(e) {
+    if (!_edgeSwipeData) return;
+    const dx = e.touches[0].clientX - _edgeSwipeData.startX;
+    const dy = Math.abs(e.touches[0].clientY - _edgeSwipeData.startY);
+    // Horizontal swipe only, minimum 80px
+    if (dx < 30 || dy > dx * 0.5) { _edgeSwipeData = null; return; }
+    // Visual hint: show a subtle edge glow when swiping
+    if (!document.getElementById('edge-swipe-indicator')) {
+      const ind = document.createElement('div');
+      ind.id = 'edge-swipe-indicator';
+      ind.style.cssText = 'position:fixed;left:0;top:0;bottom:0;width:4px;background:var(--primary);z-index:99998;opacity:0;transition:opacity .15s;border-radius:0 4px 4px 0;';
+      document.body.appendChild(ind);
+    }
+    const opacity = Math.min(1, (dx - 30) / 120);
+    document.getElementById('edge-swipe-indicator').style.opacity = opacity;
+  }, { passive: true });
+
+  document.addEventListener('touchend', function(e) {
+    if (!_edgeSwipeData) return;
+    const dx = e.changedTouches[0].clientX - _edgeSwipeData.startX;
+    const dy = Math.abs(e.changedTouches[0].clientY - _edgeSwipeData.startY);
+    const indicator = document.getElementById('edge-swipe-indicator');
+    if (indicator) { indicator.style.opacity = '0'; setTimeout(function() { if (indicator.parentNode) indicator.remove(); }, 300); }
+    if (dx < 80 || dy > dx * 0.6) { _edgeSwipeData = null; return; }
+    _edgeSwipeData = null;
+    // Edge swipe detected — go back
+    if (closeTopModal()) {
+      // Modal was closed, don't also navigate
+    } else {
+      history.back();
+    }
+  }, { passive: true });
+})();
 
 // Ensure we always have at least 2 history entries on page load
 if (history.length <= 1) {
