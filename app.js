@@ -1284,9 +1284,11 @@ function initPlannerParallax() {
   if (_plannerScrollHandler) { document.removeEventListener('scroll', _plannerScrollHandler, { passive: true }); }
   _plannerScrollHandler = function() {
     var hero = document.getElementById('planner-hero');
-    if (!hero || document.getElementById('planner-container').style.display === 'none') return;
+    var pip = document.getElementById('planner-info-panel');
+    if (!hero || !pip || document.getElementById('planner-container').style.display === 'none') return;
     var scrollY = window.pageYOffset || document.documentElement.scrollTop;
     hero.classList.toggle('collapsed', scrollY > 20);
+    pip.classList.toggle('visible', scrollY > 80);
   };
   document.addEventListener('scroll', _plannerScrollHandler, { passive: true });
 }
@@ -4295,6 +4297,15 @@ function renderPlanner() {
   var maxMeals = DAYS.length * totalSlots;
   var mealPct = maxMeals > 0 ? Math.round((totalMeals / maxMeals) * 100) : 0;
   document.getElementById('planner-summary').innerHTML = '<div class="planner-summary-row"><div class="psr-item"><div class="psr-val">'+totalMeals+'/'+maxMeals+'</div><div class="psr-label">'+(lang==='en'?'Planned':'Naplán')+'</div></div><div class="psr-item"><div class="psr-val">🔥 '+totalKcal+'</div><div class="psr-label">kcal</div></div><div class="psr-item"><div class="psr-val">⏱ '+totalTime+'\'</div><div class="psr-label">'+(lang==='en'?'Prep':'Var')+'</div></div><div class="psr-progress-wrap"><div class="psr-progress-bar"><div class="psr-progress-fill" style="width:'+mealPct+'%"></div></div><div class="psr-progress-label">'+mealPct+'%</div></div></div>';
+
+  // Floating info panel
+  var pip = document.getElementById('planner-info-panel');
+  if (pip) {
+    document.getElementById('pip-meals').textContent = totalMeals+'/'+maxMeals;
+    document.getElementById('pip-kcal').textContent = totalKcal;
+    document.getElementById('pip-time').textContent = totalTime;
+    document.getElementById('pip-fill').style.width = mealPct+'%';
+  }
 }
 
 function goToWeek(offset) {
@@ -4372,10 +4383,12 @@ function setPlanType(type) {
   if (activeBtn) springBounce(activeBtn);
 }
 function getDayIcon(dayIndex, filledCount) {
-  if (filledCount === 0) return '📅';
-  if (filledCount <= 2) return '📋';
-  if (filledCount <= 4) return '📝';
-  return '✅';
+  // Thematic icons per day: pondelok🌙 utorok🔥 streda💧 stvrtok🌿 piatok🎉 sobota☀️ nedela🧘
+  var icons = ['🌙', '🔥', '💧', '🌿', '🎉', '☀️', '🧘'];
+  var icon = icons[dayIndex] || '📅';
+  if (filledCount === 0) return icon;
+  if (filledCount === 5) return icon; // all filled, stays thematic
+  return icon;
 }
 function getSlotRecipe(entry) {
   if (!entry) return null;
@@ -4525,6 +4538,9 @@ function selectRecipe(day, slot, id, wk) {
   localStorage.setItem('mealPlan', JSON.stringify(mealPlan));
   localStorage.setItem('mealPlanKids', JSON.stringify(mealPlanKids));
   renderPlanner();
+  // Confetti if day is fully filled
+  var filled = Object.values(weekPlan[day]).filter(Boolean).length;
+  if (filled === MEALS.length) triggerConfetti();
   if (day === DAYS[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1] && !plannerIsVisible()) renderDashboard();
 }
 
@@ -6214,6 +6230,32 @@ window.addEventListener('unhandledrejection', function(e) {
 function haptic(ms) {
   try {
     if (navigator.vibrate) navigator.vibrate(ms || 8);
+  } catch(_) {}
+}
+
+// =================== CONFETTI ===================
+function triggerConfetti() {
+  try {
+    var colors = ['#10b981','#34d399','#06b6d4','#f59e0b','#a78bfa','#f472b6','#ef4444'];
+    for (var i = 0; i < 30; i++) {
+      var c = document.createElement('div');
+      c.style.cssText = 'position:fixed;width:6px;height:6px;border-radius:2px;z-index:99999;pointer-events:none;' +
+        'background:' + colors[Math.floor(Math.random() * colors.length)] + ';' +
+        'left:' + (Math.random() * 100) + 'vw;' +
+        'top:-10px;' +
+        'opacity:' + (.6 + Math.random() * .4) + ';' +
+        'transform:rotate(' + (Math.random() * 360) + 'deg);';
+      document.body.appendChild(c);
+      var x = parseFloat(c.style.left);
+      var drift = (Math.random() - .5) * 100;
+      var fall = 300 + Math.random() * 400;
+      var rot = 360 + Math.random() * 720;
+      c.animate([
+        { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
+        { transform: 'translateY(' + fall + 'px) translateX(' + drift + 'px) rotate(' + rot + 'deg)', opacity: 0 }
+      ], { duration: 1200 + Math.random() * 800, easing: 'cubic-bezier(.25,.46,.45,.94)', fill: 'forwards' });
+      setTimeout(function() { c.remove(); }, 2500);
+    }
   } catch(_) {}
 }
 

@@ -172,6 +172,13 @@
       <button class="btn" onclick="resetWeek()" style="font-size:.7rem;padding:.3rem .65rem;background:var(--surface);border:1px solid var(--border);">↺ Reset</button>
     </div>
   </div>
+  <!-- FLOATING INFO PANEL -->
+  <div class="planner-info-panel" id="planner-info-panel">
+    <span class="pip-item"><span class="pip-val" id="pip-meals">0/35</span> jedál</span>
+    <span class="pip-item">🔥 <span class="pip-val" id="pip-kcal">0</span></span>
+    <span class="pip-item">⏱ <span class="pip-val" id="pip-time">0</span>min</span>
+    <div class="pip-progress"><div class="pip-fill" id="pip-fill" style="width:0%"></div></div>
+  </div>
   <!-- WEEK NAV -->
   <div class="planner-week-nav" id="planner-week-nav">
     <button class="pln-btn active" onclick="goToWeek(0)" id="pln-this">Tento týždeň</button>
