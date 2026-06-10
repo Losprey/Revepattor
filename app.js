@@ -3674,6 +3674,9 @@ function switchTab(tab) {
     if (boardView) {
       try { renderBoard(); } catch(e) {}
     }
+  } else if (tab === 'tasks' && tasksContainer) {
+    tasksContainer.style.display = 'block'; applyPageTransition(tasksContainer, 350);
+    try { renderTasks(); } catch(e) {}
   }
 }
 
