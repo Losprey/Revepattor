@@ -1019,6 +1019,10 @@ body:not(.dark) .recipe-card .fav-btn.fav-active { background: linear-gradient(1
 
 input, textarea, select, [contenteditable] { -webkit-user-select: text; user-select: text; }
 
+/* ===== FOCUS VISIBLE ===== */
+:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 4px; }
+button:focus:not(:focus-visible), .btn:focus:not(:focus-visible) { outline: none; }
+
 /* ===== UTILITIES ===== */
 .import-hidden { display: none; }
 .skeleton { background: linear-gradient(90deg, var(--border) 25%, var(--hover-bg) 50%, var(--border) 75%); background-size: 200% 100%; animation: shimmer 1.4s ease infinite; border-radius: var(--radius-md); }
@@ -2020,3 +2024,14 @@ body.header-collapsed .controls-bar { top: 0; }
 .seasonal-recipe { background: var(--section-bg); border-radius: var(--radius-sm); padding: .35rem .5rem; font-size: .72rem; color: var(--text); cursor: pointer; transition: all .15s ease; display: flex; align-items: center; gap: .3rem; font-weight: 500; }
 .seasonal-recipe:hover { background: var(--hover-bg); }
 .seasonal-recipe:active { transform: scale(.97); }
+
+/* ======================== UX IMPROVEMENTS ======================== */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+html {
+  scroll-behavior: smooth;
+}

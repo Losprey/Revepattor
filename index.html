@@ -52,13 +52,15 @@
   </style>
 </div>
 <script>
-  // Hide splash when app is ready
-  // Splash fade fast
-document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(function() {
-      var s = document.getElementById('splash');
-      if (s) { s.style.opacity = '0'; setTimeout(function() { s.remove(); }, 600); }
-    }, 1200);
+  // Hide splash - wait for app.js to signal ready, fallback after 3s
+  window._hideSplash = function() {
+    var s = document.getElementById('splash');
+    if (!s) return;
+    s.style.opacity = '0';
+    setTimeout(function() { if (s.parentNode) s.parentNode.removeChild(s); }, 400);
+  };
+  document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(window._hideSplash, 3000);
   });
 </script>
 

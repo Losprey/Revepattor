@@ -237,6 +237,8 @@ function initFirebaseAuth() {
         updateAuthUI();
       }
     }
+    // Hide splash after first auth state is resolved
+    if (window._hideSplash) window._hideSplash();
   });
 }
 
@@ -258,17 +260,19 @@ function signInWithGoogle() {
 }
 
 function signOutUser() {
+  showConfirmModal(lang==='en'?'Sign out from Mealnest?':'Odhlásiť sa z Mealnestu?', '👋', lang==='en'?'Sign out':'Odhlásiť', function() {
+    
   if (!firebase.auth) return;
   firebase.auth().signOut().then(() => {
     authUser = null;
-    authIsGuest = true;
+    authIsGuest = false;
     setStoreNamespace('guest_');
     localStorage.removeItem('authUser');
-    localStorage.setItem('authGuest', '1');
+    localStorage.removeItem('authGuest');
+    document.getElementById('login-overlay').style.display = 'flex';
     updateAuthUI();
-    // onAuthStateChanged callback už prekreslí UI a načíta správny namespace
-    // location.reload() nie je potrebný a spôsobuje zbytočné bliknutie
   }).catch(() => {});
+  });
 }
 
 function continueAsGuest() {
@@ -678,6 +682,9 @@ async function aiIngredientSuggest() {
 }
 
 async function aiDailyTip() {
+  var btn = document.getElementById('dash-ai-tip-btn');
+  var origHTML = btn ? btn.innerHTML : '';
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span style="display:inline-block;animation:spin .6s linear infinite">⏳</span> ' + (lang==='en'?'Thinking...':'Premýšľam...'); }
   const season = ['jar','jar','jar','leto','leto','leto','leto','leto','jeseň','jeseň','jeseň','zima'][new Date().getMonth()];
   const prompt = lang==='en'
     ? 'Give me one short cooking tip for today. Season: '+season+'. Be witty, original, max 2 sentences. Reply in English.'
@@ -687,6 +694,8 @@ async function aiDailyTip() {
     document.getElementById('dash-message').textContent = reply;
     document.getElementById('dash-message-sub').textContent = t('🤖 Vygenerované AI','🤖 AI-generated');
   }
+  // Restore button
+  if (btn) { btn.disabled = false; btn.innerHTML = origHTML || ('🤖 <span id="dash-ai-label">' + t('AI tip dňa','AI tip of the day') + '</span>'); }
 }
 
 async function aiSuggestForSlot(dayKey, slotKey) {
@@ -2905,6 +2914,7 @@ function getCurrentRecipe() {
 }
 
 function viewRecipe(id) {
+  try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch(e) {}
   viewingId = id;
   basePortion = 2;
   currentPortion = basePortion;
@@ -5061,6 +5071,8 @@ function closeShopSheet() {
 }
 
 function saveShopItem() {
+  // Auto-merge duplicates
+  try { mergeDuplicateShopItems(); } catch(e) {}
   const nameEl = document.getElementById('shop-item-name');
   const amountEl = document.getElementById('shop-item-amount');
   const unitEl = document.getElementById('shop-item-unit');
@@ -6186,6 +6198,17 @@ renderDashboard = function() {
 };
 
 
+
+// ======================== CLOSE MODAL ON OUTSIDE CLICK ========================
+document.addEventListener('click', function(e) {
+  var modal = e.target.closest('.modal-overlay.active, #confirm-modal');
+  if (modal && e.target === modal) {
+    // Clicked on overlay background, close it
+    var closeBtn = modal.querySelector('.modal-close, .sheet-close');
+    if (closeBtn) closeBtn.click();
+    else { modal.classList.remove('active'); setTimeout(function() { modal.style.display = 'none'; }, 200); }
+  }
+});
 
 // ======================== TOAST NOTIFICATIONS ========================
 function showToast(msg, type, duration) {
