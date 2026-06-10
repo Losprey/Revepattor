@@ -3544,6 +3544,7 @@ function dismissTip() {
 }
 
 function switchTab(tab) {
+  haptic(8);
   try { localStorage.setItem('lastTab', tab); } catch(e) {}
   document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
   const btn = document.querySelector(`.nav-item[data-tab="${tab}"]`);
@@ -4276,19 +4277,25 @@ function renderPlanner() {
 
 function goToWeek(offset) {
   var grid = document.getElementById('planner-week-grid');
-  var isNext = offset > plannerWeekOffset;
-  plannerWeekOffset = offset;
-  _selectedPlannerDay = 0;
-  renderPlanner();
   if (grid) {
-    grid.classList.remove('slide-in', 'slide-in-back');
-    // Force reflow for animation to replay
+    grid.classList.remove('morph-out', 'morph-in');
+    // Force reflow
     void grid.offsetWidth;
-    grid.classList.add(isNext ? 'slide-in' : 'slide-in-back');
-    setTimeout(function() {
-      grid.classList.remove('slide-in', 'slide-in-back');
-    }, 500);
+    grid.classList.add('morph-out');
   }
+  haptic(12);
+  setTimeout(function() {
+    plannerWeekOffset = offset;
+    _selectedPlannerDay = 0;
+    renderPlanner();
+    var grid2 = document.getElementById('planner-week-grid');
+    if (grid2) {
+      grid2.classList.remove('morph-out', 'morph-in');
+      void grid2.offsetWidth;
+      grid2.classList.add('morph-in');
+      setTimeout(function() { grid2.classList.remove('morph-in'); }, 500);
+    }
+  }, 300);
 }
 
 function showDayDetail(dayKey) {
@@ -6180,6 +6187,13 @@ window.addEventListener('unhandledrejection', function(e) {
   console.warn('Unhandled promise rejection:', e.reason);
   e.preventDefault();
 });
+
+// =================== HAPTIC FEEDBACK ===================
+function haptic(ms) {
+  try {
+    if (navigator.vibrate) navigator.vibrate(ms || 8);
+  } catch(_) {}
+}
 
 // =================== BUTTON TOUCH RIPPLE ===================
 function addRipple(e, el) {
