@@ -4262,7 +4262,7 @@ function renderPlanner() {
           +'<button class="pvc-meal-del" onclick="event.stopPropagation();removeSlot(\''+d+'\',\''+m.id+'\',\''+weekKey+'\')">✕</button>'
           +'</div>'; }
       else {
-        s += '<div class="pvc-meal empty" onclick="pickRecipe(\''+d+'\',\''+m.id+'\',\''+weekKey+'\')"><button class="pvc-meal-add-btn"><span class="pvc-meal-add-icon">+</span>'+(lang==='en'?'Add':'Pridať')+'</button></div>'; }
+        s += '<div class="pvc-meal empty '+mealClass+'" onclick="pickRecipe(\''+d+'\',\''+m.id+'\',\''+weekKey+'\')"><div class="pvc-meal-header"><span class="pvc-meal-icon">'+m.icon+'</span><span class="pvc-meal-label">'+mealLabel(m.id)+'</span></div><button class="pvc-meal-add-btn"><span class="pvc-meal-add-icon">+</span>'+(lang==='en'?'Add':'Pridať')+'</button></div>'; }
     });
     s += '</div></div>';
   });

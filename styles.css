@@ -339,75 +339,116 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: rgba(22
   .pvc-meals-grid { grid-template-columns: 1fr; }
 }
 
-/* ===== MEAL CARD (not a row!) ===== */
+/* ===== MEAL CARD ===== */
 .pvc-meal {
   border-radius: 14px;
   cursor: pointer;
   transition: all .2s var(--ease-smooth);
   position: relative;
   overflow: hidden;
-  min-height: 56px;
+  min-height: 64px;
   display: flex;
   flex-direction: column;
 }
 .pvc-meal.filled {
-  background: var(--input-bg);
-  border: 1px solid var(--border);
-  box-shadow: 0 1px 3px rgba(0,0,0,.04);
+  border: 1px solid transparent;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06);
 }
 .pvc-meal.filled:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 14px rgba(0,0,0,.1);
-  border-color: rgba(255,255,255,.1);
+  box-shadow: 0 4px 14px rgba(0,0,0,.12);
 }
 .pvc-meal.filled:active { transform: scale(.96); }
 
-/* Colored top accent per meal type */
-.pvc-meal.meal-ranajky.filled { border-top: 2.5px solid var(--meal-ranajky); }
-.pvc-meal.meal-ranajky.filled:hover { background: linear-gradient(180deg, var(--meal-ranajky-bg), var(--input-bg) 60%); }
-.pvc-meal.meal-desiata.filled { border-top: 2.5px solid var(--meal-snack); }
-.pvc-meal.meal-desiata.filled:hover { background: linear-gradient(180deg, var(--meal-snack-bg), var(--input-bg) 60%); }
-.pvc-meal.meal-obed.filled { border-top: 2.5px solid var(--meal-obed); }
-.pvc-meal.meal-obed.filled:hover { background: linear-gradient(180deg, var(--meal-obed-bg), var(--input-bg) 60%); }
-.pvc-meal.meal-olovrant.filled { border-top: 2.5px solid var(--meal-olovrant); }
-.pvc-meal.meal-olovrant.filled:hover { background: linear-gradient(180deg, var(--meal-olovrant-bg), var(--input-bg) 60%); }
-.pvc-meal.meal-vecera.filled { border-top: 2.5px solid var(--meal-vecera); }
-.pvc-meal.meal-vecera.filled:hover { background: linear-gradient(180deg, var(--meal-vecera-bg), var(--input-bg) 60%); }
+/* ===== MEAL TYPE COLORS — each type gets full identity ===== */
+/* Raňajky — zelená */
+.pvc-meal.meal-ranajky.filled { background: linear-gradient(135deg, var(--meal-ranajky-bg), var(--input-bg) 70%); border-color: rgba(16,185,129,.15); }
+.pvc-meal.meal-ranajky.filled:hover { background: linear-gradient(135deg, var(--meal-ranajky-bg), var(--input-bg) 40%); border-color: rgba(16,185,129,.3); }
+.pvc-meal.meal-ranajky .pvc-meal-icon { color: var(--meal-ranajky); }
+
+/* Desiata — ružová */
+.pvc-meal.meal-desiata.filled { background: linear-gradient(135deg, var(--meal-snack-bg), var(--input-bg) 70%); border-color: rgba(244,114,182,.15); }
+.pvc-meal.meal-desiata.filled:hover { background: linear-gradient(135deg, var(--meal-snack-bg), var(--input-bg) 40%); border-color: rgba(244,114,182,.3); }
+.pvc-meal.meal-desiata .pvc-meal-icon { color: var(--meal-snack); }
+
+/* Obed — oranžová */
+.pvc-meal.meal-obed.filled { background: linear-gradient(135deg, var(--meal-obed-bg), var(--input-bg) 70%); border-color: rgba(245,158,11,.15); }
+.pvc-meal.meal-obed.filled:hover { background: linear-gradient(135deg, var(--meal-obed-bg), var(--input-bg) 40%); border-color: rgba(245,158,11,.3); }
+.pvc-meal.meal-obed .pvc-meal-icon { color: var(--meal-obed); }
+
+/* Olovrant — modrá */
+.pvc-meal.meal-olovrant.filled { background: linear-gradient(135deg, var(--meal-olovrant-bg), var(--input-bg) 70%); border-color: rgba(56,189,248,.15); }
+.pvc-meal.meal-olovrant.filled:hover { background: linear-gradient(135deg, var(--meal-olovrant-bg), var(--input-bg) 40%); border-color: rgba(56,189,248,.3); }
+.pvc-meal.meal-olovrant .pvc-meal-icon { color: var(--meal-olovrant); }
+
+/* Večera — fialová */
+.pvc-meal.meal-vecera.filled { background: linear-gradient(135deg, var(--meal-vecera-bg), var(--input-bg) 70%); border-color: rgba(167,139,250,.15); }
+.pvc-meal.meal-vecera.filled:hover { background: linear-gradient(135deg, var(--meal-vecera-bg), var(--input-bg) 40%); border-color: rgba(167,139,250,.3); }
+.pvc-meal.meal-vecera .pvc-meal-icon { color: var(--meal-vecera); }
+
+/* Colored left strip */
+.pvc-meal.filled::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: .4rem;
+  bottom: .4rem;
+  width: 3px;
+  border-radius: 3px;
+  transition: all .2s var(--ease-smooth);
+}
+.pvc-meal.meal-ranajky.filled::before { background: var(--meal-ranajky); box-shadow: 0 0 6px var(--meal-ranajky-glow); }
+.pvc-meal.meal-desiata.filled::before { background: var(--meal-snack); box-shadow: 0 0 6px var(--meal-snack-glow); }
+.pvc-meal.meal-obed.filled::before { background: var(--meal-obed); box-shadow: 0 0 6px var(--meal-obed-glow); }
+.pvc-meal.meal-olovrant.filled::before { background: var(--meal-olovrant); box-shadow: 0 0 6px var(--meal-olovrant-glow); }
+.pvc-meal.meal-vecera.filled::before { background: var(--meal-vecera); box-shadow: 0 0 6px var(--meal-vecera-glow); }
+.pvc-meal.filled:hover::before { top: .2rem; bottom: .2rem; }
 
 .pvc-meal-header {
   display: flex;
   align-items: center;
-  gap: .3rem;
-  padding: .3rem .45rem 0;
+  gap: .35rem;
+  padding: .4rem .45rem 0 .65rem;
 }
-.pvc-meal-icon { font-size: .7rem; flex-shrink: 0; }
+.pvc-meal-icon {
+  font-size: .85rem;
+  flex-shrink: 0;
+  line-height: 1;
+}
 .pvc-meal-label {
   font-size: .5rem;
   text-transform: uppercase;
   letter-spacing: .06em;
-  color: var(--text3);
-  font-weight: 700;
-  opacity: .6;
+  font-weight: 800;
+  padding: .08rem .35rem;
+  border-radius: 4px;
+  line-height: 1.2;
 }
+.pvc-meal.meal-ranajky .pvc-meal-label { background: var(--meal-ranajky-bg); color: var(--meal-ranajky); }
+.pvc-meal.meal-desiata .pvc-meal-label { background: var(--meal-snack-bg); color: var(--meal-snack); }
+.pvc-meal.meal-obed .pvc-meal-label { background: var(--meal-obed-bg); color: var(--meal-obed); }
+.pvc-meal.meal-olovrant .pvc-meal-label { background: var(--meal-olovrant-bg); color: var(--meal-olovrant); }
+.pvc-meal.meal-vecera .pvc-meal-label { background: var(--meal-vecera-bg); color: var(--meal-vecera); }
+
 .pvc-meal-body {
   display: flex;
   align-items: center;
   gap: .4rem;
-  padding: .15rem .45rem .35rem;
+  padding: .15rem .45rem .35rem .65rem;
   flex: 1;
   min-width: 0;
 }
 .pvc-meal-thumb {
-  width: 26px;
-  height: 26px;
-  border-radius: 7px;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
   background-size: cover;
   background-position: center;
   flex-shrink: 0;
   border: 1px solid var(--border);
   transition: transform .2s var(--ease-spring);
 }
-.pvc-meal.filled:hover .pvc-meal-thumb { transform: scale(1.12) rotate(2deg); }
+.pvc-meal.filled:hover .pvc-meal-thumb { transform: scale(1.15) rotate(3deg); }
 .pvc-meal-name {
   flex: 1;
   font-size: .72rem;
@@ -422,21 +463,22 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: rgba(22
   font-size: .5rem;
   color: var(--text3);
   white-space: nowrap;
-  padding: .08rem .35rem;
+  padding: .1rem .35rem;
   border-radius: 99px;
   background: rgba(255,255,255,.035);
   font-weight: 600;
+  backdrop-filter: blur(4px);
 }
 .pvc-meal-del {
   position: absolute;
-  top: .2rem;
-  right: .2rem;
+  top: .15rem;
+  right: .15rem;
   width: 18px;
   height: 18px;
   border-radius: 50%;
   border: none;
-  background: rgba(0,0,0,.35);
-  color: rgba(255,255,255,.5);
+  background: rgba(0,0,0,.3);
+  color: rgba(255,255,255,.4);
   font-size: .45rem;
   cursor: pointer;
   display: flex;
@@ -445,58 +487,67 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: rgba(22
   opacity: 0;
   transition: all .15s ease;
   backdrop-filter: blur(4px);
+  z-index: 2;
 }
-.pvc-meal.filled:hover .pvc-meal-del { opacity: .8; }
-.pvc-meal-del:hover { opacity: 1 !important; background: rgba(239,68,68,.6); color: #fff; transform: scale(1.15); }
+.pvc-meal.filled:hover .pvc-meal-del { opacity: 1; }
+.pvc-meal-del:hover { background: rgba(239,68,68,.7) !important; color: #fff; transform: scale(1.15); }
 
-/* Empty meal slot */
+/* Empty meal slot — now shows meal type icon + label */
 .pvc-meal.empty {
   border: 1.5px dashed rgba(255,255,255,.06);
   background: transparent;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 56px;
+  flex-direction: column;
+  min-height: 64px;
   transition: all .25s var(--ease-smooth);
   border-radius: 14px;
 }
+.pvc-meal.empty .pvc-meal-header { padding: .35rem .45rem 0 .65rem; }
+.pvc-meal.empty .pvc-meal-icon { opacity: .35; filter: grayscale(.6); }
+.pvc-meal.empty .pvc-meal-label { opacity: .35; background: var(--border) !important; color: var(--text3) !important; }
 .pvc-meal.empty:hover {
   border-color: var(--primary-light);
-  background: rgba(16,185,129,.04);
+  background: rgba(16,185,129,.03);
   transform: translateY(-1px);
 }
+.pvc-meal.empty:hover .pvc-meal-icon { opacity: .6; filter: none; }
+.pvc-meal.empty:hover .pvc-meal-label { opacity: .6; }
 .pvc-meal.empty:active { transform: scale(.95); }
 .pvc-meal-add-btn {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: .3rem;
-  font-size: .65rem;
+  font-size: .62rem;
   color: var(--text3);
   font-weight: 500;
-  opacity: .4;
+  opacity: .35;
   transition: all .2s ease;
   background: none;
   border: none;
   cursor: pointer;
-  padding: .3rem .5rem;
+  padding: .15rem .5rem .3rem;
   border-radius: 99px;
+  width: 100%;
 }
 .pvc-meal.empty:hover .pvc-meal-add-btn { opacity: .8; color: var(--primary-light); }
 .pvc-meal-add-icon {
-  font-size: .9rem;
-  width: 22px;
-  height: 22px;
+  font-size: .85rem;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
-  background: rgba(255,255,255,.04);
+  background: rgba(255,255,255,.03);
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all .2s var(--ease-spring);
+  flex-shrink: 0;
 }
 .pvc-meal.empty:hover .pvc-meal-add-icon { background: var(--primary); color: #fff; transform: rotate(90deg); }
 
 /* Custom meal special styling */
-.pvc-meal.custom { border-top-color: var(--text3) !important; border-top-style: dashed; }
+.pvc-meal.custom::before { opacity: .5; }
+.pvc-meal.custom .pvc-meal-label { background: var(--border) !important; color: var(--text3) !important; font-style: italic; }
 .planner-bar { display: flex; gap: .5rem; margin-bottom: .5rem; }
 .planner-bar .pb-btn { flex: 1; padding: .5rem; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text2); font-size: .65rem; font-weight: 700; cursor: pointer; text-align: center; }
 .planner-bar .pb-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
