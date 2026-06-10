@@ -6183,22 +6183,28 @@ window.addEventListener('unhandledrejection', function(e) {
 
 // =================== BUTTON TOUCH RIPPLE ===================
 function addRipple(e, el) {
-  var btn = el || e.currentTarget;
-  if (!btn || typeof btn.getBoundingClientRect !== 'function') return;
-  var rect = btn.getBoundingClientRect();
-  var ripple = document.createElement('span');
-  ripple.className = 'btn-ripple';
-  var size = Math.max(rect.width, rect.height) * 1.5;
-  var cx = (e.clientX || rect.left + rect.width/2) - rect.left;
-  var cy = (e.clientY || rect.top + rect.height/2) - rect.top;
-  ripple.style.width = ripple.style.height = size + 'px';
-  ripple.style.left = (cx - size/2) + 'px';
-  ripple.style.top = (cy - size/2) + 'px';
-  btn.appendChild(ripple);
-  setTimeout(function() { ripple.remove(); }, 500);
+  try {
+    var btn = el || e.currentTarget;
+    if (!btn || typeof btn.getBoundingClientRect !== 'function') return;
+    var rect = btn.getBoundingClientRect();
+    var ripple = document.createElement('span');
+    ripple.className = 'btn-ripple';
+    var size = Math.max(rect.width, rect.height) * 1.5;
+    var cx = (e.clientX || rect.left + rect.width/2) - rect.left;
+    var cy = (e.clientY || rect.top + rect.height/2) - rect.top;
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = (cx - size/2) + 'px';
+    ripple.style.top = (cy - size/2) + 'px';
+    btn.appendChild(ripple);
+    setTimeout(function() { ripple.remove(); }, 500);
+  } catch(_) { /* silent */ }
 }
 document.addEventListener('click', function(e) {
-  var btn = e.target.closest('.btn, .nav-item, .topbar-btn, .age-btn, .pln-btn, .plan-type-btn, .pa-btn, .sa-btn, .shop-add-btn, .fab-trigger, .hero-btn');
-  if (btn && !btn.closest('.bottom-nav')) addRipple(e, btn);
+  try {
+    var target = e.target;
+    if (!target || !target.closest) return;
+    var btn = target.closest('.btn, .nav-item, .age-btn, .pln-btn, .plan-type-btn, .pa-btn, .shop-add-btn, .fab-trigger, .hero-btn');
+    if (btn && !btn.closest('.bottom-nav')) addRipple(e, btn);
+  } catch(_) {}
 }, { passive: true });
 

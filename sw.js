@@ -1,4 +1,4 @@
-var CACHE = 'mealnest-v9';
+var CACHE = 'mealnest-v10';
 var PRECACHE = [
   'recipes-default.json',
   'manifest.json',
