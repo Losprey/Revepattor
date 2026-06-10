@@ -2314,9 +2314,15 @@ function render() {
   } catch(e) { var el = document.getElementById('boot-status'); if (el) { el.style.display = 'block'; el.style.background = 'rgba(200,0,0,.92)'; el.textContent = '❌ render: ' + (e.message || ''); } }
 }
 
+let searchTimer;
+let searchValue = '';
 document.getElementById('search').addEventListener('input', function() {
   document.getElementById('search-clear').style.display = this.value ? 'block' : 'none';
-  render();
+  searchValue = this.value;
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(function() {
+    render();
+  }, 150);
 });
 document.getElementById('filter-category').addEventListener('change', render);
 
