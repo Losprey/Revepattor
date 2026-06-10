@@ -5953,14 +5953,18 @@ window.addEventListener('popstate', function(e) {
     // Don't swipe on inputs or when a sheet is open
     if (e.target.closest('input, textarea, .sheet-overlay, #settings-sheet, .cooking-overlay')) { _edgeSwipeData = null; return; }
     _edgeSwipeData = { startX: e.touches[0].clientX, startY: e.touches[0].clientY };
+    // Cancel tab swipe when edge swipe is active
+    if (typeof _swipeTabData !== 'undefined') _swipeTabData = null;
   }, { passive: true });
 
   document.addEventListener('touchmove', function(e) {
     if (!_edgeSwipeData) return;
     const dx = e.touches[0].clientX - _edgeSwipeData.startX;
     const dy = Math.abs(e.touches[0].clientY - _edgeSwipeData.startY);
-    // Horizontal swipe only, minimum 80px
-    if (dx < 30 || dy > dx * 0.5) { _edgeSwipeData = null; return; }
+    // Horizontal swipe only, minimum ~20px to show indicator
+    if (dx < 20 || dy > dx * 0.5) { _edgeSwipeData = null; return; }
+    // Cancel tab swipe while edge swipe is active
+    if (typeof _swipeTabData !== 'undefined') _swipeTabData = null;
     // Visual hint: show a subtle edge glow when swiping
     if (!document.getElementById('edge-swipe-indicator')) {
       const ind = document.createElement('div');
@@ -5968,9 +5972,10 @@ window.addEventListener('popstate', function(e) {
       ind.style.cssText = 'position:fixed;left:0;top:0;bottom:0;width:4px;background:var(--primary);z-index:99998;opacity:0;transition:opacity .15s;border-radius:0 4px 4px 0;';
       document.body.appendChild(ind);
     }
-    const opacity = Math.min(1, (dx - 30) / 120);
+    const opacity = Math.min(1, (dx - 20) / 120);
     document.getElementById('edge-swipe-indicator').style.opacity = opacity;
-  }, { passive: true });
+    e.preventDefault();
+  }, { passive: false });
 
   document.addEventListener('touchend', function(e) {
     if (!_edgeSwipeData) return;
@@ -5980,6 +5985,8 @@ window.addEventListener('popstate', function(e) {
     if (indicator) { indicator.style.opacity = '0'; setTimeout(function() { if (indicator.parentNode) indicator.remove(); }, 300); }
     if (dx < 80 || dy > dx * 0.6) { _edgeSwipeData = null; return; }
     _edgeSwipeData = null;
+    // Cancel any tab swipe
+    if (typeof _swipeTabData !== 'undefined') _swipeTabData = null;
     // Edge swipe detected — go back
     if (closeTopModal()) {
       // Modal was closed, don't also navigate
