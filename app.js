@@ -350,17 +350,21 @@ function getSettingsAuthHTML() {
   return '';
 }
 
-// Wait for Firebase SDK to load, then init
+// Wait for Firebase SDK to load (max 5s), then init with small delay to let app.js finish parsing
 (function waitForFirebaseSDK(retries) {
   if (typeof firebase !== 'undefined' && firebase.initializeApp) {
-    initFirebase();
-    initFirebaseAuth();
+    setTimeout(function() {
+      initFirebase();
+      initFirebaseAuth();
+    }, 50);
   } else if (retries > 0) {
     setTimeout(waitForFirebaseSDK, 200, retries - 1);
   } else {
     console.warn('Firebase SDK not loaded after 5s');
-    initFirebase();
-    initFirebaseAuth();
+    setTimeout(function() {
+      initFirebase();
+      initFirebaseAuth();
+    }, 50);
   }
 }(25)); // max ~5s wait
 
