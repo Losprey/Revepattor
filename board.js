@@ -1,5 +1,7 @@
 // ======================== 📌 RODINNÁ NÁSTENKA (BOARD) ========================
-
+(function() {
+  try {
+    // Wrapped in try-catch to prevent crashing the app
 let boardCards = [];
 const BOARD_REACTIONS = ['👍', '❤️', '😂', '🎉', '😢', '😡'];
 
@@ -308,3 +310,8 @@ if (document.readyState === 'complete' || document.readyState === 'interactive')
     setTimeout(patchBoardFirebaseInit, 1500);
   });
 }
+
+  } catch(e) {
+    console.error('📌 Board error:', e);
+  }
+})();
