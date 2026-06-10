@@ -284,9 +284,7 @@ function timeAgo(ts) {
   return days + ' ' + (days === 1 ? (lang==='en'?'day ago':'dňom') : (lang==='en'?'days ago':'dňami'));
 }
 
-// Hook into Firebase family connect
-// This should be called after connectToFamily sets familyDbRef
-(function patchBoardFirebaseInit() {
+function patchBoardFirebaseInit() {
   var origConnectToFamily = window.connectToFamily;
   if (origConnectToFamily) {
     // Already defined (app.js loaded first)
@@ -300,4 +298,13 @@ function timeAgo(ts) {
   }, 500);
   // Stop checking after 30s
   setTimeout(function() { clearInterval(checkInterval); }, 30000);
-})();
+}
+
+// Wait for app to be ready before starting Firebase sync
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  setTimeout(patchBoardFirebaseInit, 1500);
+} else {
+  document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(patchBoardFirebaseInit, 1500);
+  });
+}
