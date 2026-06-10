@@ -980,7 +980,7 @@ body[data-season="zima"] .planner-week-nav .pln-btn.active { background: linear-
 }
 
 /* ===== LIGHT MODE OVERRIDES ===== */
-body { overscroll-behavior: none; -webkit-overflow-scrolling: touch; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+body { overscroll-behavior: none; -webkit-overflow-scrolling: touch; -webkit-touch-callout: none !important; -webkit-user-select: none !important; user-select: none !important; }
 body:not(.dark) {
   --bg: #f5f5f0;
   --bg-gradient: radial-gradient(ellipse at 50% 0%, rgba(16,185,129,.03) 0%, transparent 60%), #f5f5f0;

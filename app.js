@@ -3715,6 +3715,20 @@ function doPullRefresh() {
   }, 500);
 }
 
+// =================== PREVENT CONTEXT MENU ===================
+document.addEventListener('contextmenu', function(e) {
+  // Allow context menu on input/textarea
+  if (e.target.closest && !e.target.closest('input, textarea, [contenteditable]')) {
+    e.preventDefault();
+    haptic(6);
+  }
+});
+document.addEventListener('selectstart', function(e) {
+  if (e.target.closest && !e.target.closest('input, textarea, [contenteditable]')) {
+    e.preventDefault();
+  }
+});
+
 // =================== HAPTIC FEEDBACK ===================
 function haptic(ms) {
   try { navigator.vibrate && navigator.vibrate(ms || 8); } catch(e) {}
@@ -6320,6 +6334,20 @@ window.onerror = function(msg, url, line, col, err) {
 window.addEventListener('unhandledrejection', function(e) {
   console.warn('Unhandled promise rejection:', e.reason);
   e.preventDefault();
+});
+
+// =================== PREVENT CONTEXT MENU ===================
+document.addEventListener('contextmenu', function(e) {
+  // Allow context menu on input/textarea
+  if (e.target.closest && !e.target.closest('input, textarea, [contenteditable]')) {
+    e.preventDefault();
+    haptic(6);
+  }
+});
+document.addEventListener('selectstart', function(e) {
+  if (e.target.closest && !e.target.closest('input, textarea, [contenteditable]')) {
+    e.preventDefault();
+  }
 });
 
 // =================== HAPTIC FEEDBACK ===================
