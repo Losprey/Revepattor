@@ -250,10 +250,9 @@ function signInWithGoogle() {
   });
   if (authIsGuest) {
     // Guest logging in — ask about migration
-    if (confirm(lang==='en'?'Transfer your data to this account?\n\nOK = Transfer\nCancel = Start fresh':'Chceš preniesť aktuálne dáta do účtu?\n\nOK = Preniesť dáta\nZrušiť = Začať s novým účtom')) {
-      // We'll migrate after login completes
-      localStorage.setItem('authMigrateFromGuest', '1');
-    }
+    showConfirmModal(lang==='en'?'Transfer your data to this account?':'Chceš preniesť aktuálne dáta do účtu?', '📦', lang==='en'?'Transfer':'Preniesť', function() {
+        localStorage.setItem('authMigrateFromGuest', '1');
+      });
   }
   doSignIn();
 }
@@ -945,9 +944,9 @@ function createFamily() {
   localStorage.setItem('familyCode', code);
   connectToFamily(code);
   // Only push if user confirms (creator is first, so safe to push)
-  if (confirm(t('Vytvoren\u00e1 nov\u00e1 rodina. Synchronizova\u0165 aktu\u00e1lne d\u00e1ta?','New family created. Sync your current data?'))) {
+  showConfirmModal(t('Vytvorená nová rodina. Synchronizovať aktuálne dáta?','New family created. Sync your current data?'), '👨‍👩‍👧‍👦', lang==='en'?'Sync':'Syncovať', function() {
     pushAllLocalData();
-  }
+  });
   showToast(t('Rodinný kód: ','Family code: ') + code, 'success', 5000);
   setTimeout(function() { navigator.clipboard.writeText(code).catch(function(){}); }, 100);
   openSettings();
@@ -970,7 +969,7 @@ function joinFamily(code) {
       if (mp && mp !== '{}') hasRemote = true;
     } catch(e) {}
     if (hasRemote) {
-      if (confirm(t('Rodina m\u00e1 d\u00e1ta. Pou\u017ei\u0165 rodinn\u00e9 d\u00e1ta?','Family has data. Use family data?\nOK = Use family data\nCancel = Keep mine'))) {
+      if (confirm(t('Rodina má dáta. Použiť rodinné dáta?','Family has data. Use family data?'))) {
         // Already loaded by listener, nothing to do
       } else {
         pushAllLocalData();
@@ -1000,7 +999,8 @@ function showFamilyMembers() {
 }
 
 function leaveFamily() {
-  if (!confirm(t('Naozaj opustiť rodinu? Lokálne dáta ostanú.','Really leave family? Local data stays.'))) return;
+  showConfirmModal(t('Naozaj opustiť rodinu? Lokálne dáta ostanú.','Really leave family? Local data stays.'), '💪', lang==='en'?'Leave':'Opustiť', function() {
+    
   // Remove all Firebase listeners
   firebaseListeners.forEach(ref => { try { ref.off(); } catch(e) {} });
   firebaseListeners = [];
@@ -1009,6 +1009,7 @@ function leaveFamily() {
   localStorage.removeItem('familyCode');
   updateSyncIndicator();
   openSettings();
+  });
 }
 
 function connectToFamily(code) {
@@ -2595,7 +2596,7 @@ function openSettings() {
         <span class="sr-label"><span class="sr-icon">🌐</span> ${t('Import z URL','Import from URL')}</span>
         <span class="sr-value"><span class="sr-arrow">›</span></span>
       </div>
-      <div class="settings-row" onclick="if(confirm('${t('Naozaj obnoviť demo recepty? Všetky existujúce sa stratia.','Reset to demo recipes? All existing recipes will be lost.')}')){resetRecipes();closeSettings()}">
+      <div class="settings-row" onclick="__confirmDemo(tings()}">
         <span class="sr-label"><span class="sr-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span> ${t('Obnoviť demo','Reset demo')}</span>
         <span class="sr-value"><span class="sr-arrow">›</span></span>
       </div>
@@ -2607,7 +2608,7 @@ function openSettings() {
         <span class="sr-label"><span class="sr-icon">💾</span> ${t('Vytvoriť zálohu','Create backup')}</span>
         <span class="sr-value"><span class="sr-arrow">›</span></span>
       </div>
-      <div class="settings-row" onclick="if(confirm('${t('Naozaj vymazať všetky dáta? Táto akcia je nenávratná.','Delete all data? This cannot be undone.')}')){deleteAllData()}">
+      <div class="settings-row" onclick="__confirmDeleteAll(">
         <span class="sr-label" style="color:var(--danger);"><span class="sr-icon">🗑</span> ${t('Vymazať všetky dáta','Delete all data')}</span>
         <span class="sr-value" style="color:var(--danger);"><span class="sr-arrow">›</span></span>
       </div>
@@ -2829,14 +2830,20 @@ function saveRecipe() {
   const nutrition = {kcal,protein,fat,carbs};
   // Sanity check
   const check = sanitizeNutrition(nutrition, portions);
-  if (check.hasWarnings && !confirm(
-    (lang === 'en' ? 'Per-portion values seem high:\n' : 'Hodnoty na porciu sú vysoké:\n') +
-    check.warnings.map(w => {
-      const labels = {kcal: '🔥 kcal > 1200', fat: '🧈 tuky > 80g', protein: '💪 bielkoviny > 80g', carbs: '🍚 sacharidy > 150g'};
-      return labels[w];
-    }).join('\n') + '\n\n' +
-    (lang === 'en' ? 'Save anyway?' : 'Aj tak uložiť?')
-  )) return;
+  if (check.hasWarnings) {
+    showConfirmModal(
+      (lang === 'en' ? 'Per-portion values seem high:\n' : 'Hodnoty na porciu sú vysoké:\n') +
+      check.warnings.map(w => {
+        const labels = {kcal: '🔥 kcal > 1200', fat: '🧈 tuky > 80g', protein: '💪 bielkoviny > 80g', carbs: '🍚 sacharidy > 150g'};
+        return labels[w];
+      }).join('\n') + '\n\n' +
+      (lang === 'en' ? 'Save anyway?' : 'Aj tak uložiť?'),
+      '⚠️', lang==='en'?'Save anyway':'Aj tak uložiť', function() {
+        // continue saving
+      }
+    );
+    if (!check._proceed) return;
+  }
   if (editingId) {
     const idx = recipes.findIndex(r => r.id === editingId);
     if (idx !== -1) recipes[idx] = {...recipes[idx], name, nameEn, category, time, image, imageData, ingredients, steps, tags, nutrition, difficulty, portions, allergens: recipes[idx].allergens || []};
@@ -3139,7 +3146,7 @@ function importRecipes(e) {
     try {
       const data = JSON.parse(ev.target.result);
       if (!Array.isArray(data) || !data.length || !data[0].name) throw new Error('bad');
-      if (confirm(`${t('importConfirm')} ${data.length} receptov?`)) {
+      showConfirmModal(`${t('importConfirm')} ${data.length} receptov?`, '📥', lang==='en'?'Import':'Importovať', function() {
         data.forEach(imp => {
           const idx = recipes.findIndex(r => r.id === imp.id);
           if (idx !== -1) recipes[idx] = imp;
@@ -3148,7 +3155,7 @@ function importRecipes(e) {
         saveToLS();
         render();
         showToast(t('importOk')+' '+data.length+'.','success');
-      }
+      });
     } catch(err) { showToast(t('exportError'),'error'); }
   };
   reader.readAsText(file);
@@ -5182,11 +5189,13 @@ function getRecentCompleted() {
   return tasks.filter(t => t.completed && t.completedDate && (now - new Date(t.completedDate).getTime()) < day);
 }
 function clearCompletedTasks() {
-  if (!confirm(lang==='en'?'Delete all completed tasks?':'Vymazať všetky dokončené úlohy?')) return;
+  showConfirmModal(lang==='en'?'Delete all completed tasks?':'Vymazať všetky dokončené úlohy?', '🗑️', lang==='en'?'Delete':'Vymazať', function() {
+  
   tasks = tasks.filter(t => !t.completed);
   saveTasks();
   renderTasks();
   renderDashboard();
+  });
 }
 function getTodayProgress() {
   const today = new Date().toISOString().slice(0,10);
@@ -5579,10 +5588,12 @@ function openHistory() {
 }
 
 function clearHistory() {
-  if (!confirm(lang==='en'?'Clear cooking history?':'Vymazať celú históriu?')) return;
+  showConfirmModal(lang==='en'?'Clear cooking history?':'Vymazať celú históriu?', '🗑️', lang==='en'?'Clear':'Vymazať', function() {
+  
   cookingHistory = [];
   localStorage.setItem('cookingHistory', JSON.stringify(cookingHistory));
   openHistory();
+  });
 }
 
 // ======================== DEEP SEARCH ========================
@@ -6345,6 +6356,22 @@ function triggerConfetti() {
 }
 
 // =================== BUTTON TOUCH RIPPLE ===================
+
+function __confirmDemo() {
+  showConfirmModal(
+    (lang==='en'?'Reset to demo recipes? All existing recipes will be lost.':'Naozaj obnoviť demo recepty? Všetky existujúce sa stratia.'),
+    '⚠️', lang==='en'?'Reset':'Obnoviť',
+    function() { resetRecipes(); closeSettings(); }
+  );
+}
+function __confirmDeleteAll() {
+  showConfirmModal(
+    (lang==='en'?'Delete all data? This cannot be undone.':'Naozaj vymazať všetky dáta? Táto akcia je nenávratná.'),
+    '☢️', lang==='en'?'Delete all':'Vymazať všetko',
+    function() { deleteAllData(); }
+  );
+}
+
 function addRipple(e, el) {
   try {
     var btn = el || e.currentTarget;
