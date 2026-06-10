@@ -884,6 +884,7 @@ function addAIShoppingItems() {
       }
     }
   });
+  try { autoMergeShopItems(); } catch(e) {}
   saveShopItems();
   try { localStorage.setItem('shoppingItems', JSON.stringify(shopItems)); } catch(e) {}
   document.getElementById('ai-modal')?.remove();
@@ -897,7 +898,7 @@ function addAIShoppingItems() {
         added++;
       }
     });
-    if (added > 0) { saveShopItems(); try { localStorage.setItem('shoppingItems', JSON.stringify(shopItems)); } catch(e) {} }
+    if (added > 0) { try { autoMergeShopItems(); } catch(e) {} saveShopItems(); try { localStorage.setItem('shoppingItems', JSON.stringify(shopItems)); } catch(e) {} }
     else { showToast(t('Nepodarilo sa pridať položky.','Failed to add items.'),'error'); return; }
   }
   renderShoppingList();
@@ -4727,15 +4728,8 @@ function loadShopItems() {
   // Keep only manual items (recipe auto-population removed)
   shopItems = shopItems.filter(function(it) { return it && it.source === 'manual'; });
 }
-let _mergingNow = false;
 function saveShopItems() {
   if (!Array.isArray(shopItems)) { shopItems = []; }
-  // Auto-merge duplicates before saving (unless already merging)
-  if (!_mergingNow) {
-    _mergingNow = true;
-    try { autoMergeShopItems(); } catch(e) {}
-    _mergingNow = false;
-  }
   var now = Date.now(), dev = getDeviceId();
   shopItems.forEach(function(it) {
     if (!it.createdAt) it.createdAt = now;
@@ -5101,8 +5095,6 @@ function closeShopSheet() {
 }
 
 function saveShopItem() {
-  // Auto-merge duplicates
-  try { mergeDuplicateShopItems(); } catch(e) {}
   const nameEl = document.getElementById('shop-item-name');
   const amountEl = document.getElementById('shop-item-amount');
   const unitEl = document.getElementById('shop-item-unit');
@@ -5140,6 +5132,8 @@ function saveShopItem() {
       recipeId: ''
     });
   }
+  // Auto-merge duplicates after adding new item
+  try { autoMergeShopItems(); } catch(e) {}
   saveShopItems();
   closeShopSheet();
   renderShoppingList();
