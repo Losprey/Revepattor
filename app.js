@@ -63,7 +63,7 @@ const LANG = {
     wet: 'Mokré',
     portionUnit: 'porcií',
     fabTask: '✅ Úloha', fabMeal: '🍽️ Jedlo', fabFood: '🛒 Potravina',
-    navTasks: 'Úlohy', navBoard: 'Nástenka', tasksTitle: 'Úlohy', tasksToday: 'Dnes', tasksTomorrow: 'Zajtra', tasksWeek: 'Tento týždeň', tasksDone: 'Dokončené',
+    navTasks: 'Úlohy', tasksTitle: 'Úlohy', tasksToday: 'Dnes', tasksTomorrow: 'Zajtra', tasksWeek: 'Tento týždeň', tasksDone: 'Dokončené',
     tasksEmpty: 'Dnes máš voľno ✨', tasksEmptyDesc: 'Žiadne úlohy. Pridaj si nejakú!',
     tasksAdd: 'Pridať úlohu', tasksEdit: 'Upraviť úlohu', tasksSave: 'Uložiť', tasksDelete: 'Vymazať',
     tasksCatCooking: 'Varenie', tasksCatShopping: 'Nákup', tasksCatHousehold: 'Domácnosť', tasksCatKid: 'Dieťa', tasksCatCustom: 'Vlastné',
@@ -3646,8 +3646,7 @@ function switchTab(tab) {
   const shoppingContainer = document.getElementById('shopping-container');
   const tasksContainer = document.getElementById('tasks-container');
   const mainTitle = document.getElementById('main-title');
-  const boardContainer = document.getElementById('board-container');
-  [dashboard, recipeContainer, plannerContainer, shoppingContainer, tasksContainer, boardContainer].forEach(function(el) { if (el) el.style.display = 'none'; });
+  [dashboard, recipeContainer, plannerContainer, shoppingContainer, tasksContainer].forEach(function(el) { if (el) el.style.display = 'none'; });
   if (mainTitle) mainTitle.style.display = tab === 'dashboard' ? 'none' : '';
   try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch(e) {}
   if (tab === 'dashboard' && dashboard) {
@@ -3668,12 +3667,6 @@ function switchTab(tab) {
     var weekGrid = document.getElementById('planner-week-grid');
     if (weekGrid && !weekGrid.children.length) renderSkeletonPlanner(weekGrid);
     try { renderPlanner(); } catch(e) {}
-  } else if (tab === 'board' && boardContainer) {
-    boardContainer.style.display = 'block'; applyPageTransition(boardContainer, 350);
-    var boardView = document.getElementById('board-container-view');
-    if (boardView) {
-      try { renderBoard(); } catch(e) {}
-    }
   } else if (tab === 'tasks' && tasksContainer) {
     tasksContainer.style.display = 'block'; applyPageTransition(tasksContainer, 350);
     try { renderTasks(); } catch(e) {}
@@ -3808,7 +3801,7 @@ function initSwipeTabs() {
     var dx = e.changedTouches[0].clientX - _swipeTabData.startX;
     var dy = Math.abs(e.changedTouches[0].clientY - _swipeTabData.startY);
     if (Math.abs(dx) < 60 || dy > Math.abs(dx) * 0.6) { _swipeTabData = null; return; }
-    var tabs = ['dashboard', 'home', 'planner', 'shopping', 'tasks', 'board'];
+    var tabs = ['dashboard', 'home', 'planner', 'shopping', 'tasks'];
     var current = document.body.dataset.tab || 'dashboard';
     var idx = tabs.indexOf(current);
     if (dx > 0 && idx > 0) { switchTab(tabs[idx - 1]); }
@@ -5913,7 +5906,6 @@ function closeTopModal() {
     '#shop-sheet.active',                    // Shop sheet
     '#task-sheet.active',                    // Task sheet
     '#settings-sheet.active',               // Settings
-    '#board-form-modal',                     // Board form
     '#login-overlay'                         // Login (check inline style)
   ];
   for (const sel of selectors) {
@@ -5928,7 +5920,6 @@ function closeTopModal() {
         else if (el.id === 'task-sheet') closeTaskSheet();
         else if (el.id === 'login-overlay') { el.style.display = 'none'; }
         else if (el.id === 'ai-modal' || el.id === 'ai-plan-modal') el.remove();
-        else if (el.id === 'board-form-modal') el.remove();
         else el.classList.remove('active');
         return true; // Closed something
       }
