@@ -228,7 +228,7 @@ header h1 { font-size: 1.1rem; font-weight: 800; color: var(--text); letter-spac
 .settings-row { display: flex; align-items: center; justify-content: space-between; padding: .45rem .55rem; border-radius: var(--radius-sm); cursor: pointer; transition: all .15s ease; font-size:.85rem; }
 .settings-row:hover { background: var(--hover-bg); }
 .search-wrap { position: relative; display: flex; flex: 1; min-width: 140px; align-items: center; }
-.search-wrap input { flex: 1; padding: .52rem 2.4rem .52rem 1rem; border: 1px solid var(--border); border-radius: var(--radius-lg); font-size: .82rem; background: var(--input-bg); color: var(--text); transition: all .25s ease; width: 100%; box-shadow: var(--inner-shadow); }
+.search-wrap input { flex: 1; padding: .52rem 2.4rem .52rem 1rem; border: 1px solid var(--border); border-radius: var(--radius-lg); font-size: .82rem; background: var(--input-bg); color: var(--text); transition: all .25s ease; width: 100%; box-shadow: var(--inner-shadow); -webkit-user-select: text; user-select: text; }
 .search-wrap input:focus { outline: none; border-color: rgba(220,38,38,.3); box-shadow: 0 0 0 3px var(--primary-glow), var(--inner-shadow); }
 .search-wrap input::placeholder { color: var(--text3); font-weight: 400; }
 .search-clear { position: absolute; right: 2.3rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text3); cursor: pointer; font-size: .72rem; padding: .2rem .3rem; display: none; line-height: 1; border-radius: 50%; transition: all .15s ease; }
@@ -980,7 +980,7 @@ body[data-season="zima"] .planner-week-nav .pln-btn.active { background: linear-
 }
 
 /* ===== LIGHT MODE OVERRIDES ===== */
-body { overscroll-behavior: none; -webkit-overflow-scrolling: touch; }
+body { overscroll-behavior: none; -webkit-overflow-scrolling: touch; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
 body:not(.dark) {
   --bg: #f5f5f0;
   --bg-gradient: radial-gradient(ellipse at 50% 0%, rgba(16,185,129,.03) 0%, transparent 60%), #f5f5f0;
@@ -1016,6 +1016,8 @@ body:not(.dark) {
 body:not(.dark) .recipe-card .fav-btn { background: rgba(255,255,255,.85); color: var(--text); }
 body:not(.dark) .recipe-card .fav-btn:hover { background: rgba(255,255,255,.95); }
 body:not(.dark) .recipe-card .fav-btn.fav-active { background: linear-gradient(135deg, var(--danger), #f87171); color: #fff; }
+
+input, textarea, select, [contenteditable] { -webkit-user-select: text; user-select: text; }
 
 /* ===== UTILITIES ===== */
 .import-hidden { display: none; }
