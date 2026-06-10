@@ -4248,7 +4248,7 @@ function renderPlanner() {
     var isToday = dt.toISOString().slice(0,10) === todayStr;
     // Progress ring state
     var ringClass = 'pvc-progress-ring' + (f > 0 ? ' has-meals' : '') + (f === totalSlots ? ' full' : '');
-    s += '<div class="pvc-day'+(isToday?' pvc-today':'')+'"><div class="pvc-head"><div class="pvc-title-group"><span class="pvc-day-icon">'+dayIcon+'</span><span class="pvc-title">'+dayNames[i]+' '+ds+'</span>'+ (isToday?' <span class="pvc-badge">'+(lang==='en'?'TODAY':'DNES')+'</span>':'') +'</div><span class="pvc-progress"><span class="'+ringClass+'">'+f+'</span>🔥 '+dayKcal+'</span></div><div class="pvc-meals-grid">';
+    s += '<div class="pvc-day day-'+i+(isToday?' pvc-today':'')+'"><div class="pvc-head"><div class="pvc-title-group"><span class="pvc-day-icon">'+dayIcon+'</span><span class="pvc-title">'+dayNames[i]+' '+ds+'</span>'+ (isToday?' <span class="pvc-badge">'+(lang==='en'?'TODAY':'DNES')+'</span>':'') +'</div><span class="pvc-progress"><span class="'+ringClass+'">'+f+'</span>🔥 '+dayKcal+'</span></div><div class="pvc-meals-grid">';
     MEALS.forEach(function(m){
       var e=day[m.id]; var r=getSlotRecipe(e); var nm=getSlotName(e); var ic=e&&e.type==='custom'; var ff=r||ic;
       var img = r ? (r.imageData||r.image||'') : '';
@@ -4275,9 +4275,20 @@ function renderPlanner() {
 }
 
 function goToWeek(offset) {
+  var grid = document.getElementById('planner-week-grid');
+  var isNext = offset > plannerWeekOffset;
   plannerWeekOffset = offset;
   _selectedPlannerDay = 0;
   renderPlanner();
+  if (grid) {
+    grid.classList.remove('slide-in', 'slide-in-back');
+    // Force reflow for animation to replay
+    void grid.offsetWidth;
+    grid.classList.add(isNext ? 'slide-in' : 'slide-in-back');
+    setTimeout(function() {
+      grid.classList.remove('slide-in', 'slide-in-back');
+    }, 500);
+  }
 }
 
 function showDayDetail(dayKey) {

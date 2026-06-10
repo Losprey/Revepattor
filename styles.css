@@ -271,11 +271,46 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: rgba(22
   box-shadow: 0 1px 4px rgba(0,0,0,.1);
   border: 1px solid var(--border);
   transition: all .25s var(--ease-smooth);
+  position: relative;
 }
+.pvc-day::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: .4;
+  pointer-events: none;
+  transition: opacity .4s var(--ease-smooth);
+}
+.pvc-day:hover::before { opacity: .6; }
 .pvc-day:hover { box-shadow: 0 4px 20px rgba(0,0,0,.12); }
 .pvc-day.pvc-today {
   border-color: var(--primary);
   box-shadow: 0 0 0 1px var(--primary-glow), 0 0 20px var(--primary-glow);
+}
+
+/* Day-specific tints */
+.pvc-day.day-0::before { background: linear-gradient(135deg, rgba(96,165,250,.08), transparent 70%); } /* Pondelok — modrá */
+.pvc-day.day-1::before { background: linear-gradient(135deg, rgba(16,185,129,.08), transparent 70%); } /* Utorok — zelená */
+.pvc-day.day-2::before { background: linear-gradient(135deg, rgba(251,191,36,.08), transparent 70%); } /* Streda — žltá */
+.pvc-day.day-3::before { background: linear-gradient(135deg, rgba(248,113,113,.08), transparent 70%); } /* Štvrtok — červená */
+.pvc-day.day-4::before { background: linear-gradient(135deg, rgba(167,139,250,.08), transparent 70%); } /* Piatok — fialová */
+.pvc-day.day-5::before { background: linear-gradient(135deg, rgba(56,189,248,.1), transparent 70%); } /* Sobota — tyrkysová */
+.pvc-day.day-6::before { background: linear-gradient(135deg, rgba(244,114,182,.1), transparent 70%); } /* Nedeľa — ružová */
+
+/* Week slide animation */
+.planner-week-grid.slide-in {
+  animation: weekSlideIn .4s var(--ease-smooth);
+}
+.planner-week-grid.slide-in-back {
+  animation: weekSlideInBack .4s var(--ease-smooth);
+}
+@keyframes weekSlideIn {
+  from { opacity: .2; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes weekSlideInBack {
+  from { opacity: .2; transform: translateX(-30px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
 .pvc-head {
