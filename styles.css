@@ -2025,7 +2025,144 @@ body.header-collapsed .controls-bar { top: 0; }
 .seasonal-recipe:hover { background: var(--hover-bg); }
 .seasonal-recipe:active { transform: scale(.97); }
 
-/* ======================== UX IMPROVEMENTS ======================== */
+/* ======================== BOARD (NÁSTENKA) ======================== */
+.board-scroll { padding-bottom: 1rem; }
+.board-header-actions { display: flex; align-items: center; justify-content: space-between; margin-bottom: .8rem; gap: .5rem; }
+.board-grid { display: flex; flex-direction: column; gap: .6rem; }
+.board-card {
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  padding: .7rem .8rem;
+  position: relative;
+  transition: all .2s ease;
+  backdrop-filter: blur(10px);
+}
+.board-card-header {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  margin-bottom: .35rem;
+}
+.board-card-author {
+  font-size: .7rem;
+  font-weight: 600;
+  color: var(--text);
+  flex: 1;
+}
+.board-card-time {
+  font-size: .6rem;
+  color: var(--text3);
+}
+.board-card-menu {
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: var(--text3);
+  padding: 0 .2rem;
+  line-height: 1;
+  position: relative;
+}
+.board-card-dropdown {
+  position: absolute;
+  right: 0;
+  top: 1.4rem;
+  background: var(--surface-solid);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  z-index: 10;
+  min-width: 130px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.3);
+}
+.board-card-dropdown button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: .4rem .6rem;
+  border: none;
+  background: none;
+  color: var(--text);
+  font-size: .75rem;
+  cursor: pointer;
+  transition: background .15s;
+}
+.board-card-dropdown button:hover { background: var(--hover-bg); }
+.board-card-dropdown button.danger { color: var(--danger); }
+.board-card-body p {
+  margin: 0;
+  font-size: .82rem;
+  line-height: 1.4;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.board-card-image {
+  margin-top: .4rem;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  cursor: pointer;
+}
+.board-card-image img {
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  transition: transform .2s;
+}
+.board-card-image img:hover { transform: scale(1.02); }
+.board-card-footer {
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+  margin-top: .4rem;
+  flex-wrap: wrap;
+}
+.board-reactions {
+  display: flex;
+  gap: .25rem;
+  flex-wrap: wrap;
+}
+.board-reaction {
+  font-size: .72rem;
+  background: var(--bg);
+  border-radius: 99px;
+  padding: .05rem .35rem;
+  cursor: pointer;
+  transition: background .15s;
+  user-select: none;
+}
+.board-reaction:hover { background: var(--hover-bg); }
+.board-add-reaction {
+  font-size: .85rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  opacity: .5;
+  transition: opacity .15s;
+}
+.board-add-reaction:hover { opacity: 1; }
+.board-pin-badge {
+  font-size: .65rem;
+  margin-left: auto;
+}
+.board-color-picker {
+  display: flex;
+  gap: .35rem;
+  margin: .5rem 0;
+}
+.board-color-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform .15s, border-color .15s;
+}
+.board-color-dot:hover { transform: scale(1.15); }
+.board-color-dot.active {
+  transform: scale(1.2);
+  border-color: var(--primary) !important;
+}
+
 :focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
