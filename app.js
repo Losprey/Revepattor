@@ -350,8 +350,19 @@ function getSettingsAuthHTML() {
   return '';
 }
 
-// Wait for Firebase init then start auth
-setTimeout(() => { initFirebase(); initFirebaseAuth(); }, 500);
+// Wait for Firebase SDK to load, then init
+(function waitForFirebaseSDK(retries) {
+  if (typeof firebase !== 'undefined' && firebase.initializeApp) {
+    initFirebase();
+    initFirebaseAuth();
+  } else if (retries > 0) {
+    setTimeout(waitForFirebaseSDK, 200, retries - 1);
+  } else {
+    console.warn('Firebase SDK not loaded after 5s');
+    initFirebase();
+    initFirebaseAuth();
+  }
+}(25)); // max ~5s wait
 
 // ======================== ONBOARDING ========================
 const ONBOARDING_SLIDES = [
