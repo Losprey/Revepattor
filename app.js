@@ -1668,10 +1668,13 @@ function applyLang() {
 }
 
 function toggleDark() {
-  var modes = ['auto', 'dark', 'light'];
-  var idx = modes.indexOf(appSettings.theme);
-  appSettings.theme = modes[(idx + 1) % 3];
+  // Len dark rezim, tlacidlo meni iba akcentnu farbu
   haptic(6);
+  // Vynutime dark vzdy
+  appSettings.theme = 'dark';
+  document.body.classList.add('dark');
+  var dt = document.getElementById('dark-toggle');
+  if (dt) dt.textContent = '☀️';
   saveSettings();
 }
 
@@ -2420,7 +2423,7 @@ let appSettings = {};
 function loadSettings() {
   try { appSettings = JSON.parse(localStorage.getItem('appSettings') || '{}'); } catch(e) { appSettings = {}; }
   const D = {
-    theme: 'auto',
+    theme: 'dark',
     lang: localStorage.getItem('lang') || 'en',
     accentColor: localStorage.getItem('accent') || '#dc2626',
     textSize: 'normal', uiDensity: 'normal',
@@ -2449,14 +2452,11 @@ function saveSettings() {
 }
 function applySettings() {
   try {
-    // Auto dark mode: respect system preference
-    var sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    // Vzdy tmavy rezim
+    document.body.classList.add('dark');
+    document.documentElement.classList.add('dark-only');
     var dt = document.getElementById('dark-toggle');
-    if (appSettings.theme === 'auto') {
-      if (sysDark) { document.body.classList.add('dark'); if(dt) dt.innerHTML = '☀️ <span style="font-size:.55rem;opacity:.7">AUTO</span>'; }
-      else { document.body.classList.remove('dark'); if(dt) dt.innerHTML = '🌙 <span style="font-size:.55rem;opacity:.7">AUTO</span>'; }
-    } else if (appSettings.theme === 'dark') { document.body.classList.add('dark'); if(dt) dt.textContent = '☀️'; }
-    else { document.body.classList.remove('dark'); if(dt) dt.textContent = '🌙'; }
+    if (dt) dt.textContent = '☀️';
     updateSeason();
   } catch(e) {}
   let langChanged = false;
@@ -2522,8 +2522,8 @@ function openSettings() {
     <div class="settings-group-title">🎨 ${t('Vzhľad','Appearance')}</div>
     <div class="settings-card">
       <div class="settings-row">
-        <span class="sr-label"><span class="sr-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></span> ${t('Tmavý režim','Dark mode')}</span>
-        <label class="toggle-switch"><input type="checkbox" ${s.theme==='dark'?'checked':''} onchange="s.theme=this.checked?'dark':'light';saveSettings()"><span class="toggle-slider"></span></label>
+        <span class="sr-label"><span class="sr-icon">🌙</span> ${t('Tmavý režim (vždy)','Dark mode (always)')}</span>
+        <span class="sr-value" style="color:var(--primary);font-weight:600;">✓</span>
       </div>
       <div class="settings-row" onclick="cycleLang()">
         <span class="sr-label"><span class="sr-icon">🌐</span> ${t('Jazyk','Language')}</span>
@@ -2805,7 +2805,9 @@ function cycleLang() {
 function applyAccentColor(color) {
   document.documentElement.style.setProperty('--primary', color);
   const r = parseInt(color.slice(1,3),16), g = parseInt(color.slice(3,5),16), b = parseInt(color.slice(5,7),16);
+  document.documentElement.style.setProperty('--primary-rgb', r + ', ' + g + ', ' + b);
   document.documentElement.style.setProperty('--primary-light', `rgba(${r},${g},${b},.8)`);
+  document.documentElement.style.setProperty('--primary-light-rgb', r + ', ' + g + ', ' + b);
   localStorage.setItem('accent', color);
 }
 function calcPlanningStreak() {
