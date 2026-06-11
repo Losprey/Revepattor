@@ -48,7 +48,7 @@ const LANG = {
     plannerPick: 'Vybrať recept', plannerEmpty: '+ pridať',
     plannerEmptyList: 'Zatiaľ žiadne recepty v pláne.',
     shopClearChecked: 'Vyčistiť zaškrtnuté', shopClearAll: 'Vymazať všetko',
-    settingsTitle: '⚙️ Nastavenia', settingsDark: 'Tmavý režim', settingsLang: 'Jazyk',
+    settingsTitle: '⚙️ Nastavenia', settingsLang: 'Jazyk',
     autoFill: 'Auto-odhadnúť zo surovín',
     unmatchedHint: 'surovín nebolo presne nájdených',
     nutritionPerPortion: 'Na porciu',
@@ -123,7 +123,7 @@ const LANG = {
     plannerEmptyList: 'No recipes in the plan yet.',
     shopClearChecked: 'Clear checked', shopClearAll: 'Clear all',
     plannerWeek: 'Full week', plannerWeekHide: 'Hide week',
-    settingsTitle: '⚙️ Settings', settingsDark: 'Dark mode', settingsLang: 'Language',
+    settingsTitle: '⚙️ Settings', settingsLang: 'Language',
     autoFill: 'Auto-estimate from ingredients',
     unmatchedHint: 'ingredients not exactly matched',
     navTasks: 'Tasks', navBoard: 'Board', tasksTitle: 'Tasks', tasksToday: 'Today', tasksTomorrow: 'Tomorrow', tasksWeek: 'This Week', tasksDone: 'Completed',
@@ -1378,13 +1378,7 @@ function refreshActiveTab() {
 }
 
 // =================== AUTO DARK MODE ===================
-(function initAutoDark() {
-  var mq = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
-  if (!mq) return;
-  mq.addEventListener('change', function() {
-    if (appSettings.theme === 'auto') applySettings();
-  });
-})();
+// Dark mode is always on — system preference not needed
 
 // =================== SEASON UPDATE IN REAL TIME ===================
 function updateSeason() {
@@ -2512,9 +2506,6 @@ function openSettings() {
     <div class="settings-group-title">🎨 ${t('Vzhľad','Appearance')}</div>
     <div class="settings-card">
       <div class="settings-row">
-        <span class="sr-label"><span class="sr-icon">🌙</span> ${t('Tmavý režim (vždy)','Dark mode (always)')}</span>
-        <span class="sr-value" style="color:var(--primary);font-weight:600;">✓</span>
-      </div>
       <div class="settings-row" onclick="cycleLang()">
         <span class="sr-label"><span class="sr-icon">🌐</span> ${t('Jazyk','Language')}</span>
         <span class="sr-value">${s.lang === 'en' ? 'English' : 'Slovenčina'} <span class="sr-arrow">›</span></span>
