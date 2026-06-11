@@ -1667,16 +1667,7 @@ function applyLang() {
   const fbf = document.getElementById('fab-btn-food'); if (fbf) fbf.textContent = lang==='en'?'🛒 Grocery':'🛒 Potravina';
 }
 
-function toggleDark() {
-  // Len dark rezim, tlacidlo meni iba akcentnu farbu
-  haptic(6);
-  // Vynutime dark vzdy
-  appSettings.theme = 'dark';
-  document.body.classList.add('dark');
-  var dt = document.getElementById('dark-toggle');
-  if (dt) dt.textContent = '☀️';
-  saveSettings();
-}
+// Dark mode is always on — toggle was removed
 
 function switchLang() {
   appSettings.lang = lang === 'en' ? 'sk' : 'en';
