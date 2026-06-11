@@ -1,83 +1,62 @@
 :root {
-  /* === DARK MODE DESIGN SYSTEM 2026 === */
-  --bg: #121212;
-  --bg-gradient: #121212;
-  --surface: #1E1E1E;
-  --surface-solid: #1E1E1E;
-  --surface-raised: #2A2A2A;
-  --text: #FFFFFF;
-  --text2: #B0B0B0;
+  /* === AMOLED DESIGN SYSTEM 2026 === */
+  --bg: #0B0B0B;
+  --surface: #161616;
+  --surface-raised: #1E1E1E;
+  --surface-overlay: #1A1A1A;
+  --text: #F5F5F5;
+  --text2: #B8B8B8;
   --text3: #808080;
-  --border: rgba(255,255,255,.08);
-  --border-light: rgba(255,255,255,.04);
-  --input-bg: #2A2A2A;
-  --hover-bg: rgba(255,255,255,.06);
+  --border: rgba(255,255,255,.06);
+  --border-light: rgba(255,255,255,.03);
+  --input-bg: #1E1E1E;
+  --hover-bg: rgba(255,255,255,.04);
+  --primary: #f87171;
+  --primary-rgb: 248, 113, 113;
+  --primary-glow: rgba(248,113,113,.1);
+  --primary-hover: #fca5a5;
+  --danger: #f87171;
+  --success: #4ade80;
+  --success-glow: rgba(74,222,128,.1);
+  --baby: #f472b6;
+  --gold: #fbbf24;
+  --orange: #fb923c;
+  --green: #4ade80;
+  --accent-gradient: linear-gradient(135deg, #f87171, #fbbf24);
   
-  --tag-bg: rgba(255,255,255,.06);
-  --tag-text: #CCCCCC;
-  
-  --primary: #e63946;
-  --primary-rgb: 230, 57, 70;
-  --primary-light: #ff6b77;
-  --primary-light-rgb: 255, 107, 119;
-  --primary-glow: rgba(230,57,70,.2);
-  --primary-hover: #ff4d5a;
-  
-  --meal-ranajky: #10b981;
-  --meal-ranajky-bg: rgba(16,185,129,.12);
-  --meal-ranajky-glow: rgba(16,185,129,.08);
-  --meal-obed: #f59e0b;
-  --meal-obed-bg: rgba(245,158,11,.12);
-  --meal-obed-glow: rgba(245,158,11,.08);
-  --meal-vecera: #a78bfa;
-  --meal-vecera-bg: rgba(167,139,250,.12);
-  --meal-vecera-glow: rgba(167,139,250,.08);
+  --meal-ranajky: #4ade80;
+  --meal-ranajky-bg: rgba(74,222,128,.1);
+  --meal-ranajky-glow: rgba(74,222,128,.06);
+  --meal-obed: #fbbf24;
+  --meal-obed-bg: rgba(251,191,36,.1);
+  --meal-obed-glow: rgba(251,191,36,.06);
+  --meal-vecera: #c084fc;
+  --meal-vecera-bg: rgba(192,132,252,.1);
+  --meal-vecera-glow: rgba(192,132,252,.06);
   --meal-olovrant: #38bdf8;
-  --meal-olovrant-bg: rgba(56,189,248,.12);
-  --meal-olovrant-glow: rgba(56,189,248,.08);
+  --meal-olovrant-bg: rgba(56,189,248,.1);
+  --meal-olovrant-glow: rgba(56,189,248,.06);
   --meal-snack: #f472b6;
-  --meal-snack-bg: rgba(244,114,182,.12);
-  --meal-snack-glow: rgba(244,114,182,.08);
+  --meal-snack-bg: rgba(244,114,182,.1);
+  --meal-snack-glow: rgba(244,114,182,.06);
   
-  --accent-gradient: linear-gradient(135deg, #e63946, #ff6b77);
-  --danger: #ef4444;
-  --success: #10b981;
-  --success-glow: rgba(16,185,129,.12);
-  
-  --cooking-bg: #121212;
-  --cooking-text: #FFFFFF;
-  
-  --modal-overlay: rgba(0,0,0,.8);
-  
-  --card-shadow: 0 1px 3px rgba(0,0,0,.3), 0 4px 16px rgba(0,0,0,.2);
-  --card-shadow-hover: 0 4px 12px rgba(0,0,0,.4), 0 0 0 1px rgba(230,57,70,.2);
-  --card-gradient: none;
-  
-  --radius-sm: 12px;
-  --radius-md: 16px;
-  --radius-lg: 20px;
-  --radius-xl: 24px;
-  
-  --baby: #ec4899;
-  --gold: #f59e0b;
-  --orange: #f97316;
-  --green: #10b981;
+  --cooking-bg: #0B0B0B;
+  --cooking-text: #F5F5F5;
+  --modal-overlay: rgba(0,0,0,.7);
+  --card-shadow: 0 1px 2px rgba(0,0,0,.2), 0 2px 8px rgba(0,0,0,.15);
+  --card-shadow-hover: 0 4px 16px rgba(0,0,0,.3);
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-xl: 22px;
   
   --font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  
-  --section-bg: #1A1A1A;
-  --nav-bg: #1E1E1E;
-  
-  --hero-gradient: linear-gradient(0deg, rgba(0,0,0,.85) 0%, rgba(0,0,0,.4) 40%, rgba(0,0,0,.1) 100%);
-  
-  --glow-red: 0 0 24px rgba(230,57,70,.1);
-  --glow-soft: 0 4px 24px rgba(0,0,0,.2);
-  --glow-lift: 0 8px 36px rgba(0,0,0,.3);
-  --glow-active: 0 0 20px rgba(230,57,70,.15);
+  --section-bg: #161616;
+  --hero-gradient: linear-gradient(0deg, rgba(0,0,0,.9) 0%, rgba(0,0,0,.5) 40%, rgba(0,0,0,.2) 100%);
   
   --ease-spring: cubic-bezier(.34,1.56,.64,1);
   --ease-smooth: cubic-bezier(.22,1,.36,1);
-  --inner-shadow: inset 0 1px 2px rgba(0,0,0,.2);
+  --inner-shadow: inset 0 1px 1px rgba(0,0,0,.2);
 }
 
 /* ===== BODY GLASS BG ===== */
