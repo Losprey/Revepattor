@@ -1099,6 +1099,7 @@ button:focus:not(:focus-visible), .btn:focus:not(:focus-visible) { outline: none
 @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes glowPulse { 0%,100%{box-shadow:0 0 12px rgba(220,38,38,.06)} 50%{box-shadow:0 0 24px rgba(220,38,38,.12)} }
 @keyframes floatSlow { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+@keyframes floatBlob { 0%,100%{ transform: translate(0, 0) scale(1); } 33%{ transform: translate(5%, -3%) scale(1.05); } 66%{ transform: translate(-3%, 2%) scale(0.95); } }
 @keyframes shimmerWide { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
 .skeleton-dash { background: linear-gradient(90deg, var(--border) 25%, var(--hover-bg) 50%, var(--border) 75%); background-size: 200% 100%; animation: shimmerWide 1.8s ease infinite; border-radius: var(--radius-md); }
 
@@ -1106,7 +1107,8 @@ button:focus:not(:focus-visible), .btn:focus:not(:focus-visible) { outline: none
 #dashboard { display: block; padding-top: .5rem; }
 .dash-hero { position: relative; border-radius: var(--radius-lg); overflow: hidden; margin: 0 0 .6rem; min-height: 200px; box-shadow: var(--glow-lift); border: 1px solid var(--glass-border); }
 .dash-hero-bg { position: absolute; inset: 0; background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 20%, transparent) 0%, rgba(0,0,0,.3) 50%, var(--bg) 100%); }
-.dash-hero-glow { position: absolute; top: -40%; left: -20%; width: 140%; height: 80%; background: radial-gradient(ellipse at 30% 50%, color-mix(in srgb, var(--primary) 12%, transparent) 0%, transparent 60%); pointer-events: none; animation: floatSlow 5s ease-in-out infinite; }
+.dash-hero-glow { position: absolute; top: -50%; left: -30%; width: 160%; height: 100%; background: radial-gradient(ellipse at 30% 50%, color-mix(in srgb, var(--primary) 25%, transparent) 0%, color-mix(in srgb, var(--primary) 6%, transparent) 40%, transparent 65%); pointer-events: none; animation: floatBlob 6s ease-in-out infinite; }
+.dash-hero-glow::after { content: ''; position: absolute; top: 20%; right: -10%; width: 80%; height: 70%; background: radial-gradient(ellipse at 70% 40%, color-mix(in srgb, var(--primary-light) 15%, transparent) 0%, transparent 55%); pointer-events: none; animation: floatBlob 8s ease-in-out infinite reverse; }
 .dash-hero-content { position: relative; z-index: 2; padding: 1.2rem 1rem .9rem; display: flex; flex-direction: column; gap: .15rem; }
 .dash-greeting { font-size: .65rem; text-transform: uppercase; letter-spacing: .1em; color: var(--primary-light); font-weight: 700; opacity: .9; }
 .dash-date { font-size: .75rem; color: var(--text3); font-weight: 500; margin-bottom: .1rem; }
