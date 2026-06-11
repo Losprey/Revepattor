@@ -5869,7 +5869,12 @@ function importFromUrl() {
         const calories = recipe.nutrition && recipe.nutrition.calories ? String(recipe.nutrition.calories).replace(/[^0-9]/g,'') : '';
         const ingrText = (Array.isArray(ingr) ? ingr : []).map(i => cleanHtml(typeof i === 'string' ? i : '')).join('\n');
         const stepsArr = Array.isArray(steps) ? steps.map(s => cleanHtml(typeof s === 'string' ? s : s.text || s.name || '')) :
-          typeof steps === 'string' ? cleanHtml(steps).split('\n') : [];
+          typeof steps === 'string' ? cleanHtml(steps).split('\n').filter(Boolean) : [];
+        // Ak nedostaneme vela krokov, skusime delit podla <p> alebo <br>
+        if (stepsArr.length <= 2 && typeof steps === 'string' && steps.match(/<p|<br|<li/i)) {
+          const htmlSteps = steps.split(/<\/p>|<br\s*\/?|<\/li>/i).map(s => cleanHtml(s)).filter(s => s.length > 3);
+          if (htmlSteps.length > stepsArr.length) stepsArr.length = 0, stepsArr.push.apply(stepsArr, htmlSteps);
+        }
         const stepText = stepsArr.join('\n');
         let timeNum = 30;
         if (time) {
