@@ -2857,6 +2857,11 @@ document.querySelectorAll('.modal-overlay').forEach(el => {
 // ======================== FORM ========================
 function openFormModal(recipe) {
   editingId = recipe ? recipe.id : null;
+  // Inject import card dynamically (sure way to handle translations)
+  var importCard = document.getElementById('form-import-card');
+  if (importCard) {
+    importCard.innerHTML = '<div onclick="closeModal(\'form-modal\');setTimeout(showImportUrlModal,300)" style="display:flex;align-items:center;gap:.5rem;padding:.5rem .6rem;margin-bottom:.6rem;background:linear-gradient(135deg,rgba(255,77,109,.08),rgba(255,77,109,.02));border:1px dashed rgba(255,77,109,.25);border-radius:var(--radius-md);cursor:pointer;transition:all .2s ease;" onmouseover="this.style.borderColor=\'rgba(255,77,109,.5)\';this.style.background=\'linear-gradient(135deg,rgba(255,77,109,.12),rgba(255,77,109,.04))\'" onmouseout="this.style.borderColor=\'rgba(255,77,109,.25)\';this.style.background=\'linear-gradient(135deg,rgba(255,77,109,.08),rgba(255,77,109,.02))\'"><span style="font-size:1.3rem;">🌐</span><div style="flex:1;"><div style="font-size:.82rem;font-weight:600;color:var(--text);">' + t('btnImportUrl') + '</div><div style="font-size:.65rem;color:var(--text3);">' + t('importUrlHint') + '</div></div><span style="font-size:1.1rem;color:var(--primary);">›</span></div>';
+  }
   document.getElementById('form-title').textContent = recipe ? t('formTitle') + ' (edit)' : t('formTitle');
   document.getElementById('form-submit-btn').textContent = recipe ? t('save') : t('btnAdd');
   document.getElementById('r-name').value = recipe ? recipe.name : '';
