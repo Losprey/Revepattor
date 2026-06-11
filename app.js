@@ -2685,9 +2685,9 @@ function openSettings() {
         <span class="sr-label"><span class="sr-icon">❓</span> ${t('Zobraziť onboarding','Show onboarding')}</span>
         <span class="sr-value"><span class="sr-arrow">›</span></span>
       </div>
-      <div class="settings-row" onclick="showImportUrlModal()">
-        <span class="sr-label"><span class="sr-icon">🌐</span> ${t('Import z URL','Import from URL')}</span>
-        <span class="sr-value"><span class="sr-arrow">›</span></span>
+      <div class="settings-row" onclick="showImportUrlModal()" style="background:linear-gradient(135deg,rgba(255,77,109,.06),transparent);border:1px solid rgba(255,77,109,.1);border-radius:var(--radius-sm);margin:.1rem 0;">
+        <span class="sr-label"><span class="sr-icon" style="font-size:1.1rem;">🌐</span> <strong>${t('Import z URL','Import from URL')}</strong></span>
+        <span class="sr-value" style="color:var(--primary);font-weight:600;">${t('Importovať','Import')} ›</span>
       </div>
       <div class="settings-row" onclick="__confirmDemo(tings()}">
         <span class="sr-label"><span class="sr-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span> ${t('Obnoviť demo','Reset demo')}</span>
