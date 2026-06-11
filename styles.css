@@ -2254,6 +2254,30 @@ body.header-collapsed .controls-bar { top: 0; }
   border-radius: 4px;
 }
 
+/* ===== MICRO-ANIMATIONS ===== */
+button:active, .btn:active, .nav-item:active, .toggle-switch:active { transform: scale(0.96); }
+.recipe-card:active, .dash-stat-pill:active, .settings-row:active { transform: scale(0.98); }
+button, .btn, .nav-item, .recipe-card, .dash-stat-pill, .settings-row { transition: transform .15s cubic-bezier(.4,0,.2,1), box-shadow .2s cubic-bezier(.4,0,.2,1); }
+.toggle-slider { transition: background .25s, transform .25s cubic-bezier(.4,0,.2,1); }
+
+/* ===== SKELETON LOADING ===== */
+.skeleton-pulse {
+  background: linear-gradient(90deg, var(--border) 25%, var(--hover-bg) 50%, var(--border) 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.4s ease infinite;
+  border-radius: var(--radius-sm);
+}
+@keyframes skeletonShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+/* Skeleton blocks */
+.skeleton-block { height: 12px; margin-bottom: 8px; width: 100%; }
+.skeleton-block.short { width: 60%; }
+.skeleton-block.xshort { width: 35%; }
+.skeleton-card { height: 180px; margin-bottom: 12px; border-radius: var(--radius-md); }
+.skeleton-icon { width: 40px; height: 40px; border-radius: 50%; display: inline-block; }
+
 html {
   scroll-behavior: smooth;
 }

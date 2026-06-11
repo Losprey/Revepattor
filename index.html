@@ -23,7 +23,7 @@
 <body>
 
 <!-- SPLASH SCREEN -->
-<div id="splash" style="position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .6s var(--ease-smooth);background:radial-gradient(ellipse at 50% 30%, rgba(16,185,129,.08) 0%, transparent 70%), var(--bg);">
+<div id="splash" style="position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .5s ease, transform .5s cubic-bezier(.4,0,.2,1), filter .5s ease;background:radial-gradient(ellipse at 50% 30%, rgba(16,185,129,.08) 0%, transparent 70%), var(--bg);">
   <div style="width:96px;height:96px;margin-bottom:.7rem;animation:splashIcon 2s var(--ease-spring) infinite alternate;position:relative;z-index:1;">
     <svg viewBox="0 0 512 512" width="96" height="96">
       <defs><linearGradient id="sg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#10b981"/><stop offset="100%" style="stop-color:#06b6d4"/></linearGradient></defs>
@@ -55,9 +55,12 @@
   // Hide splash - wait for app.js to signal ready, fallback after 3s
   window._hideSplash = function() {
     var s = document.getElementById('splash');
-    if (!s) return;
+    if (!s || s.dataset.hiding) return;
+    s.dataset.hiding = '1';
+    s.style.transform = 'scale(1.06)';
+    s.style.filter = 'blur(10px)';
     s.style.opacity = '0';
-    setTimeout(function() { if (s.parentNode) s.parentNode.removeChild(s); }, 400);
+    setTimeout(function() { if (s.parentNode) s.parentNode.removeChild(s); }, 500);
   };
   document.addEventListener('DOMContentLoaded', function() {
     setTimeout(window._hideSplash, 3000);
@@ -108,7 +111,19 @@
       <div class="dash-stats-row" id="dash-stats-row"></div>
     </div>
   </div>
-  <div id="dash-content"></div>
+  <div id="dash-content">
+    <!-- Skeleton loading placeholders -->
+    <div class="skeleton-card skeleton-pulse"></div>
+    <div class="skeleton-block skeleton-pulse"></div>
+    <div class="skeleton-block skeleton-pulse short"></div>
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <div class="skeleton-icon skeleton-pulse"></div>
+      <div style="flex:1;">
+        <div class="skeleton-block skeleton-pulse xshort"></div>
+        <div class="skeleton-block skeleton-pulse short"></div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- RECIPES -->
@@ -530,6 +545,114 @@
     </div>
   </div>
 </div>
+
+<!-- ===== PULL-TO-REFRESH ===== -->
+<script>
+(function() {
+  var startY = 0, pulling = false, pulled = false;
+  var indicator = document.createElement('div');
+  indicator.id = 'ptr-indicator';
+  indicator.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99998;display:flex;align-items:center;justify-content:center;padding:12px;font-size:.75rem;color:var(--text3);font-weight:600;transform:translateY(-100%);transition:transform .3s var(--ease-out-expo);background:var(--surface);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);gap:6px;';
+  indicator.innerHTML = '<span class="ptr-icon">↓</span> <span class="ptr-text">Potiahnutím obnovíš</span>';
+  document.body.appendChild(indicator);
+
+  var ptrIcon = indicator.querySelector('.ptr-icon');
+  var ptrText = indicator.querySelector('.ptr-text');
+  var refreshTimeout = null;
+
+  document.addEventListener('touchstart', function(e) {
+    if (window.scrollY > 10) return;
+    startY = e.touches[0].clientY;
+    pulling = true;
+    pulled = false;
+  }, { passive: true });
+
+  document.addEventListener('touchmove', function(e) {
+    if (!pulling || window.scrollY > 10) return;
+    var diff = e.touches[0].clientY - startY;
+    if (diff < 0) { pulling = false; return; }
+    
+    var progress = Math.min(diff / 80, 1);
+    indicator.style.transform = 'translateY(' + (diff * 0.4 - 100) + 'px)';
+    
+    if (progress >= 1 && !pulled) {
+      pulled = true;
+      ptrIcon.textContent = '↻';
+      ptrIcon.style.animation = 'ptrSpin 1s linear infinite';
+      ptrText.textContent = 'Pustíš — obnovím';
+    } else if (progress < 1) {
+      pulled = false;
+      ptrIcon.textContent = '↓';
+      ptrIcon.style.animation = '';
+      ptrText.textContent = 'Potiahnutím obnovíš';
+    }
+  }, { passive: true });
+
+  document.addEventListener('touchend', function() {
+    pulling = false;
+    
+    if (pulled) {
+      // Refresh!
+      ptrIcon.textContent = '↻';
+      ptrIcon.style.animation = 'ptrSpin 1s linear infinite';
+      ptrText.textContent = 'Obnovujem...';
+      indicator.style.transform = 'translateY(0)';
+      
+      // Call existing refresh functions
+      try {
+        if (typeof autoPullFromFirebase === 'function') autoPullFromFirebase();
+        if (typeof renderDashboard === 'function') renderDashboard();
+        if (typeof render === 'function') render();
+        if (typeof renderTasks === 'function') renderTasks();
+      } catch(e) {}
+      
+      // Haptic feedback on refresh
+      try { navigator.vibrate && navigator.vibrate(20); } catch(e) {}
+      
+      if (refreshTimeout) clearTimeout(refreshTimeout);
+      refreshTimeout = setTimeout(function() {
+        indicator.style.transform = 'translateY(-100%)';
+        ptrIcon.textContent = '↓';
+        ptrIcon.style.animation = '';
+        ptrText.textContent = 'Potiahnutím obnovíš';
+        pulled = false;
+      }, 1500);
+    } else {
+      indicator.style.transform = 'translateY(-100%)';
+    }
+  }, { passive: true });
+})();
+
+// Keyframe for spin animation
+if (!document.getElementById('ptr-style')) {
+  var s = document.createElement('style');
+  s.id = 'ptr-style';
+  s.textContent = '@keyframes ptrSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }';
+  document.head.appendChild(s);
+}
+</script>
+
+<!-- ===== HAPTIC FEEDBACK GLOBAL ===== -->
+<script>
+(function() {
+  // Haptická spätná väzba na zaškrtnutie úloh
+  document.addEventListener('click', function(e) {
+    var target = e.target;
+    // Checkbox toggles
+    if (target.matches('input[type="checkbox"]')) {
+      try { navigator.vibrate && navigator.vibrate(10); } catch(err) {}
+    }
+    // Task toggle buttons (dokončenie úlohy)
+    if (target.closest('.task-check-btn') || target.closest('.task-toggle')) {
+      try { navigator.vibrate && navigator.vibrate(15); } catch(err) {}
+    }
+    // Primary buttons
+    if (target.matches('.btn-primary, .btn.primary, button.primary')) {
+      try { navigator.vibrate && navigator.vibrate(8); } catch(err) {}
+    }
+  }, true);
+})();
+</script>
 
 </body>
 </html>
