@@ -5911,9 +5911,11 @@ function importFromUrl() {
         }
         document.getElementById('r-image').dispatchEvent(new Event('input'));
         if (image) {
-          // Try direct fetch first, then via proxy
+          // Try direct fetch first
           const directFetch = fetch(image, { mode: 'cors' }).catch(() => null);
-          const proxyFetch = fetch(proxies[0](image)).catch(() => null);
+          // Proxy fetch (ak existuje)
+          var proxyFetch = Promise.reject();
+          try { if (typeof proxies !== 'undefined' && proxies.length > 0) proxyFetch = fetch(proxies[0](image)).catch(() => null); } catch(e2) {}
           Promise.any([directFetch, proxyFetch])
             .then(r => { if (!r || !r.ok) throw new Error(); return r.blob(); })
             .then(blob => {
