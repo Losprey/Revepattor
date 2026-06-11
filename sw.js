@@ -1,85 +1,22 @@
-// ======================== PUSH NOTIFICATIONS ========================
-self.addEventListener('push', function(e) {
-  if (!e.data) return;
-  var data;
-  try { data = JSON.parse(e.data.text()); } catch(ex) { data = { title: 'Mealnest', body: e.data.text() }; }
-  var opts = {
-    title: data.title || 'Mealnest',
-    body: data.body || '',
-    icon: '/icon-192.png',
-    badge: '/icon-48.png',
-    vibrate: [200, 100, 200],
-    data: { url: data.url || '/', tab: data.tab || 'dashboard' },
-    tag: data.tag || 'mealnest-default',
-    renotify: true,
-    requireInteraction: true
-  };
-  e.waitUntil(self.registration.showNotification(opts.title, opts));
-});
+/**
+ * Mealnest Service Worker - Caching + Push notifikácie
+ */
+const CACHE = 'mealnest-v8';
 
-self.addEventListener('notificationclick', function(e) {
-  e.notification.close();
-  var target = e.notification.data && e.notification.data.url ? e.notification.data.url : '/';
-  var tab = e.notification.data && e.notification.data.tab ? e.notification.data.tab : 'dashboard';
-  e.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
-      for (var i = 0; i < clientList.length; i++) {
-        var client = clientList[i];
-        if (client.url.indexOf(self.location.origin) === 0 && 'focus' in client) {
-          client.postMessage({ action: 'switchTab', tab: tab });
-          return client.focus();
-        }
-      }
-      if (clients.openWindow) return clients.openWindow(target + '#' + tab);
-    })
-  );
-});
-
-// Handle message from client to switch tab
-self.addEventListener('message', function(e) {
-  if (e.data && e.data.action === 'switchTab' && e.data.tab) {
-    clients.matchAll({ type: 'window' }).then(function(clients) {
-      clients.forEach(function(client) {
-        client.postMessage({ action: 'switchTab', tab: e.data.tab });
-      });
-    });
-  }
-});
-
-var CACHE = 'mealnest-v11';
-var PRECACHE = [
-  'recipes-default.json',
-  'manifest.json',
-  'icon.svg',
-  'icon-192.png',
-  'icon-512.png',
-  'icon-180.png',
-  'icon-48.png'
-];
-
-self.addEventListener('install', function(e) {
+// === INSTALL ===
+self.addEventListener('install', e => {
   self.skipWaiting();
-  e.waitUntil(
-    caches.open(CACHE).then(function(cache) {
-      return cache.addAll(PRECACHE);
-    }).catch(function(err) {
-      // Non-critical: skip if offline during first install
-      console.log('SW precache partial:', err.message);
-    })
-  );
 });
 
-self.addEventListener('activate', function(e) {
+// === ACTIVATE ===
+self.addEventListener('activate', e => {
   e.waitUntil(
-    caches.keys().then(function(keys) {
-      return Promise.all(keys.map(function(k) {
-        if (k !== CACHE) return caches.delete(k);
-      }));
-    })
+    caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))))
   );
   e.waitUntil(clients.claim());
 });
 
+// === FETCH ===
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
 
@@ -89,7 +26,7 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // Network-first for ALL images (pexels, placehold.co, remote recipe images)
+  // Network-first for ALL images
   if (e.request.destination === 'image' || /\.(png|jpg|jpeg|gif|webp|svg|ico)/i.test(url.pathname)) {
     e.respondWith(
       fetch(e.request, { cache: 'no-store' }).catch(() => caches.match(e.request))
@@ -97,7 +34,7 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // Stale-while-revalidate for local assets (icons, manifest)
+  // Stale-while-revalidate for local assets
   e.respondWith(
     caches.open(CACHE).then(cache =>
       cache.match(e.request).then(cached => {
@@ -110,3 +47,102 @@ self.addEventListener('fetch', e => {
     )
   );
 });
+
+// === PUSH (fallback pre priame push notifikácie) ===
+self.addEventListener('push', function(e) {
+  let data = {};
+  try {
+    data = e.data ? e.data.json() : {};
+  } catch(err) {
+    console.warn('[sw.js] Invalid push data:', err);
+    return;
+  }
+
+  const title = data.title || 'Mealnest';
+  const options = {
+    body: data.body || '',
+    icon: data.icon || '/Revepattor/icon-192.png',
+    badge: '/Revepattor/icon-96.png',
+    vibrate: [200, 100, 200],
+    tag: data.tag || 'mealnest-push',
+    data: data.data || { url: '/Revepattor/' },
+    requireInteraction: true,
+    silent: false
+  };
+
+  e.waitUntil(self.registration.showNotification(title, options));
+});
+
+// === NOTIFICATION CLICK ===
+self.addEventListener('notificationclick', function(e) {
+  e.notification.close();
+
+  const data = e.notification.data || {};
+  const url = data.url || '/Revepattor/';
+
+  e.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clients => {
+      for (let client of clients) {
+        if (client.url.includes('/Revepattor/') && 'focus' in client) {
+          client.postMessage({ type: 'NOTIFICATION_CLICK', data });
+          return client.focus();
+        }
+      }
+      return clients.openWindow(url);
+    })
+  );
+});
+
+// === MESSAGE FROM APP (napr. nastavenie badge) ===
+self.addEventListener('message', function(e) {
+  if (!e.data) return;
+
+  const d = e.data;
+
+  // Nastavenie badge (odznak na ikonke)
+  if (d.type === 'SET_BADGE' && navigator.setAppBadge) {
+    navigator.setAppBadge(d.count || 0);
+  }
+
+  // Aktualizácia badge počtu (inkrement)
+  if (d.type === 'INC_BADGE' && navigator.setAppBadge) {
+    navigator.setAppBadge(d.count || 1);
+  }
+
+  // Vyčistenie badge
+  if (d.type === 'CLEAR_BADGE') {
+    if (navigator.clearAppBadge) {
+      navigator.clearAppBadge();
+    } else if (navigator.setAppBadge) {
+      navigator.setAppBadge(0);
+    }
+  }
+});
+
+// === BACKGROUND SYNC ===
+self.addEventListener('sync', function(e) {
+  console.log('[sw.js] Background sync event:', e.tag);
+
+  if (e.tag === 'sync-tasks') {
+    e.waitUntil(syncPendingTasks());
+  }
+
+  if (e.tag === 'sync-shopping') {
+    e.waitUntil(syncPendingShopping());
+  }
+});
+
+async function syncPendingTasks() {
+  // Notifikovať appku že môže dobehnúť dáta z Firebase
+  const allClients = await clients.matchAll({ type: 'window', includeUncontrolled: true });
+  for (const client of allClients) {
+    client.postMessage({ type: 'SYNC_TASKS' });
+  }
+}
+
+async function syncPendingShopping() {
+  const allClients = await clients.matchAll({ type: 'window', includeUncontrolled: true });
+  for (const client of allClients) {
+    client.postMessage({ type: 'SYNC_SHOPPING' });
+  }
+}

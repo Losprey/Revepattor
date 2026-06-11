@@ -63,7 +63,7 @@ const LANG = {
     wet: 'Mokré',
     portionUnit: 'porcií',
     fabTask: '✅ Úloha', fabMeal: '🍽️ Jedlo', fabFood: '🛒 Potravina',
-    navTasks: 'Úlohy', navBoard: 'Nástenka', tasksTitle: 'Úlohy', tasksToday: 'Dnes', tasksTomorrow: 'Zajtra', tasksWeek: 'Tento týždeň', tasksDone: 'Dokončené',
+    navTasks: 'Úlohy', tasksTitle: 'Úlohy', tasksToday: 'Dnes', tasksTomorrow: 'Zajtra', tasksWeek: 'Tento týždeň', tasksDone: 'Dokončené',
     tasksEmpty: 'Dnes máš voľno ✨', tasksEmptyDesc: 'Žiadne úlohy. Pridaj si nejakú!',
     tasksAdd: 'Pridať úlohu', tasksEdit: 'Upraviť úlohu', tasksSave: 'Uložiť', tasksDelete: 'Vymazať',
     tasksCatCooking: 'Varenie', tasksCatShopping: 'Nákup', tasksCatHousehold: 'Domácnosť', tasksCatKid: 'Dieťa', tasksCatCustom: 'Vlastné',
@@ -126,7 +126,7 @@ const LANG = {
     settingsTitle: '⚙️ Settings', settingsDark: 'Dark mode', settingsLang: 'Language',
     autoFill: 'Auto-estimate from ingredients',
     unmatchedHint: 'ingredients not exactly matched',
-    navTasks: 'Tasks', navBoard: 'Board', tasksTitle: 'Tasks', tasksToday: 'Today', tasksTomorrow: 'Tomorrow', tasksWeek: 'This Week', tasksDone: 'Completed',
+    navTasks: 'Tasks', tasksTitle: 'Tasks', tasksToday: 'Today', tasksTomorrow: 'Tomorrow', tasksWeek: 'This Week', tasksDone: 'Completed',
     tasksEmpty: 'You have a free day ✨', tasksEmptyDesc: 'No tasks today. Add one!',
     tasksAdd: 'Add task', tasksEdit: 'Edit task', tasksSave: 'Save', tasksDelete: 'Delete',
     tasksCatCooking: 'Cooking', tasksCatShopping: 'Shopping', tasksCatHousehold: 'Household', tasksCatKid: 'Kids', tasksCatCustom: 'Custom',
@@ -201,7 +201,7 @@ function initFirebaseAuth() {
       authLoading = false;
       setStoreNamespace('user_' + user.uid + '_');
       // Reload data from new namespace
-      try { recipes = JSON.parse(localStorage.getItem('recipes') || 'null') || []; } catch(e) {}
+      try { recipes = JSON.parse(localStorage.getItem('recipes') || 'null') || JSON.parse(JSON.stringify(DEFAULT_RECIPES)); } catch(e) {}
       try { mealPlan = JSON.parse(localStorage.getItem('mealPlan') || '{}'); } catch(e) {}
       try { mealPlanKids = JSON.parse(localStorage.getItem('mealPlanKids') || '{}'); } catch(e) {}
       try { loadShopItems(); } catch(e) {}
@@ -237,8 +237,6 @@ function initFirebaseAuth() {
         updateAuthUI();
       }
     }
-    // Hide splash after first auth state is resolved
-    if (window._hideSplash) window._hideSplash();
   });
 }
 
@@ -252,27 +250,26 @@ function signInWithGoogle() {
   });
   if (authIsGuest) {
     // Guest logging in — ask about migration
-    showConfirmModal(lang==='en'?'Transfer your data to this account?':'Chceš preniesť aktuálne dáta do účtu?', '📦', lang==='en'?'Transfer':'Preniesť', function() {
-        localStorage.setItem('authMigrateFromGuest', '1');
-      });
+    if (confirm(lang==='en'?'Transfer your data to this account?\n\nOK = Transfer\nCancel = Start fresh':'Chceš preniesť aktuálne dáta do účtu?\n\nOK = Preniesť dáta\nZrušiť = Začať s novým účtom')) {
+      // We'll migrate after login completes
+      localStorage.setItem('authMigrateFromGuest', '1');
+    }
   }
   doSignIn();
 }
 
 function signOutUser() {
-  showConfirmModal(lang==='en'?'Sign out from Mealnest?':'Odhlásiť sa z Mealnestu?', '👋', lang==='en'?'Sign out':'Odhlásiť', function() {
-    
   if (!firebase.auth) return;
   firebase.auth().signOut().then(() => {
     authUser = null;
-    authIsGuest = false;
+    authIsGuest = true;
     setStoreNamespace('guest_');
     localStorage.removeItem('authUser');
-    localStorage.removeItem('authGuest');
-    document.getElementById('login-overlay').style.display = 'flex';
+    localStorage.setItem('authGuest', '1');
     updateAuthUI();
+    // onAuthStateChanged callback už prekreslí UI a načíta správny namespace
+    // location.reload() nie je potrebný a spôsobuje zbytočné bliknutie
   }).catch(() => {});
-  });
 }
 
 function continueAsGuest() {
@@ -350,23 +347,8 @@ function getSettingsAuthHTML() {
   return '';
 }
 
-// Wait for Firebase SDK to load (max 5s), then init with small delay to let app.js finish parsing
-(function waitForFirebaseSDK(retries) {
-  if (typeof firebase !== 'undefined' && firebase.initializeApp) {
-    setTimeout(function() {
-      initFirebase();
-      initFirebaseAuth();
-    }, 50);
-  } else if (retries > 0) {
-    setTimeout(waitForFirebaseSDK, 200, retries - 1);
-  } else {
-    console.warn('Firebase SDK not loaded after 5s');
-    setTimeout(function() {
-      initFirebase();
-      initFirebaseAuth();
-    }, 50);
-  }
-}(25)); // max ~5s wait
+// Wait for Firebase init then start auth
+setTimeout(() => { initFirebase(); initFirebaseAuth(); }, 500);
 
 // ======================== ONBOARDING ========================
 const ONBOARDING_SLIDES = [
@@ -556,80 +538,6 @@ setTimeout(() => showOnboarding(), 300);
 
 // ======================== AI (DEEPSEEK PROXY) ========================
 const APP_VERSION = '1.0.5';
-const VAPID_PUBLIC_KEY = 'BI6Fga-GXSKggkNJ58R1VEYEfGE6KfWgnuDtI9sHqQLQJzGLshJuIuODmI13AVzX5D2Kd7SBxrr7Cvf-xRAowg0';
-const PUSH_PROXY_URL = 'https://receptar.waldis994.workers.dev';
-
-// ======================== PUSH NOTIFICATIONS ========================
-let _pushSubscription = null;
-
-async function registerPushSubscription() {
-  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
-  if (Notification.permission !== 'granted') return;
-  try {
-    var reg = await navigator.serviceWorker.ready;
-    var sub = await reg.pushManager.getSubscription();
-    if (sub) {
-      _pushSubscription = sub;
-      savePushSubscription(sub);
-      return sub;
-    }
-    sub = await reg.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-    });
-    _pushSubscription = sub;
-    savePushSubscription(sub);
-    return sub;
-  } catch(e) {
-    console.error('Push subscription failed:', e);
-    return null;
-  }
-}
-
-function savePushSubscription(sub) {
-  if (!sub) return;
-  try {
-    var data = JSON.parse(JSON.stringify(sub));
-    var deviceId = getDeviceId();
-    var key = 'push_subs_' + deviceId;
-    localStorage.setItem(key, JSON.stringify(data));
-    // Save to Firebase if family connected
-    if (typeof familyDbRef !== 'undefined' && familyDbRef) {
-      familyDbRef.child('pushSubscriptions/' + deviceId).set(data);
-    }
-  } catch(e) { /* silent */ }
-}
-
-async function sendPushToFamily(title, body, tab) {
-  try {
-    if (typeof familyDbRef === 'undefined' || !familyDbRef) return;
-    // Get all subscriptions from Firebase
-    var snap = await familyDbRef.child('pushSubscriptions').once('value');
-    var subs = snap.val();
-    if (!subs) return;
-    var list = Object.values(subs);
-    if (!list.length) return;
-    // Send to Cloudflare Worker
-    await fetch(PUSH_PROXY_URL + '/api/notify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        subscriptions: list,
-        payload: JSON.stringify({ title: title, body: body, tab: tab || 'dashboard' })
-      })
-    }).catch(function(e) { console.error('Push send failed:', e); });
-  } catch(e) { console.error('Push send error:', e); }
-}
-
-function urlBase64ToUint8Array(base64String) {
-  var padding = '='.repeat((4 - base64String.length % 4) % 4);
-  var base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
-  var raw = atob(base64);
-  var output = new Uint8Array(raw.length);
-  for (var i = 0; i < raw.length; ++i) output[i] = raw.charCodeAt(i);
-  return output;
-}
-
 const AI_PROXY_URL = 'https://receptar.waldis994.workers.dev'; // Cloudflare Worker proxy pre DeepSeek
 
 async function aiGenerate(messages) {
@@ -771,9 +679,6 @@ async function aiIngredientSuggest() {
 }
 
 async function aiDailyTip() {
-  var btn = document.getElementById('dash-ai-tip-btn');
-  var origHTML = btn ? btn.innerHTML : '';
-  if (btn) { btn.disabled = true; btn.innerHTML = '<span style="display:inline-block;animation:spin .6s linear infinite">⏳</span> ' + (lang==='en'?'Thinking...':'Premýšľam...'); }
   const season = ['jar','jar','jar','leto','leto','leto','leto','leto','jeseň','jeseň','jeseň','zima'][new Date().getMonth()];
   const prompt = lang==='en'
     ? 'Give me one short cooking tip for today. Season: '+season+'. Be witty, original, max 2 sentences. Reply in English.'
@@ -783,8 +688,6 @@ async function aiDailyTip() {
     document.getElementById('dash-message').textContent = reply;
     document.getElementById('dash-message-sub').textContent = t('🤖 Vygenerované AI','🤖 AI-generated');
   }
-  // Restore button
-  if (btn) { btn.disabled = false; btn.innerHTML = origHTML || ('🤖 <span id="dash-ai-label">' + t('AI tip dňa','AI tip of the day') + '</span>'); }
 }
 
 async function aiSuggestForSlot(dayKey, slotKey) {
@@ -962,7 +865,6 @@ function addAIShoppingItems() {
       }
     }
   });
-  try { autoMergeShopItems(); } catch(e) {}
   saveShopItems();
   try { localStorage.setItem('shoppingItems', JSON.stringify(shopItems)); } catch(e) {}
   document.getElementById('ai-modal')?.remove();
@@ -976,7 +878,7 @@ function addAIShoppingItems() {
         added++;
       }
     });
-    if (added > 0) { try { autoMergeShopItems(); } catch(e) {} saveShopItems(); try { localStorage.setItem('shoppingItems', JSON.stringify(shopItems)); } catch(e) {} }
+    if (added > 0) { saveShopItems(); try { localStorage.setItem('shoppingItems', JSON.stringify(shopItems)); } catch(e) {} }
     else { showToast(t('Nepodarilo sa pridať položky.','Failed to add items.'),'error'); return; }
   }
   renderShoppingList();
@@ -1026,6 +928,287 @@ function initFirebase() {
   }
 }
 
+// ======================== PUSH NOTIFIKÁCIE (FCM) ========================
+// VAPID kľúč pre Firebase Cloud Messaging
+// 🔑 ZÍSKAJ HO TU: Firebase Console → Projekt receptar2 → Cloud Messaging → Web Push certificates
+// Potom ho vlož nižšie (medzi úvodzovky)
+const VAPID_PUBLIC_KEY = 'VZibhclvVrvBVG4uHRH2iQOmKduxV3YV6SUpkq0fWHo';
+
+let fcmMessaging = null;      // Firebase Messaging inštancia
+let fcmToken = null;           // Aktuálny FCM token zariadenia
+let isFCMSubscribed = false;   // Je token prihlásený k rodine?
+let fcmInitAttempted = false;  // Už sme skúšali inicializovať?
+
+// Inicializácia FCM
+function initFCM() {
+  if (fcmInitAttempted) return;
+  fcmInitAttempted = true;
+  
+  if (!firebaseReady) {
+    console.warn('[FCM] Firebase nie je ready, skúšam neskôr');
+    fcmInitAttempted = false;
+    return;
+  }
+  
+  if (typeof firebase.messaging !== 'function') {
+    console.warn('[FCM] Firebase Messaging nie je k dispozícii (chýba SDK)');
+    return;
+  }
+
+  try {
+    fcmMessaging = firebase.messaging();
+    
+    // Počúvanie na prichádzajúce správy keď je appka v popredí
+    fcmMessaging.onMessage(function(payload) {
+      console.log('[FCM] Správa v popredí:', payload);
+      
+      // Zobrazíme in-app notifikáciu (toast)
+      const data = payload.data || {};
+      const title = data.title || payload.notification?.title || 'Mealnest';
+      const body = data.body || payload.notification?.body || '';
+      
+      if (body) {
+        showToast(body, 'info', 5000);
+      }
+      
+      // Aktualizovať badge
+      updateBadgeCount();
+      
+      // Vyvolať udalosť pre appku
+      handleNotificationData(data);
+    });
+
+    // Zaregistrovať service worker pre FCM
+    registerFCMSW()
+      .then(() => getFCMToken())
+      .then(() => subscribeToFamilyTopic())
+      .catch(function(err) {
+        console.warn('[FCM] Init error:', err);
+        if (err.message && err.message.includes('permission')) {
+          fcmInitAttempted = false;
+          setTimeout(initFCM, 30000);
+        }
+      });
+      
+  } catch(e) {
+    console.warn('[FCM] Init error:', e);
+  }
+}
+
+// Registrácia service worker-a pre Firebase Messaging
+async function registerFCMSW() {
+  try {
+    const registration = await navigator.serviceWorker.register('/Revepattor/firebase-messaging-sw.js', {
+      scope: '/Revepattor/'
+    });
+    console.log('[FCM] Service worker zaregistrovaný:', registration.scope);
+    
+    // Tiež zaregistrujeme hlavný SW pre caching
+    try {
+      await navigator.serviceWorker.register('/Revepattor/sw.js', {
+        scope: '/Revepattor/'
+      });
+    } catch(e) {}
+    
+    return registration;
+  } catch(e) {
+    console.warn('[FCM] Service worker registrácia zlyhala:', e);
+    throw e;
+  }
+}
+
+// Získanie FCM tokenu
+async function getFCMToken() {
+  if (!fcmMessaging || !('Notification' in window)) return null;
+  
+  if (Notification.permission === 'default') {
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') return null;
+  }
+  
+  if (Notification.permission !== 'granted') return null;
+  
+  try {
+    const vapidKey = VAPID_PUBLIC_KEY || undefined;
+    const currentToken = await fcmMessaging.getToken({
+      vapidKey: vapidKey
+    });
+    
+    if (currentToken) {
+      fcmToken = currentToken;
+      localStorage.setItem('fcmToken', currentToken);
+      console.log('[FCM] Token získaný:', currentToken.slice(0, 20) + '...');
+      saveFCMTokenToDB(currentToken);
+      return currentToken;
+    } else {
+      console.warn('[FCM] Token je prázdny');
+      return null;
+    }
+  } catch(err) {
+    console.warn('[FCM] Chyba pri získavaní tokenu:', err);
+    return null;
+  }
+}
+
+// Uložiť FCM token do Firebase pod aktuálnou rodinou/zariadením
+function saveFCMTokenToDB(token) {
+  if (!familyCode || !familyDbRef) {
+    setTimeout(function() {
+      if (familyCode && familyDbRef) saveFCMTokenToDB(token);
+    }, 5000);
+    return;
+  }
+  try {
+    const deviceId = getDeviceId();
+    familyDbRef.child('members').child(deviceId).update({
+      fcmToken: token,
+      lastSeen: Date.now(),
+      deviceName: localStorage.getItem('deviceName') || 'Zariadenie'
+    });
+  } catch(e) {}
+}
+
+// Odhlásiť sa z FCM
+async function unsubscribeFCM() {
+  if (!fcmMessaging || !fcmToken) return;
+  try {
+    await fcmMessaging.deleteToken();
+  } catch(e) {}
+  fcmToken = null;
+  localStorage.removeItem('fcmToken');
+  if (familyCode && familyDbRef) {
+    try {
+      const deviceId = getDeviceId();
+      familyDbRef.child('members').child(deviceId).child('fcmToken').remove();
+    } catch(e) {}
+  }
+  isFCMSubscribed = false;
+}
+
+// Spracovať dáta z notifikácie
+function handleNotificationData(data) {
+  if (!data) return;
+  const action = data.click_action || data.action || '';
+  if (action === 'open_tasks') switchTab('tasks');
+  else if (action === 'open_shopping') switchTab('shopping');
+  else if (action === 'open_planner') switchTab('planner');
+  else if (action === 'open_recipe' && data.recipeId) {
+    switchTab('home');
+    setTimeout(function() { viewRecipe(parseInt(data.recipeId)); }, 300);
+  }
+  if (action && familyDbRef) autoPullFromFirebase();
+}
+
+// Badge count
+function updateBadgeCount() {
+  if (!navigator.serviceWorker || !navigator.serviceWorker.controller) return;
+  const pendingTasks = tasks.filter(function(t) { return !t.completed; }).length;
+  navigator.serviceWorker.controller.postMessage({ type: 'SET_BADGE', count: pendingTasks });
+}
+
+function clearBadge() {
+  if (!navigator.serviceWorker || !navigator.serviceWorker.controller) return;
+  navigator.serviceWorker.controller.postMessage({ type: 'CLEAR_BADGE' });
+}
+
+// Background sync
+function registerBackgroundSync() {
+  if (!navigator.serviceWorker || !navigator.serviceWorker.ready) return;
+  navigator.serviceWorker.ready.then(function(reg) {
+    if ('sync' in reg) {
+      reg.sync.register('sync-tasks').catch(function(e) {});
+      reg.sync.register('sync-shopping').catch(function(e) {});
+    }
+  });
+}
+
+// Počúvať správy od service worker-a
+function listenToServiceWorker() {
+  if (!navigator.serviceWorker) return;
+  navigator.serviceWorker.addEventListener('message', function(event) {
+    if (!event.data) return;
+    if (event.data.type === 'NOTIFICATION_CLICK') handleNotificationData(event.data.data);
+    if (event.data.type === 'SYNC_TASKS' || event.data.type === 'SYNC_SHOPPING') {
+      if (familyDbRef) autoPullFromFirebase();
+    }
+  });
+}
+
+// Push notifikácie zapnuté?
+function arePushNotificationsEnabled() {
+  try { return appSettings.pushNotifications && appSettings.pushNotifications.enabled !== false; } catch(e) { return true; }
+}
+
+// ======================== TRIGGERY PRE PUSH NOTIFIKÁCIE ========================
+function notifyTaskAdded(task) {
+  if (!arePushNotificationsEnabled() || !familyCode || !familyDbRef) return;
+  const deviceName = localStorage.getItem('deviceName') || 'Niekto';
+  try {
+    familyDbRef.child('pushNotifications').push({
+      type: 'task_added',
+      title: '✅ ' + (task.title || 'Nová úloha'),
+      body: deviceName + ' pridal/a úlohu',
+      taskId: task.id,
+      action: 'open_tasks',
+      deviceName: deviceName,
+      timestamp: Date.now()
+    });
+  } catch(e) {}
+  updateBadgeCount();
+}
+
+function notifyTaskCompleted(task) {
+  if (!arePushNotificationsEnabled() || !familyCode || !familyDbRef) return;
+  const deviceName = localStorage.getItem('deviceName') || 'Niekto';
+  try {
+    familyDbRef.child('pushNotifications').push({
+      type: 'task_completed',
+      title: '🎉 ' + (task.title || 'Úloha'),
+      body: deviceName + ' dokončil/a úlohu',
+      taskId: task.id,
+      action: 'open_tasks',
+      deviceName: deviceName,
+      timestamp: Date.now()
+    });
+  } catch(e) {}
+}
+
+function notifyShoppingChanged(itemName) {
+  if (!arePushNotificationsEnabled() || !familyCode || !familyDbRef) return;
+  const deviceName = localStorage.getItem('deviceName') || 'Niekto';
+  try {
+    familyDbRef.child('pushNotifications').push({
+      type: 'shopping_changed',
+      title: '🛒 ' + (itemName || 'Nákupný zoznam'),
+      body: deviceName + ' zmenil/a nákupný zoznam',
+      action: 'open_shopping',
+      deviceName: deviceName,
+      timestamp: Date.now()
+    });
+  } catch(e) {}
+}
+
+function notifyPlanChanged() {
+  if (!arePushNotificationsEnabled() || !familyCode || !familyDbRef) return;
+  const deviceName = localStorage.getItem('deviceName') || 'Niekto';
+  try {
+    familyDbRef.child('pushNotifications').push({
+      type: 'plan_changed',
+      title: '📅 Plán jedál',
+      body: deviceName + ' zmenil/a plán jedál',
+      action: 'open_planner',
+      deviceName: deviceName,
+      timestamp: Date.now()
+    });
+  } catch(e) {}
+}
+
+function resetFCMOnLeaveFamily() {
+  unsubscribeFCM();
+  clearBadge();
+  fcmInitAttempted = false;
+}
+
 function generateFamilyCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let code = '';
@@ -1035,7 +1218,7 @@ function generateFamilyCode() {
 
 function createFamily() {
   initFirebase();
-  if (!firebaseReady) { showToast(t('Firebase nie je nastavený.','Firebase not configured.'),'error'); return; }
+  if (!firebaseReady) { alert(t('Firebase nie je nastaven\u00fd.','Firebase not configured.')); return; }
   var code = '';
   var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   for (var i = 0; i < 8; i++) code += chars[Math.floor(Math.random() * chars.length)];
@@ -1043,18 +1226,17 @@ function createFamily() {
   localStorage.setItem('familyCode', code);
   connectToFamily(code);
   // Only push if user confirms (creator is first, so safe to push)
-  showConfirmModal(t('Vytvorená nová rodina. Synchronizovať aktuálne dáta?','New family created. Sync your current data?'), '👨‍👩‍👧‍👦', lang==='en'?'Sync':'Syncovať', function() {
+  if (confirm(t('Vytvoren\u00e1 nov\u00e1 rodina. Synchronizova\u0165 aktu\u00e1lne d\u00e1ta?','New family created. Sync your current data?'))) {
     pushAllLocalData();
-  });
-  showToast(t('Rodinný kód: ','Family code: ') + code, 'success', 5000);
-  setTimeout(function() { navigator.clipboard.writeText(code).catch(function(){}); }, 100);
+  }
+  alert(t('Rodinn\u00fd k\u00f3d: ','Family code: ') + code + '\n' + t('Zdie\u013eaj tento k\u00f3d s rodinou.','Share this code with your family.'));
   openSettings();
   updateSyncIndicator();
 }
 
 function joinFamily(code) {
   initFirebase();
-  if (!firebaseReady) { showToast(t('Firebase nie je nastavený.','Firebase not configured.'),'error'); return; }
+  if (!firebaseReady) { alert(t('Firebase nie je nastaven\u00fd.','Firebase not configured.')); return; }
   code = code.toUpperCase().trim();
   if (!code) return;
   familyCode = code;
@@ -1068,7 +1250,7 @@ function joinFamily(code) {
       if (mp && mp !== '{}') hasRemote = true;
     } catch(e) {}
     if (hasRemote) {
-      if (confirm(t('Rodina má dáta. Použiť rodinné dáta?','Family has data. Use family data?'))) {
+      if (confirm(t('Rodina m\u00e1 d\u00e1ta. Pou\u017ei\u0165 rodinn\u00e9 d\u00e1ta?','Family has data. Use family data?\nOK = Use family data\nCancel = Keep mine'))) {
         // Already loaded by listener, nothing to do
       } else {
         pushAllLocalData();
@@ -1098,17 +1280,16 @@ function showFamilyMembers() {
 }
 
 function leaveFamily() {
-  showConfirmModal(t('Naozaj opustiť rodinu? Lokálne dáta ostanú.','Really leave family? Local data stays.'), '💪', lang==='en'?'Leave':'Opustiť', function() {
-    
+  if (!confirm(t('Naozaj opustiť rodinu? Lokálne dáta ostanú.','Really leave family? Local data stays.'))) return;
   // Remove all Firebase listeners
   firebaseListeners.forEach(ref => { try { ref.off(); } catch(e) {} });
   firebaseListeners = [];
   familyCode = '';
   familyDbRef = null;
   localStorage.removeItem('familyCode');
+  resetFCMOnLeaveFamily();
   updateSyncIndicator();
   openSettings();
-  });
 }
 
 function connectToFamily(code) {
@@ -1166,16 +1347,16 @@ function pushAllLocalData() { pushToFirebase('shoppingItems', 'shoppingItems'); 
 function firebaseHardTest() {
   try {
     initFirebase();
-    if (!firebaseReady) { showToast('FAIL: firebaseReady=false','error'); return; }
+    if (!firebaseReady) { alert('FAIL: firebaseReady=false'); return; }
     var app = firebase.app();
     var db = firebase.database();
     var info = { appName: app.name, databaseURL: app.options.databaseURL, projectId: app.options.projectId, familyCode: familyCode||null, deviceId: getDeviceId(), timestamp: Date.now() };
     var testRef = db.ref('hardTest/' + Date.now());
     testRef.set(info, function(error) {
-      if (error) { showToast('WRITE ERROR: ' + error.message,'error',6000); }
-      else { showToast('WRITE OK - check Firebase console','success',4000); }
+      if (error) { alert('WRITE ERROR:\n' + error.code + '\n' + error.message + '\n\nURL:\n' + app.options.databaseURL); }
+      else { alert('WRITE OK\n\nCheck Firebase Data -> hardTest\n\nURL:\n' + app.options.databaseURL); }
     });
-  } catch(e) { showToast('EXCEPTION: ' + e.message,'error'); }
+  } catch(e) { alert('EXCEPTION:\n' + e.name + '\n' + e.message); }
 }
 
 function debugFirebase() {
@@ -1192,24 +1373,23 @@ function debugFirebase() {
     var sm = localStorage.getItem('shoppingItems');
     info += 'shoppingItems localStorage: ' + (sm ? sm.length + ' chars' : 'empty');
   } catch(e) { info += 'localStorage error: ' + e.message; }
-  showToast('Debug info uložený v konzole','info',3000);
-  console.log('DEBUG:',info);
+  alert(info);
 }
 
 function debugFirebaseWrite() {
-  if (!familyDbRef) { showToast('Najprv sa pripoj k rodine','error'); return; }
+  if (!familyDbRef) { alert('FAIL: familyDbRef is null. Join a family first.'); return; }
   var testData = { test: true, time: Date.now(), device: getDeviceId() };
   familyDbRef.child('_debug').set(testData, function(err) {
-    if (err) { showToast('Zápis zlyhal: ' + err.message,'error'); }
-    else { showToast('Zápis OK ✅','success',3000); }
+    if (err) { alert('WRITE FAILED: ' + err.message + '\nCode: ' + (err.code||'none')); }
+    else { alert('WRITE OK! Check Firebase console -> families/'+familyCode+'/_debug'); }
   });
 }
 
 function debugFirebasePull() {
-  if (!familyDbRef) { showToast('familyDbRef is null','error'); return; }
+  if (!familyDbRef) { alert('FAIL: familyDbRef is null.'); return; }
   familyDbRef.once('value', function(snap) {
     var val = snap.val();
-    if (!val) { showToast('No data at families/'+familyCode,'info'); return; }
+    if (!val) { alert('No data at families/'+familyCode); return; }
     var keys = Object.keys(val);
     // Directly set JS variables
     if (val.mealPlan) { mealPlan = val.mealPlan; }
@@ -1229,23 +1409,23 @@ function debugFirebasePull() {
     try { renderTasks(); } catch(e) {}
     try { renderShoppingList(); } catch(e) {}
     try { renderDashboard(); } catch(e) {}
-    showToast('Načítané: ' + keys.length + ' kľúčov','success',3000);
-  }, function(err) { showToast('READ FAILED: ' + err.message,'error'); });
+    alert('Loaded ' + keys.length + ' keys:\n' + keys.join(', ') + '\n\nCheck planner/tasks/shopping now.');
+  }, function(err) { alert('READ FAILED: ' + err.message); });
 }
 
 function testFirebaseSync() {
   try {
     var r = !!firebaseReady, f = !!familyCode, d = !!familyDbRef;
-    showToast('Firebase: ready='+r+' code='+f,'info',3000);
+    alert('Firebase: ready='+r+' code='+f+' dbRef='+d);
     if (!d) return;
     var testData = { test: Date.now(), from: getDeviceId() };
     familyDbRef.child('_test').set(testData, function(err) {
-      if (err) { showToast('Zápis zlyhal: '+err.message,'error'); return; }
+      if (err) { alert('Z\u00e1pis zlyhal: '+err.message); return; }
       familyDbRef.child('_test').once('value', function(snap) {
-        showToast('✅ Úspešný test!','success',3000);
+        alert('\u00daspe\u0161n\u00fd test! \u2705');
       });
     });
-  } catch(e) { showToast('Chyba: '+e.message,'error'); }
+  } catch(e) { alert('Chyba: '+e.message); }
 }
 
 function pushToFirebase(path, localKey) {
@@ -1273,102 +1453,19 @@ function getDeviceId() {
   return id;
 }
 
-// Network and sync state
-var _isOnline = navigator.onLine !== false;
-var _isSyncing = false;
-var _justConnected = false;
-
 function updateSyncIndicator() {
-  var el = document.getElementById('sync-indicator');
+  const el = document.getElementById('sync-indicator');
   if (!el) return;
-  el.classList.remove('syncing', 'offline', 'connected', 'error', 'sync-just-connected');
-  
-  if (_isSyncing) {
-    el.textContent = '🔄';
-    el.title = 'Synchronizujem...';
-    el.classList.add('syncing');
-    return;
-  }
-  
-  if (!_isOnline) {
-    el.textContent = '📵';
-    el.title = 'Offline — zmeny sa uložia lokálne';
-    el.classList.add('offline');
-    return;
-  }
-  
-  if (!familyCode) {
-    el.textContent = '⚪';
-    el.title = 'Nie si pripojený k rodine';
-    return;
-  }
-  
-  if (firebaseReady) {
-    el.textContent = '🟢';
-    el.title = 'Synchronizované — kód: ' + familyCode;
-    el.classList.add('connected');
-    if (_justConnected) {
-      el.classList.add('sync-just-connected');
-      setTimeout(function() { _justConnected = false; updateSyncIndicator(); }, 1000);
-    }
-  } else {
-    el.textContent = '🔴';
-    el.title = 'Firebase nie je pripojený';
-    el.classList.add('error');
-  }
-}
-
-function setSyncing(syncing) {
-  _isSyncing = syncing;
-  updateSyncIndicator();
-}
-
-// Online/offline listeners
-window.addEventListener('online', function() {
-  _isOnline = true;
-  updateSyncIndicator();
-  var bar = document.getElementById('network-status');
-  if (bar) {
-    bar.className = 'online show';
-    bar.textContent = '🔗 Späť online — synchronizujem...';
-    setTimeout(function() { bar.classList.remove('show'); }, 2000);
-  }
-  // Reconnect to Firebase
-  if (familyCode && firebaseReady) {
-    _isSyncing = true;
-    updateSyncIndicator();
-    setTimeout(function() {
-      connectToFamily(familyCode);
-      autoPullFromFirebase();
-      setTimeout(function() { _isSyncing = false; updateSyncIndicator(); }, 1500);
-    }, 500);
-  }
-});
-
-window.addEventListener('offline', function() {
-  _isOnline = false;
-  updateSyncIndicator();
-  var bar = document.getElementById('network-status');
-  if (bar) {
-    bar.className = 'offline show';
-    bar.textContent = '📵 Offline — zmeny sa uložia lokálne';
-  }
-});
-
-function setDynamicGradient() {
-  var h = new Date().getHours();
-  document.body.classList.remove('gradient-morning', 'gradient-afternoon', 'gradient-evening', 'gradient-night');
-  if (h >= 5 && h < 11) document.body.classList.add('gradient-morning');
-  else if (h >= 11 && h < 17) document.body.classList.add('gradient-afternoon');
-  else if (h >= 17 && h < 21) document.body.classList.add('gradient-evening');
-  else document.body.classList.add('gradient-night');
+  if (!familyCode) { el.textContent = '⚪'; el.title = 'Nie si pripojený k rodine'; }
+  else if (firebaseReady) { el.textContent = '🟢'; el.title = 'Synchronizované — kód: ' + familyCode; }
+  else { el.textContent = '🔴'; el.title = 'Firebase nie je pripojený'; }
 }
 
 function refreshActiveTab() {
   const tab = document.body.dataset.tab;
-  setDynamicGradient();
-  // Set season in real time
-  updateSeason();
+    // Set season
+  const seasonNames = ["zima","zima","jar","jar","jar","leto","leto","leto","leto","leto","jesen","jesen"];
+  document.body.dataset.season = seasonNames[new Date().getMonth()] || "leto";
   if (tab === 'shopping') renderShoppingList();
   if (tab === 'planner') renderPlanner();
   if (tab === 'tasks') renderTasks();
@@ -1376,52 +1473,6 @@ function refreshActiveTab() {
   // Always update task widget on dashboard
   try { renderTaskWidget(); } catch(e) {}
 }
-
-// =================== AUTO DARK MODE ===================
-(function initAutoDark() {
-  var mq = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
-  if (!mq) return;
-  mq.addEventListener('change', function() {
-    if (appSettings.theme === 'auto') applySettings();
-  });
-})();
-
-// =================== SEASON UPDATE IN REAL TIME ===================
-function updateSeason() {
-  var seasons = ['zima','zima','jar','jar','jar','leto','leto','leto','leto','jesen','jesen','zima'];
-  document.body.dataset.season = seasons[new Date().getMonth()];
-}
-
-// =================== PARALLAX HERO COLLAPSE ===================
-var _plannerScrollHandler = null;
-function initPlannerParallax() {
-  if (_plannerScrollHandler) { document.removeEventListener('scroll', _plannerScrollHandler, { passive: true }); }
-  var _pipAutoHide = null;
-  _plannerScrollHandler = function() {
-    var hero = document.getElementById('planner-hero');
-    var pip = document.getElementById('planner-info-panel');
-    if (!hero || !pip || document.getElementById('planner-container').style.display === 'none') return;
-    var scrollY = window.pageYOffset || document.documentElement.scrollTop;
-    hero.classList.toggle('collapsed', scrollY > 20);
-    pip.classList.toggle('visible', scrollY > 80);
-    // Auto-hide floating panel after 2.5s of no scroll
-    if (scrollY > 80) {
-      if (_pipAutoHide) clearTimeout(_pipAutoHide);
-      _pipAutoHide = setTimeout(function() {
-        pip.classList.remove('visible');
-        _pipAutoHide = null;
-      }, 2500);
-    }
-  };
-  document.addEventListener('scroll', _plannerScrollHandler, { passive: true });
-}
-
-// Call parallax init after each planner render
-var _origRenderPlanner2 = renderPlanner;
-renderPlanner = function() {
-  _origRenderPlanner2.apply(this, arguments);
-  initPlannerParallax();
-};
 
 // Load family code from localStorage on init
 try { familyCode = localStorage.getItem('familyCode') || ''; } catch(e) { familyCode = ''; }
@@ -1469,32 +1520,102 @@ function autoPullFromFirebase() {
 }
 
 // ======================== DATA ========================
-// Default recipes loaded from external JSON to save 74KB
-var FALLBACK_RECIPES = [
-  {id:1,name:'Nový recept',nameEn:'New recipe',category:'Hlavné jedlá',time:30,image:'',imageData:'',ingredients:['Surovina 1','Surovina 2'],ingredientsEn:['Ingredient 1','Ingredient 2'],steps:['Krok 1','Krok 2'],stepsEn:['Step 1','Step 2'],tags:[],tagsEn:[],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:0,protein:0,fat:0,carbs:0}}
+const DEFAULT_RECIPES = [
+  {id:1,name:'Špagety aglio e olio',nameEn:'Spaghetti aglio e olio',category:'Hlavné jedlá',time:20,image:'https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20%C5%A0pagety%20aglio%20e%20olio',imageData:'',ingredients:['200g špagiet','4 strúčiky cesnaku','5 lyžíc olivového oleja','1 čili paprička','soľ','petržlenová vňať'],ingredientsEn:['200g spaghetti','4 garlic cloves','5 tbsp olive oil','1 chili pepper','salt','parsley'],steps:['Dajte variť osolenú vodu a uvarte cestoviny al dente.','Na panvici zohrejte olivový olej a pridajte cesnak a čili.','Keď cesnak začne zlatnúť, pridajte uvarené cestoviny.','Ozdobte petržlenom a podávajte.'],stepsEn:['Boil salted water and cook pasta al dente.','Heat olive oil in a pan, add sliced garlic and chili.','When garlic turns golden, add cooked pasta and toss.','Garnish with parsley and serve.'],tags:['rýchle','taliančina'],tagsEn:['quick','italian'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:420,protein:12,fat:18,carbs:55}},
+  {id:2,name:'Mrkvová polievka',nameEn:'Creamy carrot soup',category:'Polievky',time:35,image:'https://placehold.co/400x300/c2410c/fff?text=%F0%9F%A5%A3%20Mrkvov%C3%A1%20polievka',imageData:'',ingredients:['500g mrkvy','1 cibuľa','1 zemiak','2 strúčiky cesnaku','1l zeleninového vývaru','smotana na ozdobenie','soľ, korenie, rasca'],ingredientsEn:['500g carrots','1 onion','1 potato','2 garlic cloves','1L vegetable broth','cream for garnish','salt, pepper, cumin'],steps:['Mrkvu, zemiak a cibuľu ošúpte a nakrájajte na kocky.','Opečte cibuľu a cesnak, pridajte mrkvu a zemiak.','Zalejte vývarom a varte 20 minút do zmäknutia.','Rozmixujte do hladka, dochuťte soľou, korením a rascou.','Podávajte s kvapkou smotany.'],stepsEn:['Peel and dice carrots, potato and onion.','Sauté onion and garlic, add carrot and potato.','Add broth and boil 20 min until soft.','Blend until smooth, season with salt, pepper, cumin.','Serve with a drizzle of cream.'],tags:['zdravé','jednoduché'],tagsEn:['healthy','easy'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:185,protein:4,fat:7,carbs:28}},
+  {id:3,name:'Čokoládový fondant',nameEn:'Chocolate fondant',category:'Dezerty',time:25,image:'https://placehold.co/400x300/be185d/fff?text=%F0%9F%8D%B0%20%C4%8Cokol%C3%A1dov%C3%BD%20fondant',imageData:'',ingredients:['200g horkej čokolády','100g masla','2 vajcia','2 žĺtky','80g cukru','40g hladkej múky'],ingredientsEn:['200g dark chocolate','100g butter','2 eggs','2 egg yolks','80g sugar','40g flour'],steps:['Rúru predhrejte na 200°C a vymastite 4 formičky.','Vo vodnom kúpeli roztopte čokoládu s maslom.','Vyšľahajte vajcia, žĺtky a cukor do peny.','Vmiešajte čokoládovú zmes a múku.','Rozdeľte do formičiek a pečte 10-12 minút.'],stepsEn:['Preheat oven to 200°C and grease 4 ramekins.','Melt chocolate and butter in a double boiler.','Whisk eggs, yolks and sugar until fluffy.','Fold in chocolate mixture and flour.','Divide into ramekins and bake 10-12 min.'],tags:['dezert','čokoláda'],tagsEn:['dessert','chocolate'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:480,protein:8,fat:32,carbs:42}},
+  {id:4,name:'Cézar šalát',nameEn:'Caesar salad',category:'Šaláty',time:15,image:'https://placehold.co/400x300/15803d/fff?text=%F0%9F%A5%97%20C%C3%A9zar%20%C5%A1al%C3%A1t',imageData:'',ingredients:['1 hlávka rímskeho šalátu','2 kuracie prsia','50g parmezánu','krutóny','3 lyžice olivového oleja','1 lyžica citrónu','1 strúčik cesnaku','1ČL horčice','soľ, korenie'],ingredientsEn:['1 romaine lettuce','2 chicken breasts','50g parmesan','croutons','3 tbsp olive oil','1 tbsp lemon juice','1 garlic clove','1 tsp mustard','salt, pepper'],steps:['Kuracie prsia osoľte, okoreňte a opečte dozlatista.','Šalát natrhajte na kúsky.','Zmiešajte dressing z oleja, citrónu, cesnaku a horčice.','Zmiešajte šalát s dressingom, pridajte kura, krutóny a parmezán.'],stepsEn:['Season chicken breasts and pan-fry until golden.','Tear lettuce into pieces.','Mix dressing from oil, lemon, garlic and mustard.','Toss salad with dressing, add chicken, croutons and parmesan.'],tags:['rýchle','zdravé','šalát'],tagsEn:['quick','healthy','salad'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:350,protein:28,fat:22,carbs:12}},
+  {id:5,name:'Lievance s jahodami',nameEn:'Pancakes with strawberries',category:'Raňajky',time:25,image:'https://placehold.co/400x300/a16207/fff?text=%F0%9F%8C%85%20Lievance%20s%20jahodami',imageData:'',ingredients:['250g hladkej múky','2 vajcia','300ml mlieka','1 prášok do pečiva','2 lyžice cukru','štipka soli','maslo','jahody'],ingredientsEn:['250g flour','2 eggs','300ml milk','1 baking powder','2 tbsp sugar','pinch of salt','butter','strawberries'],steps:['Zmiešajte múku, prášok do pečiva, cukor a soľ.','Rozšľahajte vajcia s mliekom a spojte so suchými surovinami.','Na panvici roztopte maslo a dávkujte cesto.','Opekajte z oboch strán dozlatista.','Podávajte s jahodami a javorovým sirupom.'],stepsEn:['Mix flour, baking powder, sugar and salt.','Whisk eggs with milk and combine with dry ingredients.','Melt butter in a pan and pour batter.','Cook both sides until golden.','Serve with strawberries and maple syrup.'],tags:['raňajky','sladké'],tagsEn:['breakfast','sweet'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:320,protein:10,fat:8,carbs:52}},
+  {id:6,name:'Bryndzové halušky',nameEn:'Bryndza potato dumplings',category:'Hlavné jedlá',time:40,image:'https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20Bryndzov%C3%A9%20halu%C5%A1ky',imageData:'',ingredients:['500g zemiakov','250g hladkej múky','1 vajce','soľ','250g bryndze','100g slaniny','kyslá smotana'],ingredientsEn:['500g potatoes','250g flour','1 egg','salt','250g bryndza cheese','100g bacon','sour cream'],steps:['Zemiaky ošúpte a nastrúhajte najemno.','Zmiešajte s múkou, vajcom a soľou na cesto.','Cesto pretláčajte cez sitko do vriacej osolenej vody.','Halušky vyberte keď vyplávajú na povrch.','Slaninu opečte do chrumkava.','Zmiešajte halušky s bryndzou, posypte slaninou a ozdobte smotanou.'],stepsEn:['Peel and finely grate potatoes.','Mix with flour, egg and salt into a dough.','Press dough through a colander into boiling salted water.','Remove dumplings when they float to surface.','Fry bacon until crispy.','Mix dumplings with bryndza, top with bacon and sour cream.'],tags:['slovenské','tradičné'],tagsEn:['slovak','traditional'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:580,protein:22,fat:28,carbs:58}},
+  {id:7,name:'Kuracie prsia na smotane',nameEn:'Chicken in cream sauce',category:'Hlavné jedlá',time:30,image:'https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20Kuracie%20prsia%20na%20smotane',imageData:'',ingredients:['2 kuracie prsia','1 cibuľa','200ml smotany na varenie','1ČL horčice','soľ, korenie','olej','kôpor'],ingredientsEn:['2 chicken breasts','1 onion','200ml cooking cream','1 tsp mustard','salt, pepper','oil','dill'],steps:['Kuracie prsia nakrájajte na plátky, osoľte a okoreňte.','Opečte z oboch strán a vyberte.','Na výpeku opečte cibuľu, pridajte horčicu.','Zalejte smotanou, vráťte kura a duste 10 minút.','Ozdobte kôprom a podávajte s ryžou.'],stepsEn:['Slice chicken breasts, season with salt and pepper.','Sear both sides until golden, set aside.','Sauté onion in the pan, add mustard.','Add cream, return chicken and simmer 10 min.','Garnish with dill and serve with rice.'],tags:['rýchle','smotanové'],tagsEn:['quick','creamy'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:380,protein:32,fat:24,carbs:6}},
+  {id:8,name:'Zeleninové rizoto',nameEn:'Vegetable risotto',category:'Hlavné jedlá',time:35,image:'https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20Zeleninov%C3%A9%20rizoto',imageData:'',ingredients:['300g ryže arborio','1 cibuľa','2 mrkvy','1 cuketa','1 červená paprika','1l zeleninového vývaru','50g parmezánu','soľ, korenie, bylinky'],ingredientsEn:['300g arborio rice','1 onion','2 carrots','1 zucchini','1 red bell pepper','1L vegetable broth','50g parmesan','salt, pepper, herbs'],steps:['Cibuľu opečte na olivovom oleji.','Pridajte na kocky nakrájanú zeleninu a opekajte 5 minút.','Pridajte ryžu, zalejte naberačkou vývaru a miešajte.','Postupne pridávajte vývar, kým ryža nezmäkne.','Zmiešajte s parmezánom a dochuťte.'],stepsEn:['Sauté onion in olive oil.','Add diced vegetables and cook 5 minutes.','Add rice, pour in a ladle of broth and stir.','Gradually add broth until rice is tender.','Stir in parmesan and season.'],tags:['vegetariánske','taliančina'],tagsEn:['vegetarian','italian'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:320,protein:10,fat:8,carbs:54}},
+  {id:9,name:'Kapustnica',nameEn:'Sauerkraut soup',category:'Polievky',time:90,image:'https://placehold.co/400x300/c2410c/fff?text=%F0%9F%A5%A3%20Kapustnica',imageData:'',ingredients:['500g kyslej kapusty','200g údeného mäsa','100g klobásy','1 cibuľa','2 strúčiky cesnaku','soľ, korenie, bobkový list','200ml smotany','hrsť sušených húb'],ingredientsEn:['500g sauerkraut','200g smoked meat','100g sausage','1 onion','2 garlic cloves','salt, pepper, bay leaf','200ml cream','handful dried mushrooms'],steps:['Huby namočte na 30 minút.','Kapustu, mäso, cibuľu a huby dajte variť.','Pridajte bobkový list a varte 45 minút.','Pridajte nakrájanú klobásu a varte 15 minút.','Zahustite smotanou a dochuťte cesnakom.'],stepsEn:['Soak mushrooms for 30 min.','Boil sauerkraut, meat, onion and mushrooms.','Add bay leaf and cook 45 minutes.','Add sliced sausage and cook 15 more minutes.','Stir in cream and season with garlic.'],tags:['slovenské','vianoce','sýta'],tagsEn:['slovak','christmas','hearty'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:290,protein:16,fat:18,carbs:14}},
+  {id:10,name:'Slepačí vývar',nameEn:'Chicken broth',category:'Polievky',time:120,image:'https://placehold.co/400x300/c2410c/fff?text=%F0%9F%A5%A3%20Slepa%C4%8D%C3%AD%20v%C3%BDvar',imageData:'',ingredients:['1 kura','3 mrkvy','2 petržleny','1 zeler','1 cibuľa','soľ, celé korenie, bobkový list','domáce rezance'],ingredientsEn:['1 chicken','3 carrots','2 parsley roots','1 celeriac','1 onion','salt, peppercorns, bay leaf','homemade noodles'],steps:['Kura dajte do hrnca a zalejte studenou vodou.','Priveďte do varu, zbavte peny.','Pridajte zeleninu, soľ, korenie a bobkový list.','Varte na miernom ohni 1,5 hodiny.','Vývar precedte a podávajte s rezancami.'],stepsEn:['Place chicken in a pot and cover with cold water.','Bring to a boil, skim off foam.','Add vegetables, salt, pepper and bay leaf.','Simmer gently for 1.5 hours.','Strain and serve with noodles.'],tags:['tradičné','polievka','zdravé'],tagsEn:['traditional','soup','healthy'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:120,protein:10,fat:5,carbs:8}},
+  {id:11,name:'Losos na bylinkovom masle',nameEn:'Salmon with herb butter',category:'Hlavné jedlá',time:25,image:'https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20Losos%20na%20bylinkovom%20masle',imageData:'',ingredients:['4 filety lososa','80g masla','3 strúčiky cesnaku','bylinky (kôpor, petržlen)','citrón','soľ, korenie'],ingredientsEn:['4 salmon fillets','80g butter','3 garlic cloves','herbs (dill, parsley)','lemon','salt, pepper'],steps:['Maslo zmiešajte s nasekanými bylinkami a cesnakom.','Lososa osoľte, okoreňte a pokvapkajte citrónom.','Opečte na bylinkovom masle 3-4 min z každej strany.','Podávajte so šalátom.'],stepsEn:['Mix butter with chopped herbs and garlic.','Season salmon with salt, pepper and lemon juice.','Pan-fry in herb butter 3-4 min per side.','Serve with a green salad.'],tags:['ryba','rýchle'],tagsEn:['fish','quick'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:410,protein:34,fat:28,carbs:2}},
+  {id:12,name:'Hovädzí guláš',nameEn:'Beef goulash',category:'Hlavné jedlá',time:120,image:'https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20Hov%C3%A4dz%C3%AD%20gul%C3%A1%C5%A1',imageData:'',ingredients:['500g hovädzieho mäsa','2 cibule','3 strúčiky cesnaku','2 lyžice mletej červenej papriky','1 paradajka','1 zemiak','soľ, korenie, majorán','500ml vývaru'],ingredientsEn:['500g beef','2 onions','3 garlic cloves','2 tbsp paprika powder','1 tomato','1 potato','salt, pepper, marjoram','500ml broth'],steps:['Cibuľu nakrájajte a opečte dozlatista na masti.','Pridajte na kocky nakrájané mäso a opečte.','Zaprášte paprikou, zalejte vývarom.','Pridajte paradajku, cesnak, soľ a korenie.','Duste domäkka asi 1,5 hodiny.','Zahustite nastrúhaným zemiakom a dochuťte majoránom.'],stepsEn:['Chop onion and fry until golden in lard.','Add diced beef and brown.','Sprinkle with paprika, pour in broth.','Add tomato, garlic, salt and pepper.','Stew until tender, about 1.5 hours.','Thicken with grated potato, season with marjoram.'],tags:['slovenské','sýte','pomalé'],tagsEn:['slovak','hearty','slow'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:450,protein:32,fat:26,carbs:15}},
+  {id:13,name:'Vyprážaný syr',nameEn:'Fried cheese',category:'Hlavné jedlá',time:15,image:'https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20Vypr%C3%A1%C5%BEan%C3%BD%20syr',imageData:'',ingredients:['4 plátky eidamu','2 vajcia','100g strúhanky','100g hladkej múky','soľ','olej na vyprážanie'],ingredientsEn:['4 slices edam cheese','2 eggs','100g breadcrumbs','100g flour','salt','frying oil'],steps:['Syr nakrájajte na hrubšie plátky.','Obaľte v múke, vajci a strúhanke.','Smažte na oleji 2-3 min z každej strany.','Podávajte s hranolkami a tatárskou omáčkou.'],stepsEn:['Cut cheese into thick slices.','Coat in flour, egg and breadcrumbs.','Deep fry in oil 2-3 min per side.','Serve with fries and tartar sauce.'],tags:['rýchle','slovenské'],tagsEn:['quick','slovak'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:520,protein:24,fat:34,carbs:28}},
+  {id:14,name:'Šalát Caprese',nameEn:'Caprese salad',category:'Šaláty',time:10,image:'https://placehold.co/400x300/15803d/fff?text=%F0%9F%A5%97%20%C5%A0al%C3%A1t%20Caprese',imageData:'',ingredients:['2 veľké paradajky','200g mozzarelly','čerstvá bazalka','olivový olej','balzamikový ocot','soľ, korenie'],ingredientsEn:['2 large tomatoes','200g mozzarella','fresh basil','olive oil','balsamic vinegar','salt, pepper'],steps:['Paradajky a mozzarellu nakrájajte na plátky.','Striedavo ukladajte na tanier s bazalkou.','Pokvapkajte olejom a balzamikom.','Osoľte a okoreňte.'],stepsEn:['Slice tomatoes and mozzarella.','Layer alternately with basil on a plate.','Drizzle with oil and balsamic vinegar.','Season with salt and pepper.'],tags:['rýchle','taliančina','predjedlo'],tagsEn:['quick','italian','starter'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:280,protein:18,fat:20,carbs:6}},
+  {id:15,name:'Tvarohové koláče',nameEn:'Cottage cheese pastries',category:'Dezerty',time:45,image:'https://placehold.co/400x300/be185d/fff?text=%F0%9F%8D%B0%20Tvarohov%C3%A9%20kol%C3%A1%C4%8De',imageData:'',ingredients:['500g tvarohu','2 vajcia','100g cukru','200g hladkej múky','1 prášok do pečiva','100g masla','štipka soli'],ingredientsEn:['500g cottage cheese','2 eggs','100g sugar','200g flour','1 baking powder','100g butter','pinch of salt'],steps:['Z múky, masla, prášku a soli vypracujte cesto.','Tvaroh zmiešajte s vajcami a cukrom.','Cesto rozvaľkajte, vykrajujte kolieska.','Naplňte tvarohom a preložte.','Pečte na 180°C 20-25 minút.'],stepsEn:['Make dough from flour, butter, baking powder and salt.','Mix cottage cheese with eggs and sugar.','Roll out dough, cut into circles.','Fill with cheese mixture and fold.','Bake at 180°C for 20-25 min.'],tags:['sladké','jednoduché'],tagsEn:['sweet','easy'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:340,protein:14,fat:14,carbs:40}},
+  {id:16,name:'Medovník',nameEn:'Honey cake',category:'Dezerty',time:90,image:'https://placehold.co/400x300/be185d/fff?text=%F0%9F%8D%B0%20Medovn%C3%ADk',imageData:'',ingredients:['400g hladkej múky','150g cukru','100g masla','3 lyžice medu','3 vajcia','1 prášok do pečiva','500ml šľahačkovej smotany','1 kyslá smotana'],ingredientsEn:['400g flour','150g sugar','100g butter','3 tbsp honey','3 eggs','1 baking powder','500ml whipping cream','1 sour cream'],steps:['Z múky, cukru, masla, medu, vajec a prášku vypracujte cesto.','Rozdeľte na 8 častí, vyvaľkajte na tenké pláty.','Pečte na 180°C 5-7 minút každý plát.','Vyšľahajte smotanu s kyslou smotanou.','Vrstvite: plát, krém, plát, krém.','Nechajte v chlade odstáť aspoň 4 hodiny.'],stepsEn:['Make dough from flour, sugar, butter, honey, eggs and baking powder.','Divide into 8 pieces, roll into thin sheets.','Bake each sheet at 180°C for 5-7 min.','Whip cream with sour cream.','Layer: sheet, cream, sheet, cream.','Refrigerate for at least 4 hours.'],tags:['sladké','tradičné'],tagsEn:['sweet','traditional'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:380,protein:6,fat:20,carbs:46}},
+  {id:17,name:'Brownies',nameEn:'Brownies',category:'Dezerty',time:35,image:'https://placehold.co/400x300/be185d/fff?text=%F0%9F%8D%B0%20Brownies',imageData:'',ingredients:['200g horkej čokolády','150g masla','200g cukru','3 vajcia','100g hladkej múky','1ČL vanilkového extraktu','štipka soli'],ingredientsEn:['200g dark chocolate','150g butter','200g sugar','3 eggs','100g flour','1 tsp vanilla extract','pinch of salt'],steps:['Rúru predhrejte na 180°C.','Čokoládu s maslom roztopte vo vodnom kúpeli.','Vyšľahajte vajcia s cukrom do peny.','Vmiešajte čokoládovú zmes, múku, vanilku a soľ.','Pečte 25-30 minút – vnútri má byť vláčne.'],stepsEn:['Preheat oven to 180°C.','Melt chocolate and butter in a double boiler.','Whisk eggs and sugar until fluffy.','Fold in chocolate mixture, flour, vanilla and salt.','Bake 25-30 min – should be fudgy inside.'],tags:['sladké','čokoláda','rýchle'],tagsEn:['sweet','chocolate','quick'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:420,protein:6,fat:24,carbs:48}},
+  {id:18,name:'Domáci chlieb',nameEn:'Homemade bread',category:'Pečivo',time:180,image:'https://placehold.co/400x300/b45309/fff?text=%F0%9F%A5%96%20Dom%C3%A1ci%20chlieb',imageData:'',ingredients:['500g hladkej múky','300ml vlažnej vody','1 kocka droždia (42g)','1ČL cukru','1ČL soli','2 lyžice oleja'],ingredientsEn:['500g flour','300ml warm water','42g fresh yeast','1 tsp sugar','1 tsp salt','2 tbsp oil'],steps:['Z droždia, cukru a trochy vody urobte kvások (10 minút).','Zmiešajte múku, soľ, kvások, olej a vodu.','Vypracujte cesto a nechajte kysnúť 1 hodinu.','Prelejte do formy a nechajte kysnúť 30 minút.','Pečte na 200°C 40-45 minút.'],stepsEn:['Mix yeast, sugar and a bit of water (10 min starter).','Combine flour, salt, starter, oil and water.','Knead into dough and let rise 1 hour.','Transfer to a loaf pan and let rise 30 min.','Bake at 200°C for 40-45 min.'],tags:['pečivo','tradičné'],tagsEn:['baking','traditional'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:180,protein:5,fat:2,carbs:35}},
+  {id:19,name:'Pizza Margherita',nameEn:'Pizza Margherita',category:'Hlavné jedlá',time:60,image:'https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20Pizza%20Margherita',imageData:'',ingredients:['500g hladkej múky','300ml vlažnej vody','1 kocka droždia','1ČL soli','2 lyžice olivového oleja','200ml paradajkovej omáčky','200g mozzarelly','čerstvá bazalka'],ingredientsEn:['500g flour','300ml warm water','42g fresh yeast','1 tsp salt','2 tbsp olive oil','200ml tomato sauce','200g mozzarella','fresh basil'],steps:['Z múky, vody, droždia, soli a oleja vypracujte cesto.','Nechajte kysnúť 1 hodinu.','Rozvaľkajte na tenký kruh.','Natrite omáčkou a poukladajte mozzarellu.','Pečte na 250°C 12-15 minút.','Ozdobte bazalkou.'],stepsEn:['Make dough from flour, water, yeast, salt and oil.','Let rise for 1 hour.','Roll out into a thin circle.','Spread sauce and top with mozzarella.','Bake at 250°C for 12-15 min.','Garnish with basil.'],tags:['taliančina','rýchle'],tagsEn:['italian','quick'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:280,protein:12,fat:8,carbs:40}},
+  {id:20,name:'Fazuľová polievka',nameEn:'Bean soup',category:'Polievky',time:90,image:'https://placehold.co/400x300/c2410c/fff?text=%F0%9F%A5%A3%20Fazu%C4%BEov%C3%A1%20polievka',imageData:'',ingredients:['300g sušenej fazule','1 cibuľa','2 mrkvy','1 petržlen','2 strúčiky cesnaku','soľ, korenie, majorán','200ml smotany','1 lyžica hladkej múky'],ingredientsEn:['300g dried beans','1 onion','2 carrots','1 parsley root','2 garlic cloves','salt, pepper, marjoram','200ml cream','1 tbsp flour'],steps:['Fazuľu namočte deň vopred.','Uvarte domäkka (asi 1 hodinu).','Opečte cibuľu, pridajte na kocky nakrájanú zeleninu.','Pridajte k fazuli a ochuťte.','Zahustite smotanou s múkou.'],stepsEn:['Soak beans overnight.','Cook until tender (about 1 hour).','Sauté onion, add diced vegetables.','Add to beans and season.','Thicken with cream and flour mixture.'],tags:['sýta','tradičné'],tagsEn:['hearty','traditional'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:250,protein:12,fat:10,carbs:28}},
+  {id:21,name:'Avokádový toast',nameEn:'Avocado toast',category:'Raňajky',time:10,image:'https://placehold.co/400x300/a16207/fff?text=%F0%9F%8C%85%20Avok%C3%A1dov%C3%BD%20toast',imageData:'',ingredients:['2 krajce chleba','1 zrelé avokádo','citrónová šťava','soľ, korenie','čili vločky'],ingredientsEn:['2 slices bread','1 ripe avocado','lemon juice','salt, pepper','chili flakes'],steps:['Chlieb opečte dozlatista.','Avokádo rozpučte s citrónovou šťavou, soľou a korením.','Natrite na toast.','Posypte čili vločkami.'],stepsEn:['Toast bread until golden.','Mash avocado with lemon juice, salt and pepper.','Spread on toast.','Sprinkle with chili flakes.'],tags:['rýchle','raňajky','zdravé'],tagsEn:['quick','breakfast','healthy'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:220,protein:5,fat:14,carbs:20}},
+  {id:22,name:'Smoothie bowl',nameEn:'Smoothie bowl',category:'Raňajky',time:10,image:'https://placehold.co/400x300/a16207/fff?text=%F0%9F%8C%85%20Smoothie%20bowl',imageData:'',ingredients:['1 banán','hrsť mrazeného ovocia','200ml mandľového mlieka','granola','čerstvé ovocie','chia semienka'],ingredientsEn:['1 banana','handful frozen fruit','200ml almond milk','granola','fresh fruit','chia seeds'],steps:['Banán, ovocie a mlieko rozmixujte dohladka.','Nalejte do misky.','Ozdobte granolou, ovocím a chia semienkami.'],stepsEn:['Blend banana, frozen fruit and milk until smooth.','Pour into a bowl.','Top with granola, fresh fruit and chia seeds.'],tags:['raňajky','zdravé','rýchle'],tagsEn:['breakfast','healthy','quick'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:280,protein:6,fat:8,carbs:48}},
+  {id:23,name:'Horúca čokoláda',nameEn:'Hot chocolate',category:'Nápoje',time:10,image:'https://placehold.co/400x300/1d4ed8/fff?text=%F0%9F%8D%B9%20Hor%C3%BAca%20%C4%8Dokol%C3%A1da',imageData:'',ingredients:['500ml mlieka','100g horkej čokolády','1 lyžica kakaa','1 lyžica cukru','šľahačka'],ingredientsEn:['500ml milk','100g dark chocolate','1 tbsp cocoa','1 tbsp sugar','whipped cream'],steps:['Mlieko zohrejte v hrnci.','Pridajte čokoládu, kakao a cukor.','Miešajte, kým sa čokoláda nerozpustí.','Nalejte do pohárov a ozdobte šľahačkou.'],stepsEn:['Heat milk in a pot.','Add chocolate, cocoa and sugar.','Stir until chocolate melts.','Pour into mugs and top with whipped cream.'],tags:['nápoj','sladké','zima'],tagsEn:['drink','sweet','winter'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:350,protein:10,fat:20,carbs:36}},
+  {id:24,name:'Bazová limonáda',nameEn:'Elderflower lemonade',category:'Nápoje',time:10,image:'https://placehold.co/400x300/1d4ed8/fff?text=%F0%9F%8D%B9%20Bazov%C3%A1%20limon%C3%A1da',imageData:'',ingredients:['500ml bazového sirupu','1l perlivej vody','1 citrón','1 limetka','lístky mäty','kocky ľadu'],ingredientsEn:['500ml elderflower syrup','1L sparkling water','1 lemon','1 lime','mint leaves','ice cubes'],steps:['Zmiešajte sirup s perlivou vodou.','Pridajte na plátky nakrájaný citrón a limetku.','Pridajte mätu a ľad.'],stepsEn:['Mix syrup with sparkling water.','Add sliced lemon and lime.','Add mint and ice.'],tags:['nápoj','osviežujúce','leto'],tagsEn:['drink','refreshing','summer'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:120,protein:0,fat:0,carbs:30}},
+  {id:25,name:'Pečené zemiaky s rozmarínom',nameEn:'Roasted rosemary potatoes',category:'Prílohy',time:40,image:'https://placehold.co/400x300/57534e/fff?text=%F0%9F%A5%94%20Pe%C4%8Den%C3%A9%20zemiaky%20s%20rozmar%C3%ADnom',imageData:'',ingredients:['800g zemiakov','4 lyžice olivového oleja','3 vetvičky rozmarínu','3 strúčiky cesnaku','soľ, korenie, rasca'],ingredientsEn:['800g potatoes','4 tbsp olive oil','3 rosemary sprigs','3 garlic cloves','salt, pepper, cumin'],steps:['Zemiaky nakrájajte na mesiačiky (nešúpte).','Premiešajte s olejom, rozmarínom, cesnakom, soľou a korením.','Rozložte na plech a pečte 30-35 minút na 200°C.'],stepsEn:['Cut potatoes into wedges (unpeeled).','Toss with oil, rosemary, garlic, salt and pepper.','Spread on a baking sheet and roast at 200°C for 30-35 min.'],tags:['jednoduché','príloha'],tagsEn:['easy','side'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:220,protein:4,fat:8,carbs:34}},
+  // === NOVÉ RECEPTY (26-65) ===
+  {id:26,name:'Kuracie rizoto s hráškom',nameEn:'Chicken risotto with peas',category:'Hlavné jedlá',time:35,image:'https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20Kuracie%20rizoto%20s%20hr%C3%A1%C5%A1kom',imageData:'',ingredients:['300g ryže arborio','2 kuracie prsia','1 cibuľa','150g hrášku','1l vývaru','50g parmezánu','soľ, korenie'],ingredientsEn:['300g arborio rice','2 chicken breasts','1 onion','150g peas','1L broth','50g parmesan','salt, pepper'],steps:['Kura nakrájajte a opečte, vyberte.','Opečte cibuľu, pridajte ryžu.','Postupne prilievajte vývar a miešajte.','Po 15 min pridajte hrášok a kura, dochuťte.','Primiešajte parmezán.'],stepsEn:['Dice and sear chicken, set aside.','Sauté onion, add rice.','Gradually add broth while stirring.','After 15 min add peas and chicken, season.','Stir in parmesan.'],tags:['rýchle','ryža'],tagsEn:['quick','rice'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:380,protein:25,fat:10,carbs:48}},
+  {id:27,name:'Špenátové rizoto s vajíčkom',nameEn:'Spinach risotto with egg',category:'Hlavné jedlá',time:30,image:'https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20%C5%A0pen%C3%A1tov%C3%A9%20rizoto%20s%20vaj%C3%AD%C4%8Dkom',imageData:'',ingredients:['300g ryže arborio','200g čerstvého špenátu','2 vajcia','1 cibuľa','750ml vývaru','50g parmezánu','soľ, korenie'],ingredientsEn:['300g arborio rice','200g fresh spinach','2 eggs','1 onion','750ml broth','50g parmesan','salt, pepper'],steps:['Opečte cibuľu, pridajte ryžu.','Postupne prilievajte vývar.','Keď je ryža takmer hotová, pridajte špenát.','Opečte vajíčka.','Podávajte rizoto s vajíčkom navrchu.'],stepsEn:['Sauté onion, add rice.','Gradually add broth.','When rice is almost done, add spinach.','Fry eggs sunny-side up.','Serve risotto topped with egg.'],tags:['vegetariánske','rýchle'],tagsEn:['vegetarian','quick'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:350,protein:14,fat:12,carbs:46}},
+  {id:28,name:'Pečené kuracie stehná so zeleninou',nameEn:'Baked chicken thighs with vegetables',category:'Hlavné jedlá',time:55,image:'https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20Pe%C4%8Den%C3%A9%20kuracie%20stehn%C3%A1%20so%20zeleninou',imageData:'',ingredients:['4 kuracie stehná','3 mrkvy','2 zemiaky','1 cuketa','1 cibuľa','4 strúčiky cesnaku','olej, soľ, korenie, rozmarín'],ingredientsEn:['4 chicken thighs','3 carrots','2 potatoes','1 zucchini','1 onion','4 garlic cloves','oil, salt, pepper, rosemary'],steps:['Zeleninu nakrájajte na kocky.','Zmiešajte s olejom a korením na plechu.','Stehná osoľte a položte na zeleninu.','Pečte na 200°C 40-45 minút.'],stepsEn:['Dice vegetables.','Toss with oil and seasoning on a baking sheet.','Season chicken and place on vegetables.','Bake at 200°C for 40-45 min.'],tags:['jednoduché','pečené'],tagsEn:['easy','baked'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:450,protein:30,fat:28,carbs:18}},
+  {id:29,name:'Špagety bolognese',nameEn:'Spaghetti bolognese',category:'Hlavné jedlá',time:45,image:'https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20%C5%A0pagety%20bolognese',imageData:'',ingredients:['500g špagiet','300g mletého mäsa','1 cibuľa','2 strúčiky cesnaku','400g paradajkového pyré','1 mrkva','soľ, korenie, oregano'],ingredientsEn:['500g spaghetti','300g ground beef','1 onion','2 garlic cloves','400g tomato puree','1 carrot','salt, pepper, oregano'],steps:['Opečte cibuľu a cesnak, pridajte mäso.','Pridajte nastrúhanú mrkvu a paradajkové pyré.','Duste 20 minút, dochuťte.','Uvarte špagety a zmiešajte s omáčkou.'],stepsEn:['Sauté onion and garlic, add meat.','Add grated carrot and tomato puree.','Simmer 20 min, season.','Cook spaghetti and mix with sauce.'],tags:['taliančina','mäso'],tagsEn:['italian','meat'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:480,protein:24,fat:14,carbs:62}},
+  {id:30,name:'Kurací paprikáš',nameEn:'Chicken paprikash',category:'Hlavné jedlá',time:40,image:'https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20Kurac%C3%AD%20paprik%C3%A1%C5%A1',imageData:'',ingredients:['4 kuracie stehná','2 cibule','2 lyžice mletej červenej papriky','200ml smotany','soľ, korenie'],ingredientsEn:['4 chicken thighs','2 onions','2 tbsp paprika','200ml cream','salt, pepper'],steps:['Cibuľu opečte dosklovita.','Pridajte kura a opečte.','Zaprášte paprikou, podlejte vodou a duste 30 min.','Zalejte smotanou a dochuťte.'],stepsEn:['Sauté onion until translucent.','Add chicken and brown.','Sprinkle with paprika, add water, simmer 30 min.','Add cream and season.'],tags:['slovenské','rýchle'],tagsEn:['slovak','quick'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:420,protein:28,fat:30,carbs:8}},
+  {id:31,name:'Plnené papriky',nameEn:'Stuffed bell peppers',category:'Hlavné jedlá',time:60,image:'https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20Plnen%C3%A9%20papriky',imageData:'',ingredients:['6 väčších paprík','300g mletého mäsa','100g ryže','1 cibuľa','500ml paradajkového pretlaku','soľ, korenie, rasca, kyslá smotana'],ingredientsEn:['6 large bell peppers','300g ground meat','100g rice','1 onion','500ml tomato passata','salt, pepper, cumin, sour cream'],steps:['Ryžu uvarte do polomäkka.','Zmiešajte s mäsom, cibuľou a korením.','Plnkou naplňte papriky.','Zalejte pretlakom a duste 35 min.','Podávajte s kyslou smotanou.'],stepsEn:['Cook rice until half-done.','Mix with meat, onion and spices.','Stuff peppers with filling.','Cover with passata and simmer 35 min.','Serve with sour cream.'],tags:['slovenské','sýte'],tagsEn:['slovak','hearty'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:380,protein:22,fat:14,carbs:38}},
+  {id:32,name:'Lasagne',nameEn:'Lasagna',category:'Hlavné jedlá',time:60,image:'https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20Lasagne',imageData:'',ingredients:['12 plátov lasagne','400g mletého mäsa','1 cibuľa','3 strúčiky cesnaku','500ml paradajkovej omáčky','500ml bešamelu','200g mozzarelly','soľ, korenie, oregano'],ingredientsEn:['12 lasagna sheets','400g ground meat','1 onion','3 garlic cloves','500ml tomato sauce','500ml béchamel','200g mozzarella','salt, pepper, oregano'],steps:['Opečte cibuľu, cesnak a mäso.','Pridajte paradajkovú omáčku a duste 10 min.','Vrstvite: pláty, mäso, bešamel, syr.','Pečte na 180°C 30 minút.'],stepsEn:['Sauté onion, garlic and meat.','Add tomato sauce and simmer 10 min.','Layer: sheets, meat, béchamel, cheese.','Bake at 180°C for 30 min.'],tags:['taliančina','rúra'],tagsEn:['italian','baked'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:520,protein:28,fat:22,carbs:48}},
+  {id:33,name:'Zapekané zemiaky s mäsom',nameEn:'Baked potatoes with meat',category:'Hlavné jedlá',time:50,image:'https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20Zapekan%C3%A9%20zemiaky%20s%20m%C3%A4som',imageData:'',ingredients:['600g zemiakov','300g mletého mäsa','1 cibuľa','200ml smotany','100g syru','soľ, korenie, majorán'],ingredientsEn:['600g potatoes','300g ground meat','1 onion','200ml cream','100g cheese','salt, pepper, marjoram'],steps:['Zemiaky nakrájajte na plátky.','Opečte mäso s cibuľou.','Vrstvite do formy: zemiaky, mäso, zemiaky.','Zalejte smotanou, posypte syrom.','Pečte na 180°C 35-40 min.'],stepsEn:['Slice potatoes.','Brown meat with onion.','Layer: potatoes, meat, potatoes.','Pour cream, top with cheese.','Bake at 180°C for 35-40 min.'],tags:['sýte','rúra'],tagsEn:['hearty','baked'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:460,protein:22,fat:24,carbs:36}},
+  {id:34,name:'Ryžový nákyp',nameEn:'Rice pudding',category:'Dezerty',time:45,image:'https://placehold.co/400x300/be185d/fff?text=%F0%9F%8D%B0%20Ry%C5%BEov%C3%BD%20n%C3%A1kyp',imageData:'',ingredients:['200g ryže','500ml mlieka','2 vajcia','3 lyžice cukru','1 vanilkový cukor','hrsť hrozienok','maslo'],ingredientsEn:['200g rice','500ml milk','2 eggs','3 tbsp sugar','vanilla sugar','handful raisins','butter'],steps:['Ryžu uvarte v mlieku domäkka.','Zmiešajte s vajcami, cukrom a hrozienkami.','Vlejte do vymastenej formy.','Pečte na 180°C 25 minút.'],stepsEn:['Cook rice in milk until soft.','Mix with eggs, sugar and raisins.','Pour into greased dish.','Bake at 180°C for 25 min.'],tags:['sladké','rúra'],tagsEn:['sweet','baked'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:340,protein:10,fat:8,carbs:62}},
+  {id:35,name:'Pečené kura so zeleninou',nameEn:'Roasted chicken with vegetables',category:'Hlavné jedlá',time:70,image:'https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20Pe%C4%8Den%C3%A9%20kura%20so%20zeleninou',imageData:'',ingredients:['1 celé kura','4 mrkvy','3 zemiaky','2 cibule','4 strúčiky cesnaku','olej, soľ, korenie, rozmarín'],ingredientsEn:['1 whole chicken','4 carrots','3 potatoes','2 onions','4 garlic cloves','oil, salt, pepper, rosemary'],steps:['Kura umyte a osoľte.','Zeleninu nakrájajte a dajte na plech.','Položte kura na zeleninu, potrite olejom.','Pečte na 190°C 55-60 min.'],stepsEn:['Clean and season chicken.','Chop vegetables on a baking sheet.','Place chicken on vegetables, brush with oil.','Roast at 190°C for 55-60 min.'],tags:['slovenské','rúra','nedeľa'],tagsEn:['slovak','baked','sunday'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:480,protein:35,fat:32,carbs:16}},
+  {id:36,name:'Šošovicová polievka',nameEn:'Lentil soup',category:'Polievky',time:40,image:'https://placehold.co/400x300/c2410c/fff?text=%F0%9F%A5%A3%20%C5%A0o%C5%A1ovicov%C3%A1%20polievka',imageData:'',ingredients:['300g červenej šošovice','1 cibuľa','2 mrkvy','2 strúčiky cesnaku','1l zeleninového vývaru','soľ, korenie, majorán','citrónová šťava'],ingredientsEn:['300g red lentils','1 onion','2 carrots','2 garlic cloves','1L vegetable broth','salt, pepper, marjoram','lemon juice'],steps:['Opečte cibuľu a cesnak.','Pridajte na kocky nakrájanú mrkvu.','Pridajte šošovicu a zalejte vývarom.','Varte 20 minút do zmäknutia.','Dochuťte soľou, korením a citrónom.'],stepsEn:['Sauté onion and garlic.','Add diced carrots.','Add lentils and pour broth.','Cook 20 min until soft.','Season with salt, pepper and lemon.'],tags:['zdravé','rýchle','vegánske'],tagsEn:['healthy','quick','vegan'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:220,protein:14,fat:3,carbs:36}},
+  {id:37,name:'Tekvicová polievka',nameEn:'Pumpkin soup',category:'Polievky',time:35,image:'https://placehold.co/400x300/c2410c/fff?text=%F0%9F%A5%A3%20Tekvicov%C3%A1%20polievka',imageData:'',ingredients:['500g tekvice Hokkaido','1 cibuľa','2 strúčiky cesnaku','400ml kokosového mlieka','200ml vývaru','soľ, korenie, zázvor, tekvicové semienka'],ingredientsEn:['500g Hokkaido pumpkin','1 onion','2 garlic cloves','400ml coconut milk','200ml broth','salt, pepper, ginger, pumpkin seeds'],steps:['Tekvicu nakrájajte na kocky (nešúpte).','Opečte cibuľu a cesnak.','Pridajte tekvicu, zázvor a vývar.','Varte 20 minút, zmäknite.','Rozmixujte, pridajte kokosové mlieko a dochuťte.'],stepsEn:['Dice pumpkin (keep skin on).','Sauté onion and garlic.','Add pumpkin, ginger and broth.','Cook 20 min until soft.','Blend, add coconut milk and season.'],tags:['zdravé','vegánske','jeseň'],tagsEn:['healthy','vegan','fall'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:180,protein:4,fat:10,carbs:20}},
+  {id:38,name:'Brokolicová polievka',nameEn:'Broccoli soup',category:'Polievky',time:25,image:'https://placehold.co/400x300/c2410c/fff?text=%F0%9F%A5%A3%20Brokolicov%C3%A1%20polievka',imageData:'',ingredients:['1 brokolica','1 cibuľa','2 strúčiky cesnaku','500ml vývaru','200ml smotany','soľ, korenie, muškátový oriešok'],ingredientsEn:['1 broccoli','1 onion','2 garlic cloves','500ml broth','200ml cream','salt, pepper, nutmeg'],steps:['Brokolicu rozdeľte na ružičky.','Opečte cibuľu a cesnak.','Pridajte brokolicu a vývar, varte 15 min.','Rozmixujte, pridajte smotanu a dochuťte.'],stepsEn:['Cut broccoli into florets.','Sauté onion and garlic.','Add broccoli and broth, cook 15 min.','Blend, add cream and season.'],tags:['zdravé','rýchle'],tagsEn:['healthy','quick'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:200,protein:6,fat:12,carbs:16}},
+  {id:39,name:'Cuketová polievka',nameEn:'Zucchini soup',category:'Polievky',time:25,image:'https://placehold.co/400x300/c2410c/fff?text=%F0%9F%A5%A3%20Cuketov%C3%A1%20polievka',imageData:'',ingredients:['2 cukety','1 cibuľa','2 strúčiky cesnaku','500ml vývaru','200ml smotany','soľ, korenie, bazalka'],ingredientsEn:['2 zucchinis','1 onion','2 garlic cloves','500ml broth','200ml cream','salt, pepper, basil'],steps:['Cukety nakrájajte na kocky.','Opečte cibuľu a cesnak.','Pridajte cuketu a vývar, varte 15 min.','Rozmixujte, pridajte smotanu a dochuťte.'],stepsEn:['Dice zucchinis.','Sauté onion and garlic.','Add zucchini and broth, cook 15 min.','Blend, add cream and season.'],tags:['rýchle','letné'],tagsEn:['quick','summer'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:160,protein:4,fat:10,carbs:12}},
+  {id:40,name:'Gazpacho',nameEn:'Gazpacho',category:'Polievky',time:15,image:'https://placehold.co/400x300/c2410c/fff?text=%F0%9F%A5%A3%20Gazpacho',imageData:'',ingredients:['6 paradajok','1 uhorka','1 červená paprika','1 strúčik cesnaku','3 lyžice olivového oleja','2 lyžice červeného octu','soľ, korenie'],ingredientsEn:['6 tomatoes','1 cucumber','1 red bell pepper','1 garlic clove','3 tbsp olive oil','2 tbsp red wine vinegar','salt, pepper'],steps:['Všetku zeleninu nakrájajte.','Rozmixujte s olejom a octom dohladka.','Dochuťte a dajte vychladiť na 1 hod.'],stepsEn:['Chop all vegetables.','Blend with oil and vinegar.','Season and chill for 1 hour.'],tags:['letné','studené','vegánske'],tagsEn:['summer','cold','vegan'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:140,protein:3,fat:8,carbs:14}},
+  {id:41,name:'Grécky šalát',nameEn:'Greek salad',category:'Šaláty',time:10,image:'https://placehold.co/400x300/15803d/fff?text=%F0%9F%A5%97%20Gr%C3%A9cky%20%C5%A1al%C3%A1t',imageData:'',ingredients:['3 paradajky','1 uhorka','1 červená cibuľa','200g fety','čierne olivy','olivový olej','oregano'],ingredientsEn:['3 tomatoes','1 cucumber','1 red onion','200g feta','black olives','olive oil','oregano'],steps:['Zeleninu nakrájajte na kocky.','Pridajte olivy a na kocky nakrájanú fetu.','Pokvapkajte olejom, posypte oreganom.'],stepsEn:['Dice vegetables.','Add olives and cubed feta.','Drizzle with oil, sprinkle oregano.'],tags:['rýchle','zdravé','letné'],tagsEn:['quick','healthy','summer'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:240,protein:10,fat:18,carbs:8}},
+  {id:42,name:'Quinoa šalát s avokádom',nameEn:'Quinoa salad with avocado',category:'Šaláty',time:25,image:'https://placehold.co/400x300/15803d/fff?text=%F0%9F%A5%97%20Quinoa%20%C5%A1al%C3%A1t%20s%20avok%C3%A1dom',imageData:'',ingredients:['200g quinoi','1 avokádo','1 uhorka','1 červená paprika','100g cherry paradajok','citrónová šťava','olivový olej, soľ, korenie'],ingredientsEn:['200g quinoa','1 avocado','1 cucumber','1 red bell pepper','100g cherry tomatoes','lemon juice','olive oil, salt, pepper'],steps:['Quinou uvarte podľa návodu.','Zeleninu nakrájajte na kocky.','Zmiešajte s quinoou, pokvapkajte citrónom a olejom.'],stepsEn:['Cook quinoa per package.','Dice vegetables.','Mix with quinoa, drizzle lemon and oil.'],tags:['zdravé','vegánske','bezlepkové'],tagsEn:['healthy','vegan','gluten-free'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:320,protein:10,fat:14,carbs:40}},
+  {id:43,name:'Falafel pečený',nameEn:'Baked falafel',category:'Hlavné jedlá',time:35,image:'https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20Falafel%20pe%C4%8Den%C3%BD',imageData:'',ingredients:['400g cíceru (konzerva)','1 cibuľa','3 strúčiky cesnaku','hrsť petržlenu','1ČL rímskej rasce','1ČL koriandra','2 lyžice múky','soľ, korenie'],ingredientsEn:['400g chickpeas (canned)','1 onion','3 garlic cloves','handful parsley','1 tsp cumin','1 tsp coriander','2 tbsp flour','salt, pepper'],steps:['Cícer scedite.','Rozmixujte s cibuľou, cesnakom, bylinkami a korením.','Pridajte múku a vytvarujte guľôčky.','Pečte na 200°C 20-25 min.'],stepsEn:['Drain chickpeas.','Blend with onion, garlic, herbs and spices.','Add flour and shape into balls.','Bake at 200°C for 20-25 min.'],tags:['vegánske','zdravé','rúra'],tagsEn:['vegan','healthy','baked'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:280,protein:14,fat:8,carbs:38}},
+  {id:44,name:'Hummus',nameEn:'Hummus',category:'Predjedlá',time:10,image:'https://placehold.co/400x300/0f766e/fff?text=%F0%9F%A5%9F%20Hummus',imageData:'',ingredients:['400g cíceru','2 lyžice tahini','2 lyžice olivového oleja','1 citrón','1 strúčik cesnaku','soľ, rasca'],ingredientsEn:['400g chickpeas','2 tbsp tahini','2 tbsp olive oil','1 lemon','1 garlic clove','salt, cumin'],steps:['Cícer scedite.','Rozmixujte s tahini, olejom, citrónom a cesnakom.','Dochuťte soľou a rascou.'],stepsEn:['Drain chickpeas.','Blend with tahini, oil, lemon and garlic.','Season with salt and cumin.'],tags:['vegánske','rýchle','nátierka'],tagsEn:['vegan','quick','spread'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:190,protein:8,fat:10,carbs:18}},
+  {id:45,name:'Tuniakový šalát',nameEn:'Tuna salad',category:'Šaláty',time:10,image:'https://placehold.co/400x300/15803d/fff?text=%F0%9F%A5%97%20Tuniakov%C3%BD%20%C5%A1al%C3%A1t',imageData:'',ingredients:['1 konzerva tuniaka','2 vajcia uvarené natvrdo','1 červená cibuľa','2 lyžice majonézy','1 lyžica citrónovej šťavy','soľ, korenie'],ingredientsEn:['1 can tuna','2 hard-boiled eggs','1 red onion','2 tbsp mayo','1 tbsp lemon juice','salt, pepper'],steps:['Tuniaka scedite a rozpučte.','Vajcia nakrájajte nadrobno.','Zmiešajte s cibuľou, majonézou a citrónom.'],stepsEn:['Drain and flake tuna.','Chop eggs.','Mix with onion, mayo and lemon.'],tags:['rýchle','jednoduché'],tagsEn:['quick','easy'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:250,protein:20,fat:16,carbs:4}},
+  {id:46,name:'Pečená zelenina s fetou',nameEn:'Roasted vegetables with feta',category:'Hlavné jedlá',time:35,image:'https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20Pe%C4%8Den%C3%A1%20zelenina%20s%20fetou',imageData:'',ingredients:['1 cuketa','1 baklažán','1 červená paprika','200g cherry paradajok','200g fety','olivový olej, soľ, korenie, oregano'],ingredientsEn:['1 zucchini','1 eggplant','1 red bell pepper','200g cherry tomatoes','200g feta','olive oil, salt, pepper, oregano'],steps:['Zeleninu nakrájajte na kocky.','Zmiešajte s olejom a korením na plechu.','Položte fetu na zeleninu.','Pečte na 200°C 25-30 min.'],stepsEn:['Dice vegetables.','Toss with oil on a baking sheet.','Place feta on top.','Roast at 200°C for 25-30 min.'],tags:['vegetariánske','rúra','jednoduché'],tagsEn:['vegetarian','baked','easy'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:280,protein:12,fat:18,carbs:16}},
+  {id:47,name:'Cícerová polievka',nameEn:'Chickpea soup',category:'Polievky',time:30,image:'https://placehold.co/400x300/c2410c/fff?text=%F0%9F%A5%A3%20C%C3%ADcerov%C3%A1%20polievka',imageData:'',ingredients:['400g cíceru','1 cibuľa','2 mrkvy','2 strúčiky cesnaku','1l zeleninového vývaru','rasca, soľ, korenie','citrónová šťava'],ingredientsEn:['400g chickpeas','1 onion','2 carrots','2 garlic cloves','1L vegetable broth','cumin, salt, pepper','lemon juice'],steps:['Opečte cibuľu a cesnak.','Pridajte mrkvu, cícer a vývar.','Varte 15 minút, dochuťte a pridajte citrón.'],stepsEn:['Sauté onion and garlic.','Add carrots, chickpeas and broth.','Cook 15 min, season and add lemon.'],tags:['vegánske','zdravé','sýta'],tagsEn:['vegan','healthy','hearty'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:250,protein:12,fat:5,carbs:38}},
+  {id:48,name:'Domáci burger',nameEn:'Homemade burger',category:'Hlavné jedlá',time:30,image:'https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20Dom%C3%A1ci%20burger',imageData:'',ingredients:['500g mletého mäsa','4 žemle','1 cibuľa','listy šalátu','2 paradajky','syr čedar','soľ, korenie, horčica, kečup'],ingredientsEn:['500g ground beef','4 buns','1 onion','lettuce','2 tomatoes','cheddar','salt, pepper, mustard, ketchup'],steps:['Mäso osoľte a vytvarujte fašírky.','Opečte na panvici 4-5 min z každej strany.','Žemle opečte, vrstvite ingrediencie.'],stepsEn:['Season meat and shape patties.','Pan-fry 4-5 min per side.','Toast buns, layer ingredients.'],tags:['mäso','rýchle'],tagsEn:['meat','quick'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:550,protein:32,fat:30,carbs:36}},
+  {id:49,name:'Slané palacinky so špenátom',nameEn:'Savory spinach pancakes',category:'Hlavné jedlá',time:30,image:'https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20Slan%C3%A9%20palacinky%20so%20%C5%A1pen%C3%A1tom',imageData:'',ingredients:['250g hladkej múky','2 vajcia','300ml mlieka','200g špenátu','200g ricotty','50g parmezánu','soľ, korenie'],ingredientsEn:['250g flour','2 eggs','300ml milk','200g spinach','200g ricotta','50g parmesan','salt, pepper'],steps:['Z múky, vajec a mlieka urobte cesto.','Špenát poduste na panvici.','Zmiešajte s ricottou a parmezánom.','Naplňte palacinky a zrolujte.'],stepsEn:['Make pancake batter.','Wilt spinach.','Mix with ricotta and parmesan.','Fill pancakes and roll.'],tags:['vegetariánske'],tagsEn:['vegetarian'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:320,protein:16,fat:12,carbs:36}},
+  {id:50,name:'Hubové rizoto',nameEn:'Mushroom risotto',category:'Hlavné jedlá',time:35,image:'https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20Hubov%C3%A9%20rizoto',imageData:'',ingredients:['300g ryže arborio','300g húb','1 cibuľa','2 strúčiky cesnaku','750ml vývaru','50g parmezánu','soľ, korenie, tymian'],ingredientsEn:['300g arborio rice','300g mushrooms','1 onion','2 garlic cloves','750ml broth','50g parmesan','salt, pepper, thyme'],steps:['Huby opečte a vyberte.','Opečte cibuľu a cesnak, pridajte ryžu.','Postupne prilievajte vývar.','Pridajte huby a parmezán.'],stepsEn:['Sauté mushrooms, set aside.','Sauté onion and garlic, add rice.','Gradually add broth.','Stir in mushrooms and parmesan.'],tags:['vegetariánske','taliančina'],tagsEn:['vegetarian','italian'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:340,protein:12,fat:8,carbs:54}},
+  {id:51,name:'Krémová kukuričná polievka',nameEn:'Creamy corn soup',category:'Polievky',time:20,image:'https://placehold.co/400x300/c2410c/fff?text=%F0%9F%A5%A3%20Kr%C3%A9mov%C3%A1%20kukuri%C4%8Dn%C3%A1%20polievka',imageData:'',ingredients:['400g kukurice','1 cibuľa','2 zemiaky','500ml vývaru','200ml smotany','soľ, korenie'],ingredientsEn:['400g corn','1 onion','2 potatoes','500ml broth','200ml cream','salt, pepper'],steps:['Opečte cibuľu.','Pridajte na kocky zemiaky a vývar.','Varte 15 min, pridajte kukuricu.','Rozmixujte, pridajte smotanu a dochuťte.'],stepsEn:['Sauté onion.','Add diced potatoes and broth.','Cook 15 min, add corn.','Blend, add cream and season.'],tags:['rýchle','jednoduché'],tagsEn:['quick','easy'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:220,protein:6,fat:10,carbs:28}},
+  {id:52,name:'Grilovaný hermelín',nameEn:'Grilled hermelín cheese',category:'Predjedlá',time:15,image:'https://placehold.co/400x300/0f766e/fff?text=%F0%9F%A5%9F%20Grilovan%C3%BD%20hermel%C3%ADn',imageData:'',ingredients:['2 hermelíny','4 plátky slaniny','brusnicová omáčka','paprika'],ingredientsEn:['2 hermelín cheeses','4 bacon slices','cranberry sauce','paprika'],steps:['Hermelín zabaľte do slaniny.','Grilujte 4-5 min z každej strany.','Podávajte s brusnicovou omáčkou.'],stepsEn:['Wrap hermelín in bacon.','Grill 4-5 min each side.','Serve with cranberry sauce.'],tags:['slovenské','rýchle'],tagsEn:['slovak','quick'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:380,protein:18,fat:32,carbs:4}},
+  {id:53,name:'Bravčové riadky',nameEn:'Pork steaks',category:'Hlavné jedlá',time:25,image:'https://placehold.co/400x300/991b1b/fff?text=%F0%9F%8D%96%20Brav%C4%8Dov%C3%A9%20riadky',imageData:'',ingredients:['4 bravčové riadky','2 strúčiky cesnaku','soľ, korenie, rasca','olej','1 cibuľa'],ingredientsEn:['4 pork steaks','2 garlic cloves','salt, pepper, cumin','oil','1 onion'],steps:['Mäso naklepte a osoľte.','Opečte na oleji z oboch strán.','Pridajte cibuľu a cesnak, poduste 10 min.'],stepsEn:['Tenderize and season steaks.','Pan-fry in oil both sides.','Add onion and garlic, simmer 10 min.'],tags:['rýchle','mäso'],tagsEn:['quick','meat'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:320,protein:34,fat:18,carbs:4}},
+  {id:54,name:'Pečené bataty',nameEn:'Baked sweet potatoes',category:'Prílohy',time:40,image:'https://placehold.co/400x300/57534e/fff?text=%F0%9F%A5%94%20Pe%C4%8Den%C3%A9%20bataty',imageData:'',ingredients:['4 bataty','olivový olej','soľ, korenie, rozmarín'],ingredientsEn:['4 sweet potatoes','olive oil','salt, pepper, rosemary'],steps:['Bataty nakrájajte na mesiačiky.','Premiešajte s olejom a korením.','Pečte na 200°C 30-35 min.'],stepsEn:['Cut sweet potatoes into wedges.','Toss with oil and seasoning.','Roast at 200°C for 30-35 min.'],tags:['zdravé','príloha'],tagsEn:['healthy','side'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:200,protein:3,fat:5,carbs:38}},
+  {id:55,name:'Jablkový závin',nameEn:'Apple strudel',category:'Dezerty',time:50,image:'https://placehold.co/400x300/be185d/fff?text=%F0%9F%8D%B0%20Jablkov%C3%BD%20z%C3%A1vin',imageData:'',ingredients:['1 lístkové cesto','4 jablká','2 lyžice cukru','1ČL škorice','hrsť hrozienok','strúhanka','maslo'],ingredientsEn:['1 puff pastry','4 apples','2 tbsp sugar','1 tsp cinnamon','handful raisins','breadcrumbs','butter'],steps:['Jablká nastrúhajte s cukrom a škoricou.','Posypte cesto strúhankou, rozložte plnku.','Zrolujte a potrite maslom.','Pečte na 180°C 30 minút.'],stepsEn:['Grate apples with sugar and cinnamon.','Sprinkle pastry with breadcrumbs, spread filling.','Roll up and brush with butter.','Bake at 180°C for 30 min.'],tags:['sladké','rúra','tradičné'],tagsEn:['sweet','baked','traditional'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:320,protein:4,fat:14,carbs:46}},
+  {id:56,name:'Škoricové rožteky',nameEn:'Cinnamon rolls',category:'Pečivo',time:120,image:'https://placehold.co/400x300/b45309/fff?text=%F0%9F%A5%96%20%C5%A0koricov%C3%A9%20ro%C5%BEteky',imageData:'',ingredients:['500g hladkej múky','250ml mlieka','1 kocka droždia','80g cukru','80g masla','1 vajce','2ČL škorice','štipka soli'],ingredientsEn:['500g flour','250ml milk','42g yeast','80g sugar','80g butter','1 egg','2 tsp cinnamon','pinch salt'],steps:['Vypracujte cesto a nechajte kysnúť 1 hod.','Rozvaľkajte, potrite maslom a posypte cukrom so škoricou.','Zrolujte a nakrájajte na rožteky.','Pečte na 180°C 20-25 min.'],stepsEn:['Make dough, let rise 1 hour.','Roll out, brush with butter, sprinkle cinnamon sugar.','Roll up and slice.','Bake at 180°C for 20-25 min.'],tags:['pečivo','sladké'],tagsEn:['baking','sweet'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:280,protein:6,fat:8,carbs:46}},
+  {id:57,name:'Domáca granola',nameEn:'Homemade granola',category:'Raňajky',time:30,image:'https://placehold.co/400x300/a16207/fff?text=%F0%9F%8C%85%20Dom%C3%A1ca%20granola',imageData:'',ingredients:['300g ovsených vločiek','100g orechov','50g medu','50g masla','100g sušeného ovocia','1ČL škorice'],ingredientsEn:['300g rolled oats','100g nuts','50g honey','50g butter','100g dried fruit','1 tsp cinnamon'],steps:['Zmiešajte vločky s orechmi a škoricou.','Roztopte med s maslom a vlejte do suchých surovín.','Rozložte na plech a pečte na 160°C 20-25 min.'],stepsEn:['Mix oats with nuts and cinnamon.','Melt honey with butter, pour into dry mix.','Spread on baking sheet, bake at 160°C 20-25 min.'],tags:['raňajky','zdravé'],tagsEn:['breakfast','healthy'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:380,protein:8,fat:16,carbs:52}},
+  {id:58,name:'Plnené paradajky',nameEn:'Stuffed tomatoes',category:'Predjedlá',time:25,image:'https://placehold.co/400x300/0f766e/fff?text=%F0%9F%A5%9F%20Plnen%C3%A9%20paradajky',imageData:'',ingredients:['8 paradajok','200g ricotty','2 lyžice bazalky','1 strúčik cesnaku','soľ, korenie, olivový olej'],ingredientsEn:['8 tomatoes','200g ricotta','2 tbsp basil','1 garlic clove','salt, pepper, olive oil'],steps:['Paradajkám odrežte vršky a vydlabte.','Zmiešajte ricottu s bazalkou, cesnakom a korením.','Plnkou naplňte paradajky.','Pečte na 180°C 15 minút.'],stepsEn:['Cut tops off tomatoes, scoop out pulp.','Mix ricotta with basil, garlic and seasoning.','Stuff tomatoes with mixture.','Bake at 180°C for 15 min.'],tags:['vegetariánske','predjedlo'],tagsEn:['vegetarian','starter'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:180,protein:10,fat:12,carbs:8}},
+  {id:59,name:'Syr na grile',nameEn:'Grilled cheese',category:'Predjedlá',time:10,image:'https://placehold.co/400x300/0f766e/fff?text=%F0%9F%A5%9F%20Syr%20na%20grile',imageData:'',ingredients:['200g syru halloumi','olivový olej','citrón','oregano'],ingredientsEn:['200g halloumi cheese','olive oil','lemon','oregano'],steps:['Syru nakrájajte na plátky.','Grilujte 2-3 min z každej strany.','Pokvapkajte citrónom a posypte oreganom.'],stepsEn:['Slice halloumi.','Grill 2-3 min each side.','Drizzle lemon and sprinkle oregano.'],tags:['rýchle','vegetariánske'],tagsEn:['quick','vegetarian'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:280,protein:18,fat:22,carbs:2}},
+  {id:60,name:'Jablkový kompót',nameEn:'Apple compote',category:'Dezerty',time:30,image:'https://placehold.co/400x300/be185d/fff?text=%F0%9F%8D%B0%20Jablkov%C3%BD%20komp%C3%B3t',imageData:'',ingredients:['6 jabĺk','3 lyžice cukru','1l vody','1 škorica','3 klinčeky'],ingredientsEn:['6 apples','3 tbsp sugar','1L water','1 cinnamon','3 cloves'],steps:['Jablká ošúpte a nakrájajte.','Vodu s cukrom a korením priveďte do varu.','Pridajte jablká a varte 15 minút.','Nechajte vychladnúť.'],stepsEn:['Peel and slice apples.','Boil water with sugar and spices.','Add apples and cook 15 min.','Let cool.'],tags:['sladké','jednoduché','tradičné'],tagsEn:['sweet','easy','traditional'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:130,protein:0,fat:0,carbs:32}},
+  {id:61,name:'Bylinkové maslo',nameEn:'Herb butter',category:'Predjedlá',time:10,image:'https://placehold.co/400x300/0f766e/fff?text=%F0%9F%A5%9F%20Bylinkov%C3%A9%20maslo',imageData:'',ingredients:['100g masla','2 strúčiky cesnaku','bylinky (pažítka, petržlen)','soľ, korenie'],ingredientsEn:['100g butter','2 garlic cloves','herbs (chives, parsley)','salt, pepper'],steps:['Maslo nechajte zmäknúť.','Zmiešajte s prelisovaným cesnakom a nasekanými bylinkami.','Dochuťte a dajte stuhnúť.'],stepsEn:['Soften butter.','Mix with crushed garlic and chopped herbs.','Season and refrigerate.'],tags:['rýchle','nátierka'],tagsEn:['quick','spread'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:180,protein:1,fat:20,carbs:2}},
+  {id:62,name:'Pečená cvikla s kozím syrom',nameEn:'Roasted beetroot with goat cheese',category:'Predjedlá',time:50,image:'https://placehold.co/400x300/0f766e/fff?text=%F0%9F%A5%9F%20Pe%C4%8Den%C3%A1%20cvikla%20s%20koz%C3%ADm%20syrom',imageData:'',ingredients:['4 cvikly','100g kozieho syra','vlašské orechy','olivový olej, soľ, korenie, balzamiko'],ingredientsEn:['4 beetroots','100g goat cheese','walnuts','olive oil, salt, pepper, balsamic'],steps:['Cvikly zabaľte do alobalu.','Pečte na 200°C 40 minút.','Nechajte vychladnúť a ošúpte.','Nakrájajte na plátky, posypte syrom a orechmi.'],stepsEn:['Wrap beetroots in foil.','Roast at 200°C for 40 min.','Cool and peel.','Slice, top with cheese and walnuts.'],tags:['vegetariánske','rúra'],tagsEn:['vegetarian','baked'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:220,protein:8,fat:14,carbs:18}},
+  {id:63,name:'Šalát s grilovaným kuracím',nameEn:'Grilled chicken salad',category:'Šaláty',time:20,image:'https://placehold.co/400x300/15803d/fff?text=%F0%9F%A5%97%20%C5%A0al%C3%A1t%20s%20grilovan%C3%BDm%20kurac%C3%ADm',imageData:'',ingredients:['2 kuracie prsia','mix listových šalátov','100g cherry paradajok','1 uhorka','avokádo','olivový olej, citrón, soľ'],ingredientsEn:['2 chicken breasts','mixed salad greens','100g cherry tomatoes','1 cucumber','avocado','olive oil, lemon, salt'],steps:['Kura osoľte a grilujte 5-6 min z každej strany.','Zeleninu a avokádo nakrájajte.','Zmiešajte s kúskami kuraťa.','Pokvapkajte olejom a citrónom.'],stepsEn:['Season and grill chicken 5-6 min each side.','Chop vegetables and avocado.','Mix with chicken pieces.','Drizzle with oil and lemon.'],tags:['rýchle','zdravé'],tagsEn:['quick','healthy'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:320,protein:28,fat:18,carbs:10}},
+  {id:64,name:'Domáce hranolky',nameEn:'Homemade fries',category:'Prílohy',time:35,image:'https://placehold.co/400x300/57534e/fff?text=%F0%9F%A5%94%20Dom%C3%A1ce%20hranolky',imageData:'',ingredients:['600g zemiakov','olej','soľ, korenie, paprika'],ingredientsEn:['600g potatoes','oil','salt, pepper, paprika'],steps:['Zemiaky nakrájajte na hranolčeky.','Premiešajte s olejom a korením.','Pečte na 220°C 25-30 minút.'],stepsEn:['Cut potatoes into fries.','Toss with oil and seasoning.','Bake at 220°C for 25-30 min.'],tags:['rýchle','príloha'],tagsEn:['quick','side'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:260,protein:4,fat:10,carbs:38}},
+  {id:65,name:'Čokoládová pena',nameEn:'Chocolate mousse',category:'Dezerty',time:15,image:'https://placehold.co/400x300/be185d/fff?text=%F0%9F%8D%B0%20%C4%8Cokol%C3%A1dov%C3%A1%20pena',imageData:'',ingredients:['200g horkej čokolády','3 vajcia','2 lyžice cukru','200ml šľahačkovej smotany'],ingredientsEn:['200g dark chocolate','3 eggs','2 tbsp sugar','200ml whipping cream'],steps:['Čokoládu roztopte vo vodnom kúpeli.','Oddelte bielky od žĺtkov.','Vyšľahajte bielky s cukrom na tuhý sneh.','Vmiešajte čokoládu a vyšľahanú smotanu.','Dajte stuhnúť do chladničky.'],stepsEn:['Melt chocolate in a double boiler.','Separate eggs.','Whip egg whites with sugar to stiff peaks.','Fold in chocolate and whipped cream.','Refrigerate until set.'],tags:['sladké','studené'],tagsEn:['sweet','cold'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:380,protein:8,fat:28,carbs:28}},
+  // === DETSKÉ RECEPTY (under 1 year - 6m+) ===
+  {id:66,name:'Jablková presnidávka',nameEn:'Apple puree',category:'Detské',time:20,image:'https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Jablkov%C3%A1%20presnid%C3%A1vka',imageData:'',ingredients:['4 jablká','trocha vody'],ingredientsEn:['4 apples','a little water'],steps:['Jablká ošúpte a nakrájajte na kocky.','Dajte do hrnca s trochou vody.','Duste 10-15 minút domäkka.','Rozmixujte dohladka.'],stepsEn:['Peel and dice apples.','Put in a pot with a little water.','Stew 10-15 min until soft.','Blend until smooth.'],tags:['deti-6m','baby','prvé jedlo'],tagsEn:['baby-6m','baby','first food'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:80,protein:0,fat:0,carbs:20}},
+  {id:67,name:'Mrkvové pyré',nameEn:'Carrot puree',category:'Detské',time:25,image:'https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Mrkvov%C3%A9%20pyr%C3%A9',imageData:'',ingredients:['4 mrkvy','trocha vody','kvapka olivového oleja'],ingredientsEn:['4 carrots','a little water','drop of olive oil'],steps:['Mrkvy ošúpte a nakrájajte na kolieska.','Varte v malom množstve vody 15 minút.','Rozmixujte s vodou z varenia a olejom.'],stepsEn:['Peel and slice carrots.','Boil in a little water for 15 min.','Blend with cooking water and oil.'],tags:['deti-6m','baby','prvé jedlo'],tagsEn:['baby-6m','baby','first food'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:60,protein:1,fat:1,carbs:12}},
+  {id:68,name:'Tekvicové pyré',nameEn:'Pumpkin puree',category:'Detské',time:25,image:'https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Tekvicov%C3%A9%20pyr%C3%A9',imageData:'',ingredients:['300g tekvice','trocha vody'],ingredientsEn:['300g pumpkin','a little water'],steps:['Tekvicu nakrájajte na kocky.','Duste v malom množstve vody 15-20 minút.','Rozmixujte dohladka.'],stepsEn:['Dice pumpkin.','Stew in a little water 15-20 min.','Blend until smooth.'],tags:['deti-6m','baby','prvé jedlo'],tagsEn:['baby-6m','baby','first food'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:50,protein:1,fat:0,carbs:12}},
+  {id:69,name:'Batatové pyré',nameEn:'Sweet potato puree',category:'Detské',time:25,image:'https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Batatov%C3%A9%20pyr%C3%A9',imageData:'',ingredients:['2 bataty','trocha vody'],ingredientsEn:['2 sweet potatoes','a little water'],steps:['Bataty ošúpte a nakrájajte na kocky.','Varte v malom množstve vody 15 minút.','Rozmixujte dohladka.'],stepsEn:['Peel and dice sweet potatoes.','Boil in a little water for 15 min.','Blend until smooth.'],tags:['deti-6m','baby','prvé jedlo'],tagsEn:['baby-6m','baby','first food'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:90,protein:1,fat:0,carbs:21}},
+  {id:70,name:'Banánové pyré',nameEn:'Banana puree',category:'Detské',time:2,image:'https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Ban%C3%A1nov%C3%A9%20pyr%C3%A9',imageData:'',ingredients:['1 zrelý banán'],ingredientsEn:['1 ripe banana'],steps:['Banán roztlačte vidličkou dohladka.'],stepsEn:['Mash banana with a fork until smooth.'],tags:['deti-6m','baby','prvé jedlo','rýchle'],tagsEn:['baby-6m','baby','first food','quick'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:90,protein:1,fat:0,carbs:22}},
+  {id:71,name:'Zeleninová zmes (mrkva, zemiak, hrášok)',nameEn:'Mixed vegetable puree',category:'Detské',time:30,image:'https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Zeleninov%C3%A1%20zmes%20%28mrkva%2C%20zemiak%2C%20hr%C3%A1%C5%A1ok%29',imageData:'',ingredients:['2 mrkvy','1 zemiak','hrsť hrášku','trocha vody','kvapka oleja'],ingredientsEn:['2 carrots','1 potato','handful peas','a little water','drop of oil'],steps:['Zeleninu ošúpte a nakrájajte na kocky.','Varte v malom množstve vody 20 minút.','Rozmixujte dohladka s olejom.'],stepsEn:['Peel and dice vegetables.','Boil in a little water for 20 min.','Blend until smooth with oil.'],tags:['deti-8m','baby'],tagsEn:['baby-8m','baby'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:100,protein:2,fat:1,carbs:20}},
+  {id:72,name:'Kuracie pyré so zeleninou',nameEn:'Chicken and vegetable puree',category:'Detské',time:30,image:'https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Kuracie%20pyr%C3%A9%20so%20zeleninou',imageData:'',ingredients:['100g kuracieho mäsa','1 mrkva','1 zemiak','trocha vody'],ingredientsEn:['100g chicken meat','1 carrot','1 potato','a little water'],steps:['Mäso a zeleninu nakrájajte na kocky.','Varte vo vode 20-25 minút.','Rozmixujte dohladka aj s vývarom.'],stepsEn:['Dice meat and vegetables.','Boil in water for 20-25 min.','Blend until smooth with the broth.'],tags:['deti-8m','baby','mäso'],tagsEn:['baby-8m','baby','meat'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:140,protein:12,fat:3,carbs:16}},
+  // === DETSKÉ RECEPTY (1 year+) ===
+  {id:73,name:'Banánové lievance (deti 1r+)',nameEn:'Banana pancakes (toddler)',category:'Detské',time:15,image:'https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Ban%C3%A1nov%C3%A9%20lievance%20%28deti%201r%2B%29',imageData:'',ingredients:['1 zrelý banán','1 vajce','2 lyžice ovsených vločiek','trocha masla'],ingredientsEn:['1 ripe banana','1 egg','2 tbsp rolled oats','little butter'],steps:['Banán roztlačte.','Zmiešajte s vajcom a pomletými ovsenými vločkami.','Opekajte malé lievance z oboch strán.'],stepsEn:['Mash banana.','Mix with egg and ground oats.','Fry small pancakes both sides.'],tags:['deti-1','raňajky','sladké'],tagsEn:['baby-1y','breakfast','sweet'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:180,protein:6,fat:6,carbs:26}},
+  {id:74,name:'Zemiaková kaša s mrkvou',nameEn:'Mashed potatoes with carrot',category:'Detské',time:25,image:'https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Zemiakov%C3%A1%20ka%C5%A1a%20s%20mrkvou',imageData:'',ingredients:['2 zemiaky','1 mrkva','trocha masla','trocha mlieka','soľ'],ingredientsEn:['2 potatoes','1 carrot','little butter','little milk','salt'],steps:['Zeleninu ošúpte a nakrájajte.','Uvarte domäkka.','Roztlačte s maslom a mliekom.'],stepsEn:['Peel and dice.','Boil until soft.','Mash with butter and milk.'],tags:['deti-1','príloha'],tagsEn:['baby-1y','side'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:160,protein:3,fat:4,carbs:28}},
+  {id:75,name:'Dusená mrkva s hráškom',nameEn:'Steamed carrots with peas',category:'Detské',time:20,image:'https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Dusen%C3%A1%20mrkva%20s%20hr%C3%A1%C5%A1kom',imageData:'',ingredients:['2 mrkvy','hrsť hrášku','trocha masla','soľ'],ingredientsEn:['2 carrots','handful peas','little butter','salt'],steps:['Mrkvu nakrájajte.','Duste s hráškom 15 minút.','Pridajte maslo.'],stepsEn:['Slice carrots.','Steam with peas 15 min.','Add butter.'],tags:['deti-1','zelenina'],tagsEn:['baby-1y','vegetable'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:90,protein:3,fat:3,carbs:14}},
+  {id:76,name:'Kuracie fašírky v pare',nameEn:'Steamed chicken patties',category:'Detské',time:25,image:'https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Kuracie%20fa%C5%A1%C3%ADrky%20v%20pare',imageData:'',ingredients:['200g mletého kura','1 vajce','2 lyžice strúhanky','1 mrkva'],ingredientsEn:['200g ground chicken','1 egg','2 tbsp breadcrumbs','1 carrot'],steps:['Zmiešajte mäso s vajcom, strúhankou a mrkvou.','Vytvarujte malé fašírky.','Parenie 15 minút.'],stepsEn:['Mix meat with egg, breadcrumbs and carrot.','Shape patties.','Steam 15 min.'],tags:['deti-1','mäso'],tagsEn:['baby-1y','meat'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:180,protein:20,fat:8,carbs:6}},
+  {id:77,name:'Tvarohová nátierka',nameEn:'Cottage cheese spread',category:'Detské',time:5,image:'https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Tvarohov%C3%A1%20n%C3%A1tierka',imageData:'',ingredients:['200g jemného tvarohu','2 lyžice mlieka','soľ'],ingredientsEn:['200g cottage cheese','2 tbsp milk','salt'],steps:['Tvaroh zmiešajte s mliekom.','Dochuťte.'],stepsEn:['Mix cheese with milk.','Season.'],tags:['deti-1','rýchle','nátierka'],tagsEn:['baby-1y','quick','spread'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:120,protein:12,fat:6,carbs:4}},
+  {id:78,name:'Cestoviny s jemnou omáčkou',nameEn:'Pasta with mild sauce',category:'Detské',time:20,image:'https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Cestoviny%20s%20jemnou%20om%C3%A1%C4%8Dkou',imageData:'',ingredients:['200g malých cestovín','4 paradajky','1 mrkva','1 cibuľa','olivový olej'],ingredientsEn:['200g small pasta','4 tomatoes','1 carrot','1 onion','olive oil'],steps:['Cestoviny uvarte.','Opečte cibuľu, pridajte mrkvu a paradajky.','Duste 10 minút, rozmixujte.','Zmiešajte s cestovinami.'],stepsEn:['Cook pasta.','Sauté onion, add carrot and tomatoes.','Simmer 10 min, blend.','Mix with pasta.'],tags:['deti-1','cestoviny'],tagsEn:['baby-1y','pasta'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:280,protein:8,fat:4,carbs:54}},
+  {id:79,name:'Tvarohový dezert s ovocím',nameEn:'Cottage cheese dessert',category:'Detské',time:5,image:'https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Tvarohov%C3%BD%20dezert%20s%20ovoc%C3%ADm',imageData:'',ingredients:['200g tvarohu','2 lyžice jogurtu','1 lyžica medu','ovocie'],ingredientsEn:['200g cottage cheese','2 tbsp yogurt','1 tbsp honey','fruit'],steps:['Zmiešajte tvaroh s jogurtom a medom.','Ozdobte ovocím.'],stepsEn:['Mix cheese with yogurt and honey.','Top with fruit.'],tags:['deti-1','rýchle','sladké'],tagsEn:['baby-1y','quick','sweet'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:180,protein:14,fat:6,carbs:20}},
+  // === DETSKÉ RECEPTY (2 years+) ===
+  {id:80,name:'Rybie prsty domáce',nameEn:'Homemade fish sticks',category:'Detské',time:25,image:'https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Rybie%20prsty%20dom%C3%A1ce',imageData:'',ingredients:['400g tresky','1 vajce','100g strúhanky','soľ'],ingredientsEn:['400g cod','1 egg','100g breadcrumbs','salt'],steps:['Rybu nakrájajte na prúžky.','Obaľte vo vajci a strúhanke.','Pečte na 200°C 15 minút.'],stepsEn:['Cut fish into strips.','Coat in egg and breadcrumbs.','Bake at 200°C 15 min.'],tags:['deti-2','ryba'],tagsEn:['baby-2y','fish'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:220,protein:24,fat:8,carbs:12}},
+  {id:81,name:'Pečené kuracie nugetky',nameEn:'Baked chicken nuggets',category:'Detské',time:25,image:'https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Pe%C4%8Den%C3%A9%20kuracie%20nugetky',imageData:'',ingredients:['300g kuracích pŕs','1 vajce','100g strúhanky','soľ'],ingredientsEn:['300g chicken','1 egg','100g breadcrumbs','salt'],steps:['Kura nakrájajte na kocky.','Obaľte vo vajci a strúhanke.','Pečte na 200°C 15 minút.'],stepsEn:['Cube chicken.','Coat in egg and breadcrumbs.','Bake at 200°C 15 min.'],tags:['deti-2','kura'],tagsEn:['baby-2y','chicken'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:250,protein:26,fat:8,carbs:16}},
+  {id:82,name:'Brokolica v pare so syrom',nameEn:'Steamed broccoli with cheese',category:'Detské',time:15,image:'https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Brokolica%20v%20pare%20so%20syrom',imageData:'',ingredients:['1 brokolica','50g syra','maslo'],ingredientsEn:['1 broccoli','50g cheese','butter'],steps:['Brokolicu rozdeľte na ružičky.','Varte v pare 8-10 minút.','Posypte syrom.'],stepsEn:['Cut broccoli into florets.','Steam 8-10 min.','Top with cheese.'],tags:['deti-2','zelenina'],tagsEn:['baby-2y','vegetable'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:120,protein:8,fat:6,carbs:8}},
+  {id:83,name:'Zapekané cestoviny so syrom',nameEn:'Baked mac and cheese',category:'Detské',time:35,image:'https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Zapekan%C3%A9%20cestoviny%20so%20syrom',imageData:'',ingredients:['300g cestovín','300ml smotany','200g syru','2 lyžice masla'],ingredientsEn:['300g pasta','300ml cream','200g cheese','2 tbsp butter'],steps:['Cestoviny uvarte.','Zmiešajte so smotanou a syrom.','Zapečte na 180°C 15 minút.'],stepsEn:['Cook pasta.','Mix with cream and cheese.','Bake at 180°C 15 min.'],tags:['deti-2','rúra'],tagsEn:['baby-2y','baked'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:450,protein:18,fat:22,carbs:44}},
+  // === DETSKÉ (3 years+) ===
+  {id:84,name:'Mini pizza',nameEn:'Mini pizza',category:'Detské',time:20,image:'https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Mini%20pizza',imageData:'',ingredients:['4 pita chleby','4 lyžice paradajkovej omáčky','100g mozzarelly'],ingredientsEn:['4 pita breads','4 tbsp tomato sauce','100g mozzarella'],steps:['Potrite omáčkou.','Posypte syrom.','Pečte na 200°C 10 minút.'],stepsEn:['Spread sauce.','Top with cheese.','Bake at 200°C 10 min.'],tags:['deti-3','rýchle'],tagsEn:['baby-3y','quick'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:250,protein:10,fat:8,carbs:34}},
+  {id:85,name:'Vajíčková nátierka',nameEn:'Egg spread',category:'Detské',time:10,image:'https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Vaj%C3%AD%C4%8Dkov%C3%A1%20n%C3%A1tierka',imageData:'',ingredients:['4 vajcia','2 lyžice masla','soľ'],ingredientsEn:['4 eggs','2 tbsp butter','salt'],steps:['Vajcia uvarte natvrdo.','Nastrúhajte a zmiešajte s maslom.'],stepsEn:['Hard-boil eggs.','Grate and mix with butter.'],tags:['deti-3','rýchle'],tagsEn:['baby-3y','quick'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:220,protein:12,fat:18,carbs:2}},
+  {id:86,name:'Krupicová kaša s ovocím',nameEn:'Semolina pudding',category:'Detské',time:15,image:'https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Krupicov%C3%A1%20ka%C5%A1a%20s%20ovoc%C3%ADm',imageData:'',ingredients:['500ml mlieka','4 lyžice krupice','2 lyžice cukru','maslo'],ingredientsEn:['500ml milk','4 tbsp semolina','2 tbsp sugar','butter'],steps:['Mlieko zohrejte.','Za stáleho miešania vsypte krupicu.','Varte 2 minúty, pridajte cukor a maslo.'],stepsEn:['Heat milk.','Whisk in semolina.','Cook 2 min, add sugar and butter.'],tags:['deti-1','raňajky','sladké'],tagsEn:['baby-1y','breakfast','sweet'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:280,protein:8,fat:8,carbs:44}},
+  {id:87,name:'Ovsená kaša s ovocím',nameEn:'Oatmeal with fruit',category:'Detské',time:10,image:'https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Ovsen%C3%A1%20ka%C5%A1a%20s%20ovoc%C3%ADm',imageData:'',ingredients:['50g ovsených vločiek','200ml mlieka','banán','ovocie'],ingredientsEn:['50g oats','200ml milk','banana','fruit'],steps:['Vločky zalejte mliekom a varte 5 minút.','Podávajte s ovocím.'],stepsEn:['Cook oats with milk 5 min.','Serve with fruit.'],tags:['deti-1','raňajky','zdravé'],tagsEn:['baby-1y','breakfast','healthy'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:280,protein:10,fat:6,carbs:46}},
+  {id:88,name:'Jogurt s ovocím',nameEn:'Yogurt with fruit',category:'Detské',time:2,image:'https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Jogurt%20s%20ovoc%C3%ADm',imageData:'',ingredients:['200g bieleho jogurtu','ovocie','med'],ingredientsEn:['200g yogurt','fruit','honey'],steps:['Jogurt dajte do misky.','Pridajte ovocie a med.'],stepsEn:['Put yogurt in bowl.','Add fruit and honey.'],tags:['deti-1','rýchle','raňajky'],tagsEn:['baby-1y','quick','breakfast'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:180,protein:8,fat:4,carbs:28}},
+  {id:89,name:'Zelené smoothie',nameEn:'Green smoothie',category:'Detské',time:5,image:'https://placehold.co/400x300/7c3aed/fff?text=%F0%9F%91%B6%20Zelen%C3%A9%20smoothie',imageData:'',ingredients:['1 banán','hrsť špenátu','1 jablko','200ml mlieka'],ingredientsEn:['1 banana','spinach','1 apple','200ml milk'],steps:['Všetko rozmixujte dohladka.'],stepsEn:['Blend until smooth.'],tags:['deti-1','nápoj','zdravé'],tagsEn:['baby-1y','drink','healthy'],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:160,protein:4,fat:2,carbs:32}},
 ];
-
-async function loadDefaultRecipes() {
-  if (recipes && recipes.length > 0) return;
-  try {
-    var resp = await fetch('recipes-default.json');
-    if (!resp.ok) throw new Error('HTTP ' + resp.status);
-    var data = await resp.json();
-    if (data && data.length > 5) {
-      recipes = data;
-      saveToLS();
-      refreshActiveTab();
-      return;
-    }
-  } catch(e) {
-    // Silent fail - use minimal fallback
-  }
-  // If fetch failed, use minimal fallback
-  if (!recipes || recipes.length === 0) {
-    recipes = JSON.parse(JSON.stringify(FALLBACK_RECIPES));
-    saveToLS();
-  }
-}
 
 // Migrate old raw localStorage data to namespaced keys BEFORE loading data
 (function migrateOldDataIfNeeded() {
@@ -1531,7 +1652,7 @@ async function loadDefaultRecipes() {
   window._lsSet.call(localStorage, '_imgcache_cleared_v4', '1');
 })();
 
-let recipes = (function() { var parsed = JSON.parse(localStorage.getItem('recipes') || 'null'); if (!parsed || !Array.isArray(parsed) || parsed.length === 0) { setTimeout(loadDefaultRecipes, 200); return []; } return parsed.filter(function(r) { return r != null && typeof r === 'object'; }); })();
+let recipes = (function() { var parsed = JSON.parse(localStorage.getItem('recipes') || 'null'); if (!parsed || !Array.isArray(parsed) || parsed.length === 0) return JSON.parse(JSON.stringify(DEFAULT_RECIPES)); return parsed.filter(function(r) { return r != null && typeof r === 'object'; }); })();
 // Migrate: add allergens/difficulty if missing
 recipes = recipes.filter(function(r) { return r != null && typeof r === 'object'; }).map(r => ({
   ...r,
@@ -1590,6 +1711,7 @@ function getWeekPlan(weekKey) {
 }
 
 function saveWeekPlan() {
+  notifyPlanChanged();
   localStorage.setItem('mealPlan', JSON.stringify(mealPlan));
   localStorage.setItem('mealPlanKids', JSON.stringify(mealPlanKids));
   localStorage.setItem('planType', planType);
@@ -1669,7 +1791,6 @@ function applyLang() {
 
 function toggleDark() {
   appSettings.theme = document.body.classList.contains('dark') ? 'light' : 'dark';
-  haptic(6);
   saveSettings();
 }
 
@@ -1680,11 +1801,7 @@ function switchLang() {
 
 function setAgeFilter(age) {
   ageFilter = age;
-  document.querySelectorAll('#age-filter .age-btn').forEach(b => {
-    const isActive = b.dataset.age === age;
-    b.classList.toggle('active', isActive);
-    if (isActive) springBounce(b);
-  });
+  document.querySelectorAll('#age-filter .age-btn').forEach(b => b.classList.toggle('active', b.dataset.age === age));
   render();
 }
 
@@ -2336,7 +2453,6 @@ function render() {
   if (!Array.isArray(recipes)) recipes = [];
   recipes = recipes.filter(function(r) { return r != null && typeof r === 'object'; });
   const grid = document.getElementById('recipe-grid');
-  if (grid && appSettings.masonry) grid.classList.add('masonry');
   const search = document.getElementById('search').value.toLowerCase();
   const cat = document.getElementById('filter-category').value;
   const showFav = document.getElementById('filter-fav')?.checked;
@@ -2351,7 +2467,7 @@ function render() {
     return matchSearch && matchCat && matchFav && matchAge;
   });
   if (!filtered.length) {
-    document.getElementById('recipe-grid').innerHTML = '<div class="empty-state-v2"><div class="empty-svg">🔍</div><div class="empty-title">' + t('noRecipes') + '</div><div class="empty-desc">' + t('noRecipesHint') + '</div></div>';
+    document.getElementById('recipe-grid').innerHTML = `<div class="shop-empty" style="padding:2rem 0;"><div class="shop-empty-icon">🔍</div><div class="shop-empty-title">${t('noRecipes')}</div><div class="shop-empty-desc">${t('noRecipesHint')}</div></div>`;
     document.getElementById('recipe-count').textContent = '(0)';
     return;
   }
@@ -2375,7 +2491,7 @@ function render() {
     return `<div class="recipe-card" style="animation-delay:${Math.random()*.25}s" data-id="${r.id}">
       <button class="fav-btn ${r.favorite?'fav-active':''}" onclick="event.stopPropagation();toggleFav(${r.id})">${r.favorite ? '❤️' : '🤍'}</button>
       <div class="recipe-card-img${r.image||r.imageData?'':' img-skeleton'}" id="rcimg-${r.id}">${r.image||r.imageData
-        ? `<img src="${escAttr(imgUrl(r.imageData||r.image))}" alt="${san}" loading="lazy" onerror="this.outerHTML='<span style=\\'font-size:2.4rem\\'>🍽️</span>'" onload="this.classList.add('loaded');this.parentElement.classList.remove('img-skeleton')">`
+        ? `<img src="${escAttr(imgUrl(r.imageData||r.image))}" alt="${san}" loading="lazy" onerror="this.outerHTML='<span style=\\'font-size:2.4rem\\'>🍽️</span>'" onload="this.parentElement.classList.remove('img-skeleton')">`
         : `<span style="font-size:2.4rem">🍽️</span>`}</div>
       <div class="rc-info">
         <div class="rc-name">${san}</div>
@@ -2393,15 +2509,9 @@ function render() {
   } catch(e) { var el = document.getElementById('boot-status'); if (el) { el.style.display = 'block'; el.style.background = 'rgba(200,0,0,.92)'; el.textContent = '❌ render: ' + (e.message || ''); } }
 }
 
-let searchTimer;
-let searchValue = '';
 document.getElementById('search').addEventListener('input', function() {
   document.getElementById('search-clear').style.display = this.value ? 'block' : 'none';
-  searchValue = this.value;
-  clearTimeout(searchTimer);
-  searchTimer = setTimeout(function() {
-    render();
-  }, 150);
+  render();
 });
 document.getElementById('filter-category').addEventListener('change', render);
 
@@ -2422,7 +2532,7 @@ function loadSettings() {
     lang: localStorage.getItem('lang') || 'en',
     accentColor: localStorage.getItem('accent') || '#dc2626',
     textSize: 'normal', uiDensity: 'normal',
-    homeWidgets: { weather: true, todayTasks: true, hydration: true, calories: true, quickRecipes: true, seasonal: true },
+    homeWidgets: { weather: true, todayTasks: true, hydration: true, calories: true, quickRecipes: true },
     mealPlanner: { defaultServings: 4, showNutrition: true },
     notifications: { breakfastReminder: false, todayCookingReminder: false, shoppingReminder: false, hydrationReminder: false, childMealReminder: false, eveningPlanningReminder: false },
     shopping: { storeMode: false, autoCategories: true, aiShoppingList: false },
@@ -2447,14 +2557,8 @@ function saveSettings() {
 }
 function applySettings() {
   try {
-    // Auto dark mode: respect system preference
-    var sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    if (appSettings.theme === 'auto') {
-      if (sysDark) { document.body.classList.add('dark'); document.getElementById('dark-toggle').textContent = '☀️'; }
-      else { document.body.classList.remove('dark'); document.getElementById('dark-toggle').textContent = '🌙'; }
-    } else if (appSettings.theme === 'dark') { document.body.classList.add('dark'); document.getElementById('dark-toggle').textContent = '☀️'; }
+    if (appSettings.theme === 'dark') { document.body.classList.add('dark'); document.getElementById('dark-toggle').textContent = '☀️'; }
     else { document.body.classList.remove('dark'); document.getElementById('dark-toggle').textContent = '🌙'; }
-    updateSeason();
   } catch(e) {}
   let langChanged = false;
   if (appSettings.lang !== lang) { lang = appSettings.lang; localStorage.setItem('lang', lang); try { applyLang(); } catch(e) {} langChanged = true; }
@@ -2479,6 +2583,11 @@ function resetWidgetsToDefaults() {
 }
 loadSettings();
 applySettings();
+
+// Inicializácia FCM push notifikácií
+initFCM();
+listenToServiceWorker();
+registerBackgroundSync();
 
 function openSettings() {
   loadSettings();
@@ -2550,7 +2659,6 @@ function openSettings() {
     ['hydration','💧',t('Pitný režim','Hydration')],
     ['calories','🔥',t('Kalórie','Calories')],
     ['quickRecipes','🍽️',t('Rýchle recepty','Quick recipes')],
-    ['seasonal','🌿',t('Sezónny kalendár','Seasonal calendar')],
   ];
   html += `<div class="settings-group">
     <div class="settings-group-title">🏠 ${t('Domov','Home')}</div>
@@ -2607,7 +2715,12 @@ function openSettings() {
         <span class="sr-value">${localStorage.getItem('childAge')||'—'} ${t('childAgeHint','rokov')} <span class="sr-arrow">›</span></span>
       </div>
       <div style="border-top:1px solid var(--border);margin:.4rem 0;"></div>
-      <div style="font-size:.65rem;font-weight:600;color:var(--text3);margin:.6rem 0 .2rem;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:.35rem;"><span>🔔 ${t('Notifikácie','Notifications')}</span><span id="notif-perm-badge" style="font-size:.6rem;padding:.1rem .35rem;border-radius:99px;font-weight:500;background:var(--border);color:var(--text2);">${({'granted':'🟢 '+t('Povolené','Allowed'),'denied':'🔴 '+t('Zakázané','Blocked'),'default':'⚪ '+t('Nepovolené','Not set')})[(typeof Notification!=='undefined'?Notification.permission:'')]||'⚪ '+t('Nepovolené','Not set')}</span></div>
+      <div style="font-size:.65rem;font-weight:600;color:var(--text3);margin:.6rem 0 .2rem;text-transform:uppercase;letter-spacing:.05em;">🔔 ${t('Notifikácie','Notifications')}</div>
+      <div class="settings-row">
+          <span class="sr-label"><span class="sr-icon">📲</span> ${t('Push notifikácie na zmeny','Push notifications on changes')}</span>
+          <label class="toggle-switch"><input type="checkbox" ${(s.pushNotifications===undefined||s.pushNotifications.enabled!==false)?'checked':''} onchange="if(!s.pushNotifications)s.pushNotifications={};s.pushNotifications.enabled=this.checked;saveSettings();if(this.checked){initFCM()}else{unsubscribeFCM()}"><span class="toggle-slider"></span></label>
+        </div>
+        <div style="font-size:.6rem;color:var(--text3);padding:.1rem 0 .3rem;">${t('Upozornenia na nové úlohy, dokončenie, zmeny v nákupe a pláne jedál.','Notify about new tasks, completed tasks, shopping and plan changes.')}</div>
       ${[['breakfastReminder','breakfast','🌅',t('Pripomenutie raňajok','Breakfast reminder')],
          ['todayCookingReminder','whatCook','🍳',t('Čo variť dnes','What to cook today')],
          ['shoppingReminder','shopping','🛒',t('Ísť nakúpiť','Go shopping')],
@@ -2623,10 +2736,6 @@ function openSettings() {
           </div>
         </div>`
       ).join('')}
-      <div class="settings-row" onclick="pushNotifSetup()" style="cursor:pointer;">
-        <span class="sr-label"><span class="sr-icon">🔔</span> ${t('Povoliť notifikácie na pozadí','Enable background notifications')}</span>
-        <span class="sr-value"><span class="sr-arrow">›</span></span>
-      </div>
     </div>
   </div>`;
 
@@ -2705,7 +2814,7 @@ function openSettings() {
         <span class="sr-label"><span class="sr-icon">🌐</span> ${t('Import z URL','Import from URL')}</span>
         <span class="sr-value"><span class="sr-arrow">›</span></span>
       </div>
-      <div class="settings-row" onclick="__confirmDemo(tings()}">
+      <div class="settings-row" onclick="if(confirm('${t('Naozaj obnoviť demo recepty? Všetky existujúce sa stratia.','Reset to demo recipes? All existing recipes will be lost.')}')){resetRecipes();closeSettings()}">
         <span class="sr-label"><span class="sr-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span> ${t('Obnoviť demo','Reset demo')}</span>
         <span class="sr-value"><span class="sr-arrow">›</span></span>
       </div>
@@ -2713,11 +2822,7 @@ function openSettings() {
         <span class="sr-label"><span class="sr-icon">🤖</span> ${t('AI nutričné hodnoty','AI nutrition estimates')}</span>
         <span class="sr-value"><span class="sr-arrow">›</span></span>
       </div>
-      <div class="settings-row" onclick="createBackup()">
-        <span class="sr-label"><span class="sr-icon">💾</span> ${t('Vytvoriť zálohu','Create backup')}</span>
-        <span class="sr-value"><span class="sr-arrow">›</span></span>
-      </div>
-      <div class="settings-row" onclick="__confirmDeleteAll(">
+      <div class="settings-row" onclick="if(confirm('${t('Naozaj vymazať všetky dáta? Táto akcia je nenávratná.','Delete all data? This cannot be undone.')}')){deleteAllData()}">
         <span class="sr-label" style="color:var(--danger);"><span class="sr-icon">🗑</span> ${t('Vymazať všetky dáta','Delete all data')}</span>
         <span class="sr-value" style="color:var(--danger);"><span class="sr-arrow">›</span></span>
       </div>
@@ -2829,7 +2934,6 @@ function toggleFav(id) {
   const r = recipes.find(rec => rec.id === id);
   if (!r) return;
   r.favorite = !r.favorite;
-  haptic(8);
   saveToLS();
   const card = document.querySelector(`.recipe-card[data-id="${id}"]`);
   if (card) {
@@ -2837,7 +2941,6 @@ function toggleFav(id) {
     if (btn) {
       btn.classList.toggle('fav-active', r.favorite);
       btn.textContent = r.favorite ? '❤️' : '🤍';
-      springBounce(btn);
     }
   }
   const grid = document.getElementById('recipe-grid');
@@ -2927,32 +3030,19 @@ function saveRecipe() {
   const fat = parseInt(document.getElementById('r-fat').value) || 0;
   const carbs = parseInt(document.getElementById('r-carbs').value) || 0;
   const portions = parseInt(document.getElementById('r-portions').value) || 4;
-  // Auto-detect season from ingredients
-  var autoSeason = autoSeasonTag(ingredients, name);
-  autoSeason.tags.forEach(function(t) { if (tags.indexOf(t) < 0) tags.push(t); });
-  // Show a small indicator on save
-  if (autoSeason.tags.length) {
-    document.getElementById('season-status').textContent = (lang==='en'?'Detected season: ':'Detekovaná sezóna: ') + autoSeason.tags.map(function(t) { return {jar:'🌸',leto:'🌞',jesen:'🍂',zima:'❄️'}[t]||t; }).join(' ');
-  }
   if (!name) return showToast(t('formName')+(lang==='en'?' is required.':' je povinný.'),'error');
   if (!ingredients.length) return showToast(t('formIngredients')+(lang==='en'?' are required.':' sú povinné.'),'error');
   const nutrition = {kcal,protein,fat,carbs};
   // Sanity check
   const check = sanitizeNutrition(nutrition, portions);
-  if (check.hasWarnings) {
-    showConfirmModal(
-      (lang === 'en' ? 'Per-portion values seem high:\n' : 'Hodnoty na porciu sú vysoké:\n') +
-      check.warnings.map(w => {
-        const labels = {kcal: '🔥 kcal > 1200', fat: '🧈 tuky > 80g', protein: '💪 bielkoviny > 80g', carbs: '🍚 sacharidy > 150g'};
-        return labels[w];
-      }).join('\n') + '\n\n' +
-      (lang === 'en' ? 'Save anyway?' : 'Aj tak uložiť?'),
-      '⚠️', lang==='en'?'Save anyway':'Aj tak uložiť', function() {
-        // continue saving
-      }
-    );
-    if (!check._proceed) return;
-  }
+  if (check.hasWarnings && !confirm(
+    (lang === 'en' ? 'Per-portion values seem high:\n' : 'Hodnoty na porciu sú vysoké:\n') +
+    check.warnings.map(w => {
+      const labels = {kcal: '🔥 kcal > 1200', fat: '🧈 tuky > 80g', protein: '💪 bielkoviny > 80g', carbs: '🍚 sacharidy > 150g'};
+      return labels[w];
+    }).join('\n') + '\n\n' +
+    (lang === 'en' ? 'Save anyway?' : 'Aj tak uložiť?')
+  )) return;
   if (editingId) {
     const idx = recipes.findIndex(r => r.id === editingId);
     if (idx !== -1) recipes[idx] = {...recipes[idx], name, nameEn, category, time, image, imageData, ingredients, steps, tags, nutrition, difficulty, portions, allergens: recipes[idx].allergens || []};
@@ -3014,7 +3104,6 @@ function getCurrentRecipe() {
 }
 
 function viewRecipe(id) {
-  try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch(e) {}
   viewingId = id;
   basePortion = 2;
   currentPortion = basePortion;
@@ -3029,7 +3118,7 @@ function viewRecipe(id) {
   const san = esc(name), sanCat = esc(r.category), sanTime = esc(r.time);
   el.innerHTML = `
     <div id="detail-img-wrap" class="detail-img ${r.image||r.imageData?'':'img-skeleton'}">${r.image || r.imageData
-      ? `<img src="${escAttr(r.imageData||r.image)}" alt="${san}" onerror="this.outerHTML='<span style=\\'font-size:3.4rem\\'>🍽️</span>'" onload="this.classList.add('loaded');this.parentElement.classList.remove('img-skeleton')">`
+      ? `<img src="${escAttr(r.imageData||r.image)}" alt="${san}" onerror="this.outerHTML='<span style=\\'font-size:3.4rem\\'>🍽️</span>'" onload="this.parentElement.classList.remove('img-skeleton')">`
       : `<span style="font-size:3.4rem">🍽️</span>`}</div>
     <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.4rem;">
       <h2 style="font-size:1.05rem;flex:1;">${san}</h2>
@@ -3136,13 +3225,11 @@ function editCurrent() {
 }
 
 function deleteCurrent() {
-  showConfirmModal(t('Naozaj chceš vymazať tento recept?','Delete this recipe?'), '🗑️', t('Áno, vymazať','Yes, delete'), function() {
-    recipes = recipes.filter(r => r.id !== viewingId);
-    saveToLS();
-    closeModal('detail-modal');
-    render();
-    showToast('🗑️ ' + (lang==='en'?'Deleted':'Vymazané'), 'info', 1500);
-  });
+  if (!confirm(t('deleteConfirm'))) return;
+  recipes = recipes.filter(r => r.id !== viewingId);
+  saveToLS();
+  closeModal('detail-modal');
+  render();
 }
 
 // ======================== PRINT ========================
@@ -3256,7 +3343,7 @@ function importRecipes(e) {
     try {
       const data = JSON.parse(ev.target.result);
       if (!Array.isArray(data) || !data.length || !data[0].name) throw new Error('bad');
-      showConfirmModal(`${t('importConfirm')} ${data.length} receptov?`, '📥', lang==='en'?'Import':'Importovať', function() {
+      if (confirm(`${t('importConfirm')} ${data.length} receptov?`)) {
         data.forEach(imp => {
           const idx = recipes.findIndex(r => r.id === imp.id);
           if (idx !== -1) recipes[idx] = imp;
@@ -3265,90 +3352,12 @@ function importRecipes(e) {
         saveToLS();
         render();
         showToast(t('importOk')+' '+data.length+'.','success');
-      });
+      }
     } catch(err) { showToast(t('exportError'),'error'); }
   };
   reader.readAsText(file);
   e.target.value = '';
 }
-
-// ======================== AUTOMATED BACKUP ========================
-function createBackup() {
-  var data = {
-    version: '1.7',
-    exportedAt: new Date().toISOString(),
-    app: 'Mealnest',
-    recipes: recipes,
-    mealPlan: mealPlan,
-    mealPlanKids: mealPlanKids,
-    planType: planType,
-    shoppingItems: shopItems || [],
-    tasks: tasks,
-    cookingHistory: JSON.parse(localStorage.getItem('cookingHistory') || '[]'),
-    appSettings: appSettings,
-    stats: {
-      recipeCount: recipes.length,
-      mealPlanned: (function() {
-        var c = 0;
-        Object.values(mealPlan).forEach(function(w) { Object.values(w).forEach(function(d) { Object.values(d).forEach(function(v) { if (v) c++; }); }); });
-        return c;
-      })(),
-      tasksTotal: tasks.length,
-      tasksDone: tasks.filter(function(t) { return t.completed; }).length,
-      shoppingItems: (shopItems||[]).length
-    }
-  };
-  var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  a.href = url;
-  var date = new Date().toISOString().slice(0,10);
-  a.download = 'mealnest-backup-' + date + '.json';
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(function() {
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }, 100);
-  showToast(lang==='en' ? 'Backup downloaded ✓' : 'Záloha stiahnutá ✓', 'success');
-  // Store last backup timestamp
-  localStorage.setItem('_lastBackup', Date.now().toString());
-  return data;
-}
-
-// Daily backup into IndexedDB (local fallback)
-function saveLocalBackup() {
-  var data = {
-    date: new Date().toISOString().slice(0,10),
-    recipes: recipes,
-    mealPlan: mealPlan,
-    shoppingItems: shopItems || [],
-    tasks: tasks
-  };
-  dbSet('_dailyBackup', data);
-  // Keep last 3 backups
-  dbGet('_backupHistory').then(function(h) {
-    h = h || [];
-    h.push(data.date);
-    if (h.length > 3) h.shift();
-    dbSet('_backupHistory', h);
-  });
-}
-
-// Check and run daily backup
-function checkDailyBackup() {
-  var last = parseInt(localStorage.getItem('_lastBackup') || '0');
-  var now = Date.now();
-  if (now - last > 86400000) {
-    saveLocalBackup();
-  }
-}
-
-// Schedule daily backup check
-setTimeout(function() {
-  checkDailyBackup();
-  setInterval(checkDailyBackup, 3600000); // Check every hour
-}, 5000);
 
 // ======================== COOKING MODE ========================
 function openCookingMode() {
@@ -3626,100 +3635,18 @@ function showTipOfDay() {
   card.classList.add('show');
 }
 
-// =================== SKELETON HELPERS ===================
-function renderSkeletonGrid(container, count) {
-  if (!container) return;
-  count = count || 6;
-  let html = '<div class="skeleton-grid">';
-  for (let i = 0; i < count; i++) {
-    html += '<div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-body"><div class="skeleton-line"></div><div class="skeleton-line-short"></div></div></div>';
-  }
-  html += '</div>';
-  container.innerHTML = html;
-}
-
-function renderSkeletonPlanner(container) {
-  if (!container) return;
-  let html = '';
-  for (let i = 0; i < 3; i++) {
-    html += '<div class="skeleton-planner-day"><div class="skeleton-line" style="width:40%"></div><div class="skeleton-row"></div><div class="skeleton-row"></div><div class="skeleton-row"></div></div>';
-  }
-  container.innerHTML = html;
-}
-
-function renderSkeletonShopping(container) {
-  if (!container) return;
-  container.innerHTML = '<div class="skeleton-shopping"><div class="skeleton-summary"></div><div class="skeleton-cat"></div><div class="skeleton-cat"></div><div class="skeleton-cat"></div></div>';
-}
-
-function animateSkeletonOut(container) {
-  if (!container) return;
-  container.querySelectorAll('.skeleton-grid, .skeleton-planner-day, .skeleton-shopping').forEach(function(el) {
-    el.style.transition = 'opacity .25s ease, transform .25s ease';
-    el.style.opacity = '0';
-    el.style.transform = 'translateY(8px)';
-    setTimeout(function() { el.remove(); }, 280);
-  });
-}
-
-function applyPageTransition(el, duration) {
-  if (!el) return;
-  duration = duration || 400;
-  el.style.animation = 'none';
-  void el.offsetHeight;
-  el.style.animation = 'pageEnter ' + duration + 'ms cubic-bezier(.22,1,.36,1) both';
-}
-
-// =================== COUNT-UP ANIMATION ===================
-function animateCountUp(el, target) {
-  if (!el) return;
-  target = parseInt(target) || 0;
-  var current = 0;
-  var step = Math.max(1, Math.floor(target / 30));
-  var duration = 800;
-  var interval = Math.max(10, Math.floor(duration / (target / step)));
-  if (target < 1) { el.textContent = '0'; return; }
-  var timer = setInterval(function() {
-    current += step;
-    if (current >= target) {
-      current = target;
-      clearInterval(timer);
-    }
-    el.textContent = current;
-  }, interval);
-}
-
-function springBounce(el) {
-  if (!el) return;
-  el.classList.remove('spring-bounce');
-  void el.offsetWidth;
-  el.classList.add('spring-bounce');
-}
-
-function microCheckmark(el) {
-  if (!el) return;
-  el.classList.remove('check-pop');
-  void el.offsetWidth;
-  el.classList.add('check-pop');
-}
-
 function dismissTip() {
-  const hero = document.getElementById('hero-card');
-  hero.style.animation = 'pageExit .25s cubic-bezier(.55,0,.1,1) both';
-  setTimeout(() => {
-    hero.classList.remove('show');
-    hero.style.animation = '';
-  }, 260);
+  document.getElementById('hero-card').classList.remove('show');
   localStorage.setItem('tipDismissed', new Date().toISOString().slice(0,10));
 }
 
 function switchTab(tab) {
-  haptic(8);
   try { localStorage.setItem('lastTab', tab); } catch(e) {}
   document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
   const btn = document.querySelector(`.nav-item[data-tab="${tab}"]`);
-  if (btn) { btn.classList.add('active'); springBounce(btn); }
+  if (btn) btn.classList.add('active');
   document.body.dataset.tab = tab;
+  // Push to history for back-button navigation
   if (window._skipHistory) { window._skipHistory = false; }
   else { history.pushState({ tab }, '', '#' + tab); }
   const dashboard = document.getElementById('dashboard');
@@ -3727,317 +3654,13 @@ function switchTab(tab) {
   const plannerContainer = document.getElementById('planner-container');
   const shoppingContainer = document.getElementById('shopping-container');
   const tasksContainer = document.getElementById('tasks-container');
-  const boardContainer = document.getElementById('board-container');
-  const mainTitle = document.getElementById('main-title');
-  [dashboard, recipeContainer, plannerContainer, shoppingContainer, tasksContainer, boardContainer].forEach(function(el) { if (el) el.style.display = 'none'; });
-  if (mainTitle) mainTitle.style.display = tab === 'dashboard' ? 'none' : '';
-  try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch(e) {}
-  if (tab === 'dashboard' && dashboard) {
-    dashboard.style.display = ''; applyPageTransition(dashboard, 350);
-    try { renderDashboard(); } catch(e) {}
-  } else if (tab === 'home' && recipeContainer) {
-    recipeContainer.style.display = ''; applyPageTransition(recipeContainer, 350);
-    var grid = document.getElementById('recipe-grid');
-    if (grid && grid.children.length === 0) renderSkeletonGrid(grid, 6);
-    try { render(); } catch(e) {}
-  } else if (tab === 'shopping' && shoppingContainer) {
-    shoppingContainer.style.display = 'block'; applyPageTransition(shoppingContainer, 350);
-    var shopView = document.getElementById('shopping-list-view');
-    if (shopView && !shopView.children.length) renderSkeletonShopping(shopView);
-    try { renderShoppingList(); } catch(e) {}
-  } else if (tab === 'planner' && plannerContainer) {
-    plannerContainer.style.display = 'block'; applyPageTransition(plannerContainer, 350);
-    var weekGrid = document.getElementById('planner-week-grid');
-    if (weekGrid && !weekGrid.children.length) renderSkeletonPlanner(weekGrid);
-    try { renderPlanner(); } catch(e) {}
-  } else if (tab === 'tasks' && tasksContainer) {
-    tasksContainer.style.display = 'block'; applyPageTransition(tasksContainer, 350);
-    try { renderTasks(); } catch(e) {}
-  } else if (tab === 'board' && boardContainer) {
-    boardContainer.style.display = 'block'; applyPageTransition(boardContainer, 350);
-    try { renderBoard(); } catch(e) {}
-  }
-}
-
-// =================== PULL TO REFRESH ===================
-var _ptrState = null;
-function initPullToRefresh() {
-  var ptrEl = document.createElement('div');
-  ptrEl.className = 'ptr-indicator';
-  ptrEl.innerHTML = '<div class="ptr-spinner"></div><span class="ptr-text">' + (lang==='en'?'Pull to refresh':'Potiahnite pre obnovenie') + '</span>';
-  document.body.appendChild(ptrEl);
-  
-  var main = document.querySelector('.container') || document.body;
-  main.addEventListener('touchstart', function(e) {
-    if (window.scrollY > 5) return;
-    if (e.target.closest('input') || e.target.closest('button') || e.target.closest('.bottom-nav') || e.target.closest('.modal-overlay.active') || e.target.closest('.sheet-overlay') || e.target.closest('.cooking-overlay.active')) return;
-    _ptrState = { startY: e.touches[0].clientY, pulled: false, ready: false };
-  }, { passive: true });
-  
-  main.addEventListener('touchmove', function(e) {
-    if (!_ptrState || _ptrState.refreshing) return;
-    var dy = e.touches[0].clientY - _ptrState.startY;
-    if (dy < 0) { _ptrState = null; ptrEl.classList.remove('ptr-visible', 'ptr-ready'); return; }
-    dy = Math.min(dy, 120);
-    ptrEl.style.transform = 'translateY(' + (dy * 0.4) + 'px)';
-    ptrEl.style.opacity = Math.min(1, dy / 80);
-    _ptrState.pulled = dy > 40;
-    if (dy > 80 && !_ptrState.ready) {
-      _ptrState.ready = true;
-      ptrEl.classList.add('ptr-ready');
-      ptrEl.querySelector('.ptr-text').textContent = lang==='en' ? 'Release to refresh' : 'Pustite pre obnovenie';
-    } else if (dy <= 80 && _ptrState.ready) {
-      _ptrState.ready = false;
-      ptrEl.classList.remove('ptr-ready');
-      ptrEl.querySelector('.ptr-text').textContent = lang==='en' ? 'Pull to refresh' : 'Potiahnite pre obnovenie';
-    }
-  }, { passive: true });
-  
-  main.addEventListener('touchend', function(e) {
-    if (!_ptrState) return;
-    if (_ptrState.ready && _ptrState.pulled) {
-      ptrEl.classList.add('ptr-visible');
-      ptrEl.style.transform = '';
-      ptrEl.style.opacity = '1';
-      ptrEl.querySelector('.ptr-text').textContent = lang==='en' ? 'Refreshing...' : 'Obnovujem...';
-      _ptrState.refreshing = true;
-      doPullRefresh();
-    } else {
-      ptrEl.style.transform = '';
-      ptrEl.style.opacity = '0';
-      ptrEl.classList.remove('ptr-visible', 'ptr-ready');
-    }
-    _ptrState = null;
-  }, { passive: true });
-}
-
-function doPullRefresh() {
-  var tab = document.body.dataset.tab;
-  if (tab === 'home') render();
-  else if (tab === 'shopping') renderShoppingList();
-  else if (tab === 'planner') renderPlanner();
-  else if (tab === 'tasks') renderTasks();
-  else if (tab === 'dashboard') renderDashboard();
-  var ptrEl = document.querySelector('.ptr-indicator');
-  setTimeout(function() {
-    if (ptrEl) {
-      ptrEl.classList.remove('ptr-visible', 'ptr-ready');
-      ptrEl.querySelector('.ptr-text').textContent = lang==='en' ? 'Pull to refresh' : 'Potiahnite pre obnovenie';
-    }
-    var el = document.querySelector('.ptr-indicator');
-    if (el) { el.style.opacity = '0'; setTimeout(function() { el.style.opacity = ''; }, 300); }
-  }, 500);
-}
-
-// =================== PREVENT CONTEXT MENU ===================
-document.addEventListener('contextmenu', function(e) {
-  // Allow context menu on input/textarea
-  if (e.target.closest && !e.target.closest('input, textarea, [contenteditable]')) {
-    e.preventDefault();
-    haptic(6);
-  }
-});
-document.addEventListener('selectstart', function(e) {
-  if (e.target.closest && !e.target.closest('input, textarea, [contenteditable]')) {
-    e.preventDefault();
-  }
-});
-
-// =================== HAPTIC FEEDBACK ===================
-function haptic(ms) {
-  try { navigator.vibrate && navigator.vibrate(ms || 8); } catch(e) {}
-}
-
-// =================== ANIMATED HEADER ON SCROLL ===================
-function initScrollHeader() {
-  var ticking = false;
-  var body = document.body;
-  window.addEventListener('scroll', function() {
-    if (!ticking) {
-      requestAnimationFrame(function() {
-        var scrollY = window.scrollY || window.pageYOffset;
-        body.classList.toggle('header-collapsed', scrollY > 60);
-        ticking = false;
-      });
-      ticking = true;
-    }
-  }, { passive: true });
-}
-
-// =================== SWIPE BETWEEN TABS ===================
-var _swipeTabData = null;
-function initSwipeTabs() {
-  var main = document.querySelector('.container') || document.body;
-  main.addEventListener('touchstart', function(e) {
-    // Don't swipe on interactive elements
-    if (e.target.closest('input') || e.target.closest('button') || e.target.closest('.bottom-nav') || e.target.closest('.modal-overlay.active') || e.target.closest('.sheet-overlay') || e.target.closest('.cooking-overlay.active')) return;
-    _swipeTabData = { startX: e.touches[0].clientX, startY: e.touches[0].clientY };
-  }, { passive: true });
-  
-  main.addEventListener('touchmove', function(e) {
-    if (!_swipeTabData) return;
-    var dx = e.touches[0].clientX - _swipeTabData.startX;
-    var dy = Math.abs(e.touches[0].clientY - _swipeTabData.startY);
-    if (Math.abs(dx) < 30 || dy > Math.abs(dx) * 0.5) { _swipeTabData = null; return; }
-    e.preventDefault();
-  }, { passive: false });
-  
-  main.addEventListener('touchend', function(e) {
-    if (!_swipeTabData) return;
-    var dx = e.changedTouches[0].clientX - _swipeTabData.startX;
-    var dy = Math.abs(e.changedTouches[0].clientY - _swipeTabData.startY);
-    if (Math.abs(dx) < 60 || dy > Math.abs(dx) * 0.6) { _swipeTabData = null; return; }
-    var tabs = ['dashboard', 'home', 'planner', 'shopping', 'tasks', 'board'];
-    var current = document.body.dataset.tab || 'dashboard';
-    var idx = tabs.indexOf(current);
-    if (dx > 0 && idx > 0) { switchTab(tabs[idx - 1]); }
-    else if (dx < 0 && idx < tabs.length - 1) { switchTab(tabs[idx + 1]); }
-    _swipeTabData = null;
-  }, { passive: true });
-}
-// =================== LONG PRESS ON RECIPES ===================
-function initLongPress() {
-  document.addEventListener('touchstart', function(e) {
-    var card = e.target.closest('.recipe-card');
-    if (!card) return;
-    _longPressTimer = setTimeout(function() {
-      showLongPressMenu(card, e.touches[0].clientX, e.touches[0].clientY);
-    }, 400);
-  }, { passive: true });
-  document.addEventListener('touchend', function() { clearTimeout(_longPressTimer); }, { passive: true });
-  document.addEventListener('touchmove', function() { clearTimeout(_longPressTimer); }, { passive: true });
-}
-
-var _longPressTimer = null;
-function showLongPressMenu(card, x, y) {
-  var id = card.dataset.id;
-  if (!id) return;
-  document.querySelectorAll('.longpress-menu').forEach(function(m) { m.remove(); });
-  var menu = document.createElement('div');
-  menu.className = 'longpress-menu';
-  var r = card.getBoundingClientRect();
-  var left = Math.min(x, window.innerWidth - 170);
-  var top = Math.min(y, window.innerHeight - 200);
-  menu.style.left = left + 'px';
-  menu.style.top = top + 'px';
-  menu.innerHTML = '<button onclick="viewRecipe(' + id + ');this.closest(\'.longpress-menu\').remove()">📖 ' + (lang==='en'?'View':'Zobraziť') + '</button><button onclick="var r=recipes.find(x=>x.id==' + id + ');if(r){openFormModal(r)};this.closest(\'.longpress-menu\').remove()">✏️ ' + (lang==='en'?'Edit':'Upraviť') + '</button><button onclick="toggleFav(' + id + ');this.closest(\'.longpress-menu\').remove()">❤️ ' + (lang==='en'?'Favorite':'Obľúbené') + '</button><button class=\"danger\" onclick=\"if(confirm(\'' + (lang==='en'?'Delete this recipe?':'Zmazať tento recept?') + '\')){var ri=recipes.findIndex(x=>x.id==' + id + ');if(ri>=0){recipes.splice(ri,1);saveToLS();render()}};this.closest(\'.longpress-menu\').remove()\">🗑 ' + (lang==='en'?'Delete':'Zmazať') + '</button>';
-  document.body.appendChild(menu);
-  haptic(15);
-  var closer = function(x) {
-    if (!x.target.closest('.longpress-menu')) { menu.remove(); document.removeEventListener('click', closer); }
-  };
-  setTimeout(function() { document.addEventListener('click', closer); }, 100);
-}
-
-// Initialize on load
-setTimeout(function() {
-  setDynamicGradient();
-  initSwipeTabs();
-  initPullToRefresh();
-  initScrollHeader();
-  initLongPress();
-  // Toggle masonry grid if setting enabled
-  var grid = document.getElementById('recipe-grid');
-  if (grid && appSettings.masonry) grid.classList.add('masonry');
-  // Add staggered animation class to shopping
-  var shopView = document.getElementById('shopping-list-view');
-  if (shopView) shopView.classList.add('shop-animate-stagger');
-}, 500);
-
-// =================== SEASONAL CALENDAR ===================
-var SEASONAL_PROD = [
-  {m:0,produce:[],emoji:'❄️',label:'Zima',labelEn:'Winter',desc:'Koreňová zelenina, kapusta, citrusy',descEn:'Root veg, cabbage, citrus'},
-  {m:1,produce:[],emoji:'❄️',label:'Zima',labelEn:'Winter',desc:'Pór, zeler, petržlen, pomaranče',descEn:'Leek, celery, parsley, oranges'},
-  {m:2,produce:[],emoji:'🌸',label:'Jar',labelEn:'Spring',desc:'Rebarbora, špargľa, špenát, hlávkový šalát',descEn:'Rhubarb, asparagus, spinach, lettuce'},
-  {m:3,produce:[],emoji:'🌸',label:'Jar',labelEn:'Spring',desc:'Špargľa, reďkovka, jarná cibuľka, žerucha',descEn:'Asparagus, radish, spring onion, cress'},
-  {m:4,produce:[],emoji:'🌸',label:'Jar',labelEn:'Spring',desc:'Jahody, reďkovka, špenát, mladé zemiaky',descEn:'Strawberries, radish, spinach, new potatoes'},
-  {m:5,produce:[],emoji:'🌞',label:'Leto',labelEn:'Summer',desc:'Čerešne, jahody, hrach, cuketa, uhorky',descEn:'Cherries, strawberries, peas, zucchini'},
-  {m:6,produce:[],emoji:'🌞',label:'Leto',labelEn:'Summer',desc:'Maliny, ríbezle, broskyne, paradajky, paprika',descEn:'Raspberries, currants, peaches, tomatoes'},
-  {m:7,produce:[],emoji:'🌞',label:'Leto',labelEn:'Summer',desc:'Slivky, marhule, kukurica, baklažán, fazuľa',descEn:'Plums, apricots, corn, eggplant, beans'},
-  {m:8,produce:[],emoji:'🌞',label:'Leto',labelEn:'Summer',desc:'Hrozno, jablká, hrušky, tekvica, cesnak',descEn:'Grapes, apples, pears, pumpkin, garlic'},
-  {m:9,produce:[],emoji:'🍂',label:'Jeseň',labelEn:'Autumn',desc:'Hrozno, jablká, orechy, kapusta, mrkva',descEn:'Grapes, apples, nuts, cabbage, carrots'},
-  {m:10,produce:[],emoji:'🍂',label:'Jeseň',labelEn:'Autumn',desc:'Tekvica, gaštany, hrušky, cvikla, zemiaky',descEn:'Pumpkin, chestnuts, pears, beetroot'},
-  {m:11,produce:[],emoji:'❄️',label:'Zima',labelEn:'Winter',desc:'Kapusta, kel, citrusy, datle, orechy',descEn:'Cabbage, kale, citrus, dates, nuts'},
-];
-
-function getSeasonalMonth() {
-  var now = new Date();
-  var m = now.getMonth();
-  return SEASONAL_PROD[m] || SEASONAL_PROD[0];
-}
-
-function getSeasonalRecipes() {
-  // Find recipes with tags matching the current season
-  var seasonMap = {0:'zima',1:'zima',2:'jar',3:'jar',4:'jar',5:'leto',6:'leto',7:'leto',8:'leto',9:'jesen',10:'jesen',11:'zima'};
-  var season = seasonMap[new Date().getMonth()] || 'leto';
-  var seasonEn = {zima:'winter',jar:'spring',leto:'summer',jesen:'autumn'}[season];
-  return recipes.filter(function(r) {
-    var tags = (lang==='en' && r.tagsEn ? r.tagsEn : r.tags) || [];
-    return tags.some(function(t) { return t === season || t === seasonEn; });
-  }).slice(0, 3);
-}
-
-function renderSeasonalWidget() {
-  var sm = getSeasonalMonth();
-  var sr = getSeasonalRecipes();
-  var label = lang === 'en' ? sm.labelEn : sm.label;
-  var desc = lang === 'en' ? sm.descEn : sm.desc;
-  var html = '<div class="dash-card seasonal-card"><div class="seasonal-header"><span class="seasonal-icon">' + sm.emoji + '</span><div><div class="seasonal-title">' + (lang==='en'?'What\'s in season: ':'Čo je v sezóne: ') + label + '</div><div class="seasonal-desc">' + desc + '</div></div></div>';
-  if (sr.length) {
-    html += '<div class="seasonal-recipes">' + sr.map(function(r) {
-      var name = lang === 'en' && r.nameEn ? r.nameEn : r.name;
-      return '<div class="seasonal-recipe" onclick="viewRecipe(' + r.id + ')">🍽️ ' + esc(name) + '</div>';
-    }).join('') + '</div>';
-  }
-  html += '<div style="font-size:.62rem;color:var(--text3);margin-top:.25rem;">' + (lang==='en'?'Based on seasonal produce':'Podľa sezónnych surovín') + '</div></div>';
-  return html;
-}
-
-// =================== AUTO SEASON TAGGING ===================
-var SEASONAL_KEYS = {
-  jar: { en: 'spring', keywords: ['spargla','asparagus','rebarbora','rhubarb','mlady','mlada','mlade','redkovka','radish','jarna','jahoda','strawberry','jahody','strawberries','spenat','spinach','hrach','pea','pazitka','chives','bylinky','herbs','mata','mint','kopor','dill','zerucha','cress'] },
-  leto: { en: 'summer', keywords: ['paradajka','tomato','paradajky','tomatoes','uhorka','cucumber','paprika','pepper','cuketa','zucchini','baklazan','eggplant','kukurica','corn','fazula','bean','ceresne','cherries','bros kyna','peach','bros kyne','peaches','marhula','apricot','slivka','plum','malina','raspberry','maliny','raspberries','ribezle','currants','melon','gril','grill','salat','salad','cvikla','beetroot','sosovica','lentil','osviezujuci'] },
-  jesen: { en: 'autumn', keywords: ['tekvica','pumpkin','gastan','chestnut','gastany','chestnuts','hrozno','grapes','jablko','apple','jablka','apples','hruska','pear','hrusky','pears','orech','nut','orechy','nuts','huby','mushrooms','hrfb','hrfby','kapusta','cabbage','kel','kale','batat','sweet potato','pastrnak','parsnip','peeeny','peena','peene'] },
-  zima: { en: 'winter', keywords: ['pomaranc','orange','mandarinka','mandarin','citron','lemon','limetka','lime','datle','dates','figy','figs','zemiak','potato','zemiaky','potatoes','vyvar','broth','teply','klobasa','sausage','kapustnica','korenova','cibula','onion','cesnak','garlic'] }
-};
-
-function autoSeasonTag(ingredients, name) {
-  if (!ingredients || !ingredients.length) return { tags: [], tagsEn: [] };
-  var text = ingredients.join(' ').toLowerCase();
-  if (name) text += ' ' + name.toLowerCase();
-  // Normalize
-  text = text.replace(/\u010d/g,'c').replace(/\u010f/g,'d').replace(/\u013e/g,'l').replace(/\u0148/g,'n').replace(/\u0155/g,'r').replace(/\u0161/g,'s').replace(/\u0165/g,'t').replace(/\u017e/g,'z').replace(/\u00e1/g,'a').replace(/\u00e4/g,'a').replace(/\u00e9/g,'e').replace(/\u00ed/g,'i').replace(/\u00f3/g,'o').replace(/\u00f4/g,'o').replace(/\u00fa/g,'u').replace(/\u00fd/g,'y');
-  var result = [], resultEn = [];
-  for (var season in SEASONAL_KEYS) {
-    var data = SEASONAL_KEYS[season];
-    var score = 0;
-    for (var k = 0; k < data.keywords.length; k++) {
-      if (text.indexOf(data.keywords[k]) >= 0) score += data.keywords[k].length;
-    }
-    if (score >= 5) {
-      result.push(season);
-      resultEn.push(data.en);
-    }
-  }
-  if (result.length === 0) {
-    // Guess based on category if available
-    return { tags: [], tagsEn: [] };
-  }
-  return { tags: result, tagsEn: resultEn };
-}
-
-function previewSeasonTags() {
-  var text = document.getElementById('r-ingredients').value;
-  var name = document.getElementById('r-name').value;
-  var result = autoSeasonTag(text.split('\n').map(function(s) { return s.trim(); }).filter(Boolean), name);
-  var el = document.getElementById('season-status');
-  if (el) {
-    if (result.tags.length) {
-      el.textContent = (lang==='en'?'Season: ':'Sezóna: ') + result.tags.map(function(t) { return {jar:'🌸 jar',leto:'🌞 leto',jesen:'🍂 jeseň',zima:'❄️ zima'}[t]||t; }).join(', ');
-    } else {
-      el.textContent = '';
-    }
-  }
+  [dashboard, recipeContainer, plannerContainer, shoppingContainer, tasksContainer].forEach(el => { if (el) el.style.display = 'none'; });
+  document.getElementById('main-title').style.display = tab === 'dashboard' ? 'none' : '';
+  if (tab === 'dashboard' && dashboard) { dashboard.style.display = ''; try { renderDashboard(); } catch(e) {} }
+  if (tab === 'home' && recipeContainer) { recipeContainer.style.display = ''; try { render(); } catch(e) {} }
+  if (tab === 'shopping' && shoppingContainer) { shoppingContainer.style.display = 'block'; try { renderShoppingList(); } catch(e) {} }
+  if (tab === 'planner' && plannerContainer) { plannerContainer.style.display = 'block'; try { renderPlanner(); } catch(e) {} }
+  if (tab === 'tasks' && tasksContainer) { tasksContainer.style.display = 'block'; try { renderTasks(); } catch(e) {} }
 }
 
 // ======================== DASHBOARD ========================
@@ -4097,14 +3720,11 @@ function renderDashboard() {
   const favCount = recipes.filter(r => r.favorite).length;
   const totalKcal = getTodayKcal();
   document.getElementById('dash-stats-row').innerHTML = `
-    <span class="dash-stat-pill">📅 <strong class="count-up" data-target="${plannedToday}">0</strong>/${MEALS.length} ${lang === 'en' ? 'meals' : 'jedál'}</span>
-    <span class="dash-stat-pill">❤️ <strong class="count-up" data-target="${favCount}">0</strong> ${lang === 'en' ? 'favorites' : 'obľúbených'}</span>
-    <span class="dash-stat-pill">🔥 <strong class="count-up" data-target="${totalKcal}">0</strong> kcal</span>
-    <span class="dash-stat-pill">📖 <strong class="count-up" data-target="${recipes.length}">0</strong> ${lang === 'en' ? 'recipes' : 'receptov'}</span>
+    <span class="dash-stat-pill">📅 <strong>${plannedToday}</strong>/${MEALS.length} ${lang === 'en' ? 'meals' : 'jedál'}</span>
+    <span class="dash-stat-pill">❤️ <strong>${favCount}</strong> ${lang === 'en' ? 'favorites' : 'obľúbených'}</span>
+    <span class="dash-stat-pill">🔥 <strong>${totalKcal}</strong> kcal</span>
+    <span class="dash-stat-pill">📖 <strong>${recipes.length}</strong> ${lang === 'en' ? 'recipes' : 'receptov'}</span>
   `;
-  setTimeout(function() {
-    document.querySelectorAll('.count-up').forEach(function(el) { animateCountUp(el, el.dataset.target); });
-  }, 100);
 
   // Dashboard sections
   let html = '';
@@ -4123,9 +3743,6 @@ function renderDashboard() {
     } else {
       html += `<div class="dash-card"><div class="weather-widget weather-fallback" id="weather-widget" onclick="editText('weather.location','${t("Počasie","Weather")}')"><span class="weather-icon">🌤️</span><span class="weather-info"><strong>${t("Počasie","Weather")}</strong><span class="weather-temp">${t("Zadaj mesto","Enter city")}</span></span></div></div>`;
     }
-  }
-  if (w.seasonal) {
-    html += renderSeasonalWidget();
   }
 
   // Task widget
@@ -4408,8 +4025,8 @@ function renderPlanner() {
   // Week nav active state
   document.getElementById('pln-this').classList.toggle('active', plannerWeekOffset === 0);
   document.getElementById('pln-next').classList.toggle('active', plannerWeekOffset === 1);
-  document.getElementById('pln-this').textContent = lang==='en'?'This week':'Tento týždeň';
-  document.getElementById('pln-next').textContent = lang==='en'?'Next week':'Budúci týždeň';
+  document.getElementById('pln-this').textContent = lang==='en'?'This week':'Tento t\u00fd\u017ede\u0148';
+  document.getElementById('pln-next').textContent = lang==='en'?'Next week':'Bud\u00faci t\u00fd\u017ede\u0148';
 
   // ===== TODAY SECTION =====
   const dayNameToday = dayNames[todayIdx];
@@ -4432,69 +4049,34 @@ function renderPlanner() {
     var dt = new Date(startOfWeek); dt.setDate(startOfWeek.getDate()+i);
     var ds = dt.getDate()+'.'+(dt.getMonth()+1)+'.';
     var f = Object.values(day).filter(Boolean).length;
-    var dayIcon = getDayIcon(i, f);
     var dayKcal = 0;
     totalMeals += f;
     Object.values(day).filter(Boolean).forEach(function(e){var r=getSlotRecipe(e);if(r){if(r.nutrition)totalKcal+=r.nutrition.kcal||0;if(r.time)totalTime+=r.time;dayKcal+=r.nutrition.kcal||0;}});
     var isToday = dt.toISOString().slice(0,10) === todayStr;
-    // Progress ring state
-    var ringClass = 'pvc-progress-ring' + (f > 0 ? ' has-meals' : '') + (f === totalSlots ? ' full' : '');
-    s += '<div class="pvc-day day-'+i+(isToday?' pvc-today':'')+'"><div class="pvc-head"><div class="pvc-title-group"><span class="pvc-day-icon">'+dayIcon+'</span><span class="pvc-title">'+dayNames[i]+' '+ds+'</span>'+ (isToday?' <span class="pvc-badge">'+(lang==='en'?'TODAY':'DNES')+'</span>':'') +'</div><span class="pvc-progress"><span class="'+ringClass+'">'+f+'</span>🔥 '+dayKcal+'</span></div><div class="pvc-meals-grid">';
+    s += '<div class="pvc-day'+(isToday?' pvc-today':'')+'"><div class="pvc-head"><div><span class="pvc-title">'+dayNames[i]+' '+ds+'</span>'+ (isToday?' <span class="pvc-badge">'+(lang==='en'?'TODAY':'DNES')+'</span>':'') +'</div><span class="pvc-progress">'+f+'/'+totalSlots+' · \ud83d\udd25 '+dayKcal+' kcal</span></div>';
     MEALS.forEach(function(m){
       var e=day[m.id]; var r=getSlotRecipe(e); var nm=getSlotName(e); var ic=e&&e.type==='custom'; var ff=r||ic;
       var img = r ? (r.imageData||r.image||'') : '';
-      var mealClass = 'meal-' + m.id.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+      s += '<div class="pvc-row" onclick="'+(r?'viewRecipe('+r.id+')':(ff?'':'pickRecipe(\''+d+'\',\''+m.id+'\',\''+weekKey+'\')'))+'">'
+        +'<span class="pr-icon">'+m.icon+'</span><span class="pr-label">'+mealLabel(m.id)+'</span>';
       if(ff){
-        s += '<div class="pvc-meal filled '+mealClass+(ic?' custom':'')+'" onclick="'+(r?'viewRecipe('+r.id+')':'')+'">'
-          +'<div class="pvc-meal-header"><span class="pvc-meal-icon">'+m.icon+'</span><span class="pvc-meal-label">'+mealLabel(m.id)+'</span></div>'
-          +'<div class="pvc-meal-body">';
-        var thumb = img ? '<span class="pvc-meal-thumb" style="background-image:url(\''+escAttr(img)+'\')"></span>' : '';
-        s += thumb+'<span class="pvc-meal-name">'+esc(nm)+'</span>'+(r&&r.nutrition?'<span class="pvc-meal-kcal">🔥'+(r.nutrition.kcal||'?')+'</span>':'')+'</div>'
-          +'<button class="pvc-meal-del" onclick="event.stopPropagation();removeSlot(\''+d+'\',\''+m.id+'\',\''+weekKey+'\')">✕</button>'
-          +'</div>'; }
-      else {
-        s += '<div class="pvc-meal empty '+mealClass+'" onclick="pickRecipe(\''+d+'\',\''+m.id+'\',\''+weekKey+'\')"><div class="pvc-meal-header"><span class="pvc-meal-icon">'+m.icon+'</span><span class="pvc-meal-label">'+mealLabel(m.id)+'</span></div><button class="pvc-meal-add-btn"><span class="pvc-meal-add-icon">+</span>'+(lang==='en'?'Add':'Pridať')+'</button></div>'; }
+        var thumb = img ? '<span class="pr-thumb" style="background-image:url(\''+escAttr(img)+'\')"></span>' : '';
+        s += thumb+'<span class="pr-name">'+esc(nm)+'</span>'+(r&&r.nutrition?'<span class="pr-kcal">\ud83d\udd25'+(r.nutrition.kcal||'?')+'</span>':'')+'<button class="pr-del" onclick="event.stopPropagation();removeSlot(\''+d+'\',\''+m.id+'\',\''+weekKey+'\')">\u2715</button>'; }
+      else { s += '<span class="pr-empty">+ '+(lang==='en'?'Add meal':'Prida\u0165 jedlo')+'</span>'; }
+      s += '</div>';
     });
-    s += '</div></div>';
+    s += '</div>';
   });
 
   weekEl.innerHTML = s;
-  // Summary with progress bar
-  var maxMeals = DAYS.length * totalSlots;
-  var mealPct = maxMeals > 0 ? Math.round((totalMeals / maxMeals) * 100) : 0;
-  document.getElementById('planner-summary').innerHTML = '<div class="planner-summary-row"><div class="psr-item"><div class="psr-val">'+totalMeals+'/'+maxMeals+'</div><div class="psr-label">'+(lang==='en'?'Planned':'Naplán')+'</div></div><div class="psr-item"><div class="psr-val">🔥 '+totalKcal+'</div><div class="psr-label">kcal</div></div><div class="psr-item"><div class="psr-val">⏱ '+totalTime+'\'</div><div class="psr-label">'+(lang==='en'?'Prep':'Var')+'</div></div><div class="psr-progress-wrap"><div class="psr-progress-bar"><div class="psr-progress-fill" style="width:'+mealPct+'%"></div></div><div class="psr-progress-label">'+mealPct+'%</div></div></div>';
-
-  // Floating info panel
-  var pip = document.getElementById('planner-info-panel');
-  if (pip) {
-    document.getElementById('pip-meals').textContent = totalMeals+'/'+maxMeals;
-    document.getElementById('pip-kcal').textContent = totalKcal;
-    document.getElementById('pip-time').textContent = totalTime;
-    document.getElementById('pip-fill').style.width = mealPct+'%';
-  }
+  // Move stats to separate summary element
+  document.getElementById('planner-summary').innerHTML = '<div class="planner-summary-row"><div class="psr-item"><div class="psr-val">'+totalMeals+'</div><div class="psr-label">'+(lang==='en'?'Meals':'Jed\u00e1l')+'</div></div><div class="psr-item"><div class="psr-val">\ud83d\udd25 '+totalKcal+'</div><div class="psr-label">kcal</div></div><div class="psr-item"><div class="psr-val">\u23f1 '+totalTime+'min</div><div class="psr-label">'+(lang==='en'?'Prep':'Pr\u00edprava')+'</div></div></div>';
 }
 
 function goToWeek(offset) {
-  var grid = document.getElementById('planner-week-grid');
-  if (grid) {
-    grid.classList.remove('morph-out', 'morph-in');
-    // Force reflow
-    void grid.offsetWidth;
-    grid.classList.add('morph-out');
-  }
-  haptic(12);
-  setTimeout(function() {
-    plannerWeekOffset = offset;
-    _selectedPlannerDay = 0;
-    renderPlanner();
-    var grid2 = document.getElementById('planner-week-grid');
-    if (grid2) {
-      grid2.classList.remove('morph-out', 'morph-in');
-      void grid2.offsetWidth;
-      grid2.classList.add('morph-in');
-      setTimeout(function() { grid2.classList.remove('morph-in'); }, 500);
-    }
-  }, 300);
+  plannerWeekOffset = offset;
+  _selectedPlannerDay = 0;
+  renderPlanner();
 }
 
 function showDayDetail(dayKey) {
@@ -4543,18 +4125,7 @@ function setPlanType(type) {
   if (type === planType) return;
   planType = type;
   saveWeekPlan();
-  applyPageTransition(document.getElementById('planner-container'), 300);
   renderPlanner();
-  const activeBtn = document.querySelector('.plan-type-btn.active');
-  if (activeBtn) springBounce(activeBtn);
-}
-function getDayIcon(dayIndex, filledCount) {
-  // Thematic icons per day: pondelok🌙 utorok🔥 streda💧 stvrtok🌿 piatok🎉 sobota☀️ nedela🧘
-  var icons = ['🌙', '🔥', '💧', '🌿', '🎉', '☀️', '🧘'];
-  var icon = icons[dayIndex] || '📅';
-  if (filledCount === 0) return icon;
-  if (filledCount === 5) return icon; // all filled, stays thematic
-  return icon;
 }
 function getSlotRecipe(entry) {
   if (!entry) return null;
@@ -4704,12 +4275,7 @@ function selectRecipe(day, slot, id, wk) {
   localStorage.setItem('mealPlan', JSON.stringify(mealPlan));
   localStorage.setItem('mealPlanKids', JSON.stringify(mealPlanKids));
   renderPlanner();
-  // Confetti if day is fully filled
-  var filled = Object.values(weekPlan[day]).filter(Boolean).length;
-  if (filled === MEALS.length) triggerConfetti();
   if (day === DAYS[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1] && !plannerIsVisible()) renderDashboard();
-  // Toast feedback
-  showToast('✅ ' + (lang==='en'?'Added to planner':'Pridané do plánovača'), 'success', 1500);
 }
 
 function removeSlot(day, slot, wk) {
@@ -4718,26 +4284,23 @@ function removeSlot(day, slot, wk) {
   if (!weekPlan[day] || !weekPlan[day][slot]) return;
   const entry = weekPlan[day][slot];
   const name = getSlotName(entry) || (lang==='en'?'this meal':'toto jedlo');
-  showConfirmModal((lang==='en'?'Remove ':'Odstrániť ') + name + '?', '🗑️', lang==='en'?'Remove':'Odstrániť', function() {
-    delete weekPlan[day][slot];
-    saveWeekPlan();
-    try { localStorage.setItem('mealPlan', JSON.stringify(mealPlan)); } catch(e) {}
-    try { localStorage.setItem('mealPlanKids', JSON.stringify(mealPlanKids)); } catch(e) {}
-    loadTasks();
-    renderPlanner();
-    showToast('🗑️ ' + (lang==='en'?'Removed':'Odstránené'), 'info', 1200);
-  });
+  if (!confirm((lang==='en'?'Remove ':'Odstrániť ') + name + '?')) return;
+  delete weekPlan[day][slot];
+  saveWeekPlan();
+  // Force save both plans directly
+  try { localStorage.setItem('mealPlan', JSON.stringify(mealPlan)); } catch(e) {}
+  try { localStorage.setItem('mealPlanKids', JSON.stringify(mealPlanKids)); } catch(e) {}
+  renderPlanner();
+  if (day === DAYS[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1] && !plannerIsVisible()) renderDashboard();
 }
 
 function clearPlan() {
-  showConfirmModal(lang === 'en' ? 'Clear the whole week?' : 'Vymazať celý týždeň?', '🗑️', lang==='en'?'Clear':'Vymazať', function() {
-    const weekKey = currentWeekKey();
-    const weekPlan = getWeekPlan(weekKey);
-    DAYS.forEach(d => { weekPlan[d] = {}; });
-    saveWeekPlan();
-    renderPlanner();
-    showToast('🗑️ ' + (lang==='en'?'Week cleared':'Týždeň vymazaný'), 'info', 1200);
-  });
+  if (!confirm(lang === 'en' ? 'Clear the whole week?' : 'Vymazať celý týždeň?')) return;
+  const weekKey = currentWeekKey();
+  const weekPlan = getWeekPlan(weekKey);
+  DAYS.forEach(d => { weekPlan[d] = {}; });
+  saveWeekPlan();
+  renderPlanner();
 }
 
 function copyWeekPlan() {
@@ -4825,29 +4388,6 @@ function saveShopItems() {
   localStorage.setItem('shoppingItems', JSON.stringify(shopItems));
 }
 
-function autoMergeShopItems() {
-  const merged = {};
-  let changed = 0;
-  shopItems.forEach(it => {
-    const key = norm(it.name.trim().toLowerCase());
-    if (merged[key]) {
-      const existing = merged[key];
-      const a1 = parseFloat(existing.amount) || 0;
-      const a2 = parseFloat(it.amount) || 0;
-      if (a1 && a2 && existing.unit === it.unit) {
-        existing.amount = String(a1 + a2);
-        changed++;
-      } else {
-        existing.note = (existing.note ? existing.note + '; ' : '') + it.amount + (it.unit||'');
-        changed++;
-      }
-    } else {
-      merged[key] = it;
-    }
-  });
-  if (changed) shopItems = Object.values(merged);
-}
-
 function mergeShoppingItems(localArr, remoteArr) {
   if (!Array.isArray(localArr)) localArr = [];
   if (!Array.isArray(remoteArr)) remoteArr = [];
@@ -4875,7 +4415,14 @@ function renderShoppingList() {
   shopItems = shopItems.filter(function(it) { return it && it.source === 'manual'; });
 
     if (!shopItems.length) {
-    container.innerHTML = '<div class="empty-state-v2"><div class="empty-svg">🛒</div><div class="empty-title">' + (lang==='en'?'Shopping list is empty':'Nákupný zoznam je prázdny') + '</div><div class="empty-desc">' + (lang==='en'?'Tap the button below to add your first item.':'Klikni na tlačidlo a pridaj prvú položku.') + '</div><button class="btn btn-primary" onclick="openAddItemSheet()">➕ ' + (lang==='en'?'Add first item':'Pridať prvú položku') + '</button></div>';
+    container.innerHTML = `<div class="shop-empty">
+      <div class="shop-empty-icon">🛒</div>
+      <div class="shop-empty-title">${lang === 'en' ? 'Shopping list is empty' : 'Nákupný zoznam je prázdny'}</div>
+      <div class="shop-empty-desc">${lang === 'en' ? 'Tap the button below to add your first item.' : 'Klikni na tlačidlo a pridaj prvú položku.'}</div>
+      <div class="shop-empty-actions">
+        <button class="btn btn-primary" onclick="openAddItemSheet()" style="font-size:.85rem;padding:12px 28px;">➕ ${lang === 'en' ? 'Add first item' : 'Pridať prvú položku'}</button>
+      </div>
+    </div>`;
     return;
   }
 
@@ -4962,125 +4509,24 @@ function renderShoppingList() {
             <button class="si-btn" onclick="event.stopPropagation();openAddItemSheet('${it.id}')" title="${lang==='en'?'Edit':'Upraviť'}">✏️</button>
             <button class="si-btn danger" onclick="event.stopPropagation();deleteShopItem('${it.id}')" title="${lang==='en'?'Delete':'Vymazať'}">🗑</button>
           </div>
-          <div class="si-swipe-delete" onclick="event.stopPropagation();deleteShopItem('${it.id}')">🗑 ${lang==='en'?'Delete':'Vymazať'}</div>
         </div>`;
       }).join('')}</div>
     </div>`;
   });
 
   // Add item button
-  html += `<button class="shop-add-btn" onclick="openAddItemSheet();springBounce(this)">➕ ${lang==='en'?'Add food item':'Pridať potravinu'}</button>`;
+  html += `<button class="shop-add-btn" onclick="openAddItemSheet()">➕ ${lang==='en'?'Add food item':'Pridať potravinu'}</button>`;
 
   container.innerHTML = html;
-  container.classList.add('shop-animate-stagger');
-  initShopSwipe();
-}
-
-// =================== SWIPE TO DELETE ===================
-var _swipeData = null;
-// Close any open swipe when tapping elsewhere
-document.addEventListener('touchstart', function(e) {
-  if (_swipeData || !e.target.closest) return; // tracking active swipe
-  if (!e.target.closest('.shop-item')) {
-    document.querySelectorAll('.si-swipe-delete.revealed').forEach(function(d) {
-      var item = d.closest('.shop-item');
-      if (item) {
-        var check = item.querySelector('.si-check');
-        var info = item.querySelector('.si-info');
-        var actions = item.querySelector('.si-actions');
-        [check, info, actions].forEach(function(el) {
-          if (el) { el.style.transition = 'transform .25s cubic-bezier(.22,1,.36,1)'; el.style.transform = ''; }
-        });
-      }
-      d.classList.remove('revealed');
-    });
-  }
-}, { passive: true });
-
-function initShopSwipe() {
-  document.querySelectorAll('.shop-item').forEach(function(item) {
-    item.addEventListener('touchstart', onSwipeStart, { passive: true });
-    item.addEventListener('touchmove', onSwipeMove, { passive: false });
-    item.addEventListener('touchend', onSwipeEnd, { passive: true });
-    // Reset any existing revealed state
-    var del = item.querySelector('.si-swipe-delete');
-    if (del) del.classList.remove('revealed');
-  });
-}
-
-function onSwipeStart(e) {
-  var item = e.currentTarget;
-  // Don't swipe-checked items
-  if (item.classList.contains('checked')) return;
-  // Close any other open swipe
-  document.querySelectorAll('.si-swipe-delete.revealed').forEach(function(d) {
-    d.closest('.shop-item').querySelector('.si-swipe-delete').classList.remove('revealed');
-  });
-  _swipeData = { item: item, startX: e.touches[0].clientX, startY: e.touches[0].clientY, moved: false };
-}
-
-function onSwipeMove(e) {
-  if (!_swipeData) return;
-  var dx = e.touches[0].clientX - _swipeData.startX;
-  var dy = Math.abs(e.touches[0].clientY - _swipeData.startY);
-  // If scrolling vertically, don't swipe
-  if (dy > 20 && Math.abs(dx) < 10) {
-    _swipeData = null;
-    return;
-  }
-  if (dx > 0) { _swipeData = null; return; } // Only left swipe
-  _swipeData.moved = true;
-  var translateX = Math.max(dx, -80);
-  _swipeData.item.querySelector('.si-check').style.transform = 'translateX(' + translateX + 'px)';
-  _swipeData.item.querySelector('.si-info').style.transform = 'translateX(' + translateX + 'px)';
-  _swipeData.item.querySelector('.si-actions').style.transform = 'translateX(' + translateX + 'px)';
-  var del = _swipeData.item.querySelector('.si-swipe-delete');
-  if (del) del.style.transition = 'none';
-  e.preventDefault();
-}
-
-function onSwipeEnd(e) {
-  if (!_swipeData) return;
-  var del = _swipeData.item.querySelector('.si-swipe-delete');
-  var dx = e.changedTouches[0].clientX - _swipeData.startX;
-  var snapBack = function() {
-    var check = _swipeData.item.querySelector('.si-check');
-    var info = _swipeData.item.querySelector('.si-info');
-    var actions = _swipeData.item.querySelector('.si-actions');
-    [check, info, actions].forEach(function(el) {
-      if (el) { el.style.transition = 'transform .25s cubic-bezier(.22,1,.36,1)'; el.style.transform = ''; }
-    });
-    if (del) { del.style.transition = ''; del.classList.remove('revealed'); }
-  };
-  
-  if (dx < -50 && _swipeData.moved) {
-    // Reveal delete button
-    if (del) {
-      del.classList.add('revealed');
-      var check = _swipeData.item.querySelector('.si-check');
-      var info = _swipeData.item.querySelector('.si-info');
-      var actions = _swipeData.item.querySelector('.si-actions');
-      [check, info, actions].forEach(function(el) {
-        if (el) { el.style.transition = 'transform .25s cubic-bezier(.22,1,.36,1)'; el.style.transform = 'translateX(-80px)'; }
-      });
-    }
-  } else {
-    snapBack();
-  }
-  _swipeData = null;
 }
 
 function toggleShopItem(id) {
   const it = shopItems.find(i => i.id === id);
   if (!it) return;
   it.checked = !it.checked;
-  haptic(10);
   saveShopItems();
-  var checkEl = document.querySelector('.shop-item[data-id="' + id + '"] .si-check');
-  if (checkEl) microCheckmark(checkEl);
-  var itemEl = document.querySelector('.shop-item[data-id="' + id + '"]');
-  if (itemEl) springBounce(itemEl);
-  setTimeout(function() { renderShoppingList(); }, 300);
+  renderShoppingList();
+  notifyShoppingChanged(it.name);
 }
 
 function clearCheckedShopItems() {
@@ -5089,28 +4535,41 @@ function clearCheckedShopItems() {
     showToast(lang==='en'?'No checked items.':'Žiadne zaškrtnuté položky.','info');
     return;
   }
-  showConfirmModal(lang === 'en' ? `Remove ${checked.length} checked items?` : `Odstrániť ${checked.length} zaškrtnutých položiek?`, '🗑️', lang==='en'?'Remove':'Odstrániť', function() {
-    shopItems = shopItems.filter(i => !i.checked);
-    saveShopItems();
-    renderShoppingList();
-    showToast('✅ ' + (lang==='en'?'Cleaned':'Vyčistené'), 'success', 1200);
-  });
+  if (!confirm(lang === 'en' ? `Remove ${checked.length} checked items?` : `Odstrániť ${checked.length} zaškrtnutých položiek?`)) return;
+  shopItems = shopItems.filter(i => !i.checked);
+  saveShopItems();
+  renderShoppingList();
 }
 
 function clearAllShopItems() {
-  showConfirmModal(lang === 'en' ? 'Clear entire shopping list?' : 'Vymazať celý nákupný zoznam?', '🗑️', lang==='en'?'Clear all':'Všetko vymazať', function() {
-    shopItems = [];
-    saveShopItems();
-    renderShoppingList();
-    showToast('🗑️ ' + (lang==='en'?'List cleared':'Zoznam vyčistený'), 'info', 1200);
-  });
+  if (!confirm(lang === 'en' ? 'Clear entire shopping list?' : 'Vymazať celý nákupný zoznam?')) return;
+  shopItems = [];
+  saveShopItems();
+  renderShoppingList();
 }
 
 function mergeDuplicateShopItems() {
   loadShopItems();
-  const before = shopItems.length;
-  autoMergeShopItems();
-  const changed = before - shopItems.length;
+  const merged = {};
+  let changed = 0;
+  shopItems.forEach(it => {
+    const key = norm(it.name.trim().toLowerCase());
+    if (merged[key]) {
+      const existing = merged[key];
+      const a1 = parseFloat(existing.amount) || 0;
+      const a2 = parseFloat(it.amount) || 0;
+      if (a1 && a2 && existing.unit === it.unit) {
+        existing.amount = String(a1 + a2);
+        changed++;
+      } else {
+        existing.note = (existing.note ? existing.note + '; ' : '') + it.amount + (it.unit||'');
+        changed++;
+      }
+    } else {
+      merged[key] = it;
+    }
+  });
+  shopItems = Object.values(merged);
   saveShopItems();
   renderShoppingList();
   if (changed) showToast(lang==='en'?'Merged '+changed+' items.':'Zlúčených '+changed+' položiek.','success');
@@ -5218,20 +4677,17 @@ function saveShopItem() {
       recipeId: ''
     });
   }
-  // Auto-merge duplicates after adding new item
-  try { autoMergeShopItems(); } catch(e) {}
   saveShopItems();
   closeShopSheet();
   renderShoppingList();
+  notifyShoppingChanged(name);
 }
 
 function deleteShopItem(id) {
-  showConfirmModal(lang === 'en' ? 'Delete this item?' : 'Vymazať túto položku?', '🗑️', lang==='en'?'Delete':'Vymazať', function() {
-    shopItems = shopItems.filter(i => i.id !== id);
-    saveShopItems();
-    renderShoppingList();
-    showToast('🗑️ ' + (lang==='en'?'Item deleted':'Položka vymazaná'), 'info', 1200);
-  });
+  if (!confirm(lang === 'en' ? 'Delete this item?' : 'Vymazať túto položku?')) return;
+  shopItems = shopItems.filter(i => i.id !== id);
+  saveShopItems();
+  renderShoppingList();
 }
 
 function toggleShopCategory(headerEl) {
@@ -5325,13 +4781,11 @@ function getRecentCompleted() {
   return tasks.filter(t => t.completed && t.completedDate && (now - new Date(t.completedDate).getTime()) < day);
 }
 function clearCompletedTasks() {
-  showConfirmModal(lang==='en'?'Delete all completed tasks?':'Vymazať všetky dokončené úlohy?', '🗑️', lang==='en'?'Delete':'Vymazať', function() {
-  
+  if (!confirm(lang==='en'?'Delete all completed tasks?':'Vymazať všetky dokončené úlohy?')) return;
   tasks = tasks.filter(t => !t.completed);
   saveTasks();
   renderTasks();
   renderDashboard();
-  });
 }
 function getTodayProgress() {
   const today = new Date().toISOString().slice(0,10);
@@ -5570,33 +5024,26 @@ function taskCatLabel(catId) {
 function toggleTask(id) {
   const t = tasks.find(x => x.id === id);
   if (!t) return;
+  const wasCompleted = t.completed;
   t.completed = !t.completed;
   t.completedDate = t.completed ? new Date().toISOString().slice(0,10) : '';
-  haptic(10);
   saveTasks();
   const inTasks = document.getElementById('tasks-container')?.style.display !== 'none';
   if (inTasks) renderTasks();
   else renderTaskWidget();
+  
+  // Push notifikácia o dokončení/otvorení úlohy
+  if (t.completed && !wasCompleted) notifyTaskCompleted(t);
+  updateBadgeCount();
 }
 
 function deleteTask(id) {
-  showConfirmModal(lang === 'en' ? 'Delete this task?' : 'Vymazať túto úlohu?', '🗑️', lang==='en'?'Delete':'Vymazať', function() {
-    tasks = tasks.filter(t => t.id !== id);
-    saveTasks();
-    const inTasks = document.getElementById('tasks-container')?.style.display !== 'none';
-    if (inTasks) renderTasks();
-    else { renderTaskWidget(); if (document.getElementById('dashboard')?.style.display !== 'none') renderDashboard(); }
-    showToast('🗑️ ' + (lang==='en'?'Task deleted':'Úloha vymazaná'), 'info', 1200);
-  });
-}
-
-function toggleTaskExtra() {
-  var el = document.getElementById('task-extra-fields');
-  var btn = document.getElementById('task-extra-toggle');
-  if (!el || !btn) return;
-  var isVisible = el.style.display !== 'none';
-  el.style.display = isVisible ? 'none' : '';
-  btn.textContent = isVisible ? '▼ ' + (lang==='en'?'More options':'Viac možností') : '▲ ' + (lang==='en'?'Less options':'Menej možností');
+  if (!confirm(lang === 'en' ? 'Delete this task?' : 'Vymazať túto úlohu?')) return;
+  tasks = tasks.filter(t => t.id !== id);
+  saveTasks();
+  const inTasks = document.getElementById('tasks-container')?.style.display !== 'none';
+  if (inTasks) renderTasks();
+  else { renderTaskWidget(); if (document.getElementById('dashboard')?.style.display !== 'none') renderDashboard(); }
 }
 
 function openTaskSheet(editId) {
@@ -5608,10 +5055,8 @@ function openTaskSheet(editId) {
     ? (lang==='en'?'💾 Save':'💾 Uložiť')
     : (lang==='en'?'💾 Add':'💾 Pridať');
 
-  // Hide extra fields by default for new tasks
+  // Set date to today if not editing
   if (!editId) {
-    document.getElementById('task-extra-fields').style.display = 'none';
-    document.getElementById('task-extra-toggle').textContent = '▼ ' + (lang==='en'?'More options':'Viac možností');
     document.getElementById('task-date').value = new Date().toISOString().slice(0,10);
     document.getElementById('task-time').value = '';
     document.getElementById('task-priority').value = 'medium';
@@ -5619,10 +5064,6 @@ function openTaskSheet(editId) {
     document.getElementById('task-note').value = '';
     document.getElementById('task-title').value = '';
     document.getElementById('task-edit-id').value = '';
-  } else {
-    // Show extra fields when editing
-    document.getElementById('task-extra-fields').style.display = '';
-    document.getElementById('task-extra-toggle').textContent = '▲ ' + (lang==='en'?'Less options':'Menej možností');
   }
 
   // Render category chips
@@ -5687,17 +5128,14 @@ function saveTask() {
     }
   } else {
     tasks.push({ id: generateTaskId(), title, category, completed: false, date: date || new Date().toISOString().slice(0,10), time, priority, repeat, note, source: 'manual', completedDate: '' });
+    // Push notifikácia o novej úlohe
+    notifyTaskAdded(tasks[tasks.length - 1]);
   }
   saveTasks();
-  // Notify family
-  if (typeof sendPushToFamily === 'function' && typeof taskTitle !== 'undefined' && taskTitle) {
-    var pushAuthor = authUser ? (authUser.displayName || authUser.email || '👤') : t('Hosť','Guest');
-    var pushText = taskTitle.length > 80 ? taskTitle.slice(0, 80) + '...' : taskTitle;
-    sendPushToFamily('✅ ' + t('Nová úloha','New task'), pushAuthor + ': ' + pushText, 'tasks');
-  }
   closeTaskSheet();
   renderTasks();
   renderTaskWidget();
+  updateBadgeCount();
 }
 
 // ======================== COOKING HISTORY ========================
@@ -5730,12 +5168,10 @@ function openHistory() {
 }
 
 function clearHistory() {
-  showConfirmModal(lang==='en'?'Clear cooking history?':'Vymazať celú históriu?', '🗑️', lang==='en'?'Clear':'Vymazať', function() {
-  
+  if (!confirm(lang==='en'?'Clear cooking history?':'Vymazať celú históriu?')) return;
   cookingHistory = [];
   localStorage.setItem('cookingHistory', JSON.stringify(cookingHistory));
   openHistory();
-  });
 }
 
 // ======================== DEEP SEARCH ========================
@@ -5960,32 +5396,6 @@ function isAnyModalOpen() {
   return document.querySelector('.modal-overlay.active, #planner-picker.active, #login-overlay[style*="flex"], #settings-sheet.active, .sheet-overlay.active') !== null;
 }
 
-// =================== CUSTOM CONFIRM MODAL ===================
-var _confirmCallback = null;
-function showConfirmModal(msg, icon, okLabel, callback) {
-  var modal = document.getElementById('confirm-modal');
-  if (!modal) { if (callback) callback(); return; }
-  document.getElementById('confirm-text').textContent = msg || (lang==='en'?'Are you sure?':'Naozaj chcete pokračovať?');
-  document.getElementById('confirm-icon').textContent = icon || '⚠️';
-  document.getElementById('confirm-ok-btn').textContent = okLabel || (lang==='en'?'Yes, delete':'Áno, vymazať');
-  document.getElementById('confirm-ok-btn').style.background = okLabel === '💾 Uložiť' || okLabel === '✅ OK' ? 'var(--primary)' : 'var(--danger)';
-  document.getElementById('confirm-cancel-btn').textContent = lang==='en'?'Cancel':'Zrušiť';
-  _confirmCallback = callback;
-  modal.style.display = 'flex';
-  setTimeout(function() { modal.classList.add('active'); }, 10);
-}
-function closeConfirmModal() {
-  var modal = document.getElementById('confirm-modal');
-  if (!modal) return;
-  modal.classList.remove('active');
-  setTimeout(function() { modal.style.display = 'none'; _confirmCallback = null; }, 200);
-}
-function executeConfirm() {
-  var cb = _confirmCallback;
-  closeConfirmModal();
-  if (cb) setTimeout(cb, 250);
-}
-
 function closeTopModal() {
   // Close any open modal/sheet/overlay
   const selectors = [
@@ -5998,7 +5408,6 @@ function closeTopModal() {
     '#shop-sheet.active',                    // Shop sheet
     '#task-sheet.active',                    // Task sheet
     '#settings-sheet.active',               // Settings
-    '#board-form-modal',                     // Board form
     '#login-overlay'                         // Login (check inline style)
   ];
   for (const sel of selectors) {
@@ -6013,7 +5422,6 @@ function closeTopModal() {
         else if (el.id === 'task-sheet') closeTaskSheet();
         else if (el.id === 'login-overlay') { el.style.display = 'none'; }
         else if (el.id === 'ai-modal' || el.id === 'ai-plan-modal') el.remove();
-        else if (el.id === 'board-form-modal') el.remove();
         else el.classList.remove('active');
         return true; // Closed something
       }
@@ -6048,58 +5456,6 @@ window.addEventListener('popstate', function(e) {
     }
   }
 });
-
-// ======================== EDGE SWIPE BACK GESTURE ========================
-(function() {
-  let _edgeSwipeData = null;
-  document.addEventListener('touchstart', function(e) {
-    // Only edge swipe from left edge (< 40px from left)
-    if (e.touches[0].clientX > 40) { _edgeSwipeData = null; return; }
-    // Don't swipe on inputs or when a sheet is open
-    if (e.target.closest('input, textarea, .sheet-overlay, #settings-sheet, .cooking-overlay')) { _edgeSwipeData = null; return; }
-    _edgeSwipeData = { startX: e.touches[0].clientX, startY: e.touches[0].clientY };
-    // Cancel tab swipe when edge swipe is active
-    if (typeof _swipeTabData !== 'undefined') _swipeTabData = null;
-  }, { passive: true });
-
-  document.addEventListener('touchmove', function(e) {
-    if (!_edgeSwipeData) return;
-    const dx = e.touches[0].clientX - _edgeSwipeData.startX;
-    const dy = Math.abs(e.touches[0].clientY - _edgeSwipeData.startY);
-    // Horizontal swipe only, minimum ~20px to show indicator
-    if (dx < 20 || dy > dx * 0.5) { _edgeSwipeData = null; return; }
-    // Cancel tab swipe while edge swipe is active
-    if (typeof _swipeTabData !== 'undefined') _swipeTabData = null;
-    // Visual hint: show a subtle edge glow when swiping
-    if (!document.getElementById('edge-swipe-indicator')) {
-      const ind = document.createElement('div');
-      ind.id = 'edge-swipe-indicator';
-      ind.style.cssText = 'position:fixed;left:0;top:0;bottom:0;width:4px;background:var(--primary);z-index:99998;opacity:0;transition:opacity .15s;border-radius:0 4px 4px 0;';
-      document.body.appendChild(ind);
-    }
-    const opacity = Math.min(1, (dx - 20) / 120);
-    document.getElementById('edge-swipe-indicator').style.opacity = opacity;
-    e.preventDefault();
-  }, { passive: false });
-
-  document.addEventListener('touchend', function(e) {
-    if (!_edgeSwipeData) return;
-    const dx = e.changedTouches[0].clientX - _edgeSwipeData.startX;
-    const dy = Math.abs(e.changedTouches[0].clientY - _edgeSwipeData.startY);
-    const indicator = document.getElementById('edge-swipe-indicator');
-    if (indicator) { indicator.style.opacity = '0'; setTimeout(function() { if (indicator.parentNode) indicator.remove(); }, 300); }
-    if (dx < 80 || dy > dx * 0.6) { _edgeSwipeData = null; return; }
-    _edgeSwipeData = null;
-    // Cancel any tab swipe
-    if (typeof _swipeTabData !== 'undefined') _swipeTabData = null;
-    // Edge swipe detected — go back
-    if (closeTopModal()) {
-      // Modal was closed, don't also navigate
-    } else {
-      history.back();
-    }
-  }, { passive: true });
-})();
 
 // Ensure we always have at least 2 history entries on page load
 if (history.length <= 1) {
@@ -6206,29 +5562,6 @@ function requestNotifPermission() {
   if (Notification.permission === 'default') {
     Notification.requestPermission();
   }
-}
-
-
-
-function pushNotifSetup() {
-  if (!('Notification' in window)) { showToast(t('Notifikácie nie sú podporované','Notifications not supported'),'error'); return; }
-  if (Notification.permission === 'granted') {
-    registerPushSubscription().then(function(sub) {
-      if (sub) showToast(t('✅ Notifikácie už sú povolené','✅ Notifications already enabled'),'success');
-    });
-    return;
-  }
-  Notification.requestPermission().then(function(perm) {
-    if (perm === 'granted') {
-      registerPushSubscription().then(function(sub) {
-        if (sub) showToast(t('✅ Notifikácie povolené','✅ Notifications enabled'),'success');
-      });
-    } else {
-      showToast(t('❌ Notifikácie zamietnuté','❌ Notifications denied'),'error');
-    }
-  }).catch(function(e) {
-    showToast(t('❌ Chyba: ','❌ Error: ')+e.message,'error');
-  });
 }
 
 function initNotifications() {
@@ -6392,21 +5725,9 @@ renderDashboard = function() {
 
 
 
-// ======================== CLOSE MODAL ON OUTSIDE CLICK ========================
-document.addEventListener('click', function(e) {
-  var modal = e.target.closest('.modal-overlay.active, #confirm-modal');
-  if (modal && e.target === modal) {
-    // Clicked on overlay background, close it
-    var closeBtn = modal.querySelector('.modal-close, .sheet-close');
-    if (closeBtn) closeBtn.click();
-    else { modal.classList.remove('active'); setTimeout(function() { modal.style.display = 'none'; }, 200); }
-  }
-});
-
 // ======================== TOAST NOTIFICATIONS ========================
-function showToast(msg, type, duration) {
+function showToast(msg, type) {
   type = type || 'info';
-  duration = duration || 3000;
   const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
   let container = document.getElementById('toast-container');
   if (!container) {
@@ -6416,229 +5737,12 @@ function showToast(msg, type, duration) {
     document.body.appendChild(container);
   }
   const toast = document.createElement('div');
-  toast.className = 'toast toast-' + type + ' toast-stacked';
+  toast.className = 'toast toast-' + type;
   toast.innerHTML = '<span class="toast-icon">' + (icons[type] || 'ℹ️') + '</span><span class="toast-text">' + msg + '</span>';
-  // Stack positioning - shift existing toasts up
-  var existing = container.querySelectorAll('.toast');
-  existing.forEach(function(t) {
-    t.style.transform = 'translateY(-' + (existing.length * 6) + 'px)';
-    t.style.opacity = Math.max(0.3, 1 - existing.length * 0.12);
-  });
   container.appendChild(toast);
-  setTimeout(function() {
+  setTimeout(() => {
     toast.style.animation = 'toastOut .3s ease forwards';
-    setTimeout(function() {
-      toast.remove();
-      // Restore remaining toasts
-      container.querySelectorAll('.toast').forEach(function(t, i) {
-        t.style.transform = '';
-        t.style.opacity = '';
-      });
-    }, 300);
-  }, duration);
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
 }
-
-// =================== INDEXEDDB WRAPPER ===================
-var DB_VERSION = 1;
-var DB_NAME = 'MealnestDB';
-var dbInstance = null;
-
-function openDB() {
-  return new Promise(function(resolve, reject) {
-    if (dbInstance) { resolve(dbInstance); return; }
-    try {
-      var req = indexedDB.open(DB_NAME, DB_VERSION);
-      req.onupgradeneeded = function(e) {
-        var db = e.target.result;
-        if (!db.objectStoreNames.contains('data')) {
-          db.createObjectStore('data', { keyPath: 'key' });
-        }
-      };
-      req.onsuccess = function(e) {
-        dbInstance = e.target.result;
-        resolve(dbInstance);
-      };
-      req.onerror = function(e) { reject(e.target.error); };
-    } catch(e) { reject(e); }
-  });
-}
-
-function dbGet(key) {
-  return openDB().then(function(db) {
-    return new Promise(function(resolve, reject) {
-      var tx = db.transaction('data', 'readonly');
-      var store = tx.objectStore('data');
-      var req = store.get(key);
-      req.onsuccess = function(e) { resolve(e.target.result ? e.target.result.value : null); };
-      req.onerror = function(e) { reject(e.target.error); };
-    });
-  }).catch(function() { return null; });
-}
-
-function dbSet(key, value) {
-  return openDB().then(function(db) {
-    return new Promise(function(resolve, reject) {
-      var tx = db.transaction('data', 'readwrite');
-      var store = tx.objectStore('data');
-      store.put({ key: key, value: value });
-      tx.oncomplete = function() { resolve(true); };
-      tx.onerror = function(e) { reject(e.target.error); };
-    });
-  }).catch(function() { return false; });
-}
-
-function checkStorageLimit() {
-  try {
-    var total = 0;
-    for (var i = 0; i < localStorage.length; i++) {
-      var key = localStorage.key(i);
-      var val = localStorage.getItem(key);
-      if (val) total += val.length * 2;
-    }
-    // Warn at ~4MB (80% of 5MB limit)
-    if (total > 4000000) {
-      var existing = document.querySelector('.storage-warning');
-      if (!existing) {
-        var warn = document.createElement('div');
-        warn.className = 'storage-warning';
-        warn.innerHTML = '💾 ' + (lang==='en'?'Local storage nearly full! Clean up old data.':'Úložisko je takmer plné! Vymaž staré dáta.');
-        document.body.appendChild(warn);
-        setTimeout(function() { warn.remove(); }, 8000);
-      }
-    }
-  } catch(e) {}
-}
-
-function dbDelete(key) {
-  return openDB().then(function(db) {
-    return new Promise(function(resolve, reject) {
-      var tx = db.transaction('data', 'readwrite');
-      var store = tx.objectStore('data');
-      store.delete(key);
-      tx.oncomplete = function() { resolve(true); };
-      tx.onerror = function(e) { reject(e.target.error); };
-    });
-  }).catch(function() { return false; });
-}
-
-// Migrate localStorage -> IndexedDB on first run
-function migrateToIndexedDB() {
-  if (localStorage.getItem('_idbMigrated') === '1') return;
-  var keys = ['recipes','mealPlan','mealPlanKids','shoppingItems','tasks','cookingHistory','planType'];
-  keys.forEach(function(key) {
-    try {
-      var val = localStorage.getItem(storeNs + key) || localStorage.getItem(key);
-      if (val) { var parsed = JSON.parse(val); if (parsed) dbSet(key, parsed); }
-    } catch(e) {}
-  });
-  localStorage.setItem('_idbMigrated', '1');
-}
-setTimeout(migrateToIndexedDB, 2000);
-setTimeout(checkStorageLimit, 3000);
-
-// =================== GLOBAL ERROR HANDLER ===================
-window.onerror = function(msg, url, line, col, err) {
-  var el = document.getElementById('boot-status');
-  if (el) {
-    el.style.display = 'block';
-    el.style.background = 'rgba(220,38,38,.9)';
-    el.textContent = '⚠️ Chyba: ' + (msg || '').slice(0,80);
-    setTimeout(function() { el.style.display = 'none'; }, 5000);
-  }
-  console.error('GLOBAL:', msg, url, line);
-};
-window.addEventListener('unhandledrejection', function(e) {
-  console.warn('Unhandled promise rejection:', e.reason);
-  e.preventDefault();
-});
-
-// =================== PREVENT CONTEXT MENU ===================
-document.addEventListener('contextmenu', function(e) {
-  // Allow context menu on input/textarea
-  if (e.target.closest && !e.target.closest('input, textarea, [contenteditable]')) {
-    e.preventDefault();
-    haptic(6);
-  }
-});
-document.addEventListener('selectstart', function(e) {
-  if (e.target.closest && !e.target.closest('input, textarea, [contenteditable]')) {
-    e.preventDefault();
-  }
-});
-
-// =================== HAPTIC FEEDBACK ===================
-function haptic(ms) {
-  try {
-    if (navigator.vibrate) navigator.vibrate(ms || 8);
-  } catch(_) {}
-}
-
-// =================== CONFETTI ===================
-function triggerConfetti() {
-  try {
-    var colors = ['#10b981','#34d399','#06b6d4','#f59e0b','#a78bfa','#f472b6','#ef4444'];
-    for (var i = 0; i < 30; i++) {
-      var c = document.createElement('div');
-      c.style.cssText = 'position:fixed;width:6px;height:6px;border-radius:2px;z-index:99999;pointer-events:none;' +
-        'background:' + colors[Math.floor(Math.random() * colors.length)] + ';' +
-        'left:' + (Math.random() * 100) + 'vw;' +
-        'top:-10px;' +
-        'opacity:' + (.6 + Math.random() * .4) + ';' +
-        'transform:rotate(' + (Math.random() * 360) + 'deg);';
-      document.body.appendChild(c);
-      var x = parseFloat(c.style.left);
-      var drift = (Math.random() - .5) * 100;
-      var fall = 300 + Math.random() * 400;
-      var rot = 360 + Math.random() * 720;
-      c.animate([
-        { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
-        { transform: 'translateY(' + fall + 'px) translateX(' + drift + 'px) rotate(' + rot + 'deg)', opacity: 0 }
-      ], { duration: 1200 + Math.random() * 800, easing: 'cubic-bezier(.25,.46,.45,.94)', fill: 'forwards' });
-      setTimeout(function() { c.remove(); }, 2500);
-    }
-  } catch(_) {}
-}
-
-// =================== BUTTON TOUCH RIPPLE ===================
-
-function __confirmDemo() {
-  showConfirmModal(
-    (lang==='en'?'Reset to demo recipes? All existing recipes will be lost.':'Naozaj obnoviť demo recepty? Všetky existujúce sa stratia.'),
-    '⚠️', lang==='en'?'Reset':'Obnoviť',
-    function() { resetRecipes(); closeSettings(); }
-  );
-}
-function __confirmDeleteAll() {
-  showConfirmModal(
-    (lang==='en'?'Delete all data? This cannot be undone.':'Naozaj vymazať všetky dáta? Táto akcia je nenávratná.'),
-    '☢️', lang==='en'?'Delete all':'Vymazať všetko',
-    function() { deleteAllData(); }
-  );
-}
-
-function addRipple(e, el) {
-  try {
-    var btn = el || e.currentTarget;
-    if (!btn || typeof btn.getBoundingClientRect !== 'function') return;
-    var rect = btn.getBoundingClientRect();
-    var ripple = document.createElement('span');
-    ripple.className = 'btn-ripple';
-    var size = Math.max(rect.width, rect.height) * 1.5;
-    var cx = (e.clientX || rect.left + rect.width/2) - rect.left;
-    var cy = (e.clientY || rect.top + rect.height/2) - rect.top;
-    ripple.style.width = ripple.style.height = size + 'px';
-    ripple.style.left = (cx - size/2) + 'px';
-    ripple.style.top = (cy - size/2) + 'px';
-    btn.appendChild(ripple);
-    setTimeout(function() { ripple.remove(); }, 500);
-  } catch(_) { /* silent */ }
-}
-document.addEventListener('click', function(e) {
-  try {
-    var target = e.target;
-    if (!target || !target.closest) return;
-    var btn = target.closest('.btn, .nav-item, .age-btn, .pln-btn, .plan-type-btn, .pa-btn, .shop-add-btn, .fab-trigger, .hero-btn');
-    if (btn && !btn.closest('.bottom-nav')) addRipple(e, btn);
-  } catch(_) {}
-}, { passive: true });
 
