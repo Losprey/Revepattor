@@ -2416,7 +2416,7 @@ function loadSettings() {
   const D = {
     theme: 'dark',
     lang: localStorage.getItem('lang') || 'en',
-    accentColor: localStorage.getItem('accent') || '#dc2626',
+    accentColor: localStorage.getItem('accent') || '#e63946',
     textSize: 'normal', uiDensity: 'normal',
     homeWidgets: { weather: true, todayTasks: true, hydration: true, calories: true, quickRecipes: true, seasonal: true },
     mealPlanner: { defaultServings: 4, showNutrition: true },
@@ -2500,14 +2500,13 @@ function openSettings() {
 
   // 1. Vzhľad
   const accentColors = [
-    { val: '#10b981', label: 'Zelená' },
-    { val: '#06b6d4', label: 'Tyrkysová' },
-    { val: '#3b82f6', label: 'Modrá' },
     { val: '#e63946', label: 'Červená' },
+    { val: '#10b981', label: 'Zelená' },
+    { val: '#3b82f6', label: 'Modrá' },
     { val: '#f59e0b', label: 'Oranžová' },
     { val: '#8b5cf6', label: 'Fialová' },
     { val: '#ec4899', label: 'Ružová' },
-    { val: '#ffffff', label: 'Biela' },
+    { val: '#06b6d4', label: 'Tyrkysová' },
   ];
   html += `<div class="settings-group">
     <div class="settings-group-title">🎨 ${t('Vzhľad','Appearance')}</div>
