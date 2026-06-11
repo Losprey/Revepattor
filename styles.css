@@ -1,13 +1,13 @@
 :root {
-  --bg: #080b09;
-  --bg-gradient: radial-gradient(ellipse at 50% 0%, rgba(16,185,129,.04) 0%, transparent 60%), radial-gradient(ellipse at 80% 80%, rgba(6,182,212,.03) 0%, transparent 50%), #080b09;
-  --surface: rgba(18,24,18,.7);
-  --surface-solid: rgba(18,24,18,.95);
+  --bg: #0f1310;
+  --bg-gradient: radial-gradient(ellipse at 50% 0%, rgba(16,185,129,.05) 0%, transparent 60%), radial-gradient(ellipse at 80% 80%, rgba(6,182,212,.04) 0%, transparent 50%), #0f1310;
+  --surface: rgba(30,45,35,.6);
+  --surface-solid: rgba(26,38,30,.92);
   --text: #e6ede6;
   --text2: #9ea89e;
   --text3: #6e7a6e;
-  --border: rgba(255,255,255,.06);
-  --input-bg: rgba(18,24,18,.65);
+  --border: rgba(255,255,255,.08);
+  --input-bg: rgba(30,45,35,.5);
   --tag-bg: rgba(16,185,129,.12);
   --tag-text: #d1fae5;
   --primary: #10b981;

@@ -1668,7 +1668,9 @@ function applyLang() {
 }
 
 function toggleDark() {
-  appSettings.theme = document.body.classList.contains('dark') ? 'light' : 'dark';
+  var modes = ['auto', 'dark', 'light'];
+  var idx = modes.indexOf(appSettings.theme);
+  appSettings.theme = modes[(idx + 1) % 3];
   haptic(6);
   saveSettings();
 }
@@ -2418,7 +2420,7 @@ let appSettings = {};
 function loadSettings() {
   try { appSettings = JSON.parse(localStorage.getItem('appSettings') || '{}'); } catch(e) { appSettings = {}; }
   const D = {
-    theme: 'light',
+    theme: 'auto',
     lang: localStorage.getItem('lang') || 'en',
     accentColor: localStorage.getItem('accent') || '#dc2626',
     textSize: 'normal', uiDensity: 'normal',
@@ -2449,11 +2451,12 @@ function applySettings() {
   try {
     // Auto dark mode: respect system preference
     var sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var dt = document.getElementById('dark-toggle');
     if (appSettings.theme === 'auto') {
-      if (sysDark) { document.body.classList.add('dark'); document.getElementById('dark-toggle').textContent = '☀️'; }
-      else { document.body.classList.remove('dark'); document.getElementById('dark-toggle').textContent = '🌙'; }
-    } else if (appSettings.theme === 'dark') { document.body.classList.add('dark'); document.getElementById('dark-toggle').textContent = '☀️'; }
-    else { document.body.classList.remove('dark'); document.getElementById('dark-toggle').textContent = '🌙'; }
+      if (sysDark) { document.body.classList.add('dark'); if(dt) dt.innerHTML = '☀️ <span style="font-size:.55rem;opacity:.7">AUTO</span>'; }
+      else { document.body.classList.remove('dark'); if(dt) dt.innerHTML = '🌙 <span style="font-size:.55rem;opacity:.7">AUTO</span>'; }
+    } else if (appSettings.theme === 'dark') { document.body.classList.add('dark'); if(dt) dt.textContent = '☀️'; }
+    else { document.body.classList.remove('dark'); if(dt) dt.textContent = '🌙'; }
     updateSeason();
   } catch(e) {}
   let langChanged = false;
