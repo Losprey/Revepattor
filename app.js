@@ -556,6 +556,80 @@ setTimeout(() => showOnboarding(), 300);
 
 // ======================== AI (DEEPSEEK PROXY) ========================
 const APP_VERSION = '1.0.5';
+const VAPID_PUBLIC_KEY = 'BI6Fga-GXSKggkNJ58R1VEYEfGE6KfWgnuDtI9sHqQLQJzGLshJuIuODmI13AVzX5D2Kd7SBxrr7Cvf-xRAowg0';
+const PUSH_PROXY_URL = 'https://receptar.waldis994.workers.dev';
+
+// ======================== PUSH NOTIFICATIONS ========================
+let _pushSubscription = null;
+
+async function registerPushSubscription() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+  if (Notification.permission !== 'granted') return;
+  try {
+    var reg = await navigator.serviceWorker.ready;
+    var sub = await reg.pushManager.getSubscription();
+    if (sub) {
+      _pushSubscription = sub;
+      savePushSubscription(sub);
+      return sub;
+    }
+    sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+    });
+    _pushSubscription = sub;
+    savePushSubscription(sub);
+    return sub;
+  } catch(e) {
+    console.error('Push subscription failed:', e);
+    return null;
+  }
+}
+
+function savePushSubscription(sub) {
+  if (!sub) return;
+  try {
+    var data = JSON.parse(JSON.stringify(sub));
+    var deviceId = getDeviceId();
+    var key = 'push_subs_' + deviceId;
+    localStorage.setItem(key, JSON.stringify(data));
+    // Save to Firebase if family connected
+    if (typeof familyDbRef !== 'undefined' && familyDbRef) {
+      familyDbRef.child('pushSubscriptions/' + deviceId).set(data);
+    }
+  } catch(e) { /* silent */ }
+}
+
+async function sendPushToFamily(title, body, tab) {
+  try {
+    if (typeof familyDbRef === 'undefined' || !familyDbRef) return;
+    // Get all subscriptions from Firebase
+    var snap = await familyDbRef.child('pushSubscriptions').once('value');
+    var subs = snap.val();
+    if (!subs) return;
+    var list = Object.values(subs);
+    if (!list.length) return;
+    // Send to Cloudflare Worker
+    await fetch(PUSH_PROXY_URL + '/api/notify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        subscriptions: list,
+        payload: JSON.stringify({ title: title, body: body, tab: tab || 'dashboard' })
+      })
+    }).catch(function(e) { console.error('Push send failed:', e); });
+  } catch(e) { console.error('Push send error:', e); }
+}
+
+function urlBase64ToUint8Array(base64String) {
+  var padding = '='.repeat((4 - base64String.length % 4) % 4);
+  var base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+  var raw = atob(base64);
+  var output = new Uint8Array(raw.length);
+  for (var i = 0; i < raw.length; ++i) output[i] = raw.charCodeAt(i);
+  return output;
+}
+
 const AI_PROXY_URL = 'https://receptar.waldis994.workers.dev'; // Cloudflare Worker proxy pre DeepSeek
 
 async function aiGenerate(messages) {
@@ -2549,6 +2623,10 @@ function openSettings() {
           </div>
         </div>`
       ).join('')}
+      <div class="settings-row" onclick="pushNotifSetup()" style="cursor:pointer;">
+        <span class="sr-label"><span class="sr-icon">🔔</span> ${t('Povoliť notifikácie na pozadí','Enable background notifications')}</span>
+        <span class="sr-value"><span class="sr-arrow">›</span></span>
+      </div>
     </div>
   </div>`;
 
@@ -5611,6 +5689,12 @@ function saveTask() {
     tasks.push({ id: generateTaskId(), title, category, completed: false, date: date || new Date().toISOString().slice(0,10), time, priority, repeat, note, source: 'manual', completedDate: '' });
   }
   saveTasks();
+  // Notify family
+  if (typeof sendPushToFamily === 'function' && typeof taskTitle !== 'undefined' && taskTitle) {
+    var pushAuthor = authUser ? (authUser.displayName || authUser.email || '👤') : t('Hosť','Guest');
+    var pushText = taskTitle.length > 80 ? taskTitle.slice(0, 80) + '...' : taskTitle;
+    sendPushToFamily('✅ ' + t('Nová úloha','New task'), pushAuthor + ': ' + pushText, 'tasks');
+  }
   closeTaskSheet();
   renderTasks();
   renderTaskWidget();
@@ -6122,6 +6206,29 @@ function requestNotifPermission() {
   if (Notification.permission === 'default') {
     Notification.requestPermission();
   }
+}
+
+
+
+function pushNotifSetup() {
+  if (!('Notification' in window)) { showToast(t('Notifikácie nie sú podporované','Notifications not supported'),'error'); return; }
+  if (Notification.permission === 'granted') {
+    registerPushSubscription().then(function(sub) {
+      if (sub) showToast(t('✅ Notifikácie už sú povolené','✅ Notifications already enabled'),'success');
+    });
+    return;
+  }
+  Notification.requestPermission().then(function(perm) {
+    if (perm === 'granted') {
+      registerPushSubscription().then(function(sub) {
+        if (sub) showToast(t('✅ Notifikácie povolené','✅ Notifications enabled'),'success');
+      });
+    } else {
+      showToast(t('❌ Notifikácie zamietnuté','❌ Notifications denied'),'error');
+    }
+  }).catch(function(e) {
+    showToast(t('❌ Chyba: ','❌ Error: ')+e.message,'error');
+  });
 }
 
 function initNotifications() {

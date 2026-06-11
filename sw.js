@@ -1,3 +1,51 @@
+// ======================== PUSH NOTIFICATIONS ========================
+self.addEventListener('push', function(e) {
+  if (!e.data) return;
+  var data;
+  try { data = JSON.parse(e.data.text()); } catch(ex) { data = { title: 'Mealnest', body: e.data.text() }; }
+  var opts = {
+    title: data.title || 'Mealnest',
+    body: data.body || '',
+    icon: '/icon-192.png',
+    badge: '/icon-48.png',
+    vibrate: [200, 100, 200],
+    data: { url: data.url || '/', tab: data.tab || 'dashboard' },
+    tag: data.tag || 'mealnest-default',
+    renotify: true,
+    requireInteraction: true
+  };
+  e.waitUntil(self.registration.showNotification(opts.title, opts));
+});
+
+self.addEventListener('notificationclick', function(e) {
+  e.notification.close();
+  var target = e.notification.data && e.notification.data.url ? e.notification.data.url : '/';
+  var tab = e.notification.data && e.notification.data.tab ? e.notification.data.tab : 'dashboard';
+  e.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
+      for (var i = 0; i < clientList.length; i++) {
+        var client = clientList[i];
+        if (client.url.indexOf(self.location.origin) === 0 && 'focus' in client) {
+          client.postMessage({ action: 'switchTab', tab: tab });
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) return clients.openWindow(target + '#' + tab);
+    })
+  );
+});
+
+// Handle message from client to switch tab
+self.addEventListener('message', function(e) {
+  if (e.data && e.data.action === 'switchTab' && e.data.tab) {
+    clients.matchAll({ type: 'window' }).then(function(clients) {
+      clients.forEach(function(client) {
+        client.postMessage({ action: 'switchTab', tab: e.data.tab });
+      });
+    });
+  }
+});
+
 var CACHE = 'mealnest-v11';
 var PRECACHE = [
   'recipes-default.json',

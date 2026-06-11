@@ -133,6 +133,12 @@
     }
     saveBoardCards();
     syncBoardToFirebase();
+    // Notify family
+    if (typeof sendPushToFamily === 'function') {
+      var pushText = text.length > 80 ? text.slice(0, 80) + '...' : text;
+      var pushAuthor = authUser ? (authUser.displayName || authUser.email || '👤') : t('Hosť','Guest');
+      sendPushToFamily('📌 ' + t('Nová karta','New card'), pushAuthor + ': ' + pushText, 'board');
+    }
     var modal = document.getElementById('board-form-modal');
     if (modal) modal.remove();
     renderBoard();
