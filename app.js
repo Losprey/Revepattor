@@ -555,7 +555,7 @@ function pickOnboardLang(l) {
 setTimeout(() => showOnboarding(), 300);
 
 // ======================== AI (DEEPSEEK PROXY) ========================
-const APP_VERSION = '1.0.5';
+const APP_VERSION = '1.0.6';
 const VAPID_PUBLIC_KEY = 'BI6Fga-GXSKggkNJ58R1VEYEfGE6KfWgnuDtI9sHqQLQJzGLshJuIuODmI13AVzX5D2Kd7SBxrr7Cvf-xRAowg0';
 const PUSH_PROXY_URL = 'https://receptar.waldis994.workers.dev';
 
@@ -2509,6 +2509,13 @@ function openSettings() {
   window.n = s.notifications; window.f = s.family;
 
   let html = '';
+  html += `<div class="settings-quick-nav">
+    <a href="#settings-appearance">🎨 ${t('Vzhľad','Appearance')}</a>
+    <a href="#settings-home">🏠 ${t('Domov','Home')}</a>
+    <a href="#settings-meals">📅 ${t('Jedálniček','Meals')}</a>
+    <a href="#settings-shopping">🛒 ${t('Nákup','Shopping')}</a>
+    <a href="#settings-data">💾 ${t('Dáta','Data')}</a>
+  </div>`;
 
   // Účet — always at top
   const authHtml = getSettingsAuthHTML();
@@ -2529,7 +2536,7 @@ function openSettings() {
     { val: '#ec4899', label: 'Ružová' },
     { val: '#06b6d4', label: 'Tyrkysová' },
   ];
-  html += `<div class="settings-group">
+  html += `<div class="settings-group" id="settings-appearance">
     <div class="settings-group-title">🎨 ${t('Vzhľad','Appearance')}</div>
     <div class="settings-card">
       <div class="settings-row" onclick="cycleLang()">
@@ -2566,7 +2573,7 @@ function openSettings() {
     ['quickRecipes','🍽️',t('Rýchle recepty','Quick recipes')],
     ['seasonal','🌿',t('Sezónny kalendár','Seasonal calendar')],
   ];
-  html += `<div class="settings-group">
+  html += `<div class="settings-group" id="settings-home">
     <div class="settings-group-title">🏠 ${t('Domov','Home')}</div>
     <div class="settings-card">
       <div style="font-size:.65rem;font-weight:600;color:var(--text3);margin-bottom:.2rem;text-transform:uppercase;letter-spacing:.05em;">${t('Widgety','Widgets')}</div>
@@ -2645,7 +2652,7 @@ function openSettings() {
   </div>`;
 
   // 3. Jedálniček
-  html += `<div class="settings-group">
+  html += `<div class="settings-group" id="settings-meals">
     <div class="settings-group-title">📅 ${t('Jedálniček','Meal planner')}</div>
     <div class="settings-card">
       <div class="settings-row" onclick="promptNumber('mealPlanner.defaultServings',1,8)">
@@ -2660,7 +2667,7 @@ function openSettings() {
   </div>`;
 
   // 4. Nákup
-  html += `<div class="settings-group">
+  html += `<div class="settings-group" id="settings-shopping">
     <div class="settings-group-title">🛒 ${t('Nákup','Shopping')}</div>
     <div class="settings-card">
       <div class="settings-row">
@@ -2684,7 +2691,7 @@ function openSettings() {
 
   // 5. Účet
   // 6. Dáta
-  html += `<div class="settings-group">
+  html += `<div class="settings-group" id="settings-data">
     <div class="settings-group-title">💾 ${t('Dáta','Data')}</div>
     <div class="settings-card">
       <div class="settings-row" onclick="refreshRecipeImages();closeSettings()">
@@ -4133,12 +4140,15 @@ function renderDashboard() {
   // Dashboard sections
   let html = '';
   const w = appSettings.homeWidgets;
+  try { loadShopItems(); } catch(e) {}
 
     // Greeting + stats hero
   const todayMeals = getTodayMealCount();
   const todayTasksArr = getTodayTasks();
-  const todayDone = todayTasksArr.filter(t => t.done).length;
+  const todayDone = tasks.filter(t => t.date === new Date().toISOString().slice(0,10) && t.completed).length;
   const streak = calcPlanningStreak();
+
+  html += renderTodayFocusPanel({ todayMeals, todayTasks: todayTasksArr.length, todayDone, totalKcal, streak });
 
     // Weather widget
   if (w.weather) {
@@ -4229,6 +4239,35 @@ function getTodayKcal() {
     if (r && r.nutrition) total += r.nutrition.kcal || 0;
   });
   return total;
+}
+
+function renderTodayFocusPanel(stats) {
+  const remainingMeals = Math.max(0, MEALS.length - stats.todayMeals);
+  const uncheckedShop = (Array.isArray(shopItems) ? shopItems : []).filter(i => i && !i.checked).length;
+  const taskLabel = stats.todayTasks
+    ? (lang === 'en' ? stats.todayTasks + ' tasks left' : stats.todayTasks + ' úloh zostáva')
+    : (lang === 'en' ? 'No tasks today' : 'Dnes bez úloh');
+  const mealLabel = remainingMeals
+    ? (lang === 'en' ? remainingMeals + ' meals open' : remainingMeals + ' jedál chýba')
+    : (lang === 'en' ? 'Meals planned' : 'Jedlá naplánované');
+  const shopLabel = uncheckedShop
+    ? (lang === 'en' ? uncheckedShop + ' shopping items' : uncheckedShop + ' položiek v nákupe')
+    : (lang === 'en' ? 'Shopping clear' : 'Nákup čistý');
+  return `<div class="today-focus-card dash-card">
+    <div class="today-focus-head">
+      <div>
+        <div class="today-focus-kicker">${lang === 'en' ? 'Today' : 'Dnes'}</div>
+        <div class="today-focus-title">${lang === 'en' ? 'Your day at a glance' : 'Prehľad dňa'}</div>
+      </div>
+      <button class="today-focus-action" onclick="switchTab('planner')">${lang === 'en' ? 'Plan' : 'Plánovať'} ›</button>
+    </div>
+    <div class="today-focus-grid">
+      <button class="today-focus-item" onclick="switchTab('planner')"><span>🍽️</span><strong>${stats.todayMeals}/${MEALS.length}</strong><small>${mealLabel}</small></button>
+      <button class="today-focus-item" onclick="switchTab('tasks')"><span>✅</span><strong>${stats.todayDone}/${stats.todayDone + stats.todayTasks}</strong><small>${taskLabel}</small></button>
+      <button class="today-focus-item" onclick="switchTab('shopping')"><span>🛒</span><strong>${uncheckedShop}</strong><small>${shopLabel}</small></button>
+      <button class="today-focus-item" onclick="aiGenerateFullWeek()"><span>✨</span><strong>${stats.streak}</strong><small>${lang === 'en' ? 'day streak' : 'dní v rade'}</small></button>
+    </div>
+  </div>`;
 }
 
 function renderMealTimeline() {
@@ -4852,19 +4891,26 @@ function saveShopItems() {
 function autoMergeShopItems() {
   const merged = {};
   let changed = 0;
+  const unitMap = { gram: 'g', grams: 'g', gramy: 'g', kilogram: 'kg', kilograms: 'kg', kilo: 'kg', liter: 'l', litre: 'l', literov: 'l', kus: 'ks', piece: 'ks', pieces: 'ks' };
+  const cleanUnit = u => unitMap[norm(String(u || '').trim().toLowerCase())] || norm(String(u || '').trim().toLowerCase());
   shopItems.forEach(it => {
     const key = norm(it.name.trim().toLowerCase());
+    it.unit = cleanUnit(it.unit);
+    if (!it.category || it.category === 'other') it.category = guessFoodCategory(it.name || '');
     if (merged[key]) {
       const existing = merged[key];
       const a1 = parseFloat(existing.amount) || 0;
       const a2 = parseFloat(it.amount) || 0;
+      existing.unit = cleanUnit(existing.unit);
       if (a1 && a2 && existing.unit === it.unit) {
         existing.amount = String(a1 + a2);
         changed++;
       } else {
-        existing.note = (existing.note ? existing.note + '; ' : '') + it.amount + (it.unit||'');
+        const extra = [it.amount, it.unit].filter(Boolean).join(' ');
+        existing.note = [existing.note, extra, it.note].filter(Boolean).join('; ');
         changed++;
       }
+      existing.checked = existing.checked && it.checked;
     } else {
       merged[key] = it;
     }
@@ -4899,7 +4945,7 @@ function renderShoppingList() {
   shopItems = shopItems.filter(function(it) { return it && it.source === 'manual'; });
 
     if (!shopItems.length) {
-    container.innerHTML = '<div class="empty-state-v2"><div class="empty-svg">🛒</div><div class="empty-title">' + (lang==='en'?'Shopping list is empty':'Nákupný zoznam je prázdny') + '</div><div class="empty-desc">' + (lang==='en'?'Tap the button below to add your first item.':'Klikni na tlačidlo a pridaj prvú položku.') + '</div><button class="btn btn-primary" onclick="openAddItemSheet()">➕ ' + (lang==='en'?'Add first item':'Pridať prvú položku') + '</button></div>';
+    container.innerHTML = '<div class="empty-state-v2 action-empty"><div class="empty-svg">🛒</div><div class="empty-title">' + (lang==='en'?'Shopping list is empty':'Nákupný zoznam je prázdny') + '</div><div class="empty-desc">' + (lang==='en'?'Add a manual item or generate a list from the weekly meal plan.':'Pridaj položku ručne alebo vytvor nákup z týždenného jedálnička.') + '</div><div class="empty-actions"><button class="btn btn-primary" onclick="openAddItemSheet()">➕ ' + (lang==='en'?'Add item':'Pridať položku') + '</button><button class="btn btn-secondary" onclick="switchTab(&quot;planner&quot;)">📅 ' + (lang==='en'?'Plan meals':'Naplánovať jedlá') + '</button></div></div>';
     return;
   }
 
@@ -4926,6 +4972,7 @@ function renderShoppingList() {
   const remaining = totalItems - checkedItems;
   const pctAll = totalItems ? Math.round(checkedItems / totalItems * 100) : 0;
   const catCount = Object.keys(groups).length;
+  const biggestCat = Object.keys(groups).sort((a,b) => groups[b].length - groups[a].length)[0];
 
   // Build HTML
   let html = '';
@@ -4938,7 +4985,7 @@ function renderShoppingList() {
         <span>✅ <strong>${checkedItems}</strong> ${lang==='en'?'bought':'kúpených'}</span>
         <span>📋 <strong>${remaining}</strong> ${lang==='en'?'left':'zostáva'}</span>
       </div>
-      <span style="font-size:.64rem;color:var(--text3);">${catCount} ${lang==='en'?'categories':'kategórií'}</span>
+      <span style="font-size:.64rem;color:var(--text3);">${catCount} ${lang==='en'?'categories':'kategórií'}${biggestCat ? ' · ' + shopCatIcon(biggestCat) + ' ' + esc(shopCatLabel(biggestCat)) : ''}</span>
     </div>
     <div class="shop-summary-progress"><div class="shop-summary-progress-bar" style="width:${pctAll}%"></div></div>
   </div>`;
@@ -5838,6 +5885,58 @@ function showImportUrlModal() {
   openModal('import-url-modal');
 }
 
+function fillImportedRecipe(data) {
+  openFormModal();
+  document.getElementById('r-name').value = data.name || '';
+  document.getElementById('r-image').value = data.image || '';
+  document.getElementById('r-ingredients').value = data.ingredients || '';
+  document.getElementById('r-steps').value = data.steps || '';
+  document.getElementById('r-time').value = data.time || 30;
+  if (data.category) document.getElementById('r-category').value = data.category;
+  document.getElementById('r-tags').value = (data.tags || []).join(', ');
+  if (data.calories) document.getElementById('r-kcal').value = data.calories;
+  document.getElementById('r-portions').value = data.portions || 4;
+  document.getElementById('r-image').dispatchEvent(new Event('input'));
+  if (!data.calories && data.rawIngredients) estimateAndFillImport(data.rawIngredients, data.portions || 4);
+}
+
+function showImportReview(data) {
+  const old = document.getElementById('import-review-modal');
+  if (old) old.remove();
+  const ingredientsCount = data.ingredients ? data.ingredients.split('\n').filter(Boolean).length : 0;
+  const stepsCount = data.steps ? data.steps.split('\n').filter(Boolean).length : 0;
+  const div = document.createElement('div');
+  div.id = 'import-review-modal';
+  div.className = 'modal-overlay active';
+  div.innerHTML = `<div class="modal import-review-modal">
+    <button class="modal-close" onclick="document.getElementById('import-review-modal').remove()">✕</button>
+    <h2>🌐 ${lang === 'en' ? 'Review import' : 'Skontrolovať import'}</h2>
+    <div class="import-review-card">
+      ${data.image ? `<img class="import-review-img" src="${escAttr(data.image)}" alt="">` : '<div class="import-review-img placeholder">🍽️</div>'}
+      <div class="import-review-info">
+        <div class="import-review-title">${esc(data.name || (lang === 'en' ? 'Untitled recipe' : 'Recept bez názvu'))}</div>
+        <div class="import-review-meta">
+          <span>⏱ ${esc(String(data.time || 30))} min</span>
+          <span>🍽️ ${esc(String(data.portions || 4))}</span>
+          <span>🥣 ${ingredientsCount}</span>
+          <span>📝 ${stepsCount}</span>
+        </div>
+        <div class="import-review-source">${esc(data.source || '')}</div>
+      </div>
+    </div>
+    <div class="import-review-columns">
+      <div><strong>${lang === 'en' ? 'Ingredients' : 'Suroviny'}</strong><pre>${esc((data.ingredients || '').slice(0, 700))}</pre></div>
+      <div><strong>${lang === 'en' ? 'Steps' : 'Postup'}</strong><pre>${esc((data.steps || '').slice(0, 700))}</pre></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="document.getElementById('import-review-modal').remove()">${lang === 'en' ? 'Cancel' : 'Zrušiť'}</button>
+      <button class="btn btn-primary" onclick="fillImportedRecipe(window._pendingImportRecipe);document.getElementById('import-review-modal').remove();closeModal('import-url-modal')">${lang === 'en' ? 'Use this recipe' : 'Použiť recept'}</button>
+    </div>
+  </div>`;
+  window._pendingImportRecipe = data;
+  document.body.appendChild(div);
+}
+
 function importFromUrl() {
   const url = document.getElementById('import-url-input').value.trim();
   if (!url) return;
@@ -5850,8 +5949,15 @@ function importFromUrl() {
   function tryFetch(retriesLeft) {
     if (retriesLeft === undefined) retriesLeft = maxRetries;
     const proxyUrl = SCRAPER_URL + '?url=' + encodeURIComponent(url);
+    let fetchUrl = proxyUrl;
+    try {
+      const parsedUrl = new URL(url, window.location.href);
+      if (parsedUrl.origin === window.location.origin || /^(localhost|127\.0\.0\.1|\[::1\])$/.test(parsedUrl.hostname)) {
+        fetchUrl = parsedUrl.href;
+      }
+    } catch(e) {}
     status.textContent = retriesLeft < maxRetries ? '⏳ Opakujem...' : '⏳ Načítavam...';
-    fetch(proxyUrl)
+    fetch(fetchUrl, { cache: 'no-store' })
       .then(r => {
         if (!r.ok) throw new Error('HTTP ' + r.status);
         return r.text();
@@ -5926,52 +6032,31 @@ function importFromUrl() {
         const cats = ['Hlavné jedlá','Polievky','Šaláty','Dezerty','Pečivo','Nápoje','Predjedlá','Raňajky','Prílohy','Detské'];
         const catMatch = cats.find(c => norm(category).includes(norm(c)) || norm(c).includes(norm(category)));
         let yieldNum = parseInt(yield_) || 4;
-        openFormModal();
-        document.getElementById('r-name').value = name;
-        document.getElementById('r-image').value = image;
-        document.getElementById('r-ingredients').value = ingrText;
-        document.getElementById('r-steps').value = stepText;
-        document.getElementById('r-time').value = timeNum;
-        if (catMatch) document.getElementById('r-category').value = catMatch;
         const tags = [];
         if (cuisine) { const t = cuisine.split(',').map(s => s.trim().toLowerCase()); tags.push(...t); }
         if (recipe.keywords) { const t = (typeof recipe.keywords === 'string' ? recipe.keywords : (Array.isArray(recipe.keywords) ? recipe.keywords.join(',') : '')).split(',').map(s => s.trim().toLowerCase()); tags.push(...t); }
-        document.getElementById('r-tags').value = [...new Set(tags)].join(', ');
+        let perPortionCalories = '';
         if (calories) {
           // Source provided total calories - divide by yield for per-portion
           const calTotal = parseInt(calories);
-          const perPortion = Math.round(calTotal / yieldNum);
-          document.getElementById('r-kcal').value = perPortion || calTotal;
-          document.getElementById('r-portions').value = yieldNum;
-        } else {
-          // Auto-estimate from ingredients
-          const result = estimateAndFillImport(Array.isArray(ingr) ? ingr : [], yieldNum);
+          perPortionCalories = Math.round(calTotal / yieldNum) || calTotal;
         }
-        document.getElementById('r-image').dispatchEvent(new Event('input'));
-        if (image) {
-          // Try direct fetch first
-          const directFetch = fetch(image, { mode: 'cors' }).catch(() => null);
-          // Proxy fetch (ak existuje)
-          var proxyFetch = Promise.reject();
-          try { if (typeof proxies !== 'undefined' && proxies.length > 0) proxyFetch = fetch(proxies[0](image)).catch(() => null); } catch(e2) {}
-          Promise.any([directFetch, proxyFetch])
-            .then(r => { if (!r || !r.ok) throw new Error(); return r.blob(); })
-            .then(blob => {
-              if (blob.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                  const preview = document.getElementById('r-image-preview');
-                  preview.src = e.target.result;
-                  preview.style.display = 'block';
-                  document.getElementById('r-image').value = '';
-                };
-                reader.readAsDataURL(blob);
-              }
-            })
-            .catch(() => {});
-        }
+        const importData = {
+          name: name,
+          image: image,
+          ingredients: ingrText,
+          rawIngredients: Array.isArray(ingr) ? ingr : [],
+          steps: stepText,
+          time: timeNum,
+          category: catMatch || '',
+          tags: [...new Set(tags)],
+          calories: perPortionCalories,
+          portions: yieldNum,
+          source: url
+        };
         status.textContent = t('importUrlOk');
-        closeModal('import-url-modal');
+        btn.disabled = false;
+        showImportReview(importData);
       })
       .catch(err => {
         // Chyba už je ošetrená v .catch() pred .then()
@@ -6184,20 +6269,48 @@ showTipOfDay();
 // Background image fetch for Pexels – fetches any still-missing images
 batchFetchImages().then(() => { render(); renderDashboard(); showTipOfDay(); });
 
-// Register service worker for PWA — auto-reload on update
+// Register service worker for PWA — user-controlled update handoff
+let _refreshingForUpdate = false;
+
+function showServiceWorkerUpdateBanner(worker) {
+  if (!worker) return;
+  const oldBanner = document.getElementById('sw-update-banner');
+  if (oldBanner) oldBanner.remove();
+
+  const banner = document.createElement('div');
+  banner.id = 'sw-update-banner';
+  banner.className = 'sw-update-banner';
+  banner.innerHTML =
+    '<div class="sw-update-copy"><strong>✨ ' + t('Nová verzia je pripravená','New version is ready') + '</strong>' +
+    '<span>' + t('Aktualizuj aplikáciu bez čakania na reštart.','Refresh the app without waiting for a restart.') + '</span></div>' +
+    '<button type="button" id="sw-update-btn">' + t('Aktualizovať','Update') + '</button>';
+  document.body.appendChild(banner);
+
+  const btn = document.getElementById('sw-update-btn');
+  if (btn) {
+    btn.addEventListener('click', () => {
+      btn.disabled = true;
+      btn.textContent = t('Aktualizujem…','Updating…');
+      worker.postMessage({ type: 'SKIP_WAITING' });
+      worker.postMessage('skipWaiting');
+    });
+  }
+}
+
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').then(reg => {
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (_refreshingForUpdate) return;
+    _refreshingForUpdate = true;
+    window.location.reload();
+  });
+
+  navigator.serviceWorker.register('sw.js?v=' + APP_VERSION).then(reg => {
+    if (reg.waiting && navigator.serviceWorker.controller) showServiceWorkerUpdateBanner(reg.waiting);
     reg.addEventListener('updatefound', () => {
       const newSW = reg.installing;
       if (newSW) newSW.addEventListener('statechange', () => {
         if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
-          // Show update notification
-          const banner = document.createElement('div');
-          banner.id = 'sw-update-banner';
-          banner.style.cssText = 'position:fixed;bottom:80px;left:20px;right:20px;z-index:9999;background:var(--primary);color:#fff;padding:12px 16px;border-radius:12px;display:flex;align-items:center;justify-content:space-between;font-size:.8rem;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,.4);animation:slideUp .3s ease;';
-          banner.innerHTML = '<span>✨ '+t('Nová verzia je k dispozícii','New version available')+'</span><button style="background:#fff;color:var(--primary);border:none;padding:6px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:.75rem;" onclick="newSW.postMessage(\'skipWaiting\');this.parentElement.remove();location.reload();">'+t('Aktualizovať','Update')+'</button>';
-          document.body.appendChild(banner);
-          setTimeout(() => banner.remove(), 15000);
+          showServiceWorkerUpdateBanner(newSW);
         }
       });
     });

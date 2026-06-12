@@ -35,8 +35,13 @@ self.addEventListener('notificationclick', function(e) {
   );
 });
 
-// Handle message from client to switch tab
+// Handle message from client to switch tab / activate update
 self.addEventListener('message', function(e) {
+  if (e.data === 'skipWaiting' || (e.data && e.data.type === 'SKIP_WAITING')) {
+    self.skipWaiting();
+    return;
+  }
+
   if (e.data && e.data.action === 'switchTab' && e.data.tab) {
     clients.matchAll({ type: 'window' }).then(function(clients) {
       clients.forEach(function(client) {
@@ -46,7 +51,7 @@ self.addEventListener('message', function(e) {
   }
 });
 
-var CACHE = 'mealnest-v11';
+var CACHE = 'mealnest-v12';
 var PRECACHE = [
   'recipes-default.json',
   'manifest.json',
