@@ -2546,6 +2546,245 @@ html.light .today-focus-card {
   cursor: wait;
 }
 
+/* ===== PLANNER POLISH PASS ===== */
+.planner-container {
+  padding-bottom: calc(6rem + env(safe-area-inset-bottom));
+}
+#planner-hero {
+  border-radius: 1.35rem;
+  padding: .95rem;
+  margin-bottom: .75rem;
+  border: 1px solid color-mix(in srgb, var(--primary) 18%, var(--border));
+  background:
+    radial-gradient(circle at 15% 15%, rgba(var(--primary-rgb), .22), transparent 36%),
+    linear-gradient(135deg, color-mix(in srgb, var(--surface) 82%, transparent), var(--surface-raised));
+  box-shadow: var(--shadow-md);
+}
+#planner-hero .hero-header-title {
+  font-size: 1.25rem;
+  letter-spacing: -.04em;
+  line-height: 1.05;
+}
+#planner-hero .hero-header-sub {
+  max-width: 18rem;
+  color: var(--text2);
+  line-height: 1.35;
+}
+#planner-hero .hero-header-actions {
+  margin-top: .85rem;
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: .45rem;
+}
+#planner-hero .hero-header-actions .btn {
+  min-height: 2.35rem;
+  border-radius: .95rem;
+  font-weight: 800;
+  box-shadow: none;
+}
+.planner-week-nav {
+  position: sticky;
+  top: .35rem;
+  z-index: 8;
+  padding: .25rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface-solid) 92%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 10px 26px rgba(0,0,0,.16);
+}
+.pln-btn {
+  min-height: 2.2rem;
+  border-radius: 999px;
+  border: 0;
+  background: transparent;
+  font-size: .72rem;
+}
+.pln-btn.active {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  box-shadow: 0 8px 18px rgba(var(--primary-rgb), .26);
+}
+.plan-type-switch {
+  margin: .65rem 0 .85rem;
+  background: var(--surface-raised);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
+}
+.plan-type-switch .pts-bg {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+}
+.plan-type-btn {
+  min-height: 2.5rem;
+}
+.planner-week-grid {
+  display: grid;
+  gap: .75rem;
+}
+.pvc-day {
+  margin-bottom: 0;
+  border-radius: 1.25rem;
+  border-color: var(--border);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  box-shadow: 0 12px 32px rgba(0,0,0,.16);
+}
+.pvc-day::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.045);
+}
+.pvc-day.pvc-today {
+  border-color: color-mix(in srgb, var(--primary) 72%, var(--border));
+  box-shadow: 0 0 0 1px rgba(var(--primary-rgb), .24), 0 16px 38px rgba(var(--primary-rgb), .12);
+}
+.pvc-head {
+  padding: .8rem .85rem .55rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+}
+.pvc-title-group {
+  min-width: 0;
+  gap: .5rem;
+}
+.pvc-day-icon {
+  width: 2rem;
+  height: 2rem;
+  display: grid;
+  place-items: center;
+  border-radius: .85rem;
+  background: var(--input-bg);
+  opacity: 1;
+}
+.pvc-title {
+  font-size: .9rem;
+  letter-spacing: -.025em;
+}
+.pvc-badge {
+  margin-left: .1rem;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+}
+.pvc-progress {
+  flex-shrink: 0;
+  padding: .2rem .4rem;
+  border-radius: 999px;
+  background: var(--input-bg);
+}
+.pvc-progress-ring {
+  background: var(--surface);
+}
+.pvc-meals-grid {
+  gap: .5rem;
+  padding: .65rem;
+}
+.pvc-meal {
+  min-height: 76px;
+  border-radius: 1rem;
+}
+.pvc-meal.filled {
+  border-color: color-mix(in srgb, var(--border) 70%, transparent);
+}
+.pvc-meal-header {
+  padding: .5rem .55rem 0 .72rem;
+}
+.pvc-meal-body {
+  padding: .22rem .55rem .48rem .72rem;
+}
+.pvc-meal-thumb {
+  width: 30px;
+  height: 30px;
+  border-radius: .7rem;
+}
+.pvc-meal-name {
+  font-size: .76rem;
+  font-weight: 750;
+  letter-spacing: -.015em;
+}
+.pvc-meal-label {
+  border-radius: 999px;
+}
+.pvc-meal.empty {
+  border-color: color-mix(in srgb, var(--border) 82%, transparent);
+  background: color-mix(in srgb, var(--input-bg) 62%, transparent);
+}
+.pvc-meal.empty .pvc-meal-icon,
+.pvc-meal.empty .pvc-meal-label,
+.pvc-meal-add-btn {
+  opacity: .7;
+}
+.pvc-meal-add-btn {
+  margin-top: auto;
+  font-weight: 800;
+  color: var(--text2);
+}
+.pvc-meal-add-icon {
+  background: color-mix(in srgb, var(--primary) 14%, var(--surface));
+  color: var(--primary);
+}
+.planner-summary {
+  margin-top: .75rem;
+}
+.planner-summary-row {
+  justify-content: initial;
+  padding: .7rem;
+  border-radius: 1.15rem;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(var(--primary-rgb), .11), transparent 34%),
+    var(--surface);
+  box-shadow: var(--shadow-md);
+}
+.psr-copy {
+  min-width: 7.5rem;
+  margin-right: auto;
+}
+.psr-eyebrow {
+  color: var(--primary);
+  font-size: .52rem;
+  font-weight: 900;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+.psr-copy-title {
+  margin-top: .08rem;
+  color: var(--text);
+  font-size: .82rem;
+  font-weight: 850;
+  letter-spacing: -.025em;
+}
+.planner-summary-row .psr-item {
+  min-width: 3.1rem;
+  padding: .35rem .45rem;
+  border-radius: .85rem;
+  background: color-mix(in srgb, var(--input-bg) 72%, transparent);
+}
+.planner-summary-row .psr-val {
+  font-size: .82rem;
+}
+.psr-progress-wrap {
+  min-width: 5rem;
+}
+.psr-progress-bar {
+  height: .42rem;
+  background: var(--input-bg);
+}
+.planner-actions {
+  gap: .5rem;
+  margin-top: .7rem;
+}
+.planner-actions .pa-btn {
+  min-height: 2.65rem;
+  border-radius: 1rem;
+  font-size: .72rem;
+  font-weight: 800;
+}
+html.light .pvc-day {
+  background: rgba(255,255,255,.88);
+  box-shadow: 0 10px 28px rgba(32,24,20,.08);
+}
+html.light .planner-week-nav {
+  box-shadow: 0 8px 24px rgba(32,24,20,.08);
+}
+
 @media (max-width: 430px) {
   .today-focus-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .import-review-card { align-items: flex-start; }
@@ -2553,4 +2792,24 @@ html.light .today-focus-card {
   .import-review-columns { grid-template-columns: 1fr; }
   .sw-update-banner { align-items: stretch; flex-direction: column; }
   .sw-update-banner button { width: 100%; }
+  #planner-hero { padding: .85rem; }
+  #planner-hero .hero-header-actions { grid-template-columns: 1fr; }
+  .planner-week-nav { top: .2rem; }
+  .pvc-meals-grid { grid-template-columns: 1fr; }
+  .pvc-head { align-items: flex-start; gap: .55rem; }
+  .pvc-progress { margin-top: .1rem; }
+  .planner-summary-row {
+    flex-wrap: wrap;
+    align-items: stretch;
+  }
+  .psr-copy {
+    flex: 1 0 100%;
+    margin: 0 0 .15rem;
+  }
+  .planner-summary-row .psr-item {
+    flex: 1;
+  }
+  .psr-progress-wrap {
+    flex: 1 0 100%;
+  }
 }

@@ -555,7 +555,7 @@ function pickOnboardLang(l) {
 setTimeout(() => showOnboarding(), 300);
 
 // ======================== AI (DEEPSEEK PROXY) ========================
-const APP_VERSION = '1.0.7';
+const APP_VERSION = '1.0.8';
 const VAPID_PUBLIC_KEY = 'BI6Fga-GXSKggkNJ58R1VEYEfGE6KfWgnuDtI9sHqQLQJzGLshJuIuODmI13AVzX5D2Kd7SBxrr7Cvf-xRAowg0';
 const PUSH_PROXY_URL = 'https://receptar.waldis994.workers.dev';
 
@@ -1643,12 +1643,18 @@ function applyLang() {
     document.getElementById('form-title').textContent = t('formTitle');
   }
   // Planner labels
+  const phTitle = document.getElementById('planner-hero-title'); if (phTitle) phTitle.textContent = lang==='en'?'📅 Meal Planner':'📅 Plánovač jedál';
+  const phSub = document.getElementById('planner-hero-sub'); if (phSub) phSub.textContent = lang==='en'?'Plan the whole week in a few taps':'Naplánuj si celý týždeň na pár kliknutí';
+  const phBtns = document.querySelectorAll('#planner-hero .hero-header-actions .btn');
+  if (phBtns[0]) phBtns[0].textContent = lang==='en'?'🤖 AI week':'🤖 AI týždeň';
+  if (phBtns[1]) phBtns[1].textContent = '↺ Reset';
   const ptA = document.getElementById('pt-adults-label'); if (ptA) ptA.textContent = lang==='en'?'Adults':'Dospelí';
   const ptK = document.getElementById('pt-kids-label'); if (ptK) ptK.textContent = lang==='en'?'Kids':'Deti';
   document.getElementById('pln-this').textContent = lang==='en'?'This week':'Tento t\u00fd\u017ede\u0148';
   document.getElementById('pln-next').textContent = lang==='en'?'Next week':'Bud\u00faci t\u00fd\u017ede\u0148';
   const paC = document.getElementById('pa-clear-label'); if (paC) paC.textContent = lang==='en'?'Clear week':'Vymazať týždeň';
   const paA = document.getElementById('pa-ai-label'); if (paA) paA.textContent = lang==='en'?'📝 AI Shop':'📝 AI nákup';
+  const pipMealsLabel = document.getElementById('pip-meals-label'); if (pipMealsLabel) pipMealsLabel.textContent = lang==='en'?'meals':'jedál';
   const aiTip = document.getElementById('dash-ai-label'); if (aiTip) aiTip.textContent = lang==='en'?'AI tip of the day':'AI tip dňa';
   const rab = document.getElementById('recipe-ai-btn'); if (rab) { rab.textContent = lang==='en'?'🤖 What to cook?':'🤖 Čo uvariť?'; rab.title = lang==='en'?'AI suggestion from your ingredients':'AI návrh z vašich surovín'; }
   // Category dropdowns
@@ -4469,10 +4475,20 @@ function renderPlanner() {
   const todayStr = new Date().toISOString().slice(0,10);
   const todayIdx = (new Date().getDay() + 6) % 7;
 
+  const heroTitle = document.getElementById('planner-hero-title');
+  if (heroTitle) heroTitle.textContent = lang === 'en' ? '📅 Meal Planner' : '📅 Plánovač jedál';
+  const heroSub = document.getElementById('planner-hero-sub');
+  if (heroSub) heroSub.textContent = lang === 'en' ? 'Plan the whole week in a few taps' : 'Naplánuj si celý týždeň na pár kliknutí';
+  const planButtons = document.querySelectorAll('#planner-hero .hero-header-actions .btn');
+  if (planButtons[0]) planButtons[0].textContent = lang === 'en' ? '🤖 AI week' : '🤖 AI týždeň';
+  if (planButtons[1]) planButtons[1].textContent = lang === 'en' ? '↺ Reset' : '↺ Reset';
+
   // Plan type switcher
   const pts = document.getElementById('plan-type-switch');
   pts.className = 'plan-type-switch' + (planType === 'kids' ? ' kids' : '');
   document.querySelectorAll('.plan-type-btn').forEach(b => b.classList.toggle('active', b.dataset.pt === planType));
+  const ptA = document.getElementById('pt-adults-label'); if (ptA) ptA.textContent = lang === 'en' ? 'Adults' : 'Dospelí';
+  const ptK = document.getElementById('pt-kids-label'); if (ptK) ptK.textContent = lang === 'en' ? 'Kids' : 'Deti';
 
   // Week nav active state
   document.getElementById('pln-this').classList.toggle('active', plannerWeekOffset === 0);
@@ -4531,12 +4547,19 @@ function renderPlanner() {
   // Summary with progress bar
   var maxMeals = DAYS.length * totalSlots;
   var mealPct = maxMeals > 0 ? Math.round((totalMeals / maxMeals) * 100) : 0;
-  document.getElementById('planner-summary').innerHTML = '<div class="planner-summary-row"><div class="psr-item"><div class="psr-val">'+totalMeals+'/'+maxMeals+'</div><div class="psr-label">'+(lang==='en'?'Planned':'Naplán')+'</div></div><div class="psr-item"><div class="psr-val">🔥 '+totalKcal+'</div><div class="psr-label">kcal</div></div><div class="psr-item"><div class="psr-val">⏱ '+totalTime+'\'</div><div class="psr-label">'+(lang==='en'?'Prep':'Var')+'</div></div><div class="psr-progress-wrap"><div class="psr-progress-bar"><div class="psr-progress-fill" style="width:'+mealPct+'%"></div></div><div class="psr-progress-label">'+mealPct+'%</div></div></div>';
+  const weekSummaryLabel = mealPct >= 80
+    ? (lang === 'en' ? 'Week almost ready' : 'Týždeň takmer hotový')
+    : mealPct >= 35
+      ? (lang === 'en' ? 'Good rhythm' : 'Dobrý rytmus')
+      : (lang === 'en' ? 'Start with today' : 'Začni dneškom');
+  document.getElementById('planner-summary').innerHTML = '<div class="planner-summary-row"><div class="psr-copy"><div class="psr-eyebrow">'+(lang==='en'?'Weekly overview':'Prehľad týždňa')+'</div><div class="psr-copy-title">'+weekSummaryLabel+'</div></div><div class="psr-item"><div class="psr-val">'+totalMeals+'/'+maxMeals+'</div><div class="psr-label">'+(lang==='en'?'Planned':'Naplán')+'</div></div><div class="psr-item"><div class="psr-val">🔥 '+totalKcal+'</div><div class="psr-label">kcal</div></div><div class="psr-item"><div class="psr-val">⏱ '+totalTime+'\'</div><div class="psr-label">'+(lang==='en'?'Prep':'Var')+'</div></div><div class="psr-progress-wrap"><div class="psr-progress-bar"><div class="psr-progress-fill" style="width:'+mealPct+'%"></div></div><div class="psr-progress-label">'+mealPct+'%</div></div></div>';
 
   // Floating info panel
   var pip = document.getElementById('planner-info-panel');
   if (pip) {
     document.getElementById('pip-meals').textContent = totalMeals+'/'+maxMeals;
+    const pipMealsLabel = document.getElementById('pip-meals-label');
+    if (pipMealsLabel) pipMealsLabel.textContent = lang === 'en' ? 'meals' : 'jedál';
     document.getElementById('pip-kcal').textContent = totalKcal;
     document.getElementById('pip-time').textContent = totalTime;
     document.getElementById('pip-fill').style.width = mealPct+'%';

@@ -15,7 +15,7 @@
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <title data-lang="appTitle">Mealnest</title>
-  <link rel="stylesheet" href="styles.css?v=7">
+  <link rel="stylesheet" href="styles.css?v=8">
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -192,7 +192,7 @@
   </div>
   <!-- FLOATING INFO PANEL -->
   <div class="planner-info-panel" id="planner-info-panel">
-    <span class="pip-item"><span class="pip-val" id="pip-meals">0/35</span> jedál</span>
+    <span class="pip-item"><span class="pip-val" id="pip-meals">0/35</span> <span id="pip-meals-label">jedál</span></span>
     <span class="pip-item">🔥 <span class="pip-val" id="pip-kcal">0</span></span>
     <span class="pip-item">⏱ <span class="pip-val" id="pip-time">0</span>min</span>
     <div class="pip-progress"><div class="pip-fill" id="pip-fill" style="width:0%"></div></div>
@@ -518,8 +518,8 @@
 </nav>
 
 
-<script src="app.js?v=7"></script>
-<script src="board.js?v=7"></script>
+<script src="app.js?v=8"></script>
+<script src="board.js?v=8"></script>
 
 <!-- Quick add FAB -->
 <div id="fab-quick-add" style="display:none">
