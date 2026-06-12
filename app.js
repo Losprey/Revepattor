@@ -555,7 +555,7 @@ function pickOnboardLang(l) {
 setTimeout(() => showOnboarding(), 300);
 
 // ======================== AI (DEEPSEEK PROXY) ========================
-const APP_VERSION = '1.0.6';
+const APP_VERSION = '1.0.7';
 const VAPID_PUBLIC_KEY = 'BI6Fga-GXSKggkNJ58R1VEYEfGE6KfWgnuDtI9sHqQLQJzGLshJuIuODmI13AVzX5D2Kd7SBxrr7Cvf-xRAowg0';
 const PUSH_PROXY_URL = 'https://receptar.waldis994.workers.dev';
 
@@ -2885,8 +2885,14 @@ function randomRecipe() {
 }
 
 // ======================== MODALS ========================
-function openModal(id) { document.getElementById(id).classList.add('active'); }
-function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+function openModal(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.add('active');
+}
+function closeModal(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.remove('active');
+}
 document.querySelectorAll('.modal-overlay').forEach(el => {
   el.addEventListener('click', e => { if (e.target === el) { el.classList.remove('active'); } });
 });
@@ -5880,9 +5886,20 @@ function cleanHtml(text) {
 }
 
 function showImportUrlModal() {
-  document.getElementById('import-url-input').value = '';
-  document.getElementById('import-url-status').textContent = '';
+  const input = document.getElementById('import-url-input');
+  if (input) input.value = '';
+  setImportStatus('');
   openModal('import-url-modal');
+}
+
+function setImportStatus(message) {
+  const status = document.getElementById('import-url-status');
+  if (status) status.textContent = message || '';
+}
+
+function setImportBusy(isBusy) {
+  const btn = document.getElementById('import-url-btn');
+  if (btn) btn.disabled = !!isBusy;
 }
 
 function fillImportedRecipe(data) {
@@ -5930,20 +5947,26 @@ function showImportReview(data) {
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="document.getElementById('import-review-modal').remove()">${lang === 'en' ? 'Cancel' : 'Zrušiť'}</button>
-      <button class="btn btn-primary" onclick="fillImportedRecipe(window._pendingImportRecipe);document.getElementById('import-review-modal').remove();closeModal('import-url-modal')">${lang === 'en' ? 'Use this recipe' : 'Použiť recept'}</button>
+      <button class="btn btn-primary" onclick="acceptImportedRecipe()">${lang === 'en' ? 'Use this recipe' : 'Použiť recept'}</button>
     </div>
   </div>`;
   window._pendingImportRecipe = data;
   document.body.appendChild(div);
 }
 
+function acceptImportedRecipe() {
+  if (window._pendingImportRecipe) fillImportedRecipe(window._pendingImportRecipe);
+  const review = document.getElementById('import-review-modal');
+  if (review) review.remove();
+  closeModal('import-url-modal');
+}
+
 function importFromUrl() {
-  const url = document.getElementById('import-url-input').value.trim();
+  const input = document.getElementById('import-url-input');
+  const url = input ? input.value.trim() : '';
   if (!url) return;
-  const status = document.getElementById('import-url-status');
-  const btn = document.getElementById('import-url-btn');
-  status.textContent = '⏳ Načítavam...';
-  btn.disabled = true;
+  setImportStatus('⏳ Načítavam...');
+  setImportBusy(true);
   const SCRAPER_URL = 'https://mealnest-scraper.waldis994.workers.dev';
   let maxRetries = 2;
   function tryFetch(retriesLeft) {
@@ -5956,7 +5979,7 @@ function importFromUrl() {
         fetchUrl = parsedUrl.href;
       }
     } catch(e) {}
-    status.textContent = retriesLeft < maxRetries ? '⏳ Opakujem...' : '⏳ Načítavam...';
+    setImportStatus(retriesLeft < maxRetries ? '⏳ Opakujem...' : '⏳ Načítavam...');
     fetch(fetchUrl, { cache: 'no-store' })
       .then(r => {
         if (!r.ok) throw new Error('HTTP ' + r.status);
@@ -5996,10 +6019,10 @@ function importFromUrl() {
           if (recipe) break;
         }
         if (!recipe) {
-          status.textContent = html.length < 200
+          setImportStatus(html.length < 200
             ? t('importUrlFail') + ' (prázdna odpoveď)'
-            : t('importUrlBad');
-          btn.disabled = false;
+            : t('importUrlBad'));
+          setImportBusy(false);
           return;
         }
         const name = cleanHtml(recipe.name || '');
@@ -6054,15 +6077,15 @@ function importFromUrl() {
           portions: yieldNum,
           source: url
         };
-        status.textContent = t('importUrlOk');
-        btn.disabled = false;
+        setImportStatus(t('importUrlOk'));
+        setImportBusy(false);
         showImportReview(importData);
       })
       .catch(err => {
         // Chyba už je ošetrená v .catch() pred .then()
         // Ak by sa dostala sem, skúsime ešte raz
-        status.textContent = t('importUrlFail');
-        btn.disabled = false;
+        setImportStatus(t('importUrlFail'));
+        setImportBusy(false);
         console.error('Scraper error:', err);
       });
   }
