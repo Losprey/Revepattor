@@ -1607,6 +1607,14 @@ function t(key, enFallback) {
 
 function applyLang() {
   document.documentElement.lang = lang === 'en' ? 'en' : 'sk';
+  const loginSub = document.getElementById('login-sub');
+  if (loginSub) loginSub.textContent = lang === 'en'
+    ? 'Save your meal plan, shopping list and tasks across devices.'
+    : 'Ulož si jedálniček, nákupný zoznam a úlohy naprieč zariadeniami.';
+  const loginGoogleLabel = document.getElementById('login-google-label');
+  if (loginGoogleLabel) loginGoogleLabel.textContent = lang === 'en' ? 'Continue with Google' : 'Pokračovať cez Google';
+  const loginGuestBtn = document.getElementById('login-guest-btn');
+  if (loginGuestBtn) loginGuestBtn.textContent = lang === 'en' ? 'Continue without signing in' : 'Pokračovať bez prihlásenia';
   document.querySelectorAll('[data-lang]').forEach(el => {
     const key = el.dataset.lang;
     if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
@@ -2408,7 +2416,7 @@ let appSettings = {};
 function loadSettings() {
   try { appSettings = JSON.parse(localStorage.getItem('appSettings') || '{}'); } catch(e) { appSettings = {}; }
   const D = {
-    theme: 'dark',
+    theme: 'system',
     lang: localStorage.getItem('lang') || 'en',
     accentColor: localStorage.getItem('accent') || '#e63946',
     textSize: 'normal', uiDensity: 'normal',
@@ -2435,13 +2443,32 @@ function saveSettings() {
   localStorage.setItem('appSettings', JSON.stringify(appSettings));
   applySettings();
 }
+function getResolvedTheme() {
+  if (appSettings.theme === 'light' || appSettings.theme === 'dark') return appSettings.theme;
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+}
+function applyTheme() {
+  const resolvedTheme = getResolvedTheme();
+  document.documentElement.classList.toggle('light', resolvedTheme === 'light');
+  document.documentElement.classList.toggle('dark', resolvedTheme === 'dark');
+  document.documentElement.classList.toggle('dark-only', resolvedTheme === 'dark');
+  if (document.body) {
+    document.body.classList.toggle('dark', resolvedTheme === 'dark');
+    document.body.classList.toggle('light', resolvedTheme === 'light');
+  }
+  const themeMeta = document.querySelector('meta[name="theme-color"]:not([media])');
+  if (themeMeta) themeMeta.setAttribute('content', resolvedTheme === 'dark' ? '#0B0B0B' : '#FAF7F5');
+}
+if (window.matchMedia) {
+  try {
+    window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', function() {
+      if (!appSettings.theme || appSettings.theme === 'system') applyTheme();
+    });
+  } catch(e) {}
+}
 function applySettings() {
   try {
-    // Vzdy tmavy rezim
-    document.body.classList.add('dark');
-    document.documentElement.classList.add('dark-only');
-    var dt = document.getElementById('dark-toggle');
-    if (dt) dt.textContent = '☀️';
+    applyTheme();
     updateSeason();
   } catch(e) {}
   let langChanged = false;
@@ -2505,10 +2532,13 @@ function openSettings() {
   html += `<div class="settings-group">
     <div class="settings-group-title">🎨 ${t('Vzhľad','Appearance')}</div>
     <div class="settings-card">
-      <div class="settings-row">
       <div class="settings-row" onclick="cycleLang()">
         <span class="sr-label"><span class="sr-icon">🌐</span> ${t('Jazyk','Language')}</span>
         <span class="sr-value">${s.lang === 'en' ? 'English' : 'Slovenčina'} <span class="sr-arrow">›</span></span>
+      </div>
+      <div class="settings-row" onclick="cycleSetting('theme',['system','dark','light'])">
+        <span class="sr-label"><span class="sr-icon">🌓</span> ${t('Téma','Theme')}</span>
+        <span class="sr-value">${t({system:'Systémová',dark:'Tmavá',light:'Svetlá'}[s.theme]||'Systémová', {system:'System',dark:'Dark',light:'Light'}[s.theme]||'System')} <span class="sr-arrow">›</span></span>
       </div>
       <div class="settings-row">
         <span class="sr-label"><span class="sr-icon">🎯</span> ${t('Farba akcentu','Accent color')}</span>
@@ -3712,7 +3742,7 @@ function switchTab(tab) {
   if (btn) { btn.classList.add('active'); springBounce(btn); }
   document.body.dataset.tab = tab;
   if (window._skipHistory) { window._skipHistory = false; }
-  else { history.pushState({ tab }, '', '#' + tab); }
+  else { history.pushState({ tab }, '', '#tab-' + tab); }
   const dashboard = document.getElementById('dashboard');
   const recipeContainer = document.getElementById('home');
   const plannerContainer = document.getElementById('planner-container');
@@ -3722,7 +3752,10 @@ function switchTab(tab) {
   const mainTitle = document.getElementById('main-title');
   [dashboard, recipeContainer, plannerContainer, shoppingContainer, tasksContainer, boardContainer].forEach(function(el) { if (el) el.style.display = 'none'; });
   if (mainTitle) mainTitle.style.display = tab === 'dashboard' ? 'none' : '';
-  try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch(e) {}
+  try {
+    document.body.classList.remove('header-collapsed');
+    window.scrollTo(0, 0);
+  } catch(e) {}
   if (tab === 'dashboard' && dashboard) {
     dashboard.style.display = ''; applyPageTransition(dashboard, 350);
     try { renderDashboard(); } catch(e) {}
@@ -4679,7 +4712,7 @@ function renderPickerRecipes() {
   }).join('');
 }
 function plannerIsVisible() {
-  return window.location.hash === '#planner' || (document.getElementById('planner-container') && document.getElementById('planner-container').style.display !== 'none');
+  return window.location.hash === '#planner' || window.location.hash === '#tab-planner' || (document.getElementById('planner-container') && document.getElementById('planner-container').style.display !== 'none');
 }
 function pickRecipe(day, slot, wk) {
   openPickerModal(day, slot, wk || currentWeekKey());
@@ -6023,7 +6056,8 @@ function closeTopModal() {
 window.addEventListener('popstate', function(e) {
   // First: close any open modal/detail/overlay
   if (closeTopModal()) {
-    history.pushState({ tab: document.body.dataset.tab || 'dashboard' }, '', '#' + (document.body.dataset.tab || 'dashboard'));
+    const currentTab = document.body.dataset.tab || 'dashboard';
+    history.pushState({ tab: currentTab }, '', '#tab-' + currentTab);
     return;
   }
 
@@ -6032,7 +6066,7 @@ window.addEventListener('popstate', function(e) {
     switchTab(e.state.tab);
     // Always keep a history cushion so swipe-back doesn't exit
     if (history.length <= 2) {
-      history.pushState({ tab: e.state.tab }, '', '#' + e.state.tab);
+      history.pushState({ tab: e.state.tab }, '', '#tab-' + e.state.tab);
     }
   } else {
     // On home — push replacement state instead of exiting immediately
@@ -6042,7 +6076,7 @@ window.addEventListener('popstate', function(e) {
     } else {
       _backPressTimer = now;
       showToast(t('Stlač ešte raz','Press again'),'info');
-      history.pushState({ tab: 'dashboard' }, '', '#dashboard');
+      history.pushState({ tab: 'dashboard' }, '', '#tab-dashboard');
     }
   }
 });
@@ -6101,7 +6135,7 @@ window.addEventListener('popstate', function(e) {
 
 // Ensure we always have at least 2 history entries on page load
 if (history.length <= 1) {
-  history.pushState({ tab: 'dashboard' }, '', '#dashboard');
+  history.pushState({ tab: 'dashboard' }, '', '#tab-dashboard');
 }
 
 // Global error handler
@@ -6131,8 +6165,18 @@ document.getElementById('recipe-grid').addEventListener('click', function(e) {
   }
 });
 try { applyLang(); } catch(e) {}
-document.body.dataset.tab = localStorage.getItem('lastTab') || 'dashboard';
-switchTab(localStorage.getItem('lastTab') || 'dashboard');
+try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch(e) {}
+const initialHashTab = (location.hash || '').replace(/^#tab-/, '').replace('#', '');
+const validInitialTabs = new Set(['dashboard', 'planner', 'home', 'shopping', 'tasks', 'board']);
+const initialTab = validInitialTabs.has(initialHashTab) ? initialHashTab : (localStorage.getItem('lastTab') || 'dashboard');
+document.body.dataset.tab = initialTab;
+switchTab(initialTab);
+setTimeout(function() {
+  try {
+    document.body.classList.remove('header-collapsed');
+    window.scrollTo(0, 0);
+  } catch(e) {}
+}, 0);
 
 render();
 showTipOfDay();
@@ -6639,4 +6683,3 @@ document.addEventListener('click', function(e) {
     if (btn && !btn.closest('.bottom-nav')) addRipple(e, btn);
   } catch(_) {}
 }, { passive: true });
-
