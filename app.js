@@ -555,7 +555,7 @@ function pickOnboardLang(l) {
 setTimeout(() => showOnboarding(), 300);
 
 // ======================== AI (DEEPSEEK PROXY) ========================
-const APP_VERSION = '1.0.17';
+const APP_VERSION = '1.0.18';
 const VAPID_PUBLIC_KEY = 'BI6Fga-GXSKggkNJ58R1VEYEfGE6KfWgnuDtI9sHqQLQJzGLshJuIuODmI13AVzX5D2Kd7SBxrr7Cvf-xRAowg0';
 const PUSH_PROXY_URL = 'https://receptar.waldis994.workers.dev';
 
@@ -4221,9 +4221,9 @@ function renderDashboard() {
   if (w.weather) {
     html += `<div class="dash-widget-pair">`;
     if (appSettings.weather.location) {
-      html += `<div class="dash-card weather-card"><div class="weather-widget" id="weather-widget" onclick="editText('weather.location','${t("Mesto","City")}')"><span class="weather-icon">🌤️</span><span class="weather-info"><strong>${esc(appSettings.weather.location)}</strong><span class="weather-temp">${t("Načítavam...","Loading...")}</span></span></div></div>`;
+      html += `<div class="dash-card weather-card"><div class="weather-widget weather-widget-modern" id="weather-widget" onclick="editText('weather.location','${t("Mesto","City")}')"><div class="weather-orb">🌤️</div><div class="weather-copy"><span class="weather-label">${lang === 'en' ? 'Weather' : 'Počasie'}</span><strong>${esc(appSettings.weather.location)}</strong><span class="weather-temp">${t("Načítavam...","Loading...")}</span></div><span class="weather-cta">${lang === 'en' ? 'Edit' : 'Upraviť'} ›</span></div></div>`;
     } else {
-      html += `<div class="dash-card weather-card"><div class="weather-widget weather-fallback" id="weather-widget" onclick="editText('weather.location','${t("Počasie","Weather")}')"><span class="weather-icon">🌤️</span><span class="weather-info"><strong>${t("Počasie","Weather")}</strong><span class="weather-temp">${t("Zadaj mesto","Enter city")}</span></span></div></div>`;
+      html += `<div class="dash-card weather-card"><div class="weather-widget weather-widget-modern weather-fallback" id="weather-widget" onclick="editText('weather.location','${t("Počasie","Weather")}')"><div class="weather-orb">🌤️</div><div class="weather-copy"><span class="weather-label">${lang === 'en' ? 'Weather' : 'Počasie'}</span><strong>${t("Počasie","Weather")}</strong><span class="weather-temp">${t("Zadaj mesto","Enter city")}</span></div><span class="weather-cta">${lang === 'en' ? 'Set' : 'Nastaviť'} ›</span></div></div>`;
     }
     if (w.seasonal) {
       html += renderSeasonalWidget(true);
@@ -4380,7 +4380,6 @@ function renderTodayFocusPanel(stats) {
         <div class="today-focus-kicker">${lang === 'en' ? 'Today' : 'Dnes'}</div>
         <div class="today-focus-title">${lang === 'en' ? 'Your day at a glance' : 'Prehľad dňa'}</div>
       </div>
-      <button class="today-focus-action" onclick="switchTab('planner')">${lang === 'en' ? 'Plan' : 'Plánovať'} ›</button>
     </div>
     <div class="today-focus-grid">
       <button class="today-focus-item" onclick="switchTab('planner')"><span>🍽️</span><strong>${stats.todayMeals}/${MEALS.length}</strong><small>${mealLabel}</small></button>
@@ -6750,13 +6749,23 @@ async function updateWeatherWidget() {
   const locLabel = appSettings.weather.location || (appSettings.lang === 'en' ? 'Unknown' : 'Neznáme');
   if (w) {
     const wi = getWeatherIcon(w.weathercode);
-    widgetEl.innerHTML = `<span class="weather-icon">${wi.icon}</span>
-      <span class="weather-info"><strong>${esc(locLabel)}</strong><span class="weather-temp">${w.temperature}°C · ${wi.label}</span></span>
+    widgetEl.innerHTML = `<div class="weather-orb">${wi.icon}</div>
+      <div class="weather-copy">
+        <span class="weather-label">${appSettings.lang==='en'?'Weather':'Počasie'}</span>
+        <strong>${esc(locLabel)}</strong>
+        <span class="weather-temp-main">${w.temperature}°C</span>
+        <span class="weather-temp">${wi.label}</span>
+      </div>
       <span class="weather-cta" onclick="event.stopPropagation();openSettings()">${appSettings.lang==='en'?'Edit':'Upraviť'} ›</span>`;
     widgetEl.classList.remove('weather-fallback');
   } else {
-    widgetEl.innerHTML = `<span class="weather-icon">🌤️</span>
-      <span class="weather-info"><strong>${esc(locLabel)}</strong><span class="weather-temp">${appSettings.lang==='en'?'Enter city for forecast':'Zadaj mesto pre predpoveď'}</span></span>
+    widgetEl.innerHTML = `<div class="weather-orb">🌡️</div>
+      <div class="weather-copy">
+        <span class="weather-label">${appSettings.lang==='en'?'Weather':'Počasie'}</span>
+        <strong>${esc(locLabel)}</strong>
+        <span class="weather-temp-main">—°C</span>
+        <span class="weather-temp">${appSettings.lang==='en'?'Set city for forecast':'Nastav mesto pre predpoveď'}</span>
+      </div>
       <span class="weather-cta" onclick="event.stopPropagation();openSettings()">${appSettings.lang==='en'?'Set':'Nastaviť'} ›</span>`;
     widgetEl.classList.add('weather-fallback');
   }

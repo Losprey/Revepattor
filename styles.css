@@ -4319,3 +4319,125 @@ body::before {
     width: auto !important;
   }
 }
+
+/* Dashboard cleanup: avoid repeated CTAs and make weather feel intentional */
+#dashboard .today-focus-head {
+  justify-content: flex-start;
+}
+
+#dashboard .today-focus-action {
+  display: none !important;
+}
+
+#dashboard .weather-card {
+  position: relative;
+  overflow: hidden;
+  min-height: 142px;
+  padding: .86rem !important;
+  background:
+    radial-gradient(circle at 8% 0%, rgba(125,211,252,.22), transparent 42%),
+    linear-gradient(145deg, rgba(13,31,43,.96), rgba(13,20,28,.9)) !important;
+  border-color: rgba(125,211,252,.16) !important;
+}
+
+#dashboard .weather-card::after {
+  content: "";
+  position: absolute;
+  right: -34px;
+  bottom: -44px;
+  width: 118px;
+  height: 118px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(56,189,248,.2), transparent 68%);
+  pointer-events: none;
+}
+
+html.light #dashboard .weather-card {
+  background:
+    radial-gradient(circle at 8% 0%, rgba(14,165,233,.16), transparent 42%),
+    linear-gradient(145deg, rgba(239,246,255,.98), rgba(248,250,252,.95)) !important;
+}
+
+#dashboard .weather-widget-modern {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas:
+    "orb copy"
+    "cta cta";
+  align-items: start;
+  gap: .68rem .62rem;
+  min-height: 100%;
+}
+
+#dashboard .weather-orb {
+  grid-area: orb;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  background: linear-gradient(145deg, rgba(255,255,255,.14), rgba(255,255,255,.04));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.12);
+  font-size: 1.4rem;
+}
+
+#dashboard .weather-copy {
+  grid-area: copy;
+  min-width: 0;
+}
+
+#dashboard .weather-label {
+  display: block;
+  margin-bottom: .14rem;
+  color: #7dd3fc;
+  font-size: .55rem;
+  font-weight: 900;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+
+#dashboard .weather-copy strong {
+  display: block;
+  color: var(--text);
+  font-size: .76rem;
+  font-weight: 850;
+  line-height: 1.12;
+}
+
+#dashboard .weather-temp-main {
+  display: block;
+  margin-top: .32rem;
+  color: var(--text);
+  font-size: 1.26rem;
+  line-height: 1;
+  font-weight: 950;
+  letter-spacing: -.04em;
+}
+
+#dashboard .weather-temp {
+  display: block;
+  margin-top: .14rem;
+  color: var(--text3);
+  font-size: .62rem;
+  line-height: 1.16;
+}
+
+#dashboard .weather-cta {
+  grid-area: cta;
+  justify-self: start;
+  margin-top: .08rem;
+  padding: .32rem .56rem;
+  border-radius: 999px;
+  background: rgba(125,211,252,.12);
+  color: #7dd3fc !important;
+  font-size: .62rem;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+html.light #dashboard .weather-cta {
+  background: rgba(14,165,233,.1);
+  color: #0369a1 !important;
+}
