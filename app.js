@@ -555,7 +555,7 @@ function pickOnboardLang(l) {
 setTimeout(() => showOnboarding(), 300);
 
 // ======================== AI (DEEPSEEK PROXY) ========================
-const APP_VERSION = '1.0.31';
+const APP_VERSION = '1.0.32';
 const VAPID_PUBLIC_KEY = 'BI6Fga-GXSKggkNJ58R1VEYEfGE6KfWgnuDtI9sHqQLQJzGLshJuIuODmI13AVzX5D2Kd7SBxrr7Cvf-xRAowg0';
 const PUSH_PROXY_URL = 'https://receptar.waldis994.workers.dev';
 
@@ -3922,7 +3922,11 @@ document.addEventListener('selectstart', function(e) {
 
 // =================== HAPTIC FEEDBACK ===================
 function haptic(ms) {
-  try { navigator.vibrate && navigator.vibrate(ms || 8); } catch(e) {}
+  try {
+    if (!navigator.vibrate) return;
+    if (navigator.userActivation && !navigator.userActivation.isActive) return;
+    navigator.vibrate(ms || 8);
+  } catch(e) {}
 }
 
 // =================== ANIMATED HEADER ON SCROLL ===================
@@ -4560,7 +4564,7 @@ function compactPlannerSlotName(name) {
   const clean = String(name || '').trim();
   if (!clean) return '';
   const words = clean.split(/\s+/).slice(0, 2).join(' ') || clean;
-  return words.length > 16 ? words.slice(0, 15) + '…' : words;
+  return words.length > 24 ? words.slice(0, 23) + '…' : words;
 }
 
 function catLabel(cat) {
@@ -6973,7 +6977,9 @@ document.addEventListener('selectstart', function(e) {
 // =================== HAPTIC FEEDBACK ===================
 function haptic(ms) {
   try {
-    if (navigator.vibrate) navigator.vibrate(ms || 8);
+    if (!navigator.vibrate) return;
+    if (navigator.userActivation && !navigator.userActivation.isActive) return;
+    navigator.vibrate(ms || 8);
   } catch(_) {}
 }
 
