@@ -555,7 +555,7 @@ function pickOnboardLang(l) {
 setTimeout(() => showOnboarding(), 300);
 
 // ======================== AI (DEEPSEEK PROXY) ========================
-const APP_VERSION = '1.0.14';
+const APP_VERSION = '1.0.15';
 const VAPID_PUBLIC_KEY = 'BI6Fga-GXSKggkNJ58R1VEYEfGE6KfWgnuDtI9sHqQLQJzGLshJuIuODmI13AVzX5D2Kd7SBxrr7Cvf-xRAowg0';
 const PUSH_PROXY_URL = 'https://receptar.waldis994.workers.dev';
 
@@ -1633,14 +1633,17 @@ function applyLang() {
       }
     }
   });
-  document.getElementById('lang-toggle').textContent = lang === 'en' ? '🇸🇰 SK' : '🇬🇧 EN';
+  const langToggle = document.getElementById('lang-toggle');
+  if (langToggle) langToggle.textContent = lang === 'en' ? '🇸🇰 SK' : '🇬🇧 EN';
   // Show/hide English name field in form
-  document.getElementById('name-en-group').style.display = lang === 'en' ? 'block' : 'none';
+  const nameEnGroup = document.getElementById('name-en-group');
+  if (nameEnGroup) nameEnGroup.style.display = lang === 'en' ? 'block' : 'none';
   // Update form title
+  const formTitle = document.getElementById('form-title');
   if (editingId !== null) {
-    document.getElementById('form-title').textContent = t('formTitle') + ' (edit)';
+    if (formTitle) formTitle.textContent = t('formTitle') + ' (edit)';
   } else {
-    document.getElementById('form-title').textContent = t('formTitle');
+    if (formTitle) formTitle.textContent = t('formTitle');
   }
   // Planner labels
   const phTitle = document.getElementById('planner-hero-title'); if (phTitle) phTitle.textContent = lang==='en'?'📅 Meal Planner':'📅 Plánovač jedál';
@@ -1650,8 +1653,8 @@ function applyLang() {
   if (phBtns[1]) phBtns[1].textContent = '↺ Reset';
   const ptA = document.getElementById('pt-adults-label'); if (ptA) ptA.textContent = lang==='en'?'Adults':'Dospelí';
   const ptK = document.getElementById('pt-kids-label'); if (ptK) ptK.textContent = lang==='en'?'Kids':'Deti';
-  document.getElementById('pln-this').textContent = lang==='en'?'This week':'Tento t\u00fd\u017ede\u0148';
-  document.getElementById('pln-next').textContent = lang==='en'?'Next week':'Bud\u00faci t\u00fd\u017ede\u0148';
+  const plnThis = document.getElementById('pln-this'); if (plnThis) plnThis.textContent = lang==='en'?'This week':'Tento t\u00fd\u017ede\u0148';
+  const plnNext = document.getElementById('pln-next'); if (plnNext) plnNext.textContent = lang==='en'?'Next week':'Bud\u00faci t\u00fd\u017ede\u0148';
   const paC = document.getElementById('pa-clear-label'); if (paC) paC.textContent = lang==='en'?'Clear week':'Vymazať týždeň';
   const paA = document.getElementById('pa-ai-label'); if (paA) paA.textContent = lang==='en'?'📝 AI Shop':'📝 AI nákup';
   const pipMealsLabel = document.getElementById('pip-meals-label'); if (pipMealsLabel) pipMealsLabel.textContent = lang==='en'?'meals':'jedál';
@@ -2883,6 +2886,19 @@ function toggleFav(id) {
 
 function updateFavFilter() { /* renders fav filter badge */ }
 
+function setTextSafe(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = value == null ? '' : String(value);
+}
+function setHtmlSafe(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.innerHTML = value == null ? '' : String(value);
+}
+function setValueSafe(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.value = value == null ? '' : value;
+}
+
 // ======================== RANDOM ========================
 function randomRecipe() {
   if (!recipes.length) return;
@@ -2918,28 +2934,31 @@ function openFormModal(recipe) {
   if (importCard) {
     importCard.innerHTML = '<div onclick="closeModal(\'form-modal\');setTimeout(showImportUrlModal,300)" style="display:flex;align-items:center;gap:.5rem;padding:.5rem .6rem;margin-bottom:.6rem;background:linear-gradient(135deg,rgba(255,77,109,.08),rgba(255,77,109,.02));border:1px dashed rgba(255,77,109,.25);border-radius:var(--radius-md);cursor:pointer;transition:all .2s ease;" onmouseover="this.style.borderColor=\'rgba(255,77,109,.5)\';this.style.background=\'linear-gradient(135deg,rgba(255,77,109,.12),rgba(255,77,109,.04))\'" onmouseout="this.style.borderColor=\'rgba(255,77,109,.25)\';this.style.background=\'linear-gradient(135deg,rgba(255,77,109,.08),rgba(255,77,109,.02))\'"><span style="font-size:1.3rem;">🌐</span><div style="flex:1;"><div style="font-size:.82rem;font-weight:600;color:var(--text);">' + t('btnImportUrl') + '</div><div style="font-size:.65rem;color:var(--text3);">' + t('importUrlHint') + '</div></div><span style="font-size:1.1rem;color:var(--primary);">›</span></div>';
   }
-  document.getElementById('form-title').textContent = recipe ? t('formTitle') + ' (edit)' : t('formTitle');
-  document.getElementById('form-submit-btn').textContent = recipe ? t('save') : t('btnAdd');
-  document.getElementById('r-name').value = recipe ? recipe.name : '';
-  document.getElementById('r-nameEn').value = recipe && recipe.nameEn ? recipe.nameEn : '';
-  document.getElementById('r-category').value = recipe ? recipe.category : 'Hlavné jedlá';
-  document.getElementById('r-difficulty').value = recipe ? (recipe.difficulty || 1) : 1;
-  document.getElementById('r-time').value = recipe ? recipe.time : '';
-  document.getElementById('r-image').value = recipe && recipe.image && !recipe.imageData ? recipe.image : '';
-  document.getElementById('r-ingredients').value = recipe ? recipe.ingredients.join('\n') : '';
-  document.getElementById('r-steps').value = recipe ? recipe.steps.join('\n') : '';
-  document.getElementById('r-tags').value = recipe ? recipe.tags.join(', ') : '';
-  document.getElementById('r-kcal').value = recipe && recipe.nutrition ? recipe.nutrition.kcal || '' : '';
-  document.getElementById('r-protein').value = recipe && recipe.nutrition ? recipe.nutrition.protein || '' : '';
-  document.getElementById('r-fat').value = recipe && recipe.nutrition ? recipe.nutrition.fat || '' : '';
-  document.getElementById('r-carbs').value = recipe && recipe.nutrition ? recipe.nutrition.carbs || '' : '';
-  document.getElementById('r-portions').value = recipe && recipe.portions ? recipe.portions : (appSettings.mealPlanner.defaultServings || 4);
-  document.getElementById('nutrition-status').innerHTML = '';
-  document.getElementById('nutrition-portion-info').textContent = '';
-  document.getElementById('r-image-preview').style.display = 'none';
+  setTextSafe('form-title', recipe ? t('formTitle') + ' (edit)' : t('formTitle'));
+  setTextSafe('form-submit-btn', recipe ? t('save') : t('btnAdd'));
+  setValueSafe('r-name', recipe ? recipe.name : '');
+  setValueSafe('r-nameEn', recipe && recipe.nameEn ? recipe.nameEn : '');
+  setValueSafe('r-category', recipe ? recipe.category : 'Hlavné jedlá');
+  setValueSafe('r-difficulty', recipe ? (recipe.difficulty || 1) : 1);
+  setValueSafe('r-time', recipe ? recipe.time : '');
+  setValueSafe('r-image', recipe && recipe.image && !recipe.imageData ? recipe.image : '');
+  setValueSafe('r-ingredients', recipe ? recipe.ingredients.join('\n') : '');
+  setValueSafe('r-steps', recipe ? recipe.steps.join('\n') : '');
+  setValueSafe('r-tags', recipe ? recipe.tags.join(', ') : '');
+  setValueSafe('r-kcal', recipe && recipe.nutrition ? recipe.nutrition.kcal || '' : '');
+  setValueSafe('r-protein', recipe && recipe.nutrition ? recipe.nutrition.protein || '' : '');
+  setValueSafe('r-fat', recipe && recipe.nutrition ? recipe.nutrition.fat || '' : '');
+  setValueSafe('r-carbs', recipe && recipe.nutrition ? recipe.nutrition.carbs || '' : '');
+  setValueSafe('r-portions', recipe && recipe.portions ? recipe.portions : (appSettings.mealPlanner.defaultServings || 4));
+  setHtmlSafe('nutrition-status', '');
+  setTextSafe('nutrition-portion-info', '');
+  const imagePreview = document.getElementById('r-image-preview');
+  if (imagePreview) imagePreview.style.display = 'none';
   if (recipe && recipe.imageData) {
-    document.getElementById('r-image-preview').src = recipe.imageData;
-    document.getElementById('r-image-preview').style.display = 'block';
+    if (imagePreview) {
+      imagePreview.src = recipe.imageData;
+      imagePreview.style.display = 'block';
+    }
   }
   openModal('form-modal');
 }
@@ -4504,16 +4523,22 @@ function renderPlanner() {
 
   // Plan type switcher
   const pts = document.getElementById('plan-type-switch');
-  pts.className = 'plan-type-switch' + (planType === 'kids' ? ' kids' : '');
+  if (pts) pts.className = 'plan-type-switch' + (planType === 'kids' ? ' kids' : '');
   document.querySelectorAll('.plan-type-btn').forEach(b => b.classList.toggle('active', b.dataset.pt === planType));
   const ptA = document.getElementById('pt-adults-label'); if (ptA) ptA.textContent = lang === 'en' ? 'Adults' : 'Dospelí';
   const ptK = document.getElementById('pt-kids-label'); if (ptK) ptK.textContent = lang === 'en' ? 'Kids' : 'Deti';
 
   // Week nav active state
-  document.getElementById('pln-this').classList.toggle('active', plannerWeekOffset === 0);
-  document.getElementById('pln-next').classList.toggle('active', plannerWeekOffset === 1);
-  document.getElementById('pln-this').textContent = lang==='en'?'This week':'Tento týždeň';
-  document.getElementById('pln-next').textContent = lang==='en'?'Next week':'Budúci týždeň';
+  const plnThis = document.getElementById('pln-this');
+  const plnNext = document.getElementById('pln-next');
+  if (plnThis) {
+    plnThis.classList.toggle('active', plannerWeekOffset === 0);
+    plnThis.textContent = lang==='en'?'This week':'Tento týždeň';
+  }
+  if (plnNext) {
+    plnNext.classList.toggle('active', plannerWeekOffset === 1);
+    plnNext.textContent = lang==='en'?'Next week':'Budúci týždeň';
+  }
 
   // ===== TODAY SECTION =====
   const dayNameToday = dayNames[todayIdx];
@@ -6018,16 +6043,17 @@ function setImportBusy(isBusy) {
 
 function fillImportedRecipe(data) {
   openFormModal();
-  document.getElementById('r-name').value = data.name || '';
-  document.getElementById('r-image').value = data.image || '';
-  document.getElementById('r-ingredients').value = data.ingredients || '';
-  document.getElementById('r-steps').value = data.steps || '';
-  document.getElementById('r-time').value = data.time || 30;
-  if (data.category) document.getElementById('r-category').value = data.category;
-  document.getElementById('r-tags').value = (data.tags || []).join(', ');
-  if (data.calories) document.getElementById('r-kcal').value = data.calories;
-  document.getElementById('r-portions').value = data.portions || 4;
-  document.getElementById('r-image').dispatchEvent(new Event('input'));
+  setValueSafe('r-name', data.name || '');
+  setValueSafe('r-image', data.image || '');
+  setValueSafe('r-ingredients', data.ingredients || '');
+  setValueSafe('r-steps', data.steps || '');
+  setValueSafe('r-time', data.time || 30);
+  if (data.category) setValueSafe('r-category', data.category);
+  setValueSafe('r-tags', (data.tags || []).join(', '));
+  if (data.calories) setValueSafe('r-kcal', data.calories);
+  setValueSafe('r-portions', data.portions || 4);
+  const imageInput = document.getElementById('r-image');
+  if (imageInput) imageInput.dispatchEvent(new Event('input'));
   if (!data.calories && data.rawIngredients) estimateAndFillImport(data.rawIngredients, data.portions || 4);
 }
 
@@ -6069,10 +6095,15 @@ function showImportReview(data) {
 }
 
 function acceptImportedRecipe() {
-  if (window._pendingImportRecipe) fillImportedRecipe(window._pendingImportRecipe);
-  const review = document.getElementById('import-review-modal');
-  if (review) review.remove();
-  closeModal('import-url-modal');
+  try {
+    if (window._pendingImportRecipe) fillImportedRecipe(window._pendingImportRecipe);
+    const review = document.getElementById('import-review-modal');
+    if (review) review.remove();
+    closeModal('import-url-modal');
+  } catch(e) {
+    console.error('Import accept error:', e);
+    showToast(lang === 'en' ? 'Import could not open the form.' : 'Import sa nepodarilo otvoriť vo formulári.', 'warning');
+  }
 }
 
 function importFromUrl() {
