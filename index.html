@@ -15,7 +15,7 @@
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <title data-lang="appTitle">Mealnest</title>
-  <link rel="stylesheet" href="styles.css?v=15">
+  <link rel="stylesheet" href="styles.css?v=17">
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -99,18 +99,6 @@
 
 <!-- DASHBOARD -->
 <div class="container" id="dashboard">
-  <div id="dash-hero" class="dash-hero glow-card">
-    <div class="dash-hero-bg"></div>
-    <div class="dash-hero-glow"></div>
-    <div class="dash-hero-content">
-      <div class="dash-greeting" id="dash-greeting">Dobré ráno</div>
-      <div class="dash-date" id="dash-date"></div>
-      <div class="dash-message" id="dash-message">Vitaj späť!</div>
-      <div class="dash-message-sub" id="dash-message-sub"></div>
-      <button id="dash-ai-tip-btn" onclick="aiDailyTip()" style="margin-top:.4rem;padding:.3rem .7rem;border-radius:99px;border:1px solid var(--primary-light);background:rgba(220,38,38,.1);color:var(--primary-light);font-size:.65rem;font-weight:600;cursor:pointer;transition:all .2s;">🤖 <span id="dash-ai-label">AI tip dňa</span></button>
-      <div class="dash-stats-row" id="dash-stats-row"></div>
-    </div>
-  </div>
   <div id="dash-content">
     <!-- Skeleton loading placeholders -->
     <div class="skeleton-card skeleton-pulse"></div>
@@ -523,8 +511,8 @@
 </nav>
 
 
-<script src="app.js?v=15"></script>
-<script src="board.js?v=15"></script>
+<script src="app.js?v=17"></script>
+<script src="board.js?v=17"></script>
 
 <!-- Quick add FAB -->
 <div id="fab-quick-add" style="display:none">

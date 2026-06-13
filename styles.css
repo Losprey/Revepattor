@@ -2091,6 +2091,446 @@ body.header-collapsed .controls-bar { top: 0; }
 .seasonal-recipe:active { transform: scale(.97); }
 
 /* ======================== BOARD (NÁSTENKA) ======================== */
+.container#dashboard {
+  padding: .6rem .7rem calc(6.2rem + env(safe-area-inset-bottom));
+  background:
+    radial-gradient(circle at 12% -8%, rgba(16,185,129,.13), transparent 34%),
+    radial-gradient(circle at 90% 5%, rgba(245,158,11,.10), transparent 32%);
+}
+
+#dash-content {
+  display: flex;
+  flex-direction: column;
+  gap: .72rem;
+}
+
+#dashboard .dash-card {
+  margin-bottom: 0;
+  padding: .82rem;
+  border-radius: 24px;
+  background: linear-gradient(145deg, rgba(28,27,24,.92), rgba(18,18,16,.88));
+  border: 1px solid rgba(255,255,255,.075);
+  box-shadow: 0 18px 42px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.035);
+}
+
+html.light #dashboard .dash-card {
+  background: linear-gradient(145deg, rgba(255,255,255,.95), rgba(250,247,241,.9));
+  border-color: rgba(15,23,42,.08);
+  box-shadow: 0 18px 38px rgba(15,23,42,.08);
+}
+
+html.light .dash-cockpit {
+  background:
+    linear-gradient(135deg, rgba(18,29,22,.96), rgba(35,23,18,.96) 58%, rgba(65,32,20,.95)),
+    radial-gradient(circle at 15% 15%, rgba(16,185,129,.28), transparent 34%);
+}
+
+.dash-cockpit {
+  position: relative;
+  overflow: hidden;
+  border-radius: 30px;
+  padding: 1rem;
+  color: #fff;
+  background:
+    linear-gradient(135deg, rgba(18,29,22,.96), rgba(25,19,16,.96) 56%, rgba(46,24,16,.95)),
+    radial-gradient(circle at 15% 15%, rgba(16,185,129,.28), transparent 34%);
+  border: 1px solid rgba(255,255,255,.09);
+  box-shadow: 0 24px 55px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.06);
+}
+
+.dash-cockpit-bg {
+  position: absolute;
+  inset: -30% -20% auto auto;
+  width: 210px;
+  height: 210px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(74,222,128,.22), rgba(245,158,11,.1) 42%, transparent 68%);
+  filter: blur(4px);
+  pointer-events: none;
+}
+
+.dash-cockpit-main {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: .8rem;
+  align-items: start;
+}
+
+#dashboard .dash-greeting {
+  display: block;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  color: #61e6a9;
+  font-size: .62rem;
+  font-weight: 850;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+#dashboard .dash-date {
+  margin-top: .38rem;
+  color: rgba(255,255,255,.62);
+  font-size: .72rem;
+  font-weight: 650;
+}
+
+#dashboard .dash-message {
+  margin: .12rem 0 0;
+  color: #fff;
+  font-size: 1.45rem;
+  line-height: 1.04;
+  letter-spacing: -.04em;
+  font-weight: 900;
+}
+
+#dashboard .dash-message-sub {
+  margin-top: .35rem;
+  color: rgba(255,255,255,.74);
+  font-size: .78rem;
+  line-height: 1.35;
+  max-width: 18rem;
+}
+
+.dash-plan-btn {
+  border: 0;
+  border-radius: 999px;
+  padding: .55rem .86rem;
+  background: rgba(255,255,255,.14);
+  color: #fff;
+  font-size: .72rem;
+  font-weight: 850;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.12);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.dash-progress-strip {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: .72rem;
+  margin-top: 1rem;
+  padding: .68rem;
+  border-radius: 22px;
+  background: rgba(255,255,255,.075);
+  border: 1px solid rgba(255,255,255,.08);
+}
+
+.dash-ring {
+  --pct: 0;
+  width: 54px;
+  height: 54px;
+  flex: 0 0 54px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at center, rgba(24,24,20,.94) 0 55%, transparent 56%),
+    conic-gradient(#34d399 calc(var(--pct) * 1%), rgba(255,255,255,.12) 0);
+}
+
+.dash-ring span {
+  color: #fff;
+  font-size: .78rem;
+  font-weight: 900;
+}
+
+.dash-progress-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: .16rem;
+}
+
+.dash-progress-copy strong {
+  font-size: .88rem;
+  color: #fff;
+}
+
+.dash-progress-copy span {
+  color: rgba(255,255,255,.63);
+  font-size: .69rem;
+}
+
+#dashboard .dash-stats-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: .4rem;
+  margin-top: .72rem;
+}
+
+#dashboard .dash-stat-pill {
+  justify-content: center;
+  min-width: 0;
+  padding: .46rem .36rem;
+  border-radius: 16px;
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.07);
+  color: rgba(255,255,255,.68);
+  font-size: .61rem;
+  font-weight: 700;
+}
+
+#dashboard .dash-stat-pill strong {
+  color: #fff;
+  font-size: .75rem;
+}
+
+.ai-tip-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: .74rem;
+  cursor: pointer;
+  background:
+    linear-gradient(135deg, rgba(16,185,129,.14), rgba(245,158,11,.09)) !important;
+  border-color: rgba(52,211,153,.18) !important;
+}
+
+html.light .ai-tip-card {
+  background: linear-gradient(135deg, rgba(236,253,245,.98), rgba(255,247,237,.96)) !important;
+  border-color: rgba(16,185,129,.18) !important;
+}
+
+.ai-tip-icon {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  background: rgba(16,185,129,.13);
+  font-size: 1.35rem;
+}
+
+.ai-tip-kicker {
+  color: #52d99c;
+  font-size: .62rem;
+  font-weight: 850;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.ai-tip-title {
+  margin-top: .1rem;
+  color: var(--text);
+  font-size: .93rem;
+  font-weight: 850;
+  line-height: 1.1;
+}
+
+.ai-tip-meta {
+  margin-top: .16rem;
+  color: var(--text3);
+  font-size: .68rem;
+}
+
+.ai-tip-btn,
+.today-focus-action {
+  border: 0;
+  border-radius: 999px;
+  padding: .5rem .72rem;
+  background: rgba(255,255,255,.1);
+  color: var(--text);
+  font-size: .68rem;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.today-focus-card {
+  padding: .86rem !important;
+}
+
+.today-focus-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  margin-bottom: .72rem;
+}
+
+.today-focus-kicker {
+  color: #34d399;
+  font-size: .62rem;
+  font-weight: 900;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+
+.today-focus-title {
+  margin-top: .12rem;
+  color: var(--text);
+  font-size: 1.06rem;
+  line-height: 1.06;
+  font-weight: 900;
+  letter-spacing: -.03em;
+}
+
+.today-focus-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0,1fr));
+  gap: .45rem;
+}
+
+.today-focus-item {
+  min-width: 0;
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 18px;
+  padding: .58rem .38rem;
+  text-align: left;
+  background: rgba(255,255,255,.045);
+  color: var(--text);
+}
+
+.today-focus-item span {
+  display: block;
+  font-size: 1rem;
+  margin-bottom: .25rem;
+}
+
+.today-focus-item strong {
+  display: block;
+  font-size: 1.02rem;
+  line-height: 1;
+  font-weight: 900;
+}
+
+.today-focus-item small {
+  display: block;
+  margin-top: .18rem;
+  color: var(--text3);
+  font-size: .58rem;
+  line-height: 1.15;
+}
+
+.dash-widget-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .65rem;
+}
+
+.dash-widget-pair .dash-card {
+  min-width: 0;
+}
+
+#dashboard .weather-card {
+  padding: .78rem !important;
+  background: linear-gradient(145deg, rgba(56,189,248,.1), rgba(28,27,24,.9)) !important;
+}
+
+html.light #dashboard .weather-card {
+  background: linear-gradient(145deg, rgba(239,246,255,.98), rgba(248,250,252,.95)) !important;
+}
+
+#dashboard .weather-widget {
+  gap: .58rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+#dashboard .weather-icon {
+  font-size: 1.65rem;
+}
+
+#dashboard .weather-info strong {
+  font-size: .76rem;
+  line-height: 1.15;
+}
+
+html.dark #dashboard .weather-info strong,
+html.dark #dashboard .weather-temp,
+html.dark #dashboard .weather-cta {
+  color: rgba(255,255,255,.88);
+}
+
+#dashboard .weather-temp,
+#dashboard .weather-cta {
+  font-size: .65rem;
+}
+
+#dashboard .seasonal-card {
+  background: linear-gradient(145deg, rgba(245,158,11,.12), rgba(28,27,24,.9)) !important;
+}
+
+html.light #dashboard .seasonal-card {
+  background: linear-gradient(145deg, rgba(255,251,235,.98), rgba(255,247,237,.95)) !important;
+}
+
+.seasonal-card-compact {
+  padding: .78rem !important;
+}
+
+#dashboard .seasonal-header {
+  align-items: flex-start;
+  gap: .55rem;
+}
+
+#dashboard .seasonal-icon {
+  font-size: 1.55rem;
+}
+
+#dashboard .seasonal-title {
+  font-size: .76rem;
+  line-height: 1.15;
+}
+
+#dashboard .seasonal-desc {
+  font-size: .64rem;
+  line-height: 1.28;
+  color: var(--text3);
+}
+
+#dashboard .seasonal-recipes {
+  margin-top: .42rem;
+}
+
+#dashboard .seasonal-recipe {
+  background: rgba(255,255,255,.055);
+  border: 1px solid rgba(255,255,255,.055);
+  font-size: .65rem;
+  line-height: 1.2;
+}
+
+#dashboard .tasks-widget {
+  margin: 0;
+  background: transparent;
+  border: 0;
+  padding: 0;
+}
+
+#dashboard .meal-timeline-item {
+  background: rgba(255,255,255,.045);
+  border-color: rgba(255,255,255,.065);
+}
+
+#dashboard .dash-card-cta {
+  background: linear-gradient(135deg, rgba(34,197,94,.12), rgba(220,38,38,.08)) !important;
+}
+
+html.light #dashboard .dash-card-cta {
+  background: linear-gradient(135deg, rgba(236,253,245,.96), rgba(254,242,242,.94)) !important;
+}
+
+@media (max-width: 420px) {
+  .container#dashboard { padding-left: .62rem; padding-right: .62rem; }
+  #dashboard .dash-message { font-size: 1.34rem; }
+  .dash-cockpit { border-radius: 28px; padding: .9rem; }
+  .today-focus-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .ai-tip-btn { padding-inline: .62rem; }
+}
+
+@media (max-width: 360px) {
+  .dash-widget-pair { grid-template-columns: 1fr; }
+  .ai-tip-card { grid-template-columns: auto 1fr; }
+  .ai-tip-btn { grid-column: 1 / -1; width: 100%; }
+}
+
 .board-scroll {
   padding-bottom: 1rem;
   position: relative;
@@ -3864,5 +4304,18 @@ body::before {
   .container {
     padding-left: .75rem;
     padding-right: .75rem;
+  }
+}
+
+@media (min-width: 361px) and (max-width: 430px) {
+  #dashboard .dash-widget-pair {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+  }
+  #dashboard .ai-tip-card {
+    grid-template-columns: auto minmax(0, 1fr) auto !important;
+  }
+  #dashboard .ai-tip-btn {
+    grid-column: auto !important;
+    width: auto !important;
   }
 }

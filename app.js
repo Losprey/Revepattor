@@ -555,7 +555,7 @@ function pickOnboardLang(l) {
 setTimeout(() => showOnboarding(), 300);
 
 // ======================== AI (DEEPSEEK PROXY) ========================
-const APP_VERSION = '1.0.15';
+const APP_VERSION = '1.0.17';
 const VAPID_PUBLIC_KEY = 'BI6Fga-GXSKggkNJ58R1VEYEfGE6KfWgnuDtI9sHqQLQJzGLshJuIuODmI13AVzX5D2Kd7SBxrr7Cvf-xRAowg0';
 const PUSH_PROXY_URL = 'https://receptar.waldis994.workers.dev';
 
@@ -4054,12 +4054,12 @@ function getSeasonalRecipes() {
   }).slice(0, 3);
 }
 
-function renderSeasonalWidget() {
+function renderSeasonalWidget(compact) {
   var sm = getSeasonalMonth();
   var sr = getSeasonalRecipes();
   var label = lang === 'en' ? sm.labelEn : sm.label;
   var desc = lang === 'en' ? sm.descEn : sm.desc;
-  var html = '<div class="dash-card seasonal-card"><div class="seasonal-header"><span class="seasonal-icon">' + sm.emoji + '</span><div><div class="seasonal-title">' + (lang==='en'?'What\'s in season: ':'Čo je v sezóne: ') + label + '</div><div class="seasonal-desc">' + desc + '</div></div></div>';
+  var html = '<div class="dash-card seasonal-card' + (compact ? ' seasonal-card-compact' : '') + '"><div class="seasonal-header"><span class="seasonal-icon">' + sm.emoji + '</span><div><div class="seasonal-title">' + (lang==='en'?'In season: ':'Sezóna: ') + label + '</div><div class="seasonal-desc">' + desc + '</div></div></div>';
   if (sr.length) {
     html += '<div class="seasonal-recipes">' + sr.map(function(r) {
       var name = lang === 'en' && r.nameEn ? r.nameEn : r.name;
@@ -4129,10 +4129,12 @@ function renderDashboard() {
   if (hour < 10) period = 'rano';
   else if (hour >= 18) period = 'vecer';
   const greeting = greetings[lang][period];
-  document.getElementById('dash-greeting').textContent = greeting;
+  const greetingEl = document.getElementById('dash-greeting');
+  if (greetingEl) greetingEl.textContent = greeting;
 
   const dateStr = now.toLocaleDateString(lang === 'en' ? 'en-GB' : 'sk-SK', { weekday: 'long', day: 'numeric', month: 'long' });
-  document.getElementById('dash-date').textContent = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+  const dashDateEl = document.getElementById('dash-date');
+  if (dashDateEl) dashDateEl.textContent = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
 
   // Weather-aware message (simulated)
   const messages = lang === 'en' ? {
@@ -4154,7 +4156,9 @@ function renderDashboard() {
   if (isHot) msgKey = 'hot';
   else if (isCold) msgKey = 'cold';
   const msgArr = messages[msgKey];
-  document.getElementById('dash-message').textContent = msgArr[Math.floor(Math.random() * msgArr.length)];
+  const currentMessage = msgArr[Math.floor(Math.random() * msgArr.length)];
+  const dashMessageEl = document.getElementById('dash-message');
+  if (dashMessageEl) dashMessageEl.textContent = currentMessage;
 
   // Motivational sub-message
   const subs = lang === 'en' ? {
@@ -4167,18 +4171,16 @@ function renderDashboard() {
     vecer: ['🌙 Zrelaxuj pri dobrej večeri', '⭐ Ohliadni sa za dnešnými jedlami'],
   };
   const subArr = subs[period];
-  document.getElementById('dash-message-sub').textContent = subArr[Math.floor(Math.random() * subArr.length)];
+  const currentSubMessage = subArr[Math.floor(Math.random() * subArr.length)];
+  const dashSubEl = document.getElementById('dash-message-sub');
+  if (dashSubEl) dashSubEl.textContent = currentSubMessage;
 
   // Stat pills
   const plannedToday = getTodayMealCount();
   const favCount = recipes.filter(r => r.favorite).length;
   const totalKcal = getTodayKcal();
-  document.getElementById('dash-stats-row').innerHTML = `
-    <span class="dash-stat-pill">📅 <strong class="count-up" data-target="${plannedToday}">0</strong>/${MEALS.length} ${lang === 'en' ? 'meals' : 'jedál'}</span>
-    <span class="dash-stat-pill">❤️ <strong class="count-up" data-target="${favCount}">0</strong> ${lang === 'en' ? 'favorites' : 'obľúbených'}</span>
-    <span class="dash-stat-pill">🔥 <strong class="count-up" data-target="${totalKcal}">0</strong> kcal</span>
-    <span class="dash-stat-pill">📖 <strong class="count-up" data-target="${recipes.length}">0</strong> ${lang === 'en' ? 'recipes' : 'receptov'}</span>
-  `;
+  const dashStatsEl = document.getElementById('dash-stats-row');
+  if (dashStatsEl) dashStatsEl.innerHTML = '';
   setTimeout(function() {
     document.querySelectorAll('.count-up').forEach(function(el) { animateCountUp(el, el.dataset.target); });
   }, 100);
@@ -4188,23 +4190,46 @@ function renderDashboard() {
   const w = appSettings.homeWidgets;
   try { loadShopItems(); } catch(e) {}
 
-    // Greeting + stats hero
   const todayMeals = getTodayMealCount();
   const todayTasksArr = getTodayTasks();
   const todayDone = tasks.filter(t => t.date === new Date().toISOString().slice(0,10) && t.completed).length;
   const streak = calcPlanningStreak();
+  const uncheckedShop = (Array.isArray(shopItems) ? shopItems : []).filter(i => i && !i.checked).length;
+  const mealPct = Math.round((todayMeals / MEALS.length) * 100);
 
-  html += renderTodayFocusPanel({ todayMeals, todayTasks: todayTasksArr.length, todayDone, totalKcal, streak });
+  html += renderDashboardCockpit({
+    greeting,
+    dateText: dateStr.charAt(0).toUpperCase() + dateStr.slice(1),
+    message: currentMessage,
+    subMessage: currentSubMessage,
+    todayMeals,
+    totalMeals: MEALS.length,
+    totalKcal,
+    favCount,
+    recipeCount: recipes.length,
+    uncheckedShop,
+    mealPct
+  });
+
+  if (w.quickRecipes) {
+    html += renderAiTipCard();
+  }
+
+  html += renderTodayFocusPanel({ todayMeals, todayTasks: todayTasksArr.length, todayDone, totalKcal, streak, uncheckedShop });
 
     // Weather widget
   if (w.weather) {
+    html += `<div class="dash-widget-pair">`;
     if (appSettings.weather.location) {
-      html += `<div class="dash-card"><div class="weather-widget" id="weather-widget" onclick="editText('weather.location','${t("Mesto","City")}')"><span class="weather-icon">🌤️</span><span class="weather-info"><strong>${esc(appSettings.weather.location)}</strong><span class="weather-temp">${t("Načítavam...","Loading...")}</span></span></div></div>`;
+      html += `<div class="dash-card weather-card"><div class="weather-widget" id="weather-widget" onclick="editText('weather.location','${t("Mesto","City")}')"><span class="weather-icon">🌤️</span><span class="weather-info"><strong>${esc(appSettings.weather.location)}</strong><span class="weather-temp">${t("Načítavam...","Loading...")}</span></span></div></div>`;
     } else {
-      html += `<div class="dash-card"><div class="weather-widget weather-fallback" id="weather-widget" onclick="editText('weather.location','${t("Počasie","Weather")}')"><span class="weather-icon">🌤️</span><span class="weather-info"><strong>${t("Počasie","Weather")}</strong><span class="weather-temp">${t("Zadaj mesto","Enter city")}</span></span></div></div>`;
+      html += `<div class="dash-card weather-card"><div class="weather-widget weather-fallback" id="weather-widget" onclick="editText('weather.location','${t("Počasie","Weather")}')"><span class="weather-icon">🌤️</span><span class="weather-info"><strong>${t("Počasie","Weather")}</strong><span class="weather-temp">${t("Zadaj mesto","Enter city")}</span></span></div></div>`;
     }
-  }
-  if (w.seasonal) {
+    if (w.seasonal) {
+      html += renderSeasonalWidget(true);
+    }
+    html += `</div>`;
+  } else if (w.seasonal) {
     html += renderSeasonalWidget();
   }
 
@@ -4227,13 +4252,6 @@ function renderDashboard() {
     <div class="meal-timeline" id="dash-timeline">${renderMealTimeline()}</div>
   </div>`;
 
-  // Progress bar
-  const mealPct = Math.round((todayMeals / 5) * 100);
-  html += `<div class="dash-card">
-    <div class="dash-progress-row"><span class="dpr-label">📅 ${lang === "en" ? "Daily progress" : "Dnešný progress"}</span><span class="dpr-value">${todayMeals}/5</span></div>
-    <div class="dash-progress-bar"><div class="dash-progress-fill" style="width:${mealPct}%;"></div></div>
-  </div>`;
-
     // AI CTA
   html += `<div class="dash-card dash-card-cta" onclick="aiGenerateFullWeek()">
     <div class="dash-cta-content">
@@ -4248,7 +4266,7 @@ function renderDashboard() {
 
   // Smart suggestions
   if (w.quickRecipes) {
-    html += `<div class="dash-card"><div class="dash-card-header"><span class="dash-card-title">💡 ${lang === "en" ? "Suggestions" : "Tipy na dnes"}</span></div><div class="suggestion-scroll" id="dash-suggestions">${renderSuggestions()}</div></div>`;
+    html += `<div class="dash-card dash-suggestions-card"><div class="dash-card-header"><span class="dash-card-title">💡 ${lang === "en" ? "More ideas" : "Ďalšie tipy"}</span></div><div class="suggestion-scroll" id="dash-suggestions">${renderSuggestions()}</div></div>`;
   }// Safe fallback: if no widgets rendered, show restore CTA
   if (!html.trim()) {
     html = `<div class="dash-section" style="text-align:center;padding:32px 20px;">
@@ -4262,6 +4280,64 @@ function renderDashboard() {
   try { document.getElementById('dash-content').innerHTML = html; } catch(e) {}
   try { loadTasks(); } catch(e) {}
   try { renderTaskWidget(); } catch(e) {}
+}
+
+function renderDashboardCockpit(data) {
+  const mealLabel = lang === 'en' ? 'meals' : 'jedál';
+  const shopLabel = lang === 'en' ? 'shopping' : 'nákup';
+  const favLabel = lang === 'en' ? 'favorite' : 'obľúb.';
+  const recipeLabel = lang === 'en' ? 'recipes' : 'receptov';
+  return `<section class="dash-cockpit">
+    <div class="dash-cockpit-bg"></div>
+    <div class="dash-cockpit-main">
+      <div class="dash-cockpit-copy">
+        <div class="dash-greeting" id="dash-greeting">${esc(data.greeting)}</div>
+        <div class="dash-date" id="dash-date">${esc(data.dateText)}</div>
+        <h1 class="dash-message" id="dash-message">${lang === 'en' ? 'Today in the kitchen' : 'Dnes v kuchyni'}</h1>
+        <div class="dash-message-sub" id="dash-message-sub">${esc(data.message)}</div>
+      </div>
+      <button class="dash-plan-btn" onclick="switchTab('planner')">${lang === 'en' ? 'Plan' : 'Plánovať'} ›</button>
+    </div>
+    <div class="dash-progress-strip">
+      <div class="dash-ring" style="--pct:${data.mealPct}">
+        <span>${data.todayMeals}/${data.totalMeals}</span>
+      </div>
+      <div class="dash-progress-copy">
+        <strong>${data.mealPct}% ${lang === 'en' ? 'planned' : 'naplánované'}</strong>
+        <span>${data.totalKcal} kcal · ${Math.max(0, data.totalMeals - data.todayMeals)} ${lang === 'en' ? 'slots open' : 'miest voľných'}</span>
+      </div>
+    </div>
+    <div class="dash-stats-row" id="dash-stats-row">
+      <span class="dash-stat-pill">🛒 <strong class="count-up" data-target="${data.uncheckedShop}">0</strong> ${shopLabel}</span>
+      <span class="dash-stat-pill">❤️ <strong class="count-up" data-target="${data.favCount}">0</strong> ${favLabel}</span>
+      <span class="dash-stat-pill">📖 <strong class="count-up" data-target="${data.recipeCount}">0</strong> ${recipeLabel}</span>
+    </div>
+  </section>`;
+}
+
+function renderAiTipCard() {
+  const suggestionsHtml = renderSuggestions();
+  const firstSuggestionMatch = suggestionsHtml.match(/onclick="viewRecipe\((\d+)\)"[\s\S]*?<div class="sugg-icon">([^<]*)<\/div>[\s\S]*?<div class="sugg-name">([^<]*)<\/div>[\s\S]*?<div class="sugg-meta">([^<]*)<\/div>/);
+  if (firstSuggestionMatch) {
+    return `<div class="dash-card ai-tip-card" onclick="viewRecipe(${firstSuggestionMatch[1]})">
+      <div class="ai-tip-icon">${firstSuggestionMatch[2]}</div>
+      <div class="ai-tip-copy">
+        <div class="ai-tip-kicker">🤖 ${lang === 'en' ? 'AI tip of the day' : 'AI tip dňa'}</div>
+        <div class="ai-tip-title">${firstSuggestionMatch[3]}</div>
+        <div class="ai-tip-meta">${firstSuggestionMatch[4]}</div>
+      </div>
+      <button class="ai-tip-btn" onclick="event.stopPropagation();viewRecipe(${firstSuggestionMatch[1]})">${lang === 'en' ? 'Open' : 'Otvoriť'} ›</button>
+    </div>`;
+  }
+  return `<div class="dash-card ai-tip-card" onclick="aiDailyTip()">
+    <div class="ai-tip-icon">🤖</div>
+    <div class="ai-tip-copy">
+      <div class="ai-tip-kicker">${lang === 'en' ? 'AI tip of the day' : 'AI tip dňa'}</div>
+      <div class="ai-tip-title">${lang === 'en' ? 'Let AI suggest something light' : 'Nechaj AI navrhnúť niečo ľahké'}</div>
+      <div class="ai-tip-meta">${lang === 'en' ? 'Based on weather and your recipes' : 'Podľa počasia a tvojich receptov'}</div>
+    </div>
+    <button class="ai-tip-btn" onclick="event.stopPropagation();aiDailyTip()">${lang === 'en' ? 'Suggest' : 'Navrhnúť'} ›</button>
+  </div>`;
 }
 
 function getTodayMealCount() {
@@ -4289,15 +4365,14 @@ function getTodayKcal() {
 
 function renderTodayFocusPanel(stats) {
   const remainingMeals = Math.max(0, MEALS.length - stats.todayMeals);
-  const uncheckedShop = (Array.isArray(shopItems) ? shopItems : []).filter(i => i && !i.checked).length;
   const taskLabel = stats.todayTasks
     ? (lang === 'en' ? stats.todayTasks + ' tasks left' : stats.todayTasks + ' úloh zostáva')
     : (lang === 'en' ? 'No tasks today' : 'Dnes bez úloh');
   const mealLabel = remainingMeals
     ? (lang === 'en' ? remainingMeals + ' meals open' : remainingMeals + ' jedál chýba')
     : (lang === 'en' ? 'Meals planned' : 'Jedlá naplánované');
-  const shopLabel = uncheckedShop
-    ? (lang === 'en' ? uncheckedShop + ' shopping items' : uncheckedShop + ' položiek v nákupe')
+  const shopLabel = stats.uncheckedShop
+    ? (lang === 'en' ? stats.uncheckedShop + ' shopping items' : stats.uncheckedShop + ' položiek v nákupe')
     : (lang === 'en' ? 'Shopping clear' : 'Nákup čistý');
   return `<div class="today-focus-card dash-card">
     <div class="today-focus-head">
@@ -4310,7 +4385,7 @@ function renderTodayFocusPanel(stats) {
     <div class="today-focus-grid">
       <button class="today-focus-item" onclick="switchTab('planner')"><span>🍽️</span><strong>${stats.todayMeals}/${MEALS.length}</strong><small>${mealLabel}</small></button>
       <button class="today-focus-item" onclick="switchTab('tasks')"><span>✅</span><strong>${stats.todayDone}/${stats.todayDone + stats.todayTasks}</strong><small>${taskLabel}</small></button>
-      <button class="today-focus-item" onclick="switchTab('shopping')"><span>🛒</span><strong>${uncheckedShop}</strong><small>${shopLabel}</small></button>
+      <button class="today-focus-item" onclick="switchTab('shopping')"><span>🛒</span><strong>${stats.uncheckedShop}</strong><small>${shopLabel}</small></button>
       <button class="today-focus-item" onclick="aiGenerateFullWeek()"><span>✨</span><strong>${stats.streak}</strong><small>${lang === 'en' ? 'day streak' : 'dní v rade'}</small></button>
     </div>
   </div>`;
@@ -6401,13 +6476,15 @@ window.addEventListener('error', function(evt) {
 (function showBootInfo() {
   var el = document.getElementById('boot-status');
   if (!el) return;
-  el.style.display = 'block';
-  el.style.background = 'rgba(0,0,0,.92)';
-  var r = JSON.parse(localStorage.getItem('recipes')||'null');
-  var rc = (r && Array.isArray(r) && r.length) ? r.length : 0;
-  var fc = localStorage.getItem('familyCode') || '';
-  el.textContent = '⚡ ' + rc + ' receptov | ' + (fc?'rodina: '+fc:'bez rodiny');
-  setTimeout(function() { if (el && el.textContent.indexOf('⏳')<0 && el.textContent.indexOf('✅')<0) { el.style.display = 'none'; } }, 3000);
+  el.style.display = 'none';
+  try {
+    var r = JSON.parse(localStorage.getItem('recipes')||'null');
+    var rc = (r && Array.isArray(r) && r.length) ? r.length : 0;
+    var fc = localStorage.getItem('familyCode') || '';
+    el.textContent = '⚡ ' + rc + ' receptov | ' + (fc?'rodina: '+fc:'bez rodiny');
+  } catch(e) {
+    el.textContent = '';
+  }
 })();
 
 document.getElementById('recipe-grid').addEventListener('click', function(e) {
