@@ -3619,3 +3619,206 @@ html.light .planner-board-meal-label {
     min-height: 4.85rem;
   }
 }
+
+/* ===== GLOBAL VISUAL HIERARCHY PASS ===== */
+:root {
+  --app-bg-depth: radial-gradient(circle at 50% -10%, rgba(var(--primary-rgb), .12), transparent 34%),
+    linear-gradient(180deg, #080605 0%, #100c0a 42%, #090706 100%);
+  --bg-gradient: var(--app-bg-depth);
+  --section-surface: rgba(28,24,21,.96);
+  --section-surface-alt: rgba(34,29,25,.96);
+  --card-surface-strong: rgba(24,21,19,.98);
+  --control-surface: rgba(255,255,255,.055);
+  --border-strong: rgba(255,255,255,.16);
+  --divider-strong: rgba(255,255,255,.12);
+  --section-shadow-strong: 0 16px 44px rgba(0,0,0,.34);
+}
+html.light {
+  --app-bg-depth: radial-gradient(circle at 50% -10%, rgba(var(--primary-rgb), .10), transparent 34%),
+    linear-gradient(180deg, #fffaf7 0%, #f7eee9 52%, #f2e8e2 100%);
+  --bg-gradient: var(--app-bg-depth);
+  --section-surface: rgba(255,255,255,.96);
+  --section-surface-alt: rgba(255,250,247,.98);
+  --card-surface-strong: rgba(255,255,255,.98);
+  --control-surface: rgba(62,39,31,.055);
+  --border-strong: rgba(62,39,31,.22);
+  --divider-strong: rgba(62,39,31,.16);
+  --section-shadow-strong: 0 14px 34px rgba(48,31,23,.12);
+}
+html,
+body {
+  font-family: var(--font);
+}
+body {
+  background: var(--app-bg-depth);
+}
+html.light body,
+html.dark body {
+  background: var(--app-bg-depth);
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(74,222,128,.08), transparent 28%),
+    radial-gradient(circle at 88% 72%, rgba(56,189,248,.06), transparent 26%);
+}
+.container {
+  padding-top: .45rem;
+}
+.dash-card,
+.dash-section,
+.settings-card,
+.recipe-card,
+.shop-cat-card,
+.tasks-widget,
+.task-card,
+.planner-control-panel,
+.planner-practical-top,
+.planner-board-scroll,
+.planner-summary-row,
+.modal,
+.sheet,
+.empty-state-v2.action-empty {
+  background: linear-gradient(180deg, var(--section-surface-alt), var(--section-surface));
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--section-shadow-strong);
+}
+.dash-card,
+.dash-section,
+.settings-card,
+.shop-cat-card,
+.tasks-widget,
+.task-card,
+.planner-control-panel,
+.planner-practical-top,
+.planner-board-scroll,
+.planner-summary-row {
+  margin-bottom: .85rem;
+}
+.dash-card-header,
+.shop-cat-head,
+.settings-group-title,
+.task-section-title,
+.planner-board-head,
+.planner-control-title,
+.planner-practical-top > div:first-child {
+  position: relative;
+}
+.dash-card-title,
+.settings-group-title,
+.task-section-title,
+.planner-board-head strong,
+.planner-control-title strong,
+.planner-practical-top strong {
+  letter-spacing: -.025em;
+  text-shadow: 0 1px 0 rgba(0,0,0,.18);
+}
+.settings-group-title,
+.task-section-title,
+.planner-board-head span,
+.planner-control-title span,
+.planner-practical-top span,
+.psr-eyebrow {
+  color: color-mix(in srgb, var(--primary) 72%, var(--success));
+  opacity: .95;
+}
+.topbar-btn,
+.btn,
+.pln-btn,
+.planner-control-actions button,
+.planner-segment,
+.planner-practical-stats span,
+.task-filter-chip,
+.age-btn,
+.cat-chip {
+  background: var(--control-surface);
+  border-color: var(--border-strong);
+}
+.bottom-nav {
+  background: color-mix(in srgb, var(--bg) 82%, #000 18%);
+  border-top: 1px solid var(--border-strong);
+  box-shadow: 0 -12px 34px rgba(0,0,0,.35);
+}
+.nav-item.active {
+  background: linear-gradient(180deg, rgba(var(--primary-rgb), .16), transparent);
+  border-radius: .9rem;
+}
+.recipe-card {
+  overflow: hidden;
+}
+.recipe-card-body,
+.recipe-card .rc-info {
+  background: linear-gradient(180deg, transparent, rgba(0,0,0,.06));
+}
+.settings-card .settings-row,
+.shop-item,
+.task-card-body {
+  border-color: var(--divider-strong);
+}
+
+/* Planner board: make the grid read as a real table, not a blended card */
+.planner-control-panel {
+  border-width: 1.5px;
+}
+.planner-practical-top {
+  border-left: 4px solid color-mix(in srgb, var(--primary) 62%, var(--success));
+}
+.planner-board-scroll {
+  border-width: 1.5px;
+  background: var(--card-surface-strong);
+}
+.planner-board-corner,
+.planner-board-day,
+.planner-board-meal-label {
+  background: color-mix(in srgb, var(--section-surface-alt) 90%, #000 10%);
+}
+.planner-board-day.today {
+  outline: 2px solid rgba(var(--primary-rgb), .22);
+  outline-offset: -2px;
+}
+.planner-board-cell {
+  background: color-mix(in srgb, var(--section-surface) 78%, #000 22%);
+}
+.planner-board-cell:nth-child(16n + 10),
+.planner-board-cell:nth-child(16n + 12),
+.planner-board-cell:nth-child(16n + 14) {
+  background: color-mix(in srgb, var(--section-surface-alt) 76%, #000 24%);
+}
+.planner-board-cell.empty {
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.018), transparent),
+    color-mix(in srgb, var(--section-surface) 70%, #000 30%);
+  border-color: var(--divider-strong);
+}
+.planner-board-cell.filled {
+  border-color: color-mix(in srgb, var(--primary) 36%, var(--border-strong));
+  background:
+    radial-gradient(circle at 0% 0%, rgba(var(--primary-rgb), .16), transparent 44%),
+    color-mix(in srgb, var(--section-surface-alt) 86%, #000 14%);
+}
+.planner-board-plus {
+  box-shadow: 0 0 0 6px rgba(var(--primary-rgb), .045);
+}
+
+@media (max-width: 430px) {
+  .dash-card,
+  .dash-section,
+  .settings-card,
+  .shop-cat-card,
+  .tasks-widget,
+  .task-card,
+  .planner-control-panel,
+  .planner-practical-top,
+  .planner-board-scroll,
+  .planner-summary-row {
+    margin-bottom: .95rem;
+  }
+  .container {
+    padding-left: .75rem;
+    padding-right: .75rem;
+  }
+}
