@@ -555,7 +555,7 @@ function pickOnboardLang(l) {
 setTimeout(() => showOnboarding(), 300);
 
 // ======================== AI (DEEPSEEK PROXY) ========================
-const APP_VERSION = '1.0.9';
+const APP_VERSION = '1.0.10';
 const VAPID_PUBLIC_KEY = 'BI6Fga-GXSKggkNJ58R1VEYEfGE6KfWgnuDtI9sHqQLQJzGLshJuIuODmI13AVzX5D2Kd7SBxrr7Cvf-xRAowg0';
 const PUSH_PROXY_URL = 'https://receptar.waldis994.workers.dev';
 
@@ -4531,107 +4531,77 @@ function renderPlanner() {
     totalTime += time;
     return { key: d, index: i, day: day, date: date, filled: filled, kcal: kcal, time: time };
   });
-  const selectedIdx = Math.max(0, Math.min(6, _selectedPlannerDay || 0));
-  const selected = dayStats[selectedIdx] || dayStats[todayIdx] || dayStats[0];
-  const selectedDateLabel = selected.date.getDate()+'. '+(selected.date.getMonth()+1)+'.';
-  const selectedIsToday = selected.date.toISOString().slice(0,10) === todayStr;
-  const selectedProgress = Math.round((selected.filled / totalSlots) * 100);
-
-  const dayRail = dayStats.map(function(info) {
-    const dayShort = (dayNames[info.index] || '').slice(0, 3);
-    const isToday = info.date.toISOString().slice(0,10) === todayStr;
-    const isSelected = info.index === selected.index;
-    const dots = MEALS.map(function(m) {
-      return '<span class="planner-chip-dot '+(info.day[m.id] ? 'filled' : '')+'"></span>';
-    }).join('');
-    return `<button class="planner-day-chip ${isSelected?'active':''} ${isToday?'today':''}" onclick="selectPlannerDay(${info.index})">
-      <span class="planner-day-chip-icon">${getDayIcon(info.index, info.filled)}</span>
-      <span class="planner-day-chip-name">${esc(dayShort)}</span>
-      <strong>${info.date.getDate()}</strong>
-      <span class="planner-chip-dots">${dots}</span>
-    </button>`;
-  }).join('');
-
-  const focusMeals = MEALS.map(function(m) {
-    const entry = selected.day[m.id];
-    const recipe = getSlotRecipe(entry);
-    const isCustom = entry && entry.type === 'custom';
-    const filled = recipe || isCustom;
-    const name = getSlotName(entry);
-    const image = recipe ? (recipe.imageData || recipe.image || '') : '';
-    const mealClass = 'meal-' + m.id.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-    if (filled) {
-      const openAction = recipe ? `viewRecipe(${recipe.id})` : `pickRecipe('${selected.key}','${m.id}','${weekKey}')`;
-      return `<div class="planner-focus-meal filled ${mealClass} ${isCustom?'custom':''}" onclick="${openAction}">
-        <div class="planner-focus-meal-main">
-          <span class="planner-focus-icon">${m.icon}</span>
-          ${image ? `<span class="planner-focus-thumb" style="background-image:url('${escAttr(image)}')"></span>` : ''}
-          <div class="planner-focus-copy">
-            <span>${esc(mealLabel(m.id))}</span>
-            <strong>${esc(name)}</strong>
-          </div>
-        </div>
-        <div class="planner-focus-meta">
-          ${recipe && recipe.nutrition ? `<span>🔥 ${recipe.nutrition.kcal || '?'}</span>` : ''}
-          ${recipe && recipe.time ? `<span>⏱ ${recipe.time}'</span>` : ''}
-          <button onclick="event.stopPropagation();removeSlot('${selected.key}','${m.id}','${weekKey}')">✕</button>
-        </div>
-      </div>`;
-    }
-    return `<div class="planner-focus-meal empty ${mealClass}" onclick="pickRecipe('${selected.key}','${m.id}','${weekKey}')">
-      <div class="planner-focus-meal-main">
-        <span class="planner-focus-icon">${m.icon}</span>
-        <div class="planner-focus-copy">
-          <span>${esc(mealLabel(m.id))}</span>
-          <strong>${lang==='en'?'Choose meal':'Vybrať jedlo'}</strong>
-        </div>
-      </div>
-      <span class="planner-focus-add">＋</span>
-    </div>`;
-  }).join('');
-
-  todayEl.innerHTML = `<section class="planner-cockpit">
-    <div class="planner-day-rail">${dayRail}</div>
-    <article class="planner-focus-card">
-      <div class="planner-focus-head">
-        <div>
-          <span class="planner-focus-kicker">${selectedIsToday ? (lang==='en'?'Today':'Dnes') : (lang==='en'?'Selected day':'Vybraný deň')}</span>
-          <h3>${esc(dayNames[selected.index])} <span>${selectedDateLabel}</span></h3>
-        </div>
-        <div class="planner-focus-score">
-          <strong>${selected.filled}/${totalSlots}</strong>
-          <span>${selectedProgress}%</span>
-        </div>
-      </div>
-      <div class="planner-focus-progress"><span style="width:${selectedProgress}%"></span></div>
-      <div class="planner-focus-meals">${focusMeals}</div>
-    </article>
-  </section>`;
-
-  weekEl.innerHTML = `<section class="planner-week-overview">
-    <div class="planner-section-head">
-      <div><span>${lang==='en'?'Week map':'Mapa týždňa'}</span><strong>${lang==='en'?'Quick overview':'Rýchly prehľad'}</strong></div>
-      <button onclick="copyWeekPlan()">📋 ${lang==='en'?'Copy':'Kopírovať'}</button>
-    </div>
-    <div class="planner-week-cards">
-      ${dayStats.map(function(info) {
-        const pct = Math.round((info.filled / totalSlots) * 100);
-        const isToday = info.date.toISOString().slice(0,10) === todayStr;
-        return `<button class="planner-week-card ${info.index===selected.index?'active':''} ${isToday?'today':''}" onclick="selectPlannerDay(${info.index})">
-          <div class="planner-week-card-top">
-            <span>${getDayIcon(info.index, info.filled)}</span>
-            <strong>${esc(dayNames[info.index])}</strong>
-            <em>${info.date.getDate()}.${info.date.getMonth()+1}.</em>
-          </div>
-          <div class="planner-week-card-bar"><span style="width:${pct}%"></span></div>
-          <div class="planner-week-card-meta"><span>${info.filled}/${totalSlots}</span><span>🔥 ${info.kcal}</span></div>
-        </button>`;
-      }).join('')}
-    </div>
-  </section>`;
   // Summary with progress bar
   var maxMeals = DAYS.length * totalSlots;
   var mealPct = maxMeals > 0 ? Math.round((totalMeals / maxMeals) * 100) : 0;
+  const weekRange = getWeekLabel(startOfWeek);
+  todayEl.innerHTML = `<section class="planner-practical-top">
+    <div>
+      <span>${lang==='en'?'Practical week board':'Praktická tabuľa týždňa'}</span>
+      <strong>${weekRange}</strong>
+    </div>
+    <div class="planner-practical-stats">
+      <span>${totalMeals}/${maxMeals}</span>
+      <span>🔥 ${totalKcal}</span>
+      <span>⏱ ${totalTime}m</span>
+    </div>
+  </section>`;
+
+  const boardHeaders = dayStats.map(function(info) {
+    const isToday = info.date.toISOString().slice(0,10) === todayStr;
+    const pct = Math.round((info.filled / totalSlots) * 100);
+    return `<div class="planner-board-day ${isToday?'today':''}">
+      <span>${esc((dayNames[info.index] || '').slice(0,3))}</span>
+      <strong>${info.date.getDate()}.${info.date.getMonth()+1}.</strong>
+      <em>${info.filled}/${totalSlots}</em>
+      <i style="width:${pct}%"></i>
+    </div>`;
+  }).join('');
+  const boardRows = MEALS.map(function(m) {
+    const mealClass = 'meal-' + m.id.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+    const cells = dayStats.map(function(info) {
+      const entry = info.day[m.id];
+      const recipe = getSlotRecipe(entry);
+      const isCustom = entry && entry.type === 'custom';
+      const name = getSlotName(entry);
+      const image = recipe ? (recipe.imageData || recipe.image || '') : '';
+      if (recipe || isCustom) {
+        const action = recipe ? `viewRecipe(${recipe.id})` : `pickRecipe('${info.key}','${m.id}','${weekKey}')`;
+        return `<div class="planner-board-cell filled ${mealClass} ${isCustom?'custom':''}" onclick="${action}">
+          <div class="planner-board-cell-main">
+            ${image ? `<span class="planner-board-thumb" style="background-image:url('${escAttr(image)}')"></span>` : `<span class="planner-board-thumb empty">${m.icon}</span>`}
+            <strong>${esc(name)}</strong>
+          </div>
+          <div class="planner-board-meta">
+            ${recipe && recipe.nutrition ? `<span>🔥 ${recipe.nutrition.kcal || '?'}</span>` : ''}
+            <button onclick="event.stopPropagation();removeSlot('${info.key}','${m.id}','${weekKey}')">✕</button>
+          </div>
+        </div>`;
+      }
+      return `<div class="planner-board-cell empty ${mealClass}" onclick="pickRecipe('${info.key}','${m.id}','${weekKey}')">
+        <span class="planner-board-plus">＋</span>
+        <strong>${lang==='en'?'Add':'Pridať'}</strong>
+      </div>`;
+    }).join('');
+    return `<div class="planner-board-meal-label ${mealClass}">
+      <span>${m.icon}</span>
+      <strong>${esc(mealLabel(m.id))}</strong>
+    </div>${cells}`;
+  }).join('');
+  weekEl.innerHTML = `<section class="planner-board-shell">
+    <div class="planner-board-head">
+      <div><span>${lang==='en'?'Week planner':'Týždenný plán'}</span><strong>${lang==='en'?'Meals by day':'Jedlá podľa dní'}</strong></div>
+      <button onclick="copyWeekPlan()">📋 ${lang==='en'?'Copy':'Kopírovať'}</button>
+    </div>
+    <div class="planner-board-scroll">
+      <div class="planner-board">
+        <div class="planner-board-corner">${lang==='en'?'Meal':'Jedlo'}</div>
+        ${boardHeaders}
+        ${boardRows}
+      </div>
+    </div>
+    <div class="planner-board-hint">${lang==='en'?'Swipe sideways to see the whole week. Tap any cell to add or open a meal.':'Potiahni do strán pre celý týždeň. Ťukni na políčko pre pridanie alebo otvorenie jedla.'}</div>
+  </section>`;
   const weekSummaryLabel = mealPct >= 80
     ? (lang === 'en' ? 'Week almost ready' : 'Týždeň takmer hotový')
     : mealPct >= 35
