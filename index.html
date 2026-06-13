@@ -15,7 +15,7 @@
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <title data-lang="appTitle">Mealnest</title>
-  <link rel="stylesheet" href="styles.css?v=13">
+  <link rel="stylesheet" href="styles.css?v=14">
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -387,18 +387,23 @@
   <div class="modal">
     <button class="modal-close" onclick="closeModal('detail-modal')">✕</button>
     <div id="recipe-detail"></div>
-    <div class="modal-footer">
-      <button class="btn btn-primary" onclick="openCookingMode()">👨‍🍳 <span data-lang="btnCook">Variť</span></button>
-      <button class="btn btn-secondary" onclick="editCurrent()">✏️ <span data-lang="btnEdit">Upraviť</span></button>
-      <button class="btn btn-secondary" onclick="printRecipe()">🖨️ <span data-lang="btnPrint">Tlačiť</span></button>
-      <button class="btn btn-secondary" onclick="shareRecipe()">📤 <span data-lang="btnShare">Zdieľať</span></button>
-      <button class="btn btn-secondary" onclick="copyRecipe()" data-lang="btnCopy">📋</button>
-      <button class="btn btn-secondary" onclick="aiAdjustPortions(viewingId)" style="font-size:.7rem;" title="Upraviť počet porcií">🍽️ Porcie</button>
-      <button class="btn btn-secondary" onclick="aiSimplifyRecipe(viewingId)" style="font-size:.7rem;" title="Zjednodušiť postup">📝 Skrátiť</button>
-      <button class="btn btn-secondary" onclick="aiSubstituteIngredient()" style="font-size:.7rem;" title="Čím nahradiť surovinu">🔄 Náhrada</button>
-      <button class="btn btn-secondary" onclick="aiEstimateNutrition(viewingId)" style="font-size:.7rem;" title="Odhadnúť nutričné hodnoty cez AI">🔥 Nutri</button>
-      <button class="btn btn-danger" onclick="deleteCurrent()">🗑</button>
-      <button class="btn btn-secondary" onclick="closeModal('detail-modal')" data-lang="close">Zavrieť</button>
+    <div class="modal-footer recipe-detail-footer">
+      <div class="recipe-footer-main">
+        <button class="btn btn-primary" onclick="openCookingMode()">👨‍🍳 <span data-lang="btnCook">Variť</span></button>
+        <button class="btn btn-secondary" onclick="editCurrent()">✏️ <span data-lang="btnEdit">Upraviť</span></button>
+        <button class="btn btn-secondary" onclick="printRecipe()">🖨️ <span data-lang="btnPrint">Tlačiť</span></button>
+        <button class="btn btn-secondary" onclick="shareRecipe()">📤 <span data-lang="btnShare">Zdieľať</span></button>
+        <button class="btn btn-secondary" onclick="copyRecipe(event)" data-lang="btnCopy">📋</button>
+        <button class="btn btn-secondary recipe-ai-toggle" onclick="toggleRecipeAiTools()">🤖 AI</button>
+        <button class="btn btn-danger" onclick="deleteCurrent()">🗑</button>
+        <button class="btn btn-secondary" onclick="closeModal('detail-modal')" data-lang="close">Zavrieť</button>
+      </div>
+      <div class="recipe-ai-tools" id="recipe-ai-tools">
+        <button class="btn btn-secondary" onclick="aiAdjustPortions(viewingId)" title="Upraviť počet porcií">🍽️ Porcie</button>
+        <button class="btn btn-secondary" onclick="aiSimplifyRecipe(viewingId)" title="Zjednodušiť postup">📝 Skrátiť</button>
+        <button class="btn btn-secondary" onclick="aiSubstituteIngredient()" title="Čím nahradiť surovinu">🔄 Náhrada</button>
+        <button class="btn btn-secondary" onclick="aiEstimateNutrition(viewingId)" title="Odhadnúť nutričné hodnoty cez AI">🔥 Nutri</button>
+      </div>
     </div>
   </div>
 </div>
@@ -518,8 +523,8 @@
 </nav>
 
 
-<script src="app.js?v=13"></script>
-<script src="board.js?v=13"></script>
+<script src="app.js?v=14"></script>
+<script src="board.js?v=14"></script>
 
 <!-- Quick add FAB -->
 <div id="fab-quick-add" style="display:none">

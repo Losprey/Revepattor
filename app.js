@@ -555,7 +555,7 @@ function pickOnboardLang(l) {
 setTimeout(() => showOnboarding(), 300);
 
 // ======================== AI (DEEPSEEK PROXY) ========================
-const APP_VERSION = '1.0.13';
+const APP_VERSION = '1.0.14';
 const VAPID_PUBLIC_KEY = 'BI6Fga-GXSKggkNJ58R1VEYEfGE6KfWgnuDtI9sHqQLQJzGLshJuIuODmI13AVzX5D2Kd7SBxrr7Cvf-xRAowg0';
 const PUSH_PROXY_URL = 'https://receptar.waldis994.workers.dev';
 
@@ -2898,6 +2898,13 @@ function openModal(id) {
 function closeModal(id) {
   const el = document.getElementById(id);
   if (el) el.classList.remove('active');
+}
+function toggleRecipeAiTools() {
+  const tools = document.getElementById('recipe-ai-tools');
+  const toggle = document.querySelector('.recipe-ai-toggle');
+  if (!tools) return;
+  const isOpen = tools.classList.toggle('active');
+  if (toggle) toggle.classList.toggle('btn-primary', isOpen);
 }
 document.querySelectorAll('.modal-overlay').forEach(el => {
   el.addEventListener('click', e => { if (e.target === el) { el.classList.remove('active'); } });

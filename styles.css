@@ -384,9 +384,9 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: rgba(22
   position: sticky;
   bottom: -.05rem;
   z-index: 4;
-  justify-content: flex-start;
-  flex-wrap: nowrap;
-  overflow-x: auto;
+  display: grid;
+  justify-content: stretch;
+  overflow: hidden;
   margin: .85rem -1.2rem -1.1rem;
   padding: .65rem 1.2rem calc(.75rem + env(safe-area-inset-bottom));
   background: color-mix(in srgb, var(--surface-solid) 92%, transparent);
@@ -396,9 +396,33 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: rgba(22
   scrollbar-width: none;
 }
 #detail-modal .modal-footer::-webkit-scrollbar { display: none; }
+#detail-modal .recipe-footer-main {
+  display: flex;
+  gap: .4rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+#detail-modal .recipe-footer-main::-webkit-scrollbar { display: none; }
 #detail-modal .modal-footer .btn {
   flex: 0 0 auto;
   white-space: nowrap;
+}
+#detail-modal .recipe-ai-tools {
+  display: none;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .38rem;
+  margin-top: .55rem;
+  padding-top: .55rem;
+  border-top: 1px solid var(--divider-strong, var(--border));
+}
+#detail-modal .recipe-ai-tools.active {
+  display: grid;
+}
+#detail-modal .recipe-ai-tools .btn {
+  justify-content: center;
+  width: 100%;
+  font-size: .72rem;
+  padding: .48rem .45rem;
 }
 
 /* ===== FORM ===== */
