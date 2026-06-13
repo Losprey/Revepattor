@@ -4873,6 +4873,13 @@ html.light .planner-agenda-day {
   border: 1px solid rgba(255,255,255,.1) !important;
 }
 
+#planner-container .planner-danger-action {
+  color: #fecaca;
+  background: linear-gradient(145deg, rgba(127,29,29,.42), rgba(69,10,10,.34));
+  border: 1px solid rgba(248,113,113,.24) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+}
+
 #planner-container .planner-control-row {
   grid-template-columns: 1fr;
   gap: .55rem;
@@ -5247,6 +5254,15 @@ html.light .planner-agenda-day {
   #planner-container .planner-reference-panel,
   .planner-ref-day-card {
     border-radius: 1.35rem;
+  }
+  .planner-reference-title-row {
+    grid-template-columns: 1fr;
+    gap: .7rem;
+  }
+  .planner-reference-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    width: 100%;
   }
   .planner-reference-title strong {
     font-size: 1.42rem;
