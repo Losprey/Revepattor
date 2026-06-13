@@ -33,11 +33,11 @@
     });
 
     if (!boardCards.length) {
-      container.innerHTML = '<div class="empty-state-v2"><div class="empty-svg">📌</div><div class="empty-title">' + t('Nástenka je prázdna','Board is empty') + '</div><div class="empty-desc">' + t('Pridaj prvú kartu — pripomienku, odkaz alebo fotku pre rodinu.','Add the first card — a note, link or photo for the family.') + '</div><button class="btn btn-primary" onclick="openAddBoardCard()">📌 ' + t('Pridať kartu','Add card') + '</button></div>';
+      container.innerHTML = '<div class="empty-state-v2 action-empty board-empty"><div class="empty-orb">📌</div><div class="empty-title">' + t('Nástenka je prázdna','Board is empty') + '</div><div class="empty-desc">' + t('Pridaj prvú kartu — pripomienku, odkaz alebo fotku pre rodinu.','Add the first card — a note, link or photo for the family.') + '</div><div class="empty-actions"><button class="btn btn-primary" onclick="openAddBoardCard()">📌 ' + t('Pridať kartu','Add card') + '</button></div></div>';
       return;
     }
 
-    var html = '<div class="board-header-actions"><button class="btn btn-primary" onclick="openAddBoardCard()" style="font-size:.78rem;padding:.35rem .7rem;">📌 ' + t('Pridať kartu','Add card') + '</button><span style="font-size:.72rem;color:var(--text3);">' + boardCards.length + ' ' + t('kariet','cards') + '</span></div>';
+    var html = '<div class="board-header-actions"><button class="btn btn-primary board-add-card-btn" onclick="openAddBoardCard()">📌 ' + t('Pridať kartu','Add card') + '</button><span class="board-count-pill">' + boardCards.length + ' ' + t('kariet','cards') + '</span></div>';
     html += '<div class="board-grid">';
 
     boardCards.forEach(function(card) {

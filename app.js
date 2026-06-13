@@ -555,7 +555,7 @@ function pickOnboardLang(l) {
 setTimeout(() => showOnboarding(), 300);
 
 // ======================== AI (DEEPSEEK PROXY) ========================
-const APP_VERSION = '1.0.33';
+const APP_VERSION = '1.0.34';
 const VAPID_PUBLIC_KEY = 'BI6Fga-GXSKggkNJ58R1VEYEfGE6KfWgnuDtI9sHqQLQJzGLshJuIuODmI13AVzX5D2Kd7SBxrr7Cvf-xRAowg0';
 const PUSH_PROXY_URL = 'https://receptar.waldis994.workers.dev';
 
@@ -1676,6 +1676,24 @@ function applyLang() {
   const fbt = document.getElementById('fab-btn-task'); if (fbt) fbt.textContent = lang==='en'?'✅ Task':'✅ Úloha';
   const fbm = document.getElementById('fab-btn-meal'); if (fbm) fbm.textContent = lang==='en'?'🍽️ Meal':'🍽️ Jedlo';
   const fbf = document.getElementById('fab-btn-food'); if (fbf) fbf.textContent = lang==='en'?'🛒 Grocery':'🛒 Potravina';
+  updateMainHeader(document.body.dataset.tab || 'dashboard');
+}
+
+function updateMainHeader(tab, count) {
+  const title = document.getElementById('main-title');
+  if (!title) return;
+  const titles = {
+    dashboard: '',
+    home: lang === 'en' ? '📖 Recipes' : '📖 Recepty',
+    planner: lang === 'en' ? '🍽️ Meal Planner' : '🍽️ Plánovač jedál',
+    shopping: lang === 'en' ? '🛒 Shopping' : '🛒 Nákup',
+    tasks: lang === 'en' ? '✅ Tasks' : '✅ Úlohy',
+    board: lang === 'en' ? '📌 Board' : '📌 Nástenka'
+  };
+  const label = titles[tab] || titles.home;
+  title.innerHTML = esc(label) + ' <span id="recipe-count" style="font-size:.75rem;opacity:.7;font-weight:400;"></span>';
+  const countEl = document.getElementById('recipe-count');
+  if (countEl) countEl.textContent = count != null ? '(' + count + ')' : '';
 }
 
 // Dark mode is always on — toggle was removed
@@ -2369,6 +2387,7 @@ function render() {
       ]
     });
     document.getElementById('recipe-count').textContent = '(0)';
+    updateMainHeader('home', 0);
     return;
   }
   const sortBy = document.getElementById('sort-by')?.value || 'name';
@@ -2383,6 +2402,7 @@ function render() {
     return 0;
   });
   document.getElementById('recipe-count').textContent = `(${filtered.length})`;
+  updateMainHeader('home', filtered.length);
   grid.innerHTML = filtered.map((r, idx) => {
     const name = lang === 'en' && r.nameEn ? r.nameEn : r.name;
     const tags = ((lang === 'en' && r.tagsEn ? r.tagsEn : r.tags) || []).slice(0, 2);
@@ -3842,6 +3862,7 @@ function switchTab(tab) {
   const mainTitle = document.getElementById('main-title');
   [dashboard, recipeContainer, plannerContainer, shoppingContainer, tasksContainer, boardContainer].forEach(function(el) { if (el) el.style.display = 'none'; });
   if (mainTitle) mainTitle.style.display = tab === 'dashboard' ? 'none' : '';
+  updateMainHeader(tab);
   try {
     document.body.classList.remove('header-collapsed');
     window.scrollTo(0, 0);
