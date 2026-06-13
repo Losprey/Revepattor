@@ -555,7 +555,7 @@ function pickOnboardLang(l) {
 setTimeout(() => showOnboarding(), 300);
 
 // ======================== AI (DEEPSEEK PROXY) ========================
-const APP_VERSION = '1.0.24';
+const APP_VERSION = '1.0.25';
 const VAPID_PUBLIC_KEY = 'BI6Fga-GXSKggkNJ58R1VEYEfGE6KfWgnuDtI9sHqQLQJzGLshJuIuODmI13AVzX5D2Kd7SBxrr7Cvf-xRAowg0';
 const PUSH_PROXY_URL = 'https://receptar.waldis994.workers.dev';
 
@@ -4560,7 +4560,7 @@ function compactPlannerSlotName(name) {
   const clean = String(name || '').trim();
   if (!clean) return '';
   const firstWord = clean.split(/\s+/)[0] || clean;
-  return firstWord.length > 10 ? firstWord.slice(0, 9) + '…' : firstWord;
+  return firstWord.length > 8 ? firstWord.slice(0, 7) + '…' : firstWord;
 }
 
 function catLabel(cat) {
@@ -4703,8 +4703,7 @@ function renderPlanner() {
         const slotMeta = recipe && recipe.nutrition ? `🔥 ${recipe.nutrition.kcal || '?'}` : (recipe && recipe.time ? `⏱ ${recipe.time}m` : '');
         return `<div class="planner-week-slot filled ${mealClass}" title="${escAttr(mealLabel(m.id)+': '+name)}">
           <button class="planner-week-slot-open" onclick="${slotAction}">
-            ${image ? `<span class="planner-week-slot-img" style="background-image:url('${escAttr(image)}')"></span>` : `<span class="planner-week-slot-icon">${m.icon}</span>`}
-            <strong>${esc(compactPlannerSlotName(name) || mealShortLabel(m.id))}</strong>
+            ${image ? `<span class="planner-week-slot-img" style="background-image:url('${escAttr(image)}')"><b>${esc(compactPlannerSlotName(name) || mealShortLabel(m.id))}</b></span>` : `<span class="planner-week-slot-icon">${m.icon}<b>${esc(compactPlannerSlotName(name) || mealShortLabel(m.id))}</b></span>`}
             ${slotMeta ? `<em>${slotMeta}</em>` : ''}
           </button>
           <button class="planner-week-slot-remove" onclick="event.stopPropagation();removeSlot('${info.key}','${m.id}','${weekKey}')" aria-label="${escAttr(lang==='en'?'Remove meal':'Odstrániť jedlo')}">×</button>
