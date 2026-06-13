@@ -555,7 +555,7 @@ function pickOnboardLang(l) {
 setTimeout(() => showOnboarding(), 300);
 
 // ======================== AI (DEEPSEEK PROXY) ========================
-const APP_VERSION = '1.0.8';
+const APP_VERSION = '1.0.9';
 const VAPID_PUBLIC_KEY = 'BI6Fga-GXSKggkNJ58R1VEYEfGE6KfWgnuDtI9sHqQLQJzGLshJuIuODmI13AVzX5D2Kd7SBxrr7Cvf-xRAowg0';
 const PUSH_PROXY_URL = 'https://receptar.waldis994.workers.dev';
 
@@ -4482,6 +4482,10 @@ function renderPlanner() {
   const planButtons = document.querySelectorAll('#planner-hero .hero-header-actions .btn');
   if (planButtons[0]) planButtons[0].textContent = lang === 'en' ? '🤖 AI week' : '🤖 AI týždeň';
   if (planButtons[1]) planButtons[1].textContent = lang === 'en' ? '↺ Reset' : '↺ Reset';
+  const paClear = document.getElementById('pa-clear-label');
+  if (paClear) paClear.textContent = lang === 'en' ? 'Clear week' : 'Vymazať týždeň';
+  const paAi = document.getElementById('pa-ai-label');
+  if (paAi) paAi.textContent = lang === 'en' ? '📝 AI Shop' : '📝 AI nákup';
 
   // Plan type switcher
   const pts = document.getElementById('plan-type-switch');
@@ -4509,41 +4513,122 @@ function renderPlanner() {
     if (r && r.nutrition) todayKcal += r.nutrition.kcal || 0;
   });
   let totalKcal = 0, totalMeals = 0, totalTime = 0;
-  todayEl.innerHTML = '';
-
-  var s = '';
-  DAYS.forEach(function(d,i){
-    var day = weekPlan[d]||{};
-    var dt = new Date(startOfWeek); dt.setDate(startOfWeek.getDate()+i);
-    var ds = dt.getDate()+'.'+(dt.getMonth()+1)+'.';
-    var f = Object.values(day).filter(Boolean).length;
-    var dayIcon = getDayIcon(i, f);
-    var dayKcal = 0;
-    totalMeals += f;
-    Object.values(day).filter(Boolean).forEach(function(e){var r=getSlotRecipe(e);if(r){if(r.nutrition)totalKcal+=r.nutrition.kcal||0;if(r.time)totalTime+=r.time;dayKcal+=r.nutrition.kcal||0;}});
-    var isToday = dt.toISOString().slice(0,10) === todayStr;
-    // Progress ring state
-    var ringClass = 'pvc-progress-ring' + (f > 0 ? ' has-meals' : '') + (f === totalSlots ? ' full' : '');
-    s += '<div class="pvc-day day-'+i+(isToday?' pvc-today':'')+'"><div class="pvc-head"><div class="pvc-title-group"><span class="pvc-day-icon">'+dayIcon+'</span><span class="pvc-title">'+dayNames[i]+' '+ds+'</span>'+ (isToday?' <span class="pvc-badge">'+(lang==='en'?'TODAY':'DNES')+'</span>':'') +'</div><span class="pvc-progress"><span class="'+ringClass+'">'+f+'</span>🔥 '+dayKcal+'</span></div><div class="pvc-meals-grid">';
-    MEALS.forEach(function(m){
-      var e=day[m.id]; var r=getSlotRecipe(e); var nm=getSlotName(e); var ic=e&&e.type==='custom'; var ff=r||ic;
-      var img = r ? (r.imageData||r.image||'') : '';
-      var mealClass = 'meal-' + m.id.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-      if(ff){
-        s += '<div class="pvc-meal filled '+mealClass+(ic?' custom':'')+'" onclick="'+(r?'viewRecipe('+r.id+')':'')+'">'
-          +'<div class="pvc-meal-header"><span class="pvc-meal-icon">'+m.icon+'</span><span class="pvc-meal-label">'+mealLabel(m.id)+'</span></div>'
-          +'<div class="pvc-meal-body">';
-        var thumb = img ? '<span class="pvc-meal-thumb" style="background-image:url(\''+escAttr(img)+'\')"></span>' : '';
-        s += thumb+'<span class="pvc-meal-name">'+esc(nm)+'</span>'+(r&&r.nutrition?'<span class="pvc-meal-kcal">🔥'+(r.nutrition.kcal||'?')+'</span>':'')+'</div>'
-          +'<button class="pvc-meal-del" onclick="event.stopPropagation();removeSlot(\''+d+'\',\''+m.id+'\',\''+weekKey+'\')">✕</button>'
-          +'</div>'; }
-      else {
-        s += '<div class="pvc-meal empty '+mealClass+'" onclick="pickRecipe(\''+d+'\',\''+m.id+'\',\''+weekKey+'\')"><div class="pvc-meal-header"><span class="pvc-meal-icon">'+m.icon+'</span><span class="pvc-meal-label">'+mealLabel(m.id)+'</span></div><button class="pvc-meal-add-btn"><span class="pvc-meal-add-icon">+</span>'+(lang==='en'?'Add':'Pridať')+'</button></div>'; }
+  const dayStats = DAYS.map(function(d, i) {
+    const day = weekPlan[d] || {};
+    const date = new Date(startOfWeek);
+    date.setDate(startOfWeek.getDate() + i);
+    let kcal = 0;
+    let time = 0;
+    const filled = Object.values(day).filter(Boolean).length;
+    Object.values(day).filter(Boolean).forEach(function(entry) {
+      const recipe = getSlotRecipe(entry);
+      if (!recipe) return;
+      kcal += recipe.nutrition ? (recipe.nutrition.kcal || 0) : 0;
+      time += recipe.time || 0;
     });
-    s += '</div></div>';
+    totalMeals += filled;
+    totalKcal += kcal;
+    totalTime += time;
+    return { key: d, index: i, day: day, date: date, filled: filled, kcal: kcal, time: time };
   });
+  const selectedIdx = Math.max(0, Math.min(6, _selectedPlannerDay || 0));
+  const selected = dayStats[selectedIdx] || dayStats[todayIdx] || dayStats[0];
+  const selectedDateLabel = selected.date.getDate()+'. '+(selected.date.getMonth()+1)+'.';
+  const selectedIsToday = selected.date.toISOString().slice(0,10) === todayStr;
+  const selectedProgress = Math.round((selected.filled / totalSlots) * 100);
 
-  weekEl.innerHTML = s;
+  const dayRail = dayStats.map(function(info) {
+    const dayShort = (dayNames[info.index] || '').slice(0, 3);
+    const isToday = info.date.toISOString().slice(0,10) === todayStr;
+    const isSelected = info.index === selected.index;
+    const dots = MEALS.map(function(m) {
+      return '<span class="planner-chip-dot '+(info.day[m.id] ? 'filled' : '')+'"></span>';
+    }).join('');
+    return `<button class="planner-day-chip ${isSelected?'active':''} ${isToday?'today':''}" onclick="selectPlannerDay(${info.index})">
+      <span class="planner-day-chip-icon">${getDayIcon(info.index, info.filled)}</span>
+      <span class="planner-day-chip-name">${esc(dayShort)}</span>
+      <strong>${info.date.getDate()}</strong>
+      <span class="planner-chip-dots">${dots}</span>
+    </button>`;
+  }).join('');
+
+  const focusMeals = MEALS.map(function(m) {
+    const entry = selected.day[m.id];
+    const recipe = getSlotRecipe(entry);
+    const isCustom = entry && entry.type === 'custom';
+    const filled = recipe || isCustom;
+    const name = getSlotName(entry);
+    const image = recipe ? (recipe.imageData || recipe.image || '') : '';
+    const mealClass = 'meal-' + m.id.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+    if (filled) {
+      const openAction = recipe ? `viewRecipe(${recipe.id})` : `pickRecipe('${selected.key}','${m.id}','${weekKey}')`;
+      return `<div class="planner-focus-meal filled ${mealClass} ${isCustom?'custom':''}" onclick="${openAction}">
+        <div class="planner-focus-meal-main">
+          <span class="planner-focus-icon">${m.icon}</span>
+          ${image ? `<span class="planner-focus-thumb" style="background-image:url('${escAttr(image)}')"></span>` : ''}
+          <div class="planner-focus-copy">
+            <span>${esc(mealLabel(m.id))}</span>
+            <strong>${esc(name)}</strong>
+          </div>
+        </div>
+        <div class="planner-focus-meta">
+          ${recipe && recipe.nutrition ? `<span>🔥 ${recipe.nutrition.kcal || '?'}</span>` : ''}
+          ${recipe && recipe.time ? `<span>⏱ ${recipe.time}'</span>` : ''}
+          <button onclick="event.stopPropagation();removeSlot('${selected.key}','${m.id}','${weekKey}')">✕</button>
+        </div>
+      </div>`;
+    }
+    return `<div class="planner-focus-meal empty ${mealClass}" onclick="pickRecipe('${selected.key}','${m.id}','${weekKey}')">
+      <div class="planner-focus-meal-main">
+        <span class="planner-focus-icon">${m.icon}</span>
+        <div class="planner-focus-copy">
+          <span>${esc(mealLabel(m.id))}</span>
+          <strong>${lang==='en'?'Choose meal':'Vybrať jedlo'}</strong>
+        </div>
+      </div>
+      <span class="planner-focus-add">＋</span>
+    </div>`;
+  }).join('');
+
+  todayEl.innerHTML = `<section class="planner-cockpit">
+    <div class="planner-day-rail">${dayRail}</div>
+    <article class="planner-focus-card">
+      <div class="planner-focus-head">
+        <div>
+          <span class="planner-focus-kicker">${selectedIsToday ? (lang==='en'?'Today':'Dnes') : (lang==='en'?'Selected day':'Vybraný deň')}</span>
+          <h3>${esc(dayNames[selected.index])} <span>${selectedDateLabel}</span></h3>
+        </div>
+        <div class="planner-focus-score">
+          <strong>${selected.filled}/${totalSlots}</strong>
+          <span>${selectedProgress}%</span>
+        </div>
+      </div>
+      <div class="planner-focus-progress"><span style="width:${selectedProgress}%"></span></div>
+      <div class="planner-focus-meals">${focusMeals}</div>
+    </article>
+  </section>`;
+
+  weekEl.innerHTML = `<section class="planner-week-overview">
+    <div class="planner-section-head">
+      <div><span>${lang==='en'?'Week map':'Mapa týždňa'}</span><strong>${lang==='en'?'Quick overview':'Rýchly prehľad'}</strong></div>
+      <button onclick="copyWeekPlan()">📋 ${lang==='en'?'Copy':'Kopírovať'}</button>
+    </div>
+    <div class="planner-week-cards">
+      ${dayStats.map(function(info) {
+        const pct = Math.round((info.filled / totalSlots) * 100);
+        const isToday = info.date.toISOString().slice(0,10) === todayStr;
+        return `<button class="planner-week-card ${info.index===selected.index?'active':''} ${isToday?'today':''}" onclick="selectPlannerDay(${info.index})">
+          <div class="planner-week-card-top">
+            <span>${getDayIcon(info.index, info.filled)}</span>
+            <strong>${esc(dayNames[info.index])}</strong>
+            <em>${info.date.getDate()}.${info.date.getMonth()+1}.</em>
+          </div>
+          <div class="planner-week-card-bar"><span style="width:${pct}%"></span></div>
+          <div class="planner-week-card-meta"><span>${info.filled}/${totalSlots}</span><span>🔥 ${info.kcal}</span></div>
+        </button>`;
+      }).join('')}
+    </div>
+  </section>`;
   // Summary with progress bar
   var maxMeals = DAYS.length * totalSlots;
   var mealPct = maxMeals > 0 ? Math.round((totalMeals / maxMeals) * 100) : 0;
@@ -4552,7 +4637,7 @@ function renderPlanner() {
     : mealPct >= 35
       ? (lang === 'en' ? 'Good rhythm' : 'Dobrý rytmus')
       : (lang === 'en' ? 'Start with today' : 'Začni dneškom');
-  document.getElementById('planner-summary').innerHTML = '<div class="planner-summary-row"><div class="psr-copy"><div class="psr-eyebrow">'+(lang==='en'?'Weekly overview':'Prehľad týždňa')+'</div><div class="psr-copy-title">'+weekSummaryLabel+'</div></div><div class="psr-item"><div class="psr-val">'+totalMeals+'/'+maxMeals+'</div><div class="psr-label">'+(lang==='en'?'Planned':'Naplán')+'</div></div><div class="psr-item"><div class="psr-val">🔥 '+totalKcal+'</div><div class="psr-label">kcal</div></div><div class="psr-item"><div class="psr-val">⏱ '+totalTime+'\'</div><div class="psr-label">'+(lang==='en'?'Prep':'Var')+'</div></div><div class="psr-progress-wrap"><div class="psr-progress-bar"><div class="psr-progress-fill" style="width:'+mealPct+'%"></div></div><div class="psr-progress-label">'+mealPct+'%</div></div></div>';
+  document.getElementById('planner-summary').innerHTML = '<div class="planner-summary-row"><div class="psr-copy"><div class="psr-eyebrow">'+(lang==='en'?'Weekly overview':'Prehľad týždňa')+'</div><div class="psr-copy-title">'+weekSummaryLabel+'</div></div><div class="psr-item"><div class="psr-val">'+totalMeals+'/'+maxMeals+'</div><div class="psr-label">'+(lang==='en'?'Planned':'Naplán')+'</div></div><div class="psr-item"><div class="psr-val">🔥 '+totalKcal+'</div><div class="psr-label">kcal</div></div><div class="psr-item"><div class="psr-val">⏱ '+totalTime+'m</div><div class="psr-label">'+(lang==='en'?'Prep':'Var')+'</div></div><div class="psr-progress-wrap"><div class="psr-progress-bar"><div class="psr-progress-fill" style="width:'+mealPct+'%"></div></div><div class="psr-progress-label">'+mealPct+'%</div></div></div>';
 
   // Floating info panel
   var pip = document.getElementById('planner-info-panel');
