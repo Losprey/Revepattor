@@ -5316,7 +5316,7 @@ html.light .planner-agenda-day {
   gap: .16rem;
   min-width: 0;
   color: rgba(255,255,255,.82);
-  font-size: .62rem;
+  font-size: .68rem;
   line-height: 1;
   font-weight: 820;
   white-space: nowrap;
@@ -5429,7 +5429,7 @@ html.light .planner-agenda-day {
   min-width: 0;
   min-height: 4.85rem;
   padding: .34rem .24rem;
-  border-radius: .9rem;
+  border-radius: .92rem;
   color: var(--text);
   overflow: hidden;
 }
@@ -5444,7 +5444,7 @@ html.light .planner-agenda-day {
   background:
     radial-gradient(circle at 50% 0%, rgba(var(--meal-color-rgb, 16,185,129), .14), transparent 52%),
     rgba(255,255,255,.045);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+  box-shadow: 0 10px 18px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.05);
 }
 
 #planner-container .planner-week-slot-open {
@@ -5508,9 +5508,9 @@ html.light .planner-agenda-day {
 #planner-container .planner-week-slot strong {
   width: 100%;
   color: #fff;
-  font-size: .6rem;
-  line-height: 1.04;
-  font-weight: 840;
+  font-size: .68rem;
+  line-height: 1.02;
+  font-weight: 920;
   text-align: center;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -5528,7 +5528,7 @@ html.light .planner-agenda-day {
 
 #planner-container .planner-week-plus {
   color: rgba(255,255,255,.88);
-  font-size: 1.35rem;
+  font-size: 1.55rem;
   line-height: 1;
   font-weight: 420;
 }
@@ -5621,14 +5621,14 @@ html.light #planner-container .planner-week-total span {
   }
   #planner-container .planner-week-legend-slots span {
     flex-direction: column;
-    gap: .05rem;
-    font-size: .48rem;
-    letter-spacing: -.02em;
+    gap: .08rem;
+    font-size: .57rem;
+    letter-spacing: -.01em;
   }
   #planner-container .planner-week-row {
     grid-template-columns: 3.28rem 3.55rem minmax(0,1fr);
     gap: .34rem;
-    min-height: 5.28rem;
+    min-height: 5.42rem;
     padding: .48rem;
     border-radius: 1.05rem;
   }
@@ -5652,12 +5652,12 @@ html.light #planner-container .planner-week-total span {
     gap: .25rem;
   }
   #planner-container .planner-week-slot {
-    min-height: 4.2rem;
-    padding: .28rem .16rem;
-    border-radius: .72rem;
+    min-height: 4.38rem;
+    padding: .3rem .16rem;
+    border-radius: .78rem;
   }
   #planner-container .planner-week-slot-open {
-    min-height: 3.62rem;
+    min-height: 3.78rem;
   }
   #planner-container .planner-week-slot-remove {
     top: .12rem;
@@ -5668,12 +5668,12 @@ html.light #planner-container .planner-week-total span {
   }
   #planner-container .planner-week-slot-img,
   #planner-container .planner-week-slot-icon {
-    width: 2.08rem;
-    height: 1.92rem;
-    border-radius: .52rem;
+    width: 2.2rem;
+    height: 2.02rem;
+    border-radius: .56rem;
   }
   #planner-container .planner-week-slot strong {
-    font-size: .52rem;
+    font-size: .6rem;
   }
   #planner-container .planner-week-slot em {
     display: none;

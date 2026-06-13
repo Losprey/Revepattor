@@ -555,7 +555,7 @@ function pickOnboardLang(l) {
 setTimeout(() => showOnboarding(), 300);
 
 // ======================== AI (DEEPSEEK PROXY) ========================
-const APP_VERSION = '1.0.23';
+const APP_VERSION = '1.0.24';
 const VAPID_PUBLIC_KEY = 'BI6Fga-GXSKggkNJ58R1VEYEfGE6KfWgnuDtI9sHqQLQJzGLshJuIuODmI13AVzX5D2Kd7SBxrr7Cvf-xRAowg0';
 const PUSH_PROXY_URL = 'https://receptar.waldis994.workers.dev';
 
@@ -4551,6 +4551,18 @@ function mealLabel(id) {
   return map[id] ? map[id][lang] || map[id].sk : id;
 }
 
+function mealShortLabel(id) {
+  const map = { 'raňajky':{sk:'Raň',en:'Brk'}, 'desiata':{sk:'Des',en:'Snk'}, 'obed':{sk:'Obed',en:'Lunch'}, 'olovrant':{sk:'Olov',en:'Aft'}, 'večera':{sk:'Več',en:'Din'} };
+  return map[id] ? map[id][lang] || map[id].sk : id;
+}
+
+function compactPlannerSlotName(name) {
+  const clean = String(name || '').trim();
+  if (!clean) return '';
+  const firstWord = clean.split(/\s+/)[0] || clean;
+  return firstWord.length > 10 ? firstWord.slice(0, 9) + '…' : firstWord;
+}
+
 function catLabel(cat) {
   const map = {
     'Hlavné jedlá':'Main dishes','Polievky':'Soups','Šaláty':'Salads','Dezerty':'Desserts',
@@ -4673,7 +4685,7 @@ function renderPlanner() {
   </section>`;
 
   const weekMealLegend = MEALS.map(function(m) {
-    return `<span><i>${m.icon}</i>${esc(mealLabel(m.id))}</span>`;
+    return `<span title="${escAttr(mealLabel(m.id))}"><i>${m.icon}</i>${esc(mealShortLabel(m.id))}</span>`;
   }).join('');
   const weekRows = dayStats.map(function(info) {
     const isToday = info.date.toISOString().slice(0,10) === todayStr;
@@ -4692,7 +4704,7 @@ function renderPlanner() {
         return `<div class="planner-week-slot filled ${mealClass}" title="${escAttr(mealLabel(m.id)+': '+name)}">
           <button class="planner-week-slot-open" onclick="${slotAction}">
             ${image ? `<span class="planner-week-slot-img" style="background-image:url('${escAttr(image)}')"></span>` : `<span class="planner-week-slot-icon">${m.icon}</span>`}
-            <strong>${esc(name || mealLabel(m.id))}</strong>
+            <strong>${esc(compactPlannerSlotName(name) || mealShortLabel(m.id))}</strong>
             ${slotMeta ? `<em>${slotMeta}</em>` : ''}
           </button>
           <button class="planner-week-slot-remove" onclick="event.stopPropagation();removeSlot('${info.key}','${m.id}','${weekKey}')" aria-label="${escAttr(lang==='en'?'Remove meal':'Odstrániť jedlo')}">×</button>
