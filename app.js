@@ -555,7 +555,7 @@ function pickOnboardLang(l) {
 setTimeout(() => showOnboarding(), 300);
 
 // ======================== AI (DEEPSEEK PROXY) ========================
-const APP_VERSION = '1.0.30';
+const APP_VERSION = '1.0.31';
 const VAPID_PUBLIC_KEY = 'BI6Fga-GXSKggkNJ58R1VEYEfGE6KfWgnuDtI9sHqQLQJzGLshJuIuODmI13AVzX5D2Kd7SBxrr7Cvf-xRAowg0';
 const PUSH_PROXY_URL = 'https://receptar.waldis994.workers.dev';
 
@@ -4669,7 +4669,6 @@ function renderPlanner() {
       </div>
       <div class="planner-reference-actions">
         <button class="planner-main-action" onclick="aiGenerateFullWeek()">🤖 ${lang==='en'?'AI week':'AI týždeň'}</button>
-        <button class="planner-soft-action" onclick="resetWeek()">↻ ${lang==='en'?'This week':'Aktuálny týždeň'}</button>
         <button class="planner-danger-action" onclick="clearPlan()" title="${escAttr(lang==='en'?'Clear current week':'Vymazať aktuálny týždeň')}">🗑️ ${lang==='en'?'Clear':'Vymazať'}</button>
       </div>
     </div>
