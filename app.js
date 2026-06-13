@@ -1655,7 +1655,7 @@ function applyLang() {
   const ptK = document.getElementById('pt-kids-label'); if (ptK) ptK.textContent = lang==='en'?'Kids':'Deti';
   const plnThis = document.getElementById('pln-this'); if (plnThis) plnThis.textContent = lang==='en'?'This week':'Tento t\u00fd\u017ede\u0148';
   const plnNext = document.getElementById('pln-next'); if (plnNext) plnNext.textContent = lang==='en'?'Next week':'Bud\u00faci t\u00fd\u017ede\u0148';
-  const paC = document.getElementById('pa-clear-label'); if (paC) paC.textContent = lang==='en'?'Clear week':'Vymazať týždeň';
+  const paC = document.getElementById('pa-clear-label'); if (paC) paC.textContent = lang==='en'?'Clear current week':'Vymazať aktuálny týždeň';
   const paA = document.getElementById('pa-ai-label'); if (paA) paA.textContent = lang==='en'?'📝 AI Shop':'📝 AI nákup';
   const pipMealsLabel = document.getElementById('pip-meals-label'); if (pipMealsLabel) pipMealsLabel.textContent = lang==='en'?'meals':'jedál';
   const aiTip = document.getElementById('dash-ai-label'); if (aiTip) aiTip.textContent = lang==='en'?'AI tip of the day':'AI tip dňa';
@@ -2349,7 +2349,7 @@ function render() {
   const showFav = document.getElementById('filter-fav')?.checked;
   let filtered = recipes.filter(r => {
     const name = lang === 'en' && r.nameEn ? r.nameEn : r.name;
-    const tags = (lang === 'en' && r.tagsEn ? r.tagsEn : r.tags) || [];
+    const tags = ((lang === 'en' && r.tagsEn ? r.tagsEn : r.tags) || []).slice(0, 2);
     const tagMatch = tags.some(t => norm(t).includes(norm(search)));
     const matchSearch = norm(name).includes(norm(search)) || tagMatch;
     const matchCat = !cat || r.category === cat;
@@ -4603,7 +4603,7 @@ function renderPlanner() {
   if (planButtons[0]) planButtons[0].textContent = lang === 'en' ? '🤖 AI week' : '🤖 AI týždeň';
   if (planButtons[1]) planButtons[1].textContent = lang === 'en' ? '↺ Reset' : '↺ Reset';
   const paClear = document.getElementById('pa-clear-label');
-  if (paClear) paClear.textContent = lang === 'en' ? 'Clear week' : 'Vymazať týždeň';
+  if (paClear) paClear.textContent = lang === 'en' ? 'Clear current week' : 'Vymazať aktuálny týždeň';
   const paAi = document.getElementById('pa-ai-label');
   if (paAi) paAi.textContent = lang === 'en' ? '📝 AI Shop' : '📝 AI nákup';
 
@@ -4670,7 +4670,7 @@ function renderPlanner() {
       <div class="planner-reference-actions">
         <button class="planner-main-action" onclick="aiGenerateFullWeek()">🤖 ${lang==='en'?'AI week':'AI týždeň'}</button>
         <button class="planner-soft-action" onclick="resetWeek()">↻ ${lang==='en'?'This week':'Aktuálny týždeň'}</button>
-        <button class="planner-danger-action" onclick="clearPlan()">🗑️ ${lang==='en'?'Clear':'Vymazať'}</button>
+        <button class="planner-danger-action" onclick="clearPlan()" title="${escAttr(lang==='en'?'Clear current week':'Vymazať aktuálny týždeň')}">🗑️ ${lang==='en'?'Clear':'Vymazať'}</button>
       </div>
     </div>
     <div class="planner-control-row">
@@ -5008,7 +5008,7 @@ function removeSlot(day, slot, wk) {
 }
 
 function clearPlan() {
-  showConfirmModal(lang === 'en' ? 'Clear the whole week?' : 'Vymazať celý týždeň?', '🗑️', lang==='en'?'Clear':'Vymazať', function() {
+  showConfirmModal(lang === 'en' ? 'Clear the current week?' : 'Vymazať aktuálny týždeň?', '🗑️', lang==='en'?'Clear':'Vymazať', function() {
     const weekKey = currentWeekKey();
     const weekPlan = getWeekPlan(weekKey);
     DAYS.forEach(d => { weekPlan[d] = {}; });
@@ -6037,7 +6037,7 @@ function applyIngredientSearch() {
     if (!matching.length) { grid.innerHTML = `<div class="empty-state"><h3>😕 ${t('noRecipes')}</h3></div>`; return; }
     grid.innerHTML = matching.map(r => {
       const name = lang==='en'&&r.nameEn?r.nameEn:r.name;
-      const tags = (lang==="en"&&r.tagsEn?r.tagsEn:r.tags)||[];
+      const tags = ((lang==="en"&&r.tagsEn?r.tagsEn:r.tags)||[]).slice(0, 2);
       const diff = r.difficulty||1;
       const san = esc(name), sanCat = esc(r.category), sanTime = esc(r.time);
       return `<div class="recipe-card" data-id="${r.id}"><button class="fav-btn ${r.favorite?'fav-active':''}" onclick="event.stopPropagation();toggleFav(${r.id})">${r.favorite?'❤️':'🤍'}</button>
