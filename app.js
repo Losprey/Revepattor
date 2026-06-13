@@ -555,7 +555,7 @@ function pickOnboardLang(l) {
 setTimeout(() => showOnboarding(), 300);
 
 // ======================== AI (DEEPSEEK PROXY) ========================
-const APP_VERSION = '1.0.32';
+const APP_VERSION = '1.0.33';
 const VAPID_PUBLIC_KEY = 'BI6Fga-GXSKggkNJ58R1VEYEfGE6KfWgnuDtI9sHqQLQJzGLshJuIuODmI13AVzX5D2Kd7SBxrr7Cvf-xRAowg0';
 const PUSH_PROXY_URL = 'https://receptar.waldis994.workers.dev';
 
@@ -2345,20 +2345,29 @@ function render() {
   const grid = document.getElementById('recipe-grid');
   if (grid && appSettings.masonry) grid.classList.add('masonry');
   const search = document.getElementById('search').value.toLowerCase();
+  const normalizedSearch = norm(search);
   const cat = document.getElementById('filter-category').value;
   const showFav = document.getElementById('filter-fav')?.checked;
   let filtered = recipes.filter(r => {
     const name = lang === 'en' && r.nameEn ? r.nameEn : r.name;
     const tags = ((lang === 'en' && r.tagsEn ? r.tagsEn : r.tags) || []).slice(0, 2);
-    const tagMatch = tags.some(t => norm(t).includes(norm(search)));
-    const matchSearch = norm(name).includes(norm(search)) || tagMatch;
+    const tagMatch = tags.some(t => norm(t).includes(normalizedSearch));
+    const matchSearch = norm(name).includes(normalizedSearch) || tagMatch;
     const matchCat = !cat || r.category === cat;
     const matchFav = !showFav || r.favorite;
     const matchAge = matchesAgeFilter(r);
     return matchSearch && matchCat && matchFav && matchAge;
   });
   if (!filtered.length) {
-    document.getElementById('recipe-grid').innerHTML = '<div class="empty-state-v2"><div class="empty-svg">🔍</div><div class="empty-title">' + t('noRecipes') + '</div><div class="empty-desc">' + t('noRecipesHint') + '</div></div>';
+    document.getElementById('recipe-grid').innerHTML = emptyStateHTML({
+      icon: search || cat || showFav ? '🔍' : '📖',
+      title: t('noRecipes'),
+      desc: t('noRecipesHint'),
+      actions: [
+        { label: '➕ ' + (lang === 'en' ? 'Add recipe' : 'Pridať recept'), cls: 'btn-primary', onClick: 'openFormModal()' },
+        { label: '🧹 ' + (lang === 'en' ? 'Clear filters' : 'Vyčistiť filtre'), cls: 'btn-secondary', onClick: 'clearRecipeFilters()' }
+      ]
+    });
     document.getElementById('recipe-count').textContent = '(0)';
     return;
   }
@@ -2374,12 +2383,12 @@ function render() {
     return 0;
   });
   document.getElementById('recipe-count').textContent = `(${filtered.length})`;
-  grid.innerHTML = filtered.map(r => {
+  grid.innerHTML = filtered.map((r, idx) => {
     const name = lang === 'en' && r.nameEn ? r.nameEn : r.name;
-    const tags = (lang === 'en' && r.tagsEn ? r.tagsEn : r.tags) || [];
+    const tags = ((lang === 'en' && r.tagsEn ? r.tagsEn : r.tags) || []).slice(0, 2);
     const diff = r.difficulty || 1;
     const san = esc(name), sanCat = esc(r.category), sanTime = esc(r.time);
-    return `<div class="recipe-card" style="animation-delay:${Math.random()*.25}s" data-id="${r.id}">
+    return `<div class="recipe-card" style="animation-delay:${Math.min(idx, 8) * .035}s" data-id="${r.id}">
       <button class="fav-btn ${r.favorite?'fav-active':''}" onclick="event.stopPropagation();toggleFav(${r.id})">${r.favorite ? '❤️' : '🤍'}</button>
       <div class="recipe-card-img${r.image||r.imageData?'':' img-skeleton'}" id="rcimg-${r.id}">${r.image||r.imageData
         ? `<img src="${escAttr(imgUrl(r.imageData||r.image))}" alt="${san}" loading="lazy" onerror="this.outerHTML='<span style=\\'font-size:2.4rem\\'>🍽️</span>'" onload="this.classList.add('loaded');this.parentElement.classList.remove('img-skeleton')">`
@@ -2408,7 +2417,7 @@ document.getElementById('search').addEventListener('input', function() {
   clearTimeout(searchTimer);
   searchTimer = setTimeout(function() {
     render();
-  }, 150);
+  }, 220);
 });
 document.getElementById('filter-category').addEventListener('change', render);
 
@@ -3079,6 +3088,30 @@ function getCurrentRecipe() {
   return recipes.find(r => r.id === parseInt(el.dataset.rid));
 }
 
+function emptyStateHTML(opts) {
+  opts = opts || {};
+  const actions = (opts.actions || []).map(a => `<button class="btn ${a.cls || 'btn-secondary'}" onclick="${a.onClick || ''}">${a.label || ''}</button>`).join('');
+  return `<div class="empty-state-v2 action-empty">
+    <div class="empty-orb">${opts.icon || '✨'}</div>
+    <div class="empty-title">${esc(opts.title || (lang === 'en' ? 'Nothing here yet' : 'Zatiaľ tu nič nie je'))}</div>
+    <div class="empty-desc">${esc(opts.desc || (lang === 'en' ? 'Start by adding the first item.' : 'Začni pridaním prvej položky.'))}</div>
+    ${actions ? `<div class="empty-actions">${actions}</div>` : ''}
+  </div>`;
+}
+
+function clearRecipeFilters() {
+  const searchEl = document.getElementById('search');
+  const catEl = document.getElementById('filter-category');
+  const favEl = document.getElementById('filter-fav');
+  if (searchEl) searchEl.value = '';
+  if (catEl) catEl.value = '';
+  if (favEl) favEl.checked = false;
+  const clearEl = document.getElementById('search-clear');
+  if (clearEl) clearEl.style.display = 'none';
+  ingredientSearchSelected.clear();
+  render();
+}
+
 function viewRecipe(id) {
   const pageScrollY = window.scrollY || window.pageYOffset || 0;
   const detailWasOpen = !!document.querySelector('#detail-modal.active');
@@ -3096,30 +3129,33 @@ function viewRecipe(id) {
   const el = document.getElementById('recipe-detail'); el.dataset.rid = id;
   const san = esc(name), sanCat = esc(r.category), sanTime = esc(r.time);
   el.innerHTML = `
-    <div id="detail-img-wrap" class="detail-img ${r.image||r.imageData?'':'img-skeleton'}">${r.image || r.imageData
-      ? `<img src="${escAttr(r.imageData||r.image)}" alt="${san}" onerror="this.outerHTML='<span style=\\'font-size:3.4rem\\'>🍽️</span>'" onload="this.classList.add('loaded');this.parentElement.classList.remove('img-skeleton')">`
+    <div class="recipe-detail-shell">
+    <div id="detail-img-wrap" class="detail-img recipe-detail-hero ${r.image||r.imageData?'':'img-skeleton'}">${r.image || r.imageData
+      ? `<img src="${escAttr(r.imageData||r.image)}" alt="${san}" loading="eager" decoding="async" onerror="this.outerHTML='<span style=\\'font-size:3.4rem\\'>🍽️</span>'" onload="this.classList.add('loaded');this.parentElement.classList.remove('img-skeleton')">`
       : `<span style="font-size:3.4rem">🍽️</span>`}</div>
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.4rem;">
-      <h2 style="font-size:1.05rem;flex:1;">${san}</h2>
-      <div style="display:flex;align-items:center;gap:.3rem;flex-shrink:0;">
-        <span style="display:inline-flex;align-items:center;gap:.2rem;background:var(--border);border-radius:var(--radius-lg);padding:.1rem .3rem;font-size:.7rem;">
-          <button onclick="changePortions(-1)" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:.8rem;font-weight:700;padding:0 .1rem;">−</button>
-          <span id="portion-display" style="font-weight:700;min-width:1.1rem;text-align:center;">${r.portions||4}</span>
-          <button onclick="changePortions(1)" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:.8rem;font-weight:700;padding:0 .1rem;">+</button>
-          <span style="color:var(--text3);font-size:.6rem;">${t('portionUnit')}</span>
+    <div class="recipe-detail-head">
+      <div class="recipe-detail-title">
+        <span>${sanCat}</span>
+        <h2>${san}</h2>
+      </div>
+      <div class="recipe-detail-controls">
+        <span class="portion-stepper">
+          <button onclick="changePortions(-1)" aria-label="${escAttr(lang==='en'?'Less portions':'Menej porcií')}">−</button>
+          <strong id="portion-display">${r.portions||4}</strong>
+          <button onclick="changePortions(1)" aria-label="${escAttr(lang==='en'?'More portions':'Viac porcií')}">+</button>
+          <small>${t('portionUnit')}</small>
         </span>
-        ${'●'.repeat(r.difficulty||1)}${Math.max(0,3-(r.difficulty||1)) > 0 ? '○'.repeat(Math.max(0,3-(r.difficulty||1))) : ''}
-        <span style="font-size:.75rem;color:var(--text2);">⏱ ${sanTime}</span>
       </div>
     </div>
-    <div class="detail-meta">
-      <span>📂 ${sanCat}</span>
-      <span>🏷 ${tgs.map(esc).join(', ')}</span>
+    <div class="detail-meta recipe-detail-meta">
+      <span>⏱ ${sanTime} min</span>
+      <span>${'●'.repeat(r.difficulty||1)}${Math.max(0,3-(r.difficulty||1)) > 0 ? '○'.repeat(Math.max(0,3-(r.difficulty||1))) : ''}</span>
+      ${tgs.length ? `<span>🏷 ${tgs.slice(0, 3).map(esc).join(', ')}</span>` : ''}
       ${(r.allergens||[]).length ? `<span>⚠️ ${r.allergens.map(esc).join(', ')}</span>` : ''}
     </div>
-    <div style="display:flex;gap:.3rem;margin-bottom:.5rem;flex-wrap:wrap;">
-      <button class="btn btn-secondary" onclick="editCurrent()" style="padding:.2rem .5rem;font-size:.75rem;">✏️ <span data-lang="btnEdit">Upraviť</span></button>
-      <button class="btn btn-danger" onclick="deleteCurrent()" style="padding:.2rem .5rem;font-size:.75rem;">🗑️ <span data-lang="btnDelete">Zmazať</span></button>
+    <div class="recipe-detail-quick-actions">
+      <button class="btn btn-secondary" onclick="editCurrent()">✏️ <span data-lang="btnEdit">Upraviť</span></button>
+      <button class="btn btn-danger" onclick="deleteCurrent()">🗑️ <span data-lang="btnDelete">Zmazať</span></button>
     </div>
     <div class="detail-section">
       <div style="display:flex;align-items:center;justify-content:space-between;">
@@ -3157,9 +3193,10 @@ function viewRecipe(id) {
       </div>
       <ul id="ingredient-list" style="margin-top:.3rem;">${scaleIngredients(ingr, 4, r.portions||4).map(i=>`<li>${esc(i)}</li>`).join('')}</ul>
     </div>
-    <div class="detail-section"><h3>📝 ${t('formSteps')}</h3><ol>${stps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol></div>
+    <div class="detail-section recipe-steps"><h3>📝 ${t('formSteps')}</h3><ol>${stps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol></div>
     <div class="detail-section"><h3>📓 ${t('formTitle')==='New Recipe'?'Notes':'Poznámky'}</h3>
       <textarea id="recipe-notes" style="width:100%;padding:.45rem;border:1px solid var(--border);border-radius:6px;min-height:45px;font-family:inherit;font-size:.82rem;background:var(--input-bg);color:var(--text);" onchange="saveNotes(${id},this.value)">${esc((lang==='en'&&r.notesEn?r.notesEn:r.notes)||'')}</textarea></div>
+    </div>
   `;
   if (sameRecipeOpen) history.replaceState({ modal: 'detail', id: id }, '', '#recipe-' + id);
   else history.pushState({ modal: 'detail', id: id }, '', '#recipe-' + id);
@@ -5162,8 +5199,16 @@ function renderShoppingList() {
   // Only keep manual items (recipe auto-population removed per user request)
   shopItems = shopItems.filter(function(it) { return it && it.source === 'manual'; });
 
-    if (!shopItems.length) {
-    container.innerHTML = '<div class="empty-state-v2 action-empty"><div class="empty-svg">🛒</div><div class="empty-title">' + (lang==='en'?'Shopping list is empty':'Nákupný zoznam je prázdny') + '</div><div class="empty-desc">' + (lang==='en'?'Add a manual item or generate a list from the weekly meal plan.':'Pridaj položku ručne alebo vytvor nákup z týždenného jedálnička.') + '</div><div class="empty-actions"><button class="btn btn-primary" onclick="openAddItemSheet()">➕ ' + (lang==='en'?'Add item':'Pridať položku') + '</button><button class="btn btn-secondary" onclick="switchTab(&quot;planner&quot;)">📅 ' + (lang==='en'?'Plan meals':'Naplánovať jedlá') + '</button></div></div>';
+  if (!shopItems.length) {
+    container.innerHTML = emptyStateHTML({
+      icon: '🛒',
+      title: lang === 'en' ? 'Shopping list is empty' : 'Nákupný zoznam je prázdny',
+      desc: lang === 'en' ? 'Add a manual item or generate a list from the weekly meal plan.' : 'Pridaj položku ručne alebo vytvor nákup z týždenného jedálnička.',
+      actions: [
+        { label: '➕ ' + (lang === 'en' ? 'Add item' : 'Pridať položku'), cls: 'btn-primary', onClick: 'openAddItemSheet()' },
+        { label: '📅 ' + (lang === 'en' ? 'Plan meals' : 'Naplánovať jedlá'), cls: 'btn-secondary', onClick: 'switchTab(&quot;planner&quot;)' }
+      ]
+    });
     return;
   }
 
@@ -5739,8 +5784,6 @@ function renderTasks() {
     <button class="task-filter-chip" onclick="filterTasksTab(this,'done')">✅ ${lang==='en'?'Done':'Hotové'}</button>
   </div>`;
 
-  // Top add button
-  html += `<button class="shop-add-btn" onclick="openTaskSheet()" style="margin-bottom:.4rem;">➕ ${lang==='en'?'Add task':'Pridať úlohu'}</button>`;
   const headerLen = html.length; // track header length for empty state check
   // Filter-aware section rendering
   if (_taskFilter === 'today') {
@@ -5792,18 +5835,32 @@ function renderTasks() {
     }
   }
 
-  if (html.length === headerLen) {
-    html = `<div class="shop-empty">
-      <div class="shop-empty-icon">✅</div>
-      <div class="shop-empty-title" data-lang="tasksEmpty">Dnes máš voľnejší deň ✨</div>
-      <div class="shop-empty-desc" data-lang="tasksEmptyDesc">Žiadne úlohy na dnes. Pridaj si nejakú!</div>
-      <div class="shop-empty-actions">
-        <button class="btn primary" onclick="openTaskSheet()">✏️ ${lang==='en'?'Add task':'Pridať úlohu'}</button>
-      </div>
-    </div>`;
+  const hasRenderedTasks = html.length !== headerLen;
+  if (hasRenderedTasks) {
+    html = html.slice(0, headerLen) + `<button class="shop-add-btn" onclick="openTaskSheet()" style="margin-bottom:.4rem;">➕ ${lang==='en'?'Add task':'Pridať úlohu'}</button>` + html.slice(headerLen);
+  }
+  if (!hasRenderedTasks) {
+    const emptyCopy = {
+      today: [lang === 'en' ? 'Free day' : 'Dnes voľno', lang === 'en' ? 'No tasks for today. Add one if something comes up.' : 'Na dnes nemáš žiadne úlohy. Pridaj si niečo, ak treba.'],
+      tomorrow: [lang === 'en' ? 'Tomorrow is clear' : 'Zajtra je čisto', lang === 'en' ? 'Nothing scheduled for tomorrow yet.' : 'Na zajtra zatiaľ nič nemáš.'],
+      week: [lang === 'en' ? 'Week looks calm' : 'Týždeň vyzerá pokojne', lang === 'en' ? 'No upcoming tasks in the rest of the week.' : 'Vo zvyšku týždňa nie sú žiadne úlohy.'],
+      done: [lang === 'en' ? 'No completed tasks' : 'Žiadne hotové úlohy', lang === 'en' ? 'Completed tasks will appear here.' : 'Dokončené úlohy sa zobrazia tu.'],
+      all: [lang === 'en' ? 'No tasks yet' : 'Zatiaľ žiadne úlohy', lang === 'en' ? 'Create your first task and keep the day organized.' : 'Vytvor prvú úlohu a udrž deň pod kontrolou.']
+    };
+    const copy = emptyCopy[_taskFilter] || emptyCopy.all;
+    html += emptyStateHTML({
+      icon: '✅',
+      title: copy[0],
+      desc: copy[1],
+      actions: [
+        { label: '✏️ ' + (lang === 'en' ? 'Add task' : 'Pridať úlohu'), cls: 'btn-primary', onClick: 'openTaskSheet()' }
+      ]
+    });
   }
 
-  html += `<button class="shop-add-btn" onclick="openTaskSheet()" style="margin-top:.3rem;">➕ ${lang==='en'?'Add task':'Pridať úlohu'}</button>`;
+  if (hasRenderedTasks) {
+    html += `<button class="shop-add-btn" onclick="openTaskSheet()" style="margin-top:.3rem;">➕ ${lang==='en'?'Add task':'Pridať úlohu'}</button>`;
+  }
 
   container.innerHTML = html;
 }
