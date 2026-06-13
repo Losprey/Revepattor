@@ -555,7 +555,7 @@ function pickOnboardLang(l) {
 setTimeout(() => showOnboarding(), 300);
 
 // ======================== AI (DEEPSEEK PROXY) ========================
-const APP_VERSION = '1.0.12';
+const APP_VERSION = '1.0.13';
 const VAPID_PUBLIC_KEY = 'BI6Fga-GXSKggkNJ58R1VEYEfGE6KfWgnuDtI9sHqQLQJzGLshJuIuODmI13AVzX5D2Kd7SBxrr7Cvf-xRAowg0';
 const PUSH_PROXY_URL = 'https://receptar.waldis994.workers.dev';
 
@@ -3054,7 +3054,9 @@ function getCurrentRecipe() {
 }
 
 function viewRecipe(id) {
-  try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch(e) {}
+  const pageScrollY = window.scrollY || window.pageYOffset || 0;
+  const detailWasOpen = !!document.querySelector('#detail-modal.active');
+  const sameRecipeOpen = detailWasOpen && viewingId === id;
   viewingId = id;
   basePortion = 2;
   currentPortion = basePortion;
@@ -3133,8 +3135,14 @@ function viewRecipe(id) {
     <div class="detail-section"><h3>📓 ${t('formTitle')==='New Recipe'?'Notes':'Poznámky'}</h3>
       <textarea id="recipe-notes" style="width:100%;padding:.45rem;border:1px solid var(--border);border-radius:6px;min-height:45px;font-family:inherit;font-size:.82rem;background:var(--input-bg);color:var(--text);" onchange="saveNotes(${id},this.value)">${esc((lang==='en'&&r.notesEn?r.notesEn:r.notes)||'')}</textarea></div>
   `;
-  history.pushState({ modal: 'detail', id: id }, '', '#recipe-' + id);
+  if (sameRecipeOpen) history.replaceState({ modal: 'detail', id: id }, '', '#recipe-' + id);
+  else history.pushState({ modal: 'detail', id: id }, '', '#recipe-' + id);
   openModal('detail-modal');
+  const detailModal = document.querySelector('#detail-modal .modal');
+  if (detailModal) detailModal.scrollTop = 0;
+  requestAnimationFrame(function() {
+    try { window.scrollTo(0, pageScrollY); } catch(e) {}
+  });
   // Async image fetch in background
   if (!r.image && !r.imageData) {
     getRecipeImage(r).then(url => {
