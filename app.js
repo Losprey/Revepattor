@@ -555,7 +555,7 @@ function pickOnboardLang(l) {
 setTimeout(() => showOnboarding(), 300);
 
 // ======================== AI (DEEPSEEK PROXY) ========================
-const APP_VERSION = '1.0.10';
+const APP_VERSION = '1.0.11';
 const VAPID_PUBLIC_KEY = 'BI6Fga-GXSKggkNJ58R1VEYEfGE6KfWgnuDtI9sHqQLQJzGLshJuIuODmI13AVzX5D2Kd7SBxrr7Cvf-xRAowg0';
 const PUSH_PROXY_URL = 'https://receptar.waldis994.workers.dev';
 
@@ -4535,7 +4535,28 @@ function renderPlanner() {
   var maxMeals = DAYS.length * totalSlots;
   var mealPct = maxMeals > 0 ? Math.round((totalMeals / maxMeals) * 100) : 0;
   const weekRange = getWeekLabel(startOfWeek);
-  todayEl.innerHTML = `<section class="planner-practical-top">
+  todayEl.innerHTML = `<section class="planner-control-panel">
+    <div class="planner-control-title">
+      <span>${lang==='en'?'Meal planning':'Plánovanie jedál'}</span>
+      <strong>${lang==='en'?'Weekly meal board':'Týždenná tabuľa jedál'}</strong>
+      <small>${weekRange}</small>
+    </div>
+    <div class="planner-control-actions">
+      <button class="planner-main-action" onclick="aiGenerateFullWeek()">🤖 ${lang==='en'?'AI week':'AI týždeň'}</button>
+      <button class="planner-soft-action" onclick="resetWeek()">↺ ${lang==='en'?'Today week':'Aktuálny týždeň'}</button>
+    </div>
+    <div class="planner-control-row">
+      <div class="planner-segment" aria-label="${lang==='en'?'Week':'Týždeň'}">
+        <button class="${plannerWeekOffset===0?'active':''}" onclick="goToWeek(0)">${lang==='en'?'This week':'Tento týždeň'}</button>
+        <button class="${plannerWeekOffset===1?'active':''}" onclick="goToWeek(1)">${lang==='en'?'Next week':'Budúci týždeň'}</button>
+      </div>
+      <div class="planner-segment" aria-label="${lang==='en'?'Audience':'Režim'}">
+        <button class="${planType==='adults'?'active':''}" onclick="setPlanType('adults')">👨 ${lang==='en'?'Adults':'Dospelí'}</button>
+        <button class="${planType==='kids'?'active':''}" onclick="setPlanType('kids')">👶 ${lang==='en'?'Kids':'Deti'}</button>
+      </div>
+    </div>
+  </section>
+  <section class="planner-practical-top">
     <div>
       <span>${lang==='en'?'Practical week board':'Praktická tabuľa týždňa'}</span>
       <strong>${weekRange}</strong>

@@ -3228,6 +3228,95 @@ html.light .planner-week-card {
 }
 
 /* ===== PLANNER PRACTICAL BOARD LAYOUT ===== */
+#planner-hero,
+#planner-info-panel,
+#planner-week-nav,
+#plan-type-switch {
+  display: none !important;
+}
+.planner-control-panel {
+  display: grid;
+  gap: .7rem;
+  margin: .15rem 0 .75rem;
+  padding: .85rem;
+  border: 1px solid color-mix(in srgb, var(--primary) 18%, var(--border));
+  border-radius: 1.25rem;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(var(--primary-rgb), .18), transparent 42%),
+    linear-gradient(135deg, color-mix(in srgb, var(--surface) 88%, transparent), var(--surface-raised));
+  box-shadow: var(--shadow-md);
+}
+.planner-control-title span {
+  display: block;
+  color: var(--primary);
+  font-size: .56rem;
+  font-weight: 950;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.planner-control-title strong {
+  display: block;
+  margin-top: .05rem;
+  color: var(--text);
+  font-size: 1.22rem;
+  line-height: 1.05;
+  letter-spacing: -.045em;
+}
+.planner-control-title small {
+  display: block;
+  margin-top: .18rem;
+  color: var(--text3);
+  font-size: .68rem;
+  font-weight: 750;
+}
+.planner-control-actions {
+  display: grid;
+  grid-template-columns: 1.45fr 1fr;
+  gap: .45rem;
+}
+.planner-control-actions button,
+.planner-segment button {
+  min-height: 2.35rem;
+  border: 0;
+  border-radius: .95rem;
+  font-size: .72rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+.planner-main-action {
+  color: #fff;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  box-shadow: 0 12px 24px rgba(var(--primary-rgb), .22);
+}
+.planner-soft-action {
+  color: var(--text);
+  background: var(--input-bg);
+  border: 1px solid var(--border) !important;
+}
+.planner-control-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .45rem;
+}
+.planner-segment {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .22rem;
+  padding: .22rem;
+  border: 1px solid var(--border);
+  border-radius: 1.05rem;
+  background: var(--input-bg);
+}
+.planner-segment button {
+  min-height: 2.1rem;
+  color: var(--text2);
+  background: transparent;
+}
+.planner-segment button.active {
+  color: #fff;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  box-shadow: 0 8px 18px rgba(var(--primary-rgb), .18);
+}
 .planner-practical-top {
   display: flex;
   align-items: center;
@@ -3492,7 +3581,8 @@ html.light .planner-week-card {
   text-align: center;
 }
 html.light .planner-board-scroll,
-html.light .planner-practical-top {
+html.light .planner-practical-top,
+html.light .planner-control-panel {
   background-color: rgba(255,255,255,.9);
 }
 html.light .planner-board-corner,
@@ -3502,6 +3592,13 @@ html.light .planner-board-meal-label {
 }
 
 @media (max-width: 430px) {
+  .planner-control-actions,
+  .planner-control-row {
+    grid-template-columns: 1fr;
+  }
+  .planner-control-title strong {
+    font-size: 1.08rem;
+  }
   .planner-practical-top {
     align-items: flex-start;
     flex-direction: column;
