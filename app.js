@@ -555,7 +555,7 @@ function pickOnboardLang(l) {
 setTimeout(() => showOnboarding(), 300);
 
 // ======================== AI (DEEPSEEK PROXY) ========================
-const APP_VERSION = '1.0.22';
+const APP_VERSION = '1.0.23';
 const VAPID_PUBLIC_KEY = 'BI6Fga-GXSKggkNJ58R1VEYEfGE6KfWgnuDtI9sHqQLQJzGLshJuIuODmI13AVzX5D2Kd7SBxrr7Cvf-xRAowg0';
 const PUSH_PROXY_URL = 'https://receptar.waldis994.workers.dev';
 
@@ -4689,11 +4689,14 @@ function renderPlanner() {
       if (recipe || isCustom) {
         const slotAction = recipe ? `viewRecipe(${recipe.id})` : `pickRecipe('${info.key}','${m.id}','${weekKey}')`;
         const slotMeta = recipe && recipe.nutrition ? `🔥 ${recipe.nutrition.kcal || '?'}` : (recipe && recipe.time ? `⏱ ${recipe.time}m` : '');
-        return `<button class="planner-week-slot filled ${mealClass}" onclick="${slotAction}" title="${escAttr(mealLabel(m.id)+': '+name)}">
-          ${image ? `<span class="planner-week-slot-img" style="background-image:url('${escAttr(image)}')"></span>` : `<span class="planner-week-slot-icon">${m.icon}</span>`}
-          <strong>${esc(name || mealLabel(m.id))}</strong>
-          ${slotMeta ? `<em>${slotMeta}</em>` : ''}
-        </button>`;
+        return `<div class="planner-week-slot filled ${mealClass}" title="${escAttr(mealLabel(m.id)+': '+name)}">
+          <button class="planner-week-slot-open" onclick="${slotAction}">
+            ${image ? `<span class="planner-week-slot-img" style="background-image:url('${escAttr(image)}')"></span>` : `<span class="planner-week-slot-icon">${m.icon}</span>`}
+            <strong>${esc(name || mealLabel(m.id))}</strong>
+            ${slotMeta ? `<em>${slotMeta}</em>` : ''}
+          </button>
+          <button class="planner-week-slot-remove" onclick="event.stopPropagation();removeSlot('${info.key}','${m.id}','${weekKey}')" aria-label="${escAttr(lang==='en'?'Remove meal':'Odstrániť jedlo')}">×</button>
+        </div>`;
       }
       return `<button class="planner-week-slot empty ${mealClass}" onclick="pickRecipe('${info.key}','${m.id}','${weekKey}')" title="${escAttr(mealLabel(m.id))}">
         <span class="planner-week-plus">＋</span>
@@ -4712,7 +4715,11 @@ function renderPlanner() {
     </article>`;
   }).join('');
   weekEl.innerHTML = `<section class="planner-week-agenda-shell">
-    <div class="planner-week-legend">${weekMealLegend}</div>
+    <div class="planner-week-legend">
+      <span class="planner-week-legend-spacer"></span>
+      <span class="planner-week-legend-progress"></span>
+      <div class="planner-week-legend-slots">${weekMealLegend}</div>
+    </div>
     <div class="planner-week-rows">${weekRows}</div>
   </section>`;
   document.getElementById('planner-summary').innerHTML = '<div class="planner-week-total"><div class="planner-week-total-ring" style="--pct:'+mealPct+'"><strong>'+totalMeals+'/'+maxMeals+'</strong><span>'+(lang==='en'?'planned':'naplánované')+'</span></div><div><strong>🔥 '+totalKcal+' kcal</strong><span>'+(lang==='en'?'week total':'týždeň spolu')+'</span></div><div><strong>🕒 '+Math.floor(totalTime/60)+'h '+(totalTime%60)+'m</strong><span>'+(lang==='en'?'active time':'aktívny čas')+'</span></div><div><strong>📖 '+recipes.length+'</strong><span>'+(lang==='en'?'recipes':'receptov')+'</span></div></div>';
