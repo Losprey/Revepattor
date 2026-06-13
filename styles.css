@@ -5296,7 +5296,7 @@ html.light .planner-agenda-day {
 
 #planner-container .planner-week-legend {
   display: grid;
-  grid-template-columns: 3.95rem 4.5rem minmax(0,1fr);
+  grid-template-columns: 5.2rem minmax(0,1fr);
   align-items: center;
   gap: .5rem;
   padding: .08rem .62rem .18rem;
@@ -5341,7 +5341,7 @@ html.light .planner-agenda-day {
 #planner-container .planner-week-row {
   --pct: 0;
   display: grid;
-  grid-template-columns: 3.95rem 4.5rem minmax(0,1fr);
+  grid-template-columns: 5.2rem minmax(0,1fr);
   align-items: center;
   gap: .5rem;
   min-height: 5.9rem;
@@ -5364,7 +5364,7 @@ html.light .planner-agenda-day {
 
 #planner-container .planner-week-day {
   display: grid;
-  gap: .24rem;
+  gap: .2rem;
   justify-items: start;
   padding: 0;
   border: 0;
@@ -5393,32 +5393,25 @@ html.light .planner-agenda-day {
   letter-spacing: -.045em;
 }
 
-#planner-container .planner-week-progress {
-  width: 4.2rem;
-  height: 4.2rem;
-  display: grid;
-  place-items: center;
-  align-content: center;
+#planner-container .planner-week-day em {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.3rem;
+  margin-top: .08rem;
+  padding: .22rem .42rem;
   border-radius: 999px;
-  background:
-    radial-gradient(circle at center, rgba(14,17,18,.98) 0 58%, transparent 59%),
-    conic-gradient(#34d399 calc(var(--pct) * 1%), rgba(255,255,255,.15) 0);
-}
-
-#planner-container .planner-week-progress strong {
-  color: #fff;
-  font-size: .88rem;
+  color: #a7f3d0;
+  background: rgba(16,185,129,.11);
+  border: 1px solid rgba(52,211,153,.2);
+  font-size: .68rem;
   line-height: 1;
+  font-style: normal;
   font-weight: 950;
 }
 
-#planner-container .planner-week-progress span {
-  display: block;
-  max-width: 3rem;
-  color: rgba(255,255,255,.64);
-  font-size: .52rem;
-  line-height: 1.05;
-  text-align: center;
+#planner-container .planner-week-progress {
+  display: none;
 }
 
 #planner-container .planner-week-slots {
@@ -5528,11 +5521,11 @@ html.light .planner-agenda-day {
   right: .18rem;
   bottom: .18rem;
   display: block;
-  padding: .16rem .22rem;
+  padding: .18rem .22rem;
   border-radius: .42rem;
-  background: linear-gradient(180deg, rgba(0,0,0,.08), rgba(0,0,0,.68));
+  background: linear-gradient(180deg, rgba(0,0,0,.12), rgba(0,0,0,.78));
   color: #fff;
-  font-size: .58rem;
+  font-size: .62rem;
   line-height: 1;
   font-weight: 920;
   text-align: center;
@@ -5544,7 +5537,7 @@ html.light .planner-agenda-day {
 
 #planner-container .planner-week-slot-icon b {
   position: static;
-  max-width: calc(100% - .3rem);
+  max-width: calc(100% - .24rem);
   margin: .08rem auto 0;
   background: rgba(0,0,0,.28);
 }
@@ -5643,7 +5636,7 @@ html.light #planner-container .planner-week-total span {
 
 @media (max-width: 430px) {
   #planner-container .planner-week-legend {
-    grid-template-columns: 3.05rem 3.2rem minmax(0,1fr);
+    grid-template-columns: 4.45rem minmax(0,1fr);
     gap: .28rem;
     padding: .05rem .48rem .12rem;
   }
@@ -5658,7 +5651,7 @@ html.light #planner-container .planner-week-total span {
     padding: .18rem .06rem;
   }
   #planner-container .planner-week-row {
-    grid-template-columns: 3.05rem 3.2rem minmax(0,1fr);
+    grid-template-columns: 4.45rem minmax(0,1fr);
     gap: .28rem;
     min-height: 5.3rem;
     padding: .48rem;
@@ -5668,17 +5661,12 @@ html.light #planner-container .planner-week-total span {
     font-size: .76rem;
   }
   #planner-container .planner-week-day strong {
-    font-size: 1.28rem;
+    font-size: 1.22rem;
   }
-  #planner-container .planner-week-progress {
-    width: 3.05rem;
-    height: 3.05rem;
-  }
-  #planner-container .planner-week-progress strong {
-    font-size: .74rem;
-  }
-  #planner-container .planner-week-progress span {
-    display: none;
+  #planner-container .planner-week-day em {
+    min-width: 2rem;
+    padding: .2rem .34rem;
+    font-size: .62rem;
   }
   #planner-container .planner-week-slots {
     gap: .25rem;
@@ -5710,7 +5698,8 @@ html.light #planner-container .planner-week-total span {
   }
   #planner-container .planner-week-slot-img b,
   #planner-container .planner-week-slot-icon b {
-    display: none;
+    display: block;
+    font-size: .52rem;
   }
   #planner-container .planner-week-slot-remove {
     width: 1.18rem;

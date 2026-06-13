@@ -555,7 +555,7 @@ function pickOnboardLang(l) {
 setTimeout(() => showOnboarding(), 300);
 
 // ======================== AI (DEEPSEEK PROXY) ========================
-const APP_VERSION = '1.0.26';
+const APP_VERSION = '1.0.27';
 const VAPID_PUBLIC_KEY = 'BI6Fga-GXSKggkNJ58R1VEYEfGE6KfWgnuDtI9sHqQLQJzGLshJuIuODmI13AVzX5D2Kd7SBxrr7Cvf-xRAowg0';
 const PUSH_PROXY_URL = 'https://receptar.waldis994.workers.dev';
 
@@ -4559,8 +4559,8 @@ function mealShortLabel(id) {
 function compactPlannerSlotName(name) {
   const clean = String(name || '').trim();
   if (!clean) return '';
-  const firstWord = clean.split(/\s+/)[0] || clean;
-  return firstWord.length > 8 ? firstWord.slice(0, 7) + '…' : firstWord;
+  const words = clean.split(/\s+/).slice(0, 2).join(' ') || clean;
+  return words.length > 16 ? words.slice(0, 15) + '…' : words;
 }
 
 function catLabel(cat) {
@@ -4717,18 +4717,14 @@ function renderPlanner() {
       <button class="planner-week-day" onclick="selectPlannerDay(${info.index})">
         <span>${esc(dayShort)}</span>
         <strong>${info.date.getDate()}.${info.date.getMonth()+1}.</strong>
+        <em>${info.filled}/${totalSlots}</em>
       </button>
-      <div class="planner-week-progress" aria-label="${info.filled}/${totalSlots}">
-        <strong>${info.filled}/${totalSlots}</strong>
-        <span>${lang==='en'?'planned':'naplánované'}</span>
-      </div>
       <div class="planner-week-slots">${daySlots}</div>
     </article>`;
   }).join('');
   weekEl.innerHTML = `<section class="planner-week-agenda-shell">
     <div class="planner-week-legend">
       <span class="planner-week-legend-spacer"></span>
-      <span class="planner-week-legend-progress"></span>
       <div class="planner-week-legend-slots">${weekMealLegend}</div>
     </div>
     <div class="planner-week-rows">${weekRows}</div>
