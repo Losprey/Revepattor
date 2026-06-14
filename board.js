@@ -147,10 +147,23 @@
   window.deleteBoardCard = function(id) {
     showConfirmModal(t('Vymazať túto kartu?','Delete this card?'), '🗑️', t('Vymazať','Delete'), function() {
       loadBoardCards();
+      var deletedCard = boardCards.find(function(c) { return c.id === id; });
+      var deletedIndex = boardCards.findIndex(function(c) { return c.id === id; });
       boardCards = boardCards.filter(function(c) { return c.id !== id; });
       saveBoardCards();
       syncBoardToFirebase();
       renderBoard();
+      if (typeof showUndoToast === 'function') {
+        showUndoToast('🗑️ ' + t('Karta vymazaná','Card deleted'), function() {
+          if (!deletedCard) return;
+          loadBoardCards();
+          boardCards.splice(Math.max(0, deletedIndex), 0, deletedCard);
+          saveBoardCards();
+          syncBoardToFirebase();
+          renderBoard();
+          showToast(t('Karta obnovená','Card restored'), 'success', 1200);
+        });
+      }
     });
   };
 

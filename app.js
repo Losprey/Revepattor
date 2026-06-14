@@ -555,7 +555,7 @@ function pickOnboardLang(l) {
 setTimeout(() => showOnboarding(), 300);
 
 // ======================== AI (DEEPSEEK PROXY) ========================
-const APP_VERSION = '1.0.38';
+const APP_VERSION = '1.0.39';
 const VAPID_PUBLIC_KEY = 'BI6Fga-GXSKggkNJ58R1VEYEfGE6KfWgnuDtI9sHqQLQJzGLshJuIuODmI13AVzX5D2Kd7SBxrr7Cvf-xRAowg0';
 const PUSH_PROXY_URL = 'https://receptar.waldis994.workers.dev';
 
@@ -3063,6 +3063,14 @@ function randomRecipe() {
   viewRecipe(r.id);
 }
 
+function toggleRecipeToolsPanel() {
+  const panel = document.getElementById('recipe-tools-panel');
+  const toggle = document.querySelector('.recipe-tools-toggle');
+  if (!panel) return;
+  const isOpen = panel.classList.toggle('active');
+  if (toggle) toggle.classList.toggle('btn-primary', isOpen);
+}
+
 // ======================== MODALS ========================
 function openModal(id) {
   const el = document.getElementById(id);
@@ -3078,6 +3086,16 @@ function toggleRecipeAiTools() {
   if (!tools) return;
   const isOpen = tools.classList.toggle('active');
   if (toggle) toggle.classList.toggle('btn-primary', isOpen);
+}
+
+function toggleRecipeMoreTools() {
+  const tools = document.getElementById('recipe-more-tools');
+  const aiTools = document.getElementById('recipe-ai-tools');
+  const toggle = document.querySelector('.recipe-more-toggle');
+  if (!tools) return;
+  const isOpen = tools.classList.toggle('active');
+  if (toggle) toggle.classList.toggle('btn-primary', isOpen);
+  if (!isOpen && aiTools) aiTools.classList.remove('active');
 }
 document.querySelectorAll('.modal-overlay').forEach(el => {
   el.addEventListener('click', e => { if (e.target === el) { el.classList.remove('active'); } });
@@ -3396,11 +3414,19 @@ function editCurrent() {
 
 function deleteCurrent() {
   showConfirmModal(t('Naozaj chceš vymazať tento recept?','Delete this recipe?'), '🗑️', t('Áno, vymazať','Yes, delete'), function() {
+    const deletedRecipe = recipes.find(r => r.id === viewingId);
+    const deletedIndex = recipes.findIndex(r => r.id === viewingId);
     recipes = recipes.filter(r => r.id !== viewingId);
     saveToLS();
     closeModal('detail-modal');
     render();
-    showToast('🗑️ ' + (lang==='en'?'Deleted':'Vymazané'), 'info', 1500);
+    showUndoToast('🗑️ ' + (lang==='en'?'Recipe deleted':'Recept vymazaný'), function() {
+      if (!deletedRecipe) return;
+      recipes.splice(Math.max(0, deletedIndex), 0, deletedRecipe);
+      saveToLS();
+      render();
+      showToast(lang === 'en' ? 'Recipe restored' : 'Recept obnovený', 'success', 1200);
+    });
   });
 }
 
@@ -5361,30 +5387,17 @@ function renderShoppingList() {
     return;
   }
 
-  // Group by category
-  const groups = {};
-  shopItems.forEach(it => {
-    const g = it.category || 'other';
-    if (!groups[g]) groups[g] = [];
-    groups[g].push(it);
-  });
+  const openItems = shopItems.filter(i => !i.checked);
+  const boughtItems = shopItems.filter(i => i.checked);
+  const openGroups = buildShopGroups(openItems);
+  const boughtGroups = buildShopGroups(boughtItems);
 
-  // Sort within groups: unchecked first, then checked
-  Object.keys(groups).forEach(g => {
-    groups[g].sort((a, b) => {
-      if (a.checked !== b.checked) return a.checked ? 1 : -1;
-      return a.name.localeCompare(b.name);
-    });
-  });
-
-  // Category order
-  const catOrder = SHOP_CATEGORIES.map(c => c.id);
   const totalItems = shopItems.length;
   const checkedItems = shopItems.filter(i => i.checked).length;
   const remaining = totalItems - checkedItems;
   const pctAll = totalItems ? Math.round(checkedItems / totalItems * 100) : 0;
-  const catCount = Object.keys(groups).length;
-  const biggestCat = Object.keys(groups).sort((a,b) => groups[b].length - groups[a].length)[0];
+  const catCount = Object.keys(openGroups).length || Object.keys(boughtGroups).length;
+  const biggestCat = Object.keys(openGroups).sort((a,b) => openGroups[b].length - openGroups[a].length)[0] || Object.keys(boughtGroups).sort((a,b) => boughtGroups[b].length - boughtGroups[a].length)[0];
 
   // Build HTML
   let html = '';
@@ -5420,45 +5433,16 @@ function renderShoppingList() {
     <button class="sa-btn danger" onclick="clearAllShopItems()">🗑 ${lang==='en'?'Clear all':'Všetko'}</button>
   </div>`;
 
-  // Category cards
-  const allCatIds = [...new Set([...Object.keys(groups).filter(g => catOrder.includes(g)), ...catOrder])];
-  allCatIds.forEach(catId => {
-    const items = groups[catId];
-    if (!items || !items.length) return;
-    const total = items.length;
-    const checked = items.filter(i => i.checked).length;
-    const pct = Math.round(checked / total * 100);
-    html += `<div class="shop-cat-card" data-cat="${catId}">
-      <div class="shop-cat-header" onclick="toggleShopCategory(this)">
-        <span class="shop-cat-icon">${shopCatIcon(catId)}</span>
-        <span class="shop-cat-name">${shopCatLabel(catId)}</span>
-        <span class="shop-cat-count">${checked}/${total}</span>
-        <div class="shop-cat-progress-wrap"><div class="shop-cat-progress-bar" style="width:${pct}%"></div></div>
-        <span class="shop-cat-arrow">▼</span>
+  html += renderShopCategoryCards(openGroups, { bought: false });
+  if (boughtItems.length) {
+    html += `<div class="shop-bought-section">
+      <div class="shop-bought-head">
+        <span>✅ ${lang === 'en' ? 'Bought' : 'Kúpené'}</span>
+        <small>${boughtItems.length} ${lang === 'en' ? 'items' : 'položiek'}</small>
       </div>
-      <div class="shop-cat-body">${items.map(it => {
-        const ch = it.checked ? 'checked' : '';
-        const catLabel = shopCatLabel(it.category);
-        const amount = it.amount ? (it.unit ? `${it.amount} ${it.unit}` : it.amount) : '';
-        return `<div class="shop-item ${ch}" data-id="${it.id}">
-          <div class="si-check ${ch}" onclick="toggleShopItem('${it.id}')">${it.checked?'✓':''}</div>
-          <div class="si-info" onclick="openAddItemSheet('${it.id}')">
-            <div class="si-name">${esc(it.name)}</div>
-            <div class="si-meta">
-              ${amount ? `<span>${esc(amount)}</span>` : ''}
-              <span class="si-cat-chip">${esc(catLabel)}</span>
-              ${it.note ? `<span>📝 ${esc(it.note)}</span>` : ''}
-            </div>
-          </div>
-          <div class="si-actions">
-            <button class="si-btn" onclick="event.stopPropagation();openAddItemSheet('${it.id}')" title="${lang==='en'?'Edit':'Upraviť'}">✏️</button>
-            <button class="si-btn danger" onclick="event.stopPropagation();deleteShopItem('${it.id}')" title="${lang==='en'?'Delete':'Vymazať'}">🗑</button>
-          </div>
-          <div class="si-swipe-delete" onclick="event.stopPropagation();deleteShopItem('${it.id}')">🗑 ${lang==='en'?'Delete':'Vymazať'}</div>
-        </div>`;
-      }).join('')}</div>
+      ${renderShopCategoryCards(boughtGroups, { bought: true })}
     </div>`;
-  });
+  }
 
   // Add item button
   html += `<button class="shop-add-btn" onclick="openAddItemSheet();springBounce(this)">➕ ${lang==='en'?'Add food item':'Pridať potravinu'}</button>`;
@@ -5466,6 +5450,66 @@ function renderShoppingList() {
   container.innerHTML = html;
   container.classList.add('shop-animate-stagger');
   initShopSwipe();
+}
+
+function buildShopGroups(items) {
+  const groups = {};
+  items.forEach(it => {
+    const g = it.category || 'other';
+    if (!groups[g]) groups[g] = [];
+    groups[g].push(it);
+  });
+  Object.keys(groups).forEach(g => {
+    groups[g].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  });
+  return groups;
+}
+
+function renderShopCategoryCards(groups, opts) {
+  opts = opts || {};
+  const catOrder = SHOP_CATEGORIES.map(c => c.id);
+  const catIds = [...new Set([...Object.keys(groups).filter(g => catOrder.includes(g)), ...catOrder])];
+  let html = '';
+  catIds.forEach(catId => {
+    const items = groups[catId];
+    if (!items || !items.length) return;
+    const total = items.length;
+    const checked = items.filter(i => i.checked).length;
+    const pct = Math.round(checked / total * 100);
+    html += `<div class="shop-cat-card${opts.bought ? ' bought' : ''}" data-cat="${catId}">
+      <div class="shop-cat-header" onclick="toggleShopCategory(this)">
+        <span class="shop-cat-icon">${shopCatIcon(catId)}</span>
+        <span class="shop-cat-name">${shopCatLabel(catId)}</span>
+        <span class="shop-cat-count">${opts.bought ? total : checked + '/' + total}</span>
+        <div class="shop-cat-progress-wrap"><div class="shop-cat-progress-bar" style="width:${opts.bought ? 100 : pct}%"></div></div>
+        <span class="shop-cat-arrow">▼</span>
+      </div>
+      <div class="shop-cat-body">${items.map(renderShopItem).join('')}</div>
+    </div>`;
+  });
+  return html;
+}
+
+function renderShopItem(it) {
+  const ch = it.checked ? 'checked' : '';
+  const catLabel = shopCatLabel(it.category);
+  const amount = it.amount ? (it.unit ? `${it.amount} ${it.unit}` : it.amount) : '';
+  return `<div class="shop-item ${ch}" data-id="${it.id}">
+    <div class="si-check ${ch}" onclick="toggleShopItem('${it.id}')">${it.checked?'✓':''}</div>
+    <div class="si-info" onclick="openAddItemSheet('${it.id}')">
+      <div class="si-name">${esc(it.name)}</div>
+      <div class="si-meta">
+        ${amount ? `<span>${esc(amount)}</span>` : ''}
+        <span class="si-cat-chip">${esc(catLabel)}</span>
+        ${it.note ? `<span>📝 ${esc(it.note)}</span>` : ''}
+      </div>
+    </div>
+    <div class="si-actions">
+      <button class="si-btn" onclick="event.stopPropagation();openAddItemSheet('${it.id}')" title="${lang==='en'?'Edit':'Upraviť'}">✏️</button>
+      <button class="si-btn danger" onclick="event.stopPropagation();deleteShopItem('${it.id}')" title="${lang==='en'?'Delete':'Vymazať'}">🗑</button>
+    </div>
+    <div class="si-swipe-delete" onclick="event.stopPropagation();deleteShopItem('${it.id}')">🗑 ${lang==='en'?'Delete':'Vymazať'}</div>
+  </div>`;
 }
 
 // =================== SWIPE TO DELETE ===================
@@ -5502,8 +5546,6 @@ function initShopSwipe() {
 
 function onSwipeStart(e) {
   var item = e.currentTarget;
-  // Don't swipe-checked items
-  if (item.classList.contains('checked')) return;
   // Close any other open swipe
   document.querySelectorAll('.si-swipe-delete.revealed').forEach(function(d) {
     d.closest('.shop-item').querySelector('.si-swipe-delete').classList.remove('revealed');
@@ -5719,10 +5761,18 @@ function saveShopItem() {
 
 function deleteShopItem(id) {
   showConfirmModal(lang === 'en' ? 'Delete this item?' : 'Vymazať túto položku?', '🗑️', lang==='en'?'Delete':'Vymazať', function() {
+    const deletedItem = shopItems.find(i => i.id === id);
+    const deletedIndex = shopItems.findIndex(i => i.id === id);
     shopItems = shopItems.filter(i => i.id !== id);
     saveShopItems();
     renderShoppingList();
-    showToast('🗑️ ' + (lang==='en'?'Item deleted':'Položka vymazaná'), 'info', 1200);
+    showUndoToast('🗑️ ' + (lang==='en'?'Item deleted':'Položka vymazaná'), function() {
+      if (!deletedItem) return;
+      shopItems.splice(Math.max(0, deletedIndex), 0, deletedItem);
+      saveShopItems();
+      renderShoppingList();
+      showToast(lang === 'en' ? 'Item restored' : 'Položka obnovená', 'success', 1200);
+    });
   });
 }
 
@@ -6141,12 +6191,21 @@ function toggleTask(id) {
 
 function deleteTask(id) {
   showConfirmModal(lang === 'en' ? 'Delete this task?' : 'Vymazať túto úlohu?', '🗑️', lang==='en'?'Delete':'Vymazať', function() {
+    const deletedTask = tasks.find(t => t.id === id);
+    const deletedIndex = tasks.findIndex(t => t.id === id);
     tasks = tasks.filter(t => t.id !== id);
     saveTasks();
     const inTasks = document.getElementById('tasks-container')?.style.display !== 'none';
     if (inTasks) renderTasks();
     else { renderTaskWidget(); if (document.getElementById('dashboard')?.style.display !== 'none') renderDashboard(); }
-    showToast('🗑️ ' + (lang==='en'?'Task deleted':'Úloha vymazaná'), 'info', 1200);
+    showUndoToast('🗑️ ' + (lang==='en'?'Task deleted':'Úloha vymazaná'), function() {
+      if (!deletedTask) return;
+      tasks.splice(Math.max(0, deletedIndex), 0, deletedTask);
+      saveTasks();
+      if (inTasks) renderTasks();
+      else { renderTaskWidget(); if (document.getElementById('dashboard')?.style.display !== 'none') renderDashboard(); }
+      showToast(lang === 'en' ? 'Task restored' : 'Úloha obnovená', 'success', 1200);
+    });
   });
 }
 
@@ -7114,6 +7173,37 @@ function showToast(msg, type, duration) {
         t.style.opacity = '';
       });
     }, 300);
+  }, duration);
+}
+
+function showUndoToast(msg, undoFn, duration) {
+  duration = duration || 5000;
+  let container = document.getElementById('toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+  }
+  let used = false;
+  const toast = document.createElement('div');
+  toast.className = 'toast toast-info toast-stacked toast-undo';
+  toast.innerHTML = '<span class="toast-icon">↩️</span><span class="toast-text">' + esc(msg) + '</span><button class="toast-action">' + (lang === 'en' ? 'Undo' : 'Späť') + '</button>';
+  const action = toast.querySelector('.toast-action');
+  if (action) {
+    action.onclick = function(e) {
+      e.stopPropagation();
+      if (used) return;
+      used = true;
+      try { undoFn && undoFn(); } catch(err) { console.error('Undo failed:', err); }
+      toast.remove();
+    };
+  }
+  container.appendChild(toast);
+  setTimeout(function() {
+    if (used || !toast.parentNode) return;
+    toast.style.animation = 'toastOut .3s ease forwards';
+    setTimeout(function() { toast.remove(); }, 300);
   }, duration);
 }
 

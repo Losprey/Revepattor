@@ -15,7 +15,7 @@
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <title data-lang="appTitle">Mealnest</title>
-  <link rel="stylesheet" href="styles.css?v=38">
+  <link rel="stylesheet" href="styles.css?v=39">
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -142,10 +142,11 @@
         <option>Hlavné jedlá</option><option>Polievky</option><option>Šaláty</option><option>Dezerty</option><option>Pečivo</option><option>Nápoje</option><option>Predjedlá</option><option>Raňajky</option><option>Prílohy</option><option>Detské</option>
       </select>
       <button class="btn btn-primary" onclick="openFormModal()" data-lang="btnAdd">➕</button>
-      <button class="btn" onclick="aiIngredientSuggest()" style="background:linear-gradient(135deg,var(--primary-light),var(--primary));color:#fff;border:none;padding:.35rem .55rem;border-radius:var(--radius-sm);font-size:.7rem;font-weight:600;cursor:pointer;" id="recipe-ai-btn">🤖 Čo uvariť?</button>
-      <button class="btn btn-primary" onclick="showImportUrlModal()" style="font-size:.7rem;padding:.35rem .55rem;" title="Import receptu z URL">🌐 Import</button>
+      <button class="btn btn-secondary recipe-tools-toggle" onclick="toggleRecipeToolsPanel()">☰ <span id="recipe-tools-label">Viac</span></button>
     </div>
-    <div class="controls-sub">
+    <div class="recipe-tools-panel" id="recipe-tools-panel">
+      <button class="btn" onclick="aiIngredientSuggest()" id="recipe-ai-btn">🤖 Čo uvariť?</button>
+      <button class="btn btn-primary" onclick="showImportUrlModal()" title="Import receptu z URL">🌐 Import</button>
       <select id="sort-by" onchange="render()" style="padding:.3rem .5rem;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.72rem;background:var(--input-bg);color:var(--text);">
         <option value="name">📋 <span data-lang="sortName">Názov</span></option>
         <option value="time">⏱ <span data-lang="sortTime">Čas</span></option>
@@ -153,13 +154,13 @@
       </select>
       <label class="fav-filter-label"><input type="checkbox" id="filter-fav" onchange="render()"> ❤️</label>
       <button class="btn btn-secondary" onclick="randomRecipe()" style="font-size:.68rem;padding:.22rem .45rem;">🎲</button>
-    </div>
-    <div class="age-filter" id="age-filter">
-      <button class="age-btn active" data-age="" onclick="setAgeFilter('')"><span data-lang="allAges">Všetky veky</span></button>
-      <button class="age-btn" data-age="baby-6m" onclick="setAgeFilter('baby-6m')">👶 <span data-lang="age6m">6m+</span></button>
-      <button class="age-btn" data-age="baby-1" onclick="setAgeFilter('baby-1')">👶 <span data-lang="age1">1r+</span></button>
-      <button class="age-btn" data-age="baby-2" onclick="setAgeFilter('baby-2')">👶 <span data-lang="age2">2r+</span></button>
-      <button class="age-btn" data-age="baby-3" onclick="setAgeFilter('baby-3')">👶 <span data-lang="age3">3r+</span></button>
+      <div class="age-filter" id="age-filter">
+        <button class="age-btn active" data-age="" onclick="setAgeFilter('')"><span data-lang="allAges">Všetky veky</span></button>
+        <button class="age-btn" data-age="baby-6m" onclick="setAgeFilter('baby-6m')">👶 <span data-lang="age6m">6m+</span></button>
+        <button class="age-btn" data-age="baby-1" onclick="setAgeFilter('baby-1')">👶 <span data-lang="age1">1r+</span></button>
+        <button class="age-btn" data-age="baby-2" onclick="setAgeFilter('baby-2')">👶 <span data-lang="age2">2r+</span></button>
+        <button class="age-btn" data-age="baby-3" onclick="setAgeFilter('baby-3')">👶 <span data-lang="age3">3r+</span></button>
+      </div>
     </div>
     </div>
   <div class="recipe-grid" id="recipe-grid"></div>
@@ -379,12 +380,15 @@
       <div class="recipe-footer-main">
         <button class="btn btn-primary" onclick="openCookingMode()">👨‍🍳 <span data-lang="btnCook">Variť</span></button>
         <button class="btn btn-secondary" onclick="editCurrent()">✏️ <span data-lang="btnEdit">Upraviť</span></button>
+        <button class="btn btn-secondary recipe-more-toggle" onclick="toggleRecipeMoreTools()">☰ <span>Viac</span></button>
+        <button class="btn btn-secondary" onclick="closeModal('detail-modal')" data-lang="close">Zavrieť</button>
+      </div>
+      <div class="recipe-more-tools" id="recipe-more-tools">
         <button class="btn btn-secondary" onclick="printRecipe()">🖨️ <span data-lang="btnPrint">Tlačiť</span></button>
         <button class="btn btn-secondary" onclick="shareRecipe()">📤 <span data-lang="btnShare">Zdieľať</span></button>
         <button class="btn btn-secondary" onclick="copyRecipe(event)" data-lang="btnCopy">📋</button>
         <button class="btn btn-secondary recipe-ai-toggle" onclick="toggleRecipeAiTools()">🤖 AI</button>
         <button class="btn btn-danger" onclick="deleteCurrent()">🗑</button>
-        <button class="btn btn-secondary" onclick="closeModal('detail-modal')" data-lang="close">Zavrieť</button>
       </div>
       <div class="recipe-ai-tools" id="recipe-ai-tools">
         <button class="btn btn-secondary" onclick="aiAdjustPortions(viewingId)" title="Upraviť počet porcií">🍽️ Porcie</button>
@@ -511,8 +515,8 @@
 </nav>
 
 
-<script src="app.js?v=38"></script>
-<script src="board.js?v=38"></script>
+<script src="app.js?v=39"></script>
+<script src="board.js?v=39"></script>
 
 <!-- Quick add FAB -->
 <div id="fab-quick-add" style="display:none">
