@@ -555,7 +555,7 @@ function pickOnboardLang(l) {
 setTimeout(() => showOnboarding(), 300);
 
 // ======================== AI (DEEPSEEK PROXY) ========================
-const APP_VERSION = '1.0.37';
+const APP_VERSION = '1.0.38';
 const VAPID_PUBLIC_KEY = 'BI6Fga-GXSKggkNJ58R1VEYEfGE6KfWgnuDtI9sHqQLQJzGLshJuIuODmI13AVzX5D2Kd7SBxrr7Cvf-xRAowg0';
 const PUSH_PROXY_URL = 'https://receptar.waldis994.workers.dev';
 
@@ -5935,23 +5935,34 @@ function renderTasks() {
 
   const openTasks = tasks.filter(t => !t.completed).length;
   const doneTasks = tasks.filter(t => t.completed).length;
+  const restWeekTasks = weekTasks.filter(t => t.date !== today && t.date !== tomStr);
+  const activeTaskFilterClass = filter => _taskFilter === filter ? ' active' : '';
+  const taskHero = getTaskHeroCopy({
+    filter: _taskFilter,
+    openTasks,
+    doneTasks,
+    todayCount: todayTasks.length,
+    tomorrowCount: tomTasks.length,
+    weekCount: restWeekTasks.length,
+    completedCount: completedList.length
+  });
 
   html += `<section class="task-hero">
     <div>
       <span class="task-hero-kicker">${lang==='en'?'Tasks':'Úlohy'}</span>
-      <h2>${openTasks ? (lang==='en'?'What needs attention':'Čo treba vybaviť') : (lang==='en'?'Everything is clear':'Všetko je čisté')}</h2>
-      <p>${lang==='en' ? `${openTasks} open · ${doneTasks} done` : `${openTasks} otvorené · ${doneTasks} hotové`}</p>
+      <h2>${taskHero.title}</h2>
+      <p>${taskHero.sub}</p>
     </div>
     <button class="task-hero-add" onclick="openTaskSheet()">➕ ${lang==='en'?'Add':'Pridať'}</button>
   </section>`;
 
   // Filter chips
   html += `<div class="task-filters">
-    <button class="task-filter-chip active" onclick="filterTasksTab(this,'today')">📅 ${lang==='en'?'Today':'Dnes'}</button>
-    <button class="task-filter-chip" onclick="filterTasksTab(this,'tomorrow')">🌟 ${lang==='en'?'Tomorrow':'Zajtra'}</button>
-    <button class="task-filter-chip" onclick="filterTasksTab(this,'week')">📆 ${lang==='en'?'Week':'Týždeň'}</button>
-    <button class="task-filter-chip" onclick="filterTasksTab(this,'all')">📋 ${lang==='en'?'All':'Všetky'}</button>
-    <button class="task-filter-chip" onclick="filterTasksTab(this,'done')">✅ ${lang==='en'?'Done':'Hotové'}</button>
+    <button class="task-filter-chip${activeTaskFilterClass('today')}" onclick="filterTasksTab(this,'today')">📅 ${lang==='en'?'Today':'Dnes'}</button>
+    <button class="task-filter-chip${activeTaskFilterClass('tomorrow')}" onclick="filterTasksTab(this,'tomorrow')">🌟 ${lang==='en'?'Tomorrow':'Zajtra'}</button>
+    <button class="task-filter-chip${activeTaskFilterClass('week')}" onclick="filterTasksTab(this,'week')">📆 ${lang==='en'?'Week':'Týždeň'}</button>
+    <button class="task-filter-chip${activeTaskFilterClass('all')}" onclick="filterTasksTab(this,'all')">📋 ${lang==='en'?'All':'Všetky'}</button>
+    <button class="task-filter-chip${activeTaskFilterClass('done')}" onclick="filterTasksTab(this,'done')">✅ ${lang==='en'?'Done':'Hotové'}</button>
   </div>`;
 
   const headerLen = html.length; // track header length for empty state check
@@ -6038,9 +6049,42 @@ function renderTasks() {
 let _taskFilter = 'today';
 function filterTasksTab(el, filter) {
   _taskFilter = filter;
-  document.querySelectorAll('.task-filter-chip').forEach(c => c.classList.remove('active'));
-  el.classList.add('active');
   renderTasks();
+}
+
+function getTaskHeroCopy(data) {
+  const totalOpenSk = data.openTasks + ' otvorené celkovo';
+  const totalOpenEn = data.openTasks + ' open total';
+  const doneSk = data.doneTasks + ' hotové';
+  const doneEn = data.doneTasks + ' done';
+  if (data.filter === 'tomorrow') {
+    return {
+      title: data.tomorrowCount ? (lang === 'en' ? 'Tomorrow needs attention' : 'Zajtra treba vybaviť') : (lang === 'en' ? 'Tomorrow is clear' : 'Zajtra je čisto'),
+      sub: lang === 'en' ? `${data.tomorrowCount} tomorrow · ${totalOpenEn}` : `${data.tomorrowCount} na zajtra · ${totalOpenSk}`
+    };
+  }
+  if (data.filter === 'week') {
+    return {
+      title: data.weekCount ? (lang === 'en' ? 'Rest of the week' : 'Zvyšok týždňa') : (lang === 'en' ? 'Week looks calm' : 'Týždeň je pokojný'),
+      sub: lang === 'en' ? `${data.weekCount} later this week · ${totalOpenEn}` : `${data.weekCount} vo zvyšku týždňa · ${totalOpenSk}`
+    };
+  }
+  if (data.filter === 'all') {
+    return {
+      title: data.openTasks ? (lang === 'en' ? 'All open tasks' : 'Všetky otvorené úlohy') : (lang === 'en' ? 'Everything is clear' : 'Všetko je čisté'),
+      sub: lang === 'en' ? `${totalOpenEn} · ${doneEn}` : `${totalOpenSk} · ${doneSk}`
+    };
+  }
+  if (data.filter === 'done') {
+    return {
+      title: data.completedCount ? (lang === 'en' ? 'Completed tasks' : 'Hotové úlohy') : (lang === 'en' ? 'Nothing completed yet' : 'Zatiaľ nič hotové'),
+      sub: lang === 'en' ? `${data.completedCount} completed · ${totalOpenEn}` : `${data.completedCount} dokončené · ${totalOpenSk}`
+    };
+  }
+  return {
+    title: data.todayCount ? (lang === 'en' ? 'Today needs attention' : 'Dnes treba vybaviť') : (lang === 'en' ? 'Free day' : 'Dnes voľno'),
+    sub: lang === 'en' ? `${data.todayCount} today · ${totalOpenEn}` : `${data.todayCount} na dnes · ${totalOpenSk}`
+  };
 }
 
 function renderTaskCard(t) {

@@ -7196,6 +7196,17 @@ html.light .task-hero-add {
   flex: 0 0 auto;
 }
 
+.task-filter-chip.active {
+  color: #062f24;
+  background: linear-gradient(135deg, #34d399, #10b981);
+  border-color: rgba(52,211,153,.9);
+  box-shadow: 0 0 0 1px rgba(52,211,153,.28), 0 12px 24px rgba(16,185,129,.22);
+}
+
+html.light .task-filter-chip.active {
+  color: #064e3b;
+}
+
 .shop-cat-card {
   margin-bottom: .62rem;
   border-radius: 22px;
