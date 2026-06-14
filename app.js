@@ -555,7 +555,7 @@ function pickOnboardLang(l) {
 setTimeout(() => showOnboarding(), 300);
 
 // ======================== AI (DEEPSEEK PROXY) ========================
-const APP_VERSION = '1.0.35';
+const APP_VERSION = '1.0.36';
 const VAPID_PUBLIC_KEY = 'BI6Fga-GXSKggkNJ58R1VEYEfGE6KfWgnuDtI9sHqQLQJzGLshJuIuODmI13AVzX5D2Kd7SBxrr7Cvf-xRAowg0';
 const PUSH_PROXY_URL = 'https://receptar.waldis994.workers.dev';
 
@@ -3201,7 +3201,7 @@ function viewRecipe(id) {
     </div>` : ''}
     <div class="detail-section">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.3rem;">
-        <h3>🥕 ${t('formIngredients')}</h3>
+        <h3>🥕 ${lang === 'en' ? 'Ingredients' : 'Suroviny'}</h3>
         <div style="display:flex;align-items:center;gap:.35rem;">
           <button class="btn btn-secondary" onclick="changePortion(-1)" style="padding:.1rem .45rem;font-size:.85rem;">−</button>
           <span id="portion-num" style="font-weight:700;font-size:.9rem;min-width:1.5rem;text-align:center;">${basePortion}</span>
@@ -3210,8 +3210,8 @@ function viewRecipe(id) {
       </div>
       <ul id="ingredient-list" style="margin-top:.3rem;">${scaleIngredients(ingr, 4, r.portions||4).map(i=>`<li>${esc(i)}</li>`).join('')}</ul>
     </div>
-    <div class="detail-section recipe-steps"><h3>📝 ${t('formSteps')}</h3><ol>${stps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol></div>
-    <div class="detail-section"><h3>📓 ${t('formTitle')==='New Recipe'?'Notes':'Poznámky'}</h3>
+    <div class="detail-section recipe-steps"><h3>📝 ${lang === 'en' ? 'Steps' : 'Postup'}</h3><ol>${stps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol></div>
+    <div class="detail-section"><h3>📓 ${lang === 'en' ? 'Notes' : 'Poznámky'}</h3>
       <textarea id="recipe-notes" style="width:100%;padding:.45rem;border:1px solid var(--border);border-radius:6px;min-height:45px;font-family:inherit;font-size:.82rem;background:var(--input-bg);color:var(--text);" onchange="saveNotes(${id},this.value)">${esc((lang==='en'&&r.notesEn?r.notesEn:r.notes)||'')}</textarea></div>
     </div>
   `;
@@ -5259,6 +5259,15 @@ function renderShoppingList() {
   let html = '';
 
   // Summary
+  html += `<section class="shop-hero">
+    <div>
+      <span class="shop-hero-kicker">${lang==='en'?'Shopping':'Nákup'}</span>
+      <h2>${remaining ? (lang==='en'?'Ready for the store':'Pripravené do obchodu') : (lang==='en'?'Everything bought':'Všetko kúpené')}</h2>
+      <p>${lang==='en' ? `${remaining} items left across ${catCount} categories.` : `${remaining} položiek zostáva v ${catCount} kategóriách.`}</p>
+    </div>
+    <button class="shop-hero-add" onclick="openAddItemSheet()">➕ ${lang==='en'?'Add':'Pridať'}</button>
+  </section>`;
+
   html += `<div class="shop-summary">
     <div class="shop-summary-row">
       <div class="shop-summary-stats">
@@ -5792,6 +5801,18 @@ function renderTasks() {
   ];
 
   let html = '';
+
+  const openTasks = tasks.filter(t => !t.completed).length;
+  const doneTasks = tasks.filter(t => t.completed).length;
+
+  html += `<section class="task-hero">
+    <div>
+      <span class="task-hero-kicker">${lang==='en'?'Tasks':'Úlohy'}</span>
+      <h2>${openTasks ? (lang==='en'?'What needs attention':'Čo treba vybaviť') : (lang==='en'?'Everything is clear':'Všetko je čisté')}</h2>
+      <p>${lang==='en' ? `${openTasks} open · ${doneTasks} done` : `${openTasks} otvorené · ${doneTasks} hotové`}</p>
+    </div>
+    <button class="task-hero-add" onclick="openTaskSheet()">➕ ${lang==='en'?'Add':'Pridať'}</button>
+  </section>`;
 
   // Filter chips
   html += `<div class="task-filters">
