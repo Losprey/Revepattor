@@ -555,7 +555,7 @@ function pickOnboardLang(l) {
 setTimeout(() => showOnboarding(), 300);
 
 // ======================== AI (DEEPSEEK PROXY) ========================
-const APP_VERSION = '1.0.36';
+const APP_VERSION = '1.0.37';
 const VAPID_PUBLIC_KEY = 'BI6Fga-GXSKggkNJ58R1VEYEfGE6KfWgnuDtI9sHqQLQJzGLshJuIuODmI13AVzX5D2Kd7SBxrr7Cvf-xRAowg0';
 const PUSH_PROXY_URL = 'https://receptar.waldis994.workers.dev';
 
@@ -632,17 +632,23 @@ function urlBase64ToUint8Array(base64String) {
 
 const AI_PROXY_URL = 'https://receptar.waldis994.workers.dev'; // Cloudflare Worker proxy pre DeepSeek
 
-async function aiGenerate(messages) {
+async function aiGenerate(messages, timeoutMs) {
   if (!AI_PROXY_URL || AI_PROXY_URL.includes('YOUR_CLOUDFLARE')) {
     showToast(t('AI nie je nastavená.','AI not configured.'),'error');
     return null;
   }
+  const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  const timeout = setTimeout(function() {
+    if (controller) controller.abort();
+  }, timeoutMs || 30000);
   try {
     const r = await fetch(AI_PROXY_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ messages }),
+      signal: controller ? controller.signal : undefined,
     });
+    clearTimeout(timeout);
     if (!r.ok) {
       const txt = await r.text().catch(() => '');
       console.error('AI proxy error', r.status, txt.slice(0,200));
@@ -653,8 +659,9 @@ async function aiGenerate(messages) {
     if (data.error) { showToast(t('AI chyba: ','AI error: ')+data.error,'error'); return null; }
     return data.reply || '';
   } catch(e) {
+    clearTimeout(timeout);
     console.error('AI fetch failed:', e.message);
-    showToast(t('AI nie je dostupná.','AI not available.'),'error');
+    showToast(e.name === 'AbortError' ? t('AI trvá príliš dlho.','AI is taking too long.') : t('AI nie je dostupná.','AI not available.'),'error');
     return null;
   }
 }
@@ -752,22 +759,146 @@ function parseAndFillAIPlan() {
   renderDashboard();
 }
 
-async function aiIngredientSuggest() {
-  const ingr = prompt(lang==='en'?'What ingredients do you have? (comma separated)':'Aké suroviny máš doma? (oddeľ čiarkou)', '');
-  if (!ingr) return;
-  const prompt = 'Mám tieto suroviny: '+ingr+'. Navrhni 3 recepty, ktoré z nich môžem uvariť. Pre každý uveď: názov, čas prípravy, postup v 3 bodoch. Odpovedaj v slovenčine.';
-  const reply = await aiGenerate([{ role: 'user', content: prompt }]);
-  if (reply) {
-    const old = document.getElementById('ai-modal');
-    if (old) old.remove();
-    const div = document.createElement('div');
-    div.id = 'ai-modal';
-    div.className = 'modal-overlay active';
-    div.style.cssText = 'z-index:2000;';
+function aiIngredientSuggest() {
+  openIngredientSuggestModal();
+}
+
+function openIngredientSuggestModal() {
+  const old = document.getElementById('ai-ingredient-modal');
+  if (old) old.remove();
+  const div = document.createElement('div');
+  div.id = 'ai-ingredient-modal';
+  div.className = 'modal-overlay active';
+  div.style.cssText = 'z-index:2000;';
   div.onclick = function(e) { if (e.target === this) this.remove(); };
-    div.innerHTML = '<div class="modal" style="max-width:500px;max-height:80vh;overflow-y:auto;"><button class="modal-close" onclick="document.getElementById(\'ai-modal\').remove()">✕</button><h2>🤖 '+t('Čo uvariť','What to cook')+'</h2><pre style="white-space:pre-wrap;font-size:.78rem;font-family:inherit;background:var(--bg);padding:.8rem;border-radius:8px;">'+esc(reply)+'</pre></div>';
-    document.body.appendChild(div);
+  div.innerHTML = `<div class="modal ai-ingredient-modal">
+    <button class="modal-close" onclick="document.getElementById('ai-ingredient-modal').remove()">✕</button>
+    <h2>🤖 ${lang === 'en' ? 'What to cook?' : 'Čo uvariť?'}</h2>
+    <p class="ai-ingredient-desc">${lang === 'en'
+      ? 'Write what you have at home and I will suggest meals from your ingredients.'
+      : 'Napíš, čo máš doma, a navrhnem jedlá zo surovín.'}</p>
+    <textarea id="ai-ingredient-input" class="ai-ingredient-input" rows="4" placeholder="${lang === 'en' ? 'e.g. eggs, tomatoes, pasta, cheese' : 'napr. vajcia, paradajky, cestoviny, syr'}"></textarea>
+    <div class="ai-ingredient-chips">
+      ${['vajcia','cestoviny','kuracie','ryža','paradajky','syr'].map(x => `<button onclick="addIngredientChip('${x}')">${esc(x)}</button>`).join('')}
+    </div>
+    <div class="ai-ingredient-actions">
+      <button class="btn btn-secondary" onclick="document.getElementById('ai-ingredient-modal').remove()">${lang === 'en' ? 'Cancel' : 'Zrušiť'}</button>
+      <button class="btn btn-primary" id="ai-ingredient-submit" onclick="submitIngredientSuggest()">✨ ${lang === 'en' ? 'Suggest meals' : 'Navrhnúť jedlá'}</button>
+    </div>
+  </div>`;
+  document.body.appendChild(div);
+  setTimeout(function() {
+    const input = document.getElementById('ai-ingredient-input');
+    if (input) input.focus();
+  }, 80);
+}
+
+function addIngredientChip(text) {
+  const input = document.getElementById('ai-ingredient-input');
+  if (!input) return;
+  const current = input.value.trim();
+  input.value = current ? current.replace(/\s*$/, '') + ', ' + text : text;
+  input.focus();
+}
+
+async function submitIngredientSuggest() {
+  const input = document.getElementById('ai-ingredient-input');
+  const btn = document.getElementById('ai-ingredient-submit');
+  const ingredients = input ? input.value.trim() : '';
+  if (!ingredients) {
+    showToast(lang === 'en' ? 'Add at least one ingredient.' : 'Pridaj aspoň jednu surovinu.', 'info');
+    if (input) input.focus();
+    return;
   }
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '⏳ ' + (lang === 'en' ? 'Thinking...' : 'Premýšľam...');
+  }
+
+  const prompt = lang === 'en'
+    ? 'I have these ingredients: ' + ingredients + '. Suggest 3 meals I can cook. For each include: name, prep time, and 3 short steps. Reply in English.'
+    : 'Mám tieto suroviny: ' + ingredients + '. Navrhni 3 recepty, ktoré z nich môžem uvariť. Pre každý uveď: názov, čas prípravy, postup v 3 bodoch. Odpovedaj v slovenčine.';
+  let reply = await aiGenerate([{ role: 'user', content: prompt }], 12000);
+  let source = 'ai';
+  if (!reply) {
+    reply = buildLocalIngredientSuggestions(ingredients);
+    source = 'local';
+  }
+  const inputModal = document.getElementById('ai-ingredient-modal');
+  if (inputModal) inputModal.remove();
+  showIngredientSuggestResult(reply, source);
+}
+
+function normalizeIngredientText(text) {
+  return (text || '').toString().toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s,]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function buildLocalIngredientSuggestions(ingredients) {
+  const terms = normalizeIngredientText(ingredients)
+    .split(/[,\s]+/)
+    .map(s => s.trim())
+    .filter(s => s.length >= 3);
+  const uniqueTerms = [...new Set(terms)];
+  const scored = recipes.map(r => {
+    const recipeName = lang === 'en' && r.nameEn ? r.nameEn : r.name;
+    const recipeIngredients = (lang === 'en' && r.ingredientsEn ? r.ingredientsEn : r.ingredients) || [];
+    const haystack = normalizeIngredientText([recipeName, r.category, recipeIngredients.join(' ')].join(' '));
+    const score = uniqueTerms.reduce((sum, term) => sum + (haystack.includes(term) ? 1 : 0), 0);
+    return { r, recipeName, score };
+  }).filter(x => x.score > 0).sort((a, b) => b.score - a.score || (a.r.time || 999) - (b.r.time || 999)).slice(0, 3);
+
+  if (!scored.length) {
+    return lang === 'en'
+      ? 'AI is not available right now and I did not find a clear match in saved recipes. Try broader ingredients like pasta, eggs, chicken, rice or tomato.'
+      : 'AI práve nie je dostupná a v uložených receptoch som nenašiel jasnú zhodu. Skús všeobecnejšie suroviny ako cestoviny, vajcia, kuracie, ryža alebo paradajky.';
+  }
+
+  const intro = lang === 'en'
+    ? 'AI is not available right now, so here are the best matches from saved recipes:'
+    : 'AI práve nie je dostupná, preto vyberám najlepšie zhody z uložených receptov:';
+  return intro + '\n\n' + scored.map((item, idx) => {
+    const r = item.r;
+    const meta = '⏱ ' + (r.time || '?') + ' min' + (r.nutrition && r.nutrition.kcal ? ' · 🔥 ' + r.nutrition.kcal + ' kcal' : '');
+    const steps = ((lang === 'en' && r.stepsEn ? r.stepsEn : r.steps) || []).slice(0, 3);
+    return `${idx + 1}. ${item.recipeName}\n${meta}\n${steps.length ? steps.map((s, i) => `   ${i + 1}) ${s}`).join('\n') : (lang === 'en' ? '   Open recipe detail for steps.' : '   Postup nájdeš v detaile receptu.')}`;
+  }).join('\n\n');
+}
+
+function showIngredientSuggestResult(reply, source) {
+  const old = document.getElementById('ai-modal');
+  if (old) old.remove();
+  const div = document.createElement('div');
+  div.id = 'ai-modal';
+  div.className = 'modal-overlay active';
+  div.style.cssText = 'z-index:2000;';
+  div.onclick = function(e) { if (e.target === this) this.remove(); };
+  const sourceNote = source === 'local'
+    ? `<div class="ai-source-note">${lang === 'en' ? 'Fallback from saved recipes' : 'Fallback z uložených receptov'}</div>`
+    : '';
+  div.innerHTML = `<div class="modal ai-result-modal">
+    <button class="modal-close" onclick="document.getElementById('ai-modal').remove()">✕</button>
+    <h2>🤖 ${lang === 'en' ? 'What to cook' : 'Čo uvariť'}</h2>
+    ${sourceNote}
+    <div class="ai-result-text">${formatAiSuggestionReply(reply)}</div>
+    <div class="ai-ingredient-actions">
+      <button class="btn btn-secondary" onclick="document.getElementById('ai-modal').remove()">${lang === 'en' ? 'Close' : 'Zavrieť'}</button>
+      <button class="btn btn-primary" onclick="document.getElementById('ai-modal').remove();openIngredientSuggestModal()">↻ ${lang === 'en' ? 'Try again' : 'Skúsiť znova'}</button>
+    </div>
+  </div>`;
+  document.body.appendChild(div);
+}
+
+function formatAiSuggestionReply(text) {
+  return esc(text || '')
+    .replace(/^---$/gm, '<hr>')
+    .replace(/^###\s*(.+)$/gm, '<div class="ai-result-heading">$1</div>')
+    .replace(/^##\s*(.+)$/gm, '<div class="ai-result-heading">$1</div>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n/g, '<br>');
 }
 
 async function aiDailyTip() {

@@ -368,6 +368,140 @@ html.light .planner-week-row {
   }
 }
 
+/* ===== AI INGREDIENT SUGGEST MODAL ===== */
+.ai-ingredient-modal,
+.ai-result-modal {
+  max-width: 500px;
+  max-height: 84svh;
+  overflow-y: auto;
+}
+
+.ai-ingredient-modal h2,
+.ai-result-modal h2 {
+  margin-bottom: .35rem;
+}
+
+.ai-ingredient-desc {
+  margin: 0 1.8rem .8rem 0;
+  color: var(--ui-muted);
+  font-size: .84rem;
+  line-height: 1.45;
+}
+
+.ai-ingredient-input {
+  width: 100%;
+  min-height: 7rem;
+  padding: .78rem .85rem;
+  border: 1px solid var(--polish-border);
+  border-radius: 18px;
+  background: rgba(255,255,255,.045);
+  color: var(--text);
+  font: inherit;
+  font-size: .92rem;
+  line-height: 1.45;
+  resize: vertical;
+  outline: none;
+}
+
+.ai-ingredient-input:focus {
+  border-color: rgba(52,211,153,.42);
+  box-shadow: 0 0 0 3px rgba(52,211,153,.1);
+}
+
+.ai-ingredient-chips {
+  display: flex;
+  gap: .36rem;
+  margin: .65rem 0 .85rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.ai-ingredient-chips::-webkit-scrollbar {
+  display: none;
+}
+
+.ai-ingredient-chips button {
+  flex: 0 0 auto;
+  min-height: 2rem;
+  padding: .36rem .64rem;
+  border: 1px solid var(--polish-border);
+  border-radius: 999px;
+  background: rgba(255,255,255,.045);
+  color: var(--text2);
+  font-size: .72rem;
+  font-weight: 780;
+}
+
+.ai-ingredient-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: .45rem;
+  margin-top: .8rem;
+  flex-wrap: wrap;
+}
+
+.ai-result-text {
+  margin: .75rem 0 0;
+  padding: .86rem;
+  max-height: 52svh;
+  overflow-y: auto;
+  border: 1px solid var(--polish-border);
+  border-radius: 18px;
+  background: rgba(0,0,0,.16);
+  color: var(--text);
+  font-family: inherit;
+  font-size: .86rem;
+  line-height: 1.48;
+}
+
+.ai-result-text hr {
+  border: 0;
+  border-top: 1px solid var(--polish-border);
+  margin: .9rem 0;
+}
+
+.ai-result-heading {
+  margin: .72rem 0 .22rem;
+  color: var(--text);
+  font-size: .98rem;
+  font-weight: 920;
+  line-height: 1.25;
+}
+
+.ai-result-text strong {
+  color: var(--text);
+  font-weight: 850;
+}
+
+.ai-source-note {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.65rem;
+  padding: .24rem .54rem;
+  border-radius: 999px;
+  color: #d1fae5;
+  background: rgba(16,185,129,.13);
+  border: 1px solid rgba(52,211,153,.2);
+  font-size: .68rem;
+  font-weight: 820;
+}
+
+html.light .ai-ingredient-input,
+html.light .ai-ingredient-chips button,
+html.light .ai-result-text {
+  background: rgba(255,255,255,.72);
+}
+
+html.light .ai-source-note {
+  color: #047857;
+}
+
+@media (max-width: 430px) {
+  .ai-ingredient-actions .btn {
+    flex: 1 1 auto;
+  }
+}
+
 html.light {
   color-scheme: light;
   --bg: #FAF7F5;
