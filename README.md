@@ -38,6 +38,8 @@ Otvoriť `index.html` v prehliadači alebo hostiť na ľubovoľnom statickom hos
 npm install -g wrangler
 cd worker
 npx wrangler secret put DEEPSEEK_KEY
+npx wrangler secret put PEXELS_KEY
+npx wrangler secret put VAPID_PRIVATE_KEY
 npx wrangler deploy
 ```
 
@@ -45,6 +47,8 @@ npx wrangler deploy
 
 - Firebase API kľúč je určený pre web SDK (obmedzený pravidlami databázy)
 - DeepSeek API kľúč je uložený ako Cloudflare Workers secret
+- Pexels API kľúč je uložený ako Cloudflare Workers secret a klient volá iba proxy
+- VAPID private key je uložený ako Cloudflare Workers secret; public key môže byť v klientovi
 - Push notifikačné tokeny vyžadujú Firebase Auth
 
 ## 📱 Google Play

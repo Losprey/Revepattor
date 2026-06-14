@@ -1,11 +1,9 @@
-// Cloudflare Worker — AI Proxy + Push notifikácie pre Mealnest
-// 🔒 DeepSeek API kľúč sa číta z Cloudflare Workers secrets (DEEPSEEK_KEY)
+// Cloudflare Worker — AI Proxy + Pexels Proxy + Push notifikácie pre Mealnest
+// 🔒 API kľúče sa čítajú z Cloudflare Workers secrets
 
 const DEEPSEEK_API = 'https://api.deepseek.com/v1/chat/completions';
 const rateMap = new Map();
 
-// VAPID kľúče pre Web Push (vygenerované pre Mealnest)
-const VAPID_PRIVATE_KEY = 'REMOVED_VAPID_PRIVATE_KEY';
 const VAPID_PUBLIC_KEY = 'BI6Fga-GXSKggkNJ58R1VEYEfGE6KfWgnuDtI9sHqQLQJzGLshJuIuODmI13AVzX5D2Kd7SBxrr7Cvf-xRAowg0';
 const VAPID_SUBJECT = 'mailto:receptar@waldis994.workers.dev';
 
@@ -21,7 +19,7 @@ async function handleRequest(request) {
     return new Response(null, {
       headers: {
         'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type',
         'Access-Control-Max-Age': '86400',
       }
@@ -31,6 +29,11 @@ async function handleRequest(request) {
   // ===== PUSH NOTIFIKÁCIE =====
   if (url.pathname === '/api/notify') {
     return handlePushNotify(request);
+  }
+
+  // ===== PEXELS IMAGE PROXY =====
+  if (url.pathname === '/api/pexels') {
+    return handlePexelsSearch(request, url);
   }
 
   // ===== AI CHAT (pôvodný endpoint) =====
@@ -65,7 +68,7 @@ async function handleRequest(request) {
       });
     }
 
-    const deepseekKey = DEEPSEEK_KEY;
+    const deepseekKey = getDeepseekKey();
     if (!deepseekKey) {
       return new Response(JSON.stringify({ error: 'AI nie je nakonfigurované.' }), {
         status: 503,
@@ -106,6 +109,73 @@ async function handleRequest(request) {
   } catch (e) {
     console.error('Worker error:', e.message);
     return new Response(JSON.stringify({ error: 'Server error' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+    });
+  }
+}
+
+function getDeepseekKey() {
+  return typeof DEEPSEEK_KEY !== 'undefined' ? DEEPSEEK_KEY : '';
+}
+
+function getPexelsKey() {
+  return typeof PEXELS_KEY !== 'undefined' ? PEXELS_KEY : '';
+}
+
+function getVapidPrivateKey() {
+  return typeof VAPID_PRIVATE_KEY !== 'undefined' ? VAPID_PRIVATE_KEY : '';
+}
+
+async function handlePexelsSearch(request, url) {
+  if (request.method !== 'GET') {
+    return new Response(JSON.stringify({ error: 'GET required' }), {
+      status: 405,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+    });
+  }
+
+  const pexelsKey = getPexelsKey();
+  if (!pexelsKey) {
+    return new Response(JSON.stringify({ error: 'Pexels nie je nakonfigurovaný.' }), {
+      status: 503,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+    });
+  }
+
+  const query = (url.searchParams.get('query') || '').trim().slice(0, 100);
+  if (!query) {
+    return new Response(JSON.stringify({ error: 'Missing query' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+    });
+  }
+
+  const pexelsUrl = 'https://api.pexels.com/v1/search?query=' +
+    encodeURIComponent(query) + '&per_page=5&orientation=landscape&size=medium';
+
+  try {
+    const response = await fetch(pexelsUrl, {
+      headers: { Authorization: pexelsKey }
+    });
+
+    if (!response.ok) {
+      return new Response(JSON.stringify({ error: 'Pexels chyba: ' + response.status }), {
+        status: 502,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+      });
+    }
+
+    const data = await response.json();
+    return new Response(JSON.stringify(data), {
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Cache-Control': 'public, max-age=86400'
+      }
+    });
+  } catch (e) {
+    return new Response(JSON.stringify({ error: 'Pexels proxy error' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
     });
@@ -176,8 +246,13 @@ async function sendWebPush(subscription, payload) {
   const payloadJWT = base64UrlEncode(new TextEncoder().encode(JSON.stringify({ aud: audience, exp: now + 86400, sub: VAPID_SUBJECT })));
   const signingInput = header + '.' + payloadJWT;
 
+  const vapidPrivateKey = getVapidPrivateKey();
+  if (!vapidPrivateKey) {
+    throw new Error('VAPID private key is not configured.');
+  }
+
   const privateKey = await crypto.subtle.importKey(
-    'pkcs8', base64UrlDecode(VAPID_PRIVATE_KEY).buffer,
+    'pkcs8', base64UrlDecode(vapidPrivateKey).buffer,
     { name: 'ECDSA', namedCurve: 'P-256' }, false, ['sign']
   );
   const sig = await crypto.subtle.sign({ name: 'ECDSA', hash: 'SHA-256' }, privateKey, new TextEncoder().encode(signingInput));
