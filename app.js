@@ -4014,8 +4014,10 @@ function switchTab(tab) {
   const tasksContainer = document.getElementById('tasks-container');
   const boardContainer = document.getElementById('board-container');
   const mainTitle = document.getElementById('main-title');
+  const appHeader = document.getElementById('app-header');
   [dashboard, recipeContainer, plannerContainer, shoppingContainer, tasksContainer, boardContainer].forEach(function(el) { if (el) el.style.display = 'none'; });
   if (mainTitle) mainTitle.style.display = tab === 'dashboard' ? 'none' : '';
+  if (appHeader) appHeader.style.display = tab === 'dashboard' ? 'none' : '';
   updateMainHeader(tab);
   try {
     document.body.classList.remove('header-collapsed');
@@ -4044,8 +4046,38 @@ function switchTab(tab) {
     try { renderTasks(); } catch(e) {}
   } else if (tab === 'board' && boardContainer) {
     boardContainer.style.display = 'block'; applyPageTransition(boardContainer, 350);
-    try { renderBoard(); } catch(e) {}
+    try { renderMoreScreen(); } catch(e) {}
   }
+}
+
+function renderMoreScreen() {
+  const view = document.getElementById('board-container-view');
+  if (!view) return;
+  const openTasks = Array.isArray(tasks) ? tasks.filter(t => !t.completed).length : 0;
+  const shoppingCount = Array.isArray(shopItems) ? shopItems.filter(i => i && !i.checked).length : 0;
+  const familyState = familyCode ? 'Rodina pripojená' : 'Pripojiť rodinu';
+  view.innerHTML = `<section class="more-screen">
+    <div class="more-head">
+      <div>
+        <span>Mealnest</span>
+        <h1>Viac</h1>
+      </div>
+      <button class="more-avatar" onclick="openSettings()">${getDashboardAvatar()}</button>
+    </div>
+    <div class="more-grid">
+      <button class="more-tile" onclick="switchTab('tasks')"><span>✅</span><strong>Úlohy</strong><small>${openTasks} otvorených</small></button>
+      <button class="more-tile" onclick="renderBoard()"><span>📌</span><strong>Nástenka</strong><small>Rodinný prehľad</small></button>
+      <button class="more-tile" onclick="openSettings()"><span>⚙️</span><strong>Nastavenia</strong><small>Profil, téma, widgety</small></button>
+      <button class="more-tile" onclick="switchLang();setTimeout(renderMoreScreen,120)"><span>🌐</span><strong>Jazyk</strong><small>SK / EN</small></button>
+      <button class="more-tile" onclick="switchTab('shopping')"><span>🛒</span><strong>Nákup</strong><small>${shoppingCount} položiek</small></button>
+      <button class="more-tile" onclick="aiGenerateFullWeek()"><span>🚀</span><strong>AI Týždeň</strong><small>Vygenerovať plán</small></button>
+    </div>
+    <div class="more-list">
+      <button onclick="openSettings()"><span>👨‍👩‍👧‍👦</span><strong>${familyState}</strong><em>›</em></button>
+      <button onclick="localStorage.removeItem('onboardingCompleted');showOnboarding(true)"><span>❓</span><strong>Zobraziť onboarding</strong><em>›</em></button>
+      <button onclick="openSettings()"><span>🔔</span><strong>Notifikácie a účet</strong><em>›</em></button>
+    </div>
+  </section>`;
 }
 
 // =================== PULL TO REFRESH ===================
@@ -4344,158 +4376,211 @@ function renderDashboard() {
   let period = 'obed';
   if (hour < 10) period = 'rano';
   else if (hour >= 18) period = 'vecer';
-  const greeting = greetings[lang][period];
-  const greetingEl = document.getElementById('dash-greeting');
-  if (greetingEl) greetingEl.textContent = greeting;
-
-  const dateStr = now.toLocaleDateString(lang === 'en' ? 'en-GB' : 'sk-SK', { weekday: 'long', day: 'numeric', month: 'long' });
-  const dashDateEl = document.getElementById('dash-date');
-  if (dashDateEl) dashDateEl.textContent = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
-
-  // Weather-aware message (simulated)
-  const messages = lang === 'en' ? {
-    rano: ['Start your day with a nutritious breakfast!', 'A light breakfast fuels a great day.', 'Perfect morning for a smoothie bowl!'],
-    obed: ['Today is ideal for light meals', 'Don\'t forget to stay hydrated!', 'Perfect time for a fresh salad.'],
-    vecer: ['A warm dinner sounds perfect tonight.', 'Time for something cozy and hearty.', 'Light dinner for better sleep.'],
-    hot: ['Stay cool — try a refreshing salad!', 'Perfect day for cold soups and smoothies.', 'Light meals for hot weather.'],
-    cold: ['Warm up with a hearty soup!', 'Perfect weather for comfort food.', 'Hot tea and warm meals for today.'],
-  } : {
-    rano: ['Začni deň výživnými raňajkami!', 'Ľahké raňajky naštartujú skvelý deň.', 'Ráno ideálne na smoothie bowl!'],
-    obed: ['Dnes ideálny deň na ľahké jedlá', 'Nezabudni na pitný režim!', 'Skvelý čas na čerstvý šalát.'],
-    vecer: ['Teplá večera znie dnes perfektne.', 'Čas na niečo hrejivé a sýte.', 'Ľahká večera pre lepší spánok.'],
-    hot: ['Ochlaď sa — skús osviežujúci šalát!', 'Deň ideálny na studené polievky.', 'Ľahké jedlá pre horúce počasie.'],
-    cold: ['Zahrej sa sýtou polievkou!', 'Perfektné počasie na comfort food.', 'Teplý čaj a hrejivé jedlá pre dnešok.'],
-  };
-  const isHot = (now.getMonth() >= 5 && now.getMonth() <= 7);
-  const isCold = (now.getMonth() <= 2 || now.getMonth() >= 10);
-  let msgKey = period;
-  if (isHot) msgKey = 'hot';
-  else if (isCold) msgKey = 'cold';
-  const msgArr = messages[msgKey];
-  const currentMessage = msgArr[Math.floor(Math.random() * msgArr.length)];
-  const dashMessageEl = document.getElementById('dash-message');
-  if (dashMessageEl) dashMessageEl.textContent = currentMessage;
-
-  // Motivational sub-message
-  const subs = lang === 'en' ? {
-    rano: ['🌅 Ready for a beautiful day', '☕ Coffee and meal planning time'],
-    obed: ['☀️ Stay energized throughout the day', '🥗 Halfway through — keep going strong!'],
-    vecer: ['🌙 Wind down with a cozy meal', '⭐ Reflect on today\'s meals'],
-  } : {
-    rano: ['🌅 Pripravený na krásny deň', '☕ Čas na kávu a plánovanie'],
-    obed: ['☀️ Drž sa — zvládneš to!', '🥗 V polovici dňa — pridaj!'],
-    vecer: ['🌙 Zrelaxuj pri dobrej večeri', '⭐ Ohliadni sa za dnešnými jedlami'],
-  };
-  const subArr = subs[period];
-  const currentSubMessage = subArr[Math.floor(Math.random() * subArr.length)];
-  const dashSubEl = document.getElementById('dash-message-sub');
-  if (dashSubEl) dashSubEl.textContent = currentSubMessage;
-
-  // Stat pills
-  const plannedToday = getTodayMealCount();
-  const favCount = recipes.filter(r => r.favorite).length;
-  const totalKcal = getTodayKcal();
-  const dashStatsEl = document.getElementById('dash-stats-row');
-  if (dashStatsEl) dashStatsEl.innerHTML = '';
-  setTimeout(function() {
-    document.querySelectorAll('.count-up').forEach(function(el) { animateCountUp(el, el.dataset.target); });
-  }, 100);
-
-  // Dashboard sections
-  let html = '';
-  const w = appSettings.homeWidgets;
+  const greeting = { rano: 'Dobré ráno', obed: 'Dobrý deň', vecer: 'Dobrý večer' }[period];
   try { loadShopItems(); } catch(e) {}
-
   const todayMeals = getTodayMealCount();
   const todayTasksArr = getTodayTasks();
   const todayDone = tasks.filter(t => t.date === new Date().toISOString().slice(0,10) && t.completed).length;
   const streak = calcPlanningStreak();
   const uncheckedShop = (Array.isArray(shopItems) ? shopItems : []).filter(i => i && !i.checked).length;
   const mealPct = Math.round((todayMeals / MEALS.length) * 100);
-
-  html += renderDashboardCockpit({
-    greeting,
-    dateText: dateStr.charAt(0).toUpperCase() + dateStr.slice(1),
-    message: currentMessage,
-    subMessage: currentSubMessage,
-    todayMeals,
-    totalMeals: MEALS.length,
-    totalKcal,
-    favCount,
-    recipeCount: recipes.length,
-    uncheckedShop,
-    mealPct
-  });
-
-  if (w.quickRecipes) {
-    html += renderAiTipCard();
-  }
-
-  html += renderTodayFocusPanel({ todayMeals, todayTasks: todayTasksArr.length, todayDone, totalKcal, streak, uncheckedShop });
-
-    // Weather widget
-  if (w.weather) {
-    html += `<div class="dash-widget-pair">`;
-    if (appSettings.weather.location) {
-      html += `<div class="dash-card weather-card"><div class="weather-widget weather-widget-modern" id="weather-widget" onclick="editText('weather.location','${t("Mesto","City")}')"><div class="weather-orb">🌤️</div><div class="weather-copy"><span class="weather-label">${lang === 'en' ? 'Weather' : 'Počasie'}</span><strong>${esc(appSettings.weather.location)}</strong><span class="weather-temp">${t("Načítavam...","Loading...")}</span></div><span class="weather-cta">${lang === 'en' ? 'Edit' : 'Upraviť'} ›</span></div></div>`;
-    } else {
-      html += `<div class="dash-card weather-card"><div class="weather-widget weather-widget-modern weather-fallback" id="weather-widget" onclick="editText('weather.location','${t("Počasie","Weather")}')"><div class="weather-orb">🌤️</div><div class="weather-copy"><span class="weather-label">${lang === 'en' ? 'Weather' : 'Počasie'}</span><strong>${t("Počasie","Weather")}</strong><span class="weather-temp">${t("Zadaj mesto","Enter city")}</span></div><span class="weather-cta">${lang === 'en' ? 'Set' : 'Nastaviť'} ›</span></div></div>`;
-    }
-    if (w.seasonal) {
-      html += renderSeasonalWidget(true);
-    }
-    html += `</div>`;
-  } else if (w.seasonal) {
-    html += renderSeasonalWidget();
-  }
-
-  // Task widget
-  if (w.todayTasks) {
-    html += `<div id="dash-tasks" class="dash-card"></div>`;
-  }
-
-  // Water reminder
-  if (w.hydration) {
-    html += `<div class="dash-card"><div class="water-reminder" id="water-reminder"><span class="water-icon">💧</span><span class="water-text">${lang === "en" ? "Don't forget to drink water! 🚰" : "Nezabudni na pitný režím! 🚰"}</span><button class="water-btn" onclick="dismissWaterReminder()">OK ✓</button></div></div>`;
-  }
-
-  // Today meals card
-  html += `<div class="dash-card">
-    <div class="dash-card-header">
-      <span class="dash-card-title">📋 ${lang === "en" ? "Today's meals" : "Dnešné jedlá"}</span>
-      <span class="dash-card-link" onclick="switchTab('planner')">${lang === "en" ? "Full week" : "Celý týždeň"} ›</span>
-    </div>
-    <div class="meal-timeline" id="dash-timeline">${renderMealTimeline()}</div>
-  </div>`;
-
-    // AI CTA
-  html += `<div class="dash-card dash-card-cta" onclick="aiGenerateFullWeek()">
-    <div class="dash-cta-content">
-      <span class="dash-cta-icon">🚀</span>
-      <div>
-        <div class="dash-cta-title">${lang === "en" ? "Generate week + shopping" : "Celý týždeň + nákup"}</div>
-        <div class="dash-cta-sub">${lang === "en" ? "AI plans your week and creates shopping in one click" : "AI naplánuje týždeň aj nákup jedným kliknutím"}</div>
+  const weatherLine = buildDashboardWeatherLine();
+  const userName = getDashboardUserName();
+  const html = `<div class="mn-home-shell">
+    <section class="mn-home-header">
+      <div class="mn-home-greeting">
+        <h1>${esc(greeting)}, ${esc(userName)} 👋</h1>
+        <p>${weatherLine}</p>
       </div>
-      <span class="dash-cta-arrow">→</span>
-    </div>
+      <div class="mn-home-actions">
+        <button class="mn-icon-btn" onclick="if (typeof requestNotificationPermission === 'function') requestNotificationPermission(); else openSettings();" aria-label="Notifikácie">🔔</button>
+        <button class="mn-avatar-btn" onclick="openSettings()" aria-label="Profil">${getDashboardAvatar()}</button>
+      </div>
+    </section>
+    ${renderMobileHeroCard({ todayMeals, totalMeals: MEALS.length, mealPct, uncheckedShop, todayTasks: todayTasksArr.length, streak })}
+    ${renderMobileWeekSelector()}
+    ${renderMobileMealsCard()}
+    ${renderMobileAiRecommendation()}
+    ${renderMobileQuickActions()}
+    ${renderMobileTaskPreview()}
+    ${renderMobileShoppingPreview(uncheckedShop)}
   </div>`;
-
-  // Smart suggestions
-  if (w.quickRecipes) {
-    html += `<div class="dash-card dash-suggestions-card"><div class="dash-card-header"><span class="dash-card-title">💡 ${lang === "en" ? "More ideas" : "Ďalšie tipy"}</span></div><div class="suggestion-scroll" id="dash-suggestions">${renderSuggestions()}</div></div>`;
-  }// Safe fallback: if no widgets rendered, show restore CTA
-  if (!html.trim()) {
-    html = `<div class="dash-section" style="text-align:center;padding:32px 20px;">
-      <div style="font-size:2.5rem;margin-bottom:8px;">🏠</div>
-      <div style="font-size:.95rem;font-weight:600;margin-bottom:4px;">${lang==='en'?'Home screen is empty':'Domovská obrazovka je prázdna'}</div>
-      <div style="font-size:.8rem;color:var(--text-muted, #888);margin-bottom:14px;">${lang==='en'?'Enable widgets in Settings.':'Povoľ widgety v Nastaveniach.'}</div>
-      <button class="btn btn-primary" onclick="resetWidgetsToDefaults()" style="font-size:.85rem;padding:10px 20px;">${lang==='en'?'🔄 Restore default widgets':'🔄 Obnoviť predvolené widgety'}</button>
-    </div>`;
-  }
 
   try { document.getElementById('dash-content').innerHTML = html; } catch(e) {}
-  try { loadTasks(); } catch(e) {}
-  try { renderTaskWidget(); } catch(e) {}
+  setTimeout(function() {
+    document.querySelectorAll('.mn-count-up').forEach(function(el) { animateCountUp(el, el.dataset.target); });
+  }, 80);
+}
+
+function getDashboardUserName() {
+  const raw = authUser && (authUser.displayName || authUser.email);
+  if (!raw) return 'Vladis';
+  const first = String(raw).split('@')[0].split(/\s+/)[0].trim();
+  return first || 'Vladis';
+}
+
+function getDashboardAvatar() {
+  if (authUser && authUser.photoURL) return `<img src="${escAttr(authUser.photoURL)}" alt="">`;
+  return '<span>V</span>';
+}
+
+function buildDashboardWeatherLine() {
+  return '☀️ 21°C • Jahody v sezóne';
+}
+
+function renderMobileHeroCard(stats) {
+  const openMeals = Math.max(0, stats.totalMeals - stats.todayMeals);
+  return `<section class="mn-hero-card mn-card">
+    <div class="mn-hero-top">
+      <div class="mn-progress-ring" style="--pct:${stats.mealPct}">
+        <svg viewBox="0 0 44 44" aria-hidden="true"><circle class="mn-ring-bg" cx="22" cy="22" r="18"/><circle class="mn-ring-fg" cx="22" cy="22" r="18"/></svg>
+        <strong>${stats.todayMeals}</strong>
+      </div>
+      <div class="mn-hero-copy">
+        <span>Dnešný plán</span>
+        <h2>${stats.todayMeals} / ${stats.totalMeals} jedál naplánovaných</h2>
+        <p>${openMeals ? openMeals + ' jedál ešte chýba' : 'Jedlá sú pripravené'}</p>
+      </div>
+    </div>
+    <div class="mn-hero-stats">
+      <button onclick="switchTab('shopping')"><span>🛒</span><strong class="mn-count-up" data-target="${stats.uncheckedShop}">0</strong><small>Nákup</small></button>
+      <button onclick="switchTab('tasks')"><span>✅</span><strong class="mn-count-up" data-target="${stats.todayTasks}">0</strong><small>Úlohy</small></button>
+      <button onclick="switchTab('planner')"><span>🔥</span><strong class="mn-count-up" data-target="${stats.streak}">0</strong><small>Streak</small></button>
+    </div>
+    <button class="mn-primary-cta" onclick="switchTab('planner')">Naplánovať deň</button>
+  </section>`;
+}
+
+function renderMobileWeekSelector() {
+  const todayIndex = (new Date().getDay() + 6) % 7;
+  const labels = ['Po','Ut','St','Št','Pi','So','Ne'];
+  return `<section class="mn-day-picker" aria-label="Dni v týždni">
+    ${labels.map((label, index) => `<button class="${index === todayIndex ? 'active' : ''}" onclick="switchTab('planner')"><span>${label}</span></button>`).join('')}
+  </section>`;
+}
+
+function getDashboardDayPlan() {
+  const weekKey = getWeekKey(new Date());
+  const todayName = DAYS[(new Date().getDay() + 6) % 7];
+  const plan = getWeekPlan(weekKey);
+  return { weekKey, todayName, dayPlan: plan[todayName] || {} };
+}
+
+function resolveMealEntry(entry) {
+  if (!entry) return null;
+  let recipe = null;
+  if (typeof entry === 'number') recipe = recipes.find(rec => rec.id === entry);
+  else if (entry.type === 'recipe') recipe = recipes.find(rec => rec.id === entry.id);
+  if (recipe) return { type: 'recipe', recipe };
+  if (entry.type === 'custom') return { type: 'custom', title: entry.text || '—' };
+  return null;
+}
+
+function renderMobileMealsCard() {
+  const ctx = getDashboardDayPlan();
+  return `<section class="mn-meals-card mn-card">
+    <div class="mn-section-head">
+      <h2>Dnešné jedlá</h2>
+      <button onclick="switchTab('planner')">Týždeň</button>
+    </div>
+    <div class="mn-meal-list">
+      ${MEALS.map(meal => renderMobileMealRow(meal, ctx)).join('')}
+    </div>
+  </section>`;
+}
+
+function renderMobileMealRow(meal, ctx) {
+  const resolved = resolveMealEntry(ctx.dayPlan[meal.id]);
+  const filled = !!resolved;
+  const recipe = resolved && resolved.recipe;
+  const title = recipe ? recipe.name : (resolved ? resolved.title : '');
+  const kcal = recipe && recipe.nutrition && recipe.nutrition.kcal ? recipe.nutrition.kcal + ' kcal' : (filled ? '—' : '');
+  const image = recipe && (recipe.imageData || recipe.image);
+  const addAction = `pickRecipe('${ctx.todayName}','${meal.id}','${ctx.weekKey}')`;
+  return `<article class="mn-meal-row ${filled ? 'filled' : 'empty'}" onclick="${filled && recipe ? `viewRecipe(${recipe.id})` : addAction}">
+    <div class="mn-meal-icon">${meal.icon}</div>
+      <div class="mn-meal-body">
+      <span>${dashboardMealLabel(meal.id)}</span>
+      ${filled ? `<strong>${esc(title)}</strong>` : `<strong class="mn-empty-meal">+ Pridať jedlo</strong>`}
+      ${filled ? `<small>${esc(kcal)}</small>` : ''}
+    </div>
+    ${image ? `<img class="mn-meal-thumb" src="${escAttr(image)}" alt="${escAttr(title)}" loading="lazy" onerror="this.remove()">` : ''}
+    <button class="mn-row-action" onclick="event.stopPropagation();${addAction}">${filled ? 'Upraviť' : '+'}</button>
+  </article>`;
+}
+
+function dashboardMealLabel(id) {
+  const map = { 'raňajky':'Raňajky', 'desiata':'Desiata', 'obed':'Obed', 'olovrant':'Olovrant', 'večera':'Večera' };
+  return map[id] || id;
+}
+
+function pickDashboardAiRecipe() {
+  const todays = new Set(getTodayRecipes().map(r => r.id));
+  return recipes.find(r => !todays.has(r.id) && (r.imageData || r.image)) || recipes.find(r => !todays.has(r.id)) || recipes[0] || null;
+}
+
+function renderMobileAiRecommendation() {
+  const recipe = pickDashboardAiRecipe();
+  if (!recipe) {
+    return `<section class="mn-ai-card mn-card">
+      <div class="mn-ai-empty"><span>🤖</span><strong>AI odporúča</strong><p>Pridaj recepty a AI odporúčanie sa zobrazí tu.</p></div>
+    </section>`;
+  }
+  const ctx = getDashboardDayPlan();
+  const title = recipe.name;
+  const img = getDashboardRecipeImage(recipe);
+  const kcal = recipe.nutrition && recipe.nutrition.kcal ? recipe.nutrition.kcal + ' kcal' : '— kcal';
+  return `<section class="mn-ai-card mn-card" onclick="viewRecipe(${recipe.id})">
+    <div class="mn-section-head mn-ai-head"><h2>🤖 AI odporúča</h2></div>
+    ${img ? `<img class="mn-ai-image" src="${escAttr(img)}" alt="${escAttr(title)}" loading="lazy" onerror="this.style.display='none'">` : `<div class="mn-ai-image mn-ai-fallback">🍽️</div>`}
+    <div class="mn-ai-copy">
+      <strong>${esc(title)}</strong>
+      <span>⏱ ${recipe.time || 25} min • 🔥 ${kcal}</span>
+    </div>
+    <button class="mn-ai-button" onclick="event.stopPropagation();pickRecipe('${ctx.todayName}','obed','${ctx.weekKey}')">Pridať do plánu</button>
+  </section>`;
+}
+
+function getDashboardRecipeImage(recipe) {
+  const img = recipe && (recipe.imageData || recipe.image) || '';
+  if (!img || img.indexOf('placehold.co') !== -1) return 'ai-recommendation.png';
+  return img;
+}
+
+function renderMobileQuickActions() {
+  const actions = [
+    { icon:'📖', label: 'Recepty', action:"switchTab('home')" },
+    { icon:'🛒', label: 'Nákup', action:"switchTab('shopping')" },
+    { icon:'✅', label: 'Úlohy', action:"switchTab('tasks')" },
+    { icon:'🚀', label: 'AI Týždeň', action:'aiGenerateFullWeek()' },
+  ];
+  return `<section class="mn-quick-grid">${actions.map(item => `<button onclick="${item.action}"><span>${item.icon}</span><strong>${item.label}</strong></button>`).join('')}</section>`;
+}
+
+function renderMobileTaskPreview() {
+  const todayTasks = getTodayTasks().slice(0, 3);
+  const fallback = [
+    'Kúpiť mlieko',
+    'Nakrájať zeleninu',
+    'Umyť fľašku'
+  ];
+  const rows = todayTasks.length ? todayTasks : fallback.map((title, index) => ({ id: '', title, completed: index < 2 }));
+  return `<section class="mn-preview-card mn-card">
+    <div class="mn-section-head"><h2>Dnešné úlohy</h2><button onclick="switchTab('tasks')">Zobraziť všetky</button></div>
+    <div class="mn-task-preview">
+      ${rows.map(task => `<button class="${task.completed ? 'done' : ''}" onclick="${task.id ? `toggleTask('${task.id}');renderDashboard();` : `switchTab('tasks')`}"><span>${task.completed ? '☑' : '☐'}</span><strong>${esc(task.title)}</strong></button>`).join('')}
+    </div>
+  </section>`;
+}
+
+function renderMobileShoppingPreview(uncheckedShop) {
+  const label = uncheckedShop === 1
+    ? '1 položka čaká'
+    : uncheckedShop + ' položiek čaká';
+  return `<section class="mn-shopping-card mn-card">
+    <div><span>🛒</span><strong>${esc(label)}</strong><small>Nákupný zoznam</small></div>
+    <button onclick="switchTab('shopping')">Otvoriť nákup</button>
+  </section>`;
 }
 
 function renderDashboardCockpit(data) {
