@@ -3766,6 +3766,7 @@ function openMorePageFromAnywhere(page) {
 }
 
 function renderMoreHome() {
+  try { loadTasks(); } catch(e) {}
   const view = document.getElementById('board-container-view');
   if (!view) return;
   const openTasks = Array.isArray(tasks) ? tasks.filter(t => !t.completed).length : 0;
@@ -4133,6 +4134,7 @@ function renderMoreDataSettingsPage() {
 }
 
 function renderMoreTasksPage() {
+  try { loadTasks(); } catch(e) {}
   const today = getTodayTasks();
   const upcoming = getWeekTasks().slice(0, 4);
   const completed = getCompletedTasks().slice(0, 4);
@@ -6398,6 +6400,12 @@ function renderTasks() {
       html += `<div class="task-section-title">${s.icon} ${s.title} <span class="task-section-count">${s.tasks.length}</span></div>`;
       html += s.tasks.map(t => renderTaskCard(t)).join('');
     });
+    // Other tasks (no date / old date) - not shown in today/week sections
+    const otherOpen = tasks.filter(t => !t.completed && !weekTasks.find(wt => wt.id === t.id) && !todayTasks.find(tt => tt.id === t.id));
+    if (otherOpen.length) {
+      html += `<div class="task-section-title">📋 ${lang==='en'?'Other':'Ďalšie'} <span class="task-section-count">${otherOpen.length}</span></div>`;
+      html += otherOpen.map(t => renderTaskCard(t)).join('');
+    }
     if (completedList.length) {
       const recentDone = getRecentCompleted();
       if (recentDone.length) {
