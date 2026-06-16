@@ -4017,7 +4017,7 @@ function switchTab(tab) {
   const appHeader = document.getElementById('app-header');
   [dashboard, recipeContainer, plannerContainer, shoppingContainer, tasksContainer, boardContainer].forEach(function(el) { if (el) el.style.display = 'none'; });
   if (mainTitle) mainTitle.style.display = tab === 'dashboard' ? 'none' : '';
-  if (appHeader) appHeader.style.display = tab === 'dashboard' ? 'none' : '';
+  if (appHeader) appHeader.style.display = (tab === 'dashboard' || tab === 'board') ? 'none' : '';
   updateMainHeader(tab);
   try {
     document.body.classList.remove('header-collapsed');
@@ -4051,6 +4051,10 @@ function switchTab(tab) {
 }
 
 function renderMoreScreen() {
+  renderMoreHome();
+}
+
+function renderMoreHome() {
   const view = document.getElementById('board-container-view');
   if (!view) return;
   const openTasks = Array.isArray(tasks) ? tasks.filter(t => !t.completed).length : 0;
@@ -4061,24 +4065,346 @@ function renderMoreScreen() {
       <div>
         <span>Mealnest</span>
         <h1>Viac</h1>
+        <p>Všetko dôležité na jednom mieste</p>
       </div>
-      <button class="more-avatar" onclick="openSettings()">${getDashboardAvatar()}</button>
+      <button class="more-avatar" onclick="openMorePage('account')">${getDashboardAvatar()}</button>
     </div>
     <div class="more-grid">
-      <button class="more-tile" onclick="switchTab('tasks')"><span>✅</span><strong>Úlohy</strong><small>${openTasks} otvorených</small></button>
-      <button class="more-tile" onclick="renderBoard()"><span>📌</span><strong>Nástenka</strong><small>Rodinný prehľad</small></button>
-      <button class="more-tile" onclick="openSettings()"><span>⚙️</span><strong>Nastavenia</strong><small>Profil, téma, widgety</small></button>
-      <button class="more-tile" onclick="switchLang();setTimeout(renderMoreScreen,120)"><span>🌐</span><strong>Jazyk</strong><small>SK / EN</small></button>
-      <button class="more-tile" onclick="switchTab('shopping')"><span>🛒</span><strong>Nákup</strong><small>${shoppingCount} položiek</small></button>
-      <button class="more-tile" onclick="aiGenerateFullWeek()"><span>🚀</span><strong>AI Týždeň</strong><small>Vygenerovať plán</small></button>
+      ${renderMoreTile('tasks', '✅', 'Úlohy', `${openTasks} otvorených`, 'Dnes, nadchádzajúce a hotové úlohy')}
+      ${renderMoreTile('board', '📌', 'Nástenka', 'Rodinný dashboard', 'Jedlá, nákup, aktivita a členovia')}
+      ${renderMoreTile('settings', '⚙️', 'Nastavenia', 'Vzhľad, účet, súkromie', 'Moderné nastavenia aplikácie')}
+      ${renderMoreTile('language', '🌐', 'Jazyk', 'Slovenčina / English', 'Rýchla zmena jazyka')}
+      ${renderMoreTile('shopping', '🛒', 'Nákup', `${shoppingCount} položiek`, 'Zoznamy, história a kategórie')}
+      ${renderMoreTile('ai-week', '🚀', 'AI Týždeň', 'Plán na mieru', 'Preferencie a návrhy AI')}
     </div>
     <div class="more-list">
-      <button onclick="openSettings()"><span>👨‍👩‍👧‍👦</span><strong>${familyState}</strong><em>›</em></button>
-      <button onclick="localStorage.removeItem('onboardingCompleted');showOnboarding(true)"><span>❓</span><strong>Zobraziť onboarding</strong><em>›</em></button>
-      <button onclick="openSettings()"><span>🔔</span><strong>Notifikácie a účet</strong><em>›</em></button>
+      ${renderMoreRow('family', '👨‍👩‍👧‍👦', familyState, familyCode ? 'Členovia, zdieľanie a aktivita' : 'Pozvánky a spoločné plánovanie')}
+      ${renderMoreRow('onboarding', '❓', 'Onboarding centrum', 'Funkcie, import, AI plánovač')}
+      ${renderMoreRow('notifications-account', '🔔', 'Notifikácie a účet', 'Email, odhlásenie, predplatné')}
+      ${renderMoreRow('backup-sync', '☁️', 'Backup a synchronizácia', 'Zálohy, obnovenie a história')}
+      ${renderMoreRow('privacy-security', '🔒', 'Súkromie a bezpečnosť', 'Oprávnenia, export a vymazanie dát')}
+      ${renderMoreRow('about', 'ℹ️', 'O aplikácii', 'Verzia, changelog, licencie')}
     </div>
   </section>`;
 }
+
+function renderMoreTile(page, icon, title, desc, detail) {
+  return `<button class="more-tile" onclick="openMorePage('${page}')"><span>${icon}</span><strong>${title}</strong><small>${desc}</small><em>${detail}</em><b>›</b></button>`;
+}
+
+function renderMoreRow(page, icon, title, desc) {
+  return `<button onclick="openMorePage('${page}')"><span>${icon}</span><div><strong>${title}</strong><small>${desc}</small></div><em>›</em></button>`;
+}
+
+function openMorePage(page) {
+  const view = document.getElementById('board-container-view');
+  if (!view) return;
+  const renderers = {
+    family: renderMoreFamilyPage,
+    settings: renderMoreSettingsHub,
+    appearance: renderMoreAppearancePage,
+    notifications: renderMoreNotificationsPage,
+    account: renderMoreAccountPage,
+    privacy: renderMorePrivacySecurityPage,
+    sync: renderMoreBackupSyncPage,
+    tasks: renderMoreTasksPage,
+    board: renderMoreBoardPage,
+    'family-permissions': renderMoreFamilyPermissionsPage,
+    language: renderMoreLanguagePage,
+    shopping: renderMoreShoppingPage,
+    'ai-week': renderMoreAiWeekPage,
+    onboarding: renderMoreOnboardingPage,
+    'notifications-account': renderMoreNotificationsAccountPage,
+    'backup-sync': renderMoreBackupSyncPage,
+    'privacy-security': renderMorePrivacySecurityPage,
+    about: renderMoreAboutPage
+  };
+  view.innerHTML = (renderers[page] || renderMoreSettingsHub)();
+  try { window.scrollTo(0, 0); } catch(e) {}
+}
+
+function renderMoreShell(title, subtitle, body, action) {
+  return `<section class="more-screen more-subpage">
+    <div class="more-subhead">
+      <button class="more-back" onclick="renderMoreHome()" aria-label="Späť">‹</button>
+      <div><h1>${title}</h1>${subtitle ? `<p>${subtitle}</p>` : ''}</div>
+      ${action || '<span class="more-head-spacer"></span>'}
+    </div>
+    ${body}
+  </section>`;
+}
+
+function moreCard(title, content, cls) {
+  return `<section class="more-card ${cls || ''}">${title ? `<h2>${title}</h2>` : ''}${content}</section>`;
+}
+
+function moreActionRow(icon, title, desc, action, meta) {
+  return `<button class="more-action-row" onclick="${action || ''}"><span>${icon}</span><div><strong>${title}</strong>${desc ? `<small>${desc}</small>` : ''}</div>${meta ? `<em>${meta}</em>` : '<em>›</em>'}</button>`;
+}
+
+function morePill(label, active, action) {
+  return `<button class="more-pill ${active ? 'active' : ''}" onclick="${action || ''}">${label}</button>`;
+}
+
+function renderMoreFamilyPage() {
+  const members = [
+    ['👨', 'Vladimír', 'Vlastník'],
+    ['👩', 'Partner', 'Člen'],
+    ['👦', 'Dieťa', 'Profil dieťaťa']
+  ];
+  const body = `
+    ${moreCard('Family members', `<div class="more-member-list">${members.map(m => `<div class="more-member"><span>${m[0]}</span><div><strong>${m[1]}</strong><small>${m[2]}</small></div></div>`).join('')}</div><button class="more-primary" onclick="copyFamilyInvite()">+ Pozvať člena</button>`)}
+    ${moreCard('Zdieľanie', `
+      ${moreActionRow('📅','Zdieľané plánovanie','Týždenný jedálniček vidí celá rodina','','Zapnuté')}
+      ${moreActionRow('🛒','Zdieľané nákupy','Spoločný nákupný zoznam','','Zapnuté')}
+      ${moreActionRow('📖','Zdieľané recepty','Rodinný receptár','','Zapnuté')}
+    `)}
+    ${moreCard('Nastavenia rodiny', `
+      ${moreActionRow('🛡️','Permissions','Správa rolí a oprávnení',"openMorePage('family-permissions')")}
+      ${moreActionRow('🕘','Activity log','Posledné rodinné zmeny','','')}
+    `)}
+    ${moreCard('Recent activity', renderMoreActivityFeed())}
+  `;
+  return renderMoreShell('Rodina pripojená', familyCode ? `Kód rodiny ${esc(familyCode)}` : 'Rodinné zdieľanie nie je pripojené', body, '<button class="more-top-action" onclick="copyFamilyInvite()">Pozvať</button>');
+}
+
+function renderMoreFamilyPermissionsPage() {
+  const body = `
+    ${moreCard('Permissions', `
+      ${moreActionRow('👨','Vladimír','Vlastník · všetky práva','','Owner')}
+      ${moreActionRow('👩','Partner','Plánovanie, nákup, recepty','','Editor')}
+      ${moreActionRow('👦','Dieťa','Iba úlohy a prehľad','','Limited')}
+    `)}
+    ${moreCard('Activity log', renderMoreActivityFeed())}
+  `;
+  return renderMoreShell('Permissions', 'Rodinné role a oprávnenia', body, "<button class=\"more-top-action\" onclick=\"openMorePage('family')\">Rodina</button>");
+}
+
+function copyFamilyInvite() {
+  const code = familyCode || 'MEALNEST';
+  try { navigator.clipboard && navigator.clipboard.writeText(code); } catch(e) {}
+  showToast('Pozvánka pripravená', 'success');
+}
+
+function renderMoreActivityFeed() {
+  return `<div class="more-feed">
+    <div><span>📖</span><strong>Lívia pridala recept</strong><small>pred 12 min</small></div>
+    <div><span>✅</span><strong>Tomáš dokončil úlohu</strong><small>dnes</small></div>
+    <div><span>📅</span><strong>Vladimír vytvoril plán</strong><small>včera</small></div>
+  </div>`;
+}
+
+function renderMoreSettingsHub() {
+  const cards = [
+    ['appearance','🎨','Vzhľad','Téma, akcent, text a hustota'],
+    ['notifications','🔔','Oznámenia','Pripomienky a push nastavenia'],
+    ['account','👤','Účet','Profil, prihlásenie a odhlásenie'],
+    ['language','🌐','Jazyk','Slovenčina alebo English'],
+    ['privacy-security','🔒','Súkromie','Oprávnenia a export dát'],
+    ['backup-sync','☁️','Synchronizácia','Backup, restore a rodinný sync']
+  ];
+  const body = `<div class="more-grid">${cards.map(c => renderMoreTile(c[0], c[1], c[2], c[3], 'Otvoriť')).join('')}</div>`;
+  return renderMoreShell('Nastavenia', 'Všetky nastavenia bez starých panelov', body);
+}
+
+function renderMoreAppearancePage() {
+  loadSettings();
+  const s = appSettings;
+  const colors = ['#22C55E','#3B82F6','#F59E0B','#EC4899','#8B5CF6','#06B6D4'];
+  const body = `
+    ${moreCard('Theme', `<div class="more-option-grid">${['light','dark','system'].map(v => morePill(v === 'light' ? 'Light' : v === 'dark' ? 'Dark' : 'System', s.theme === v, `setMoreTheme('${v}')`)).join('')}</div>`)}
+    ${moreCard('Accent color', `<div class="more-color-grid">${colors.map(c => `<button class="more-color ${s.accentColor === c ? 'active' : ''}" style="--swatch:${c}" onclick="setMoreAccent('${c}')"><span></span></button>`).join('')}</div>`)}
+    ${moreCard('Preview cards', `<div class="more-preview"><div><strong>Dnešný plán</strong><small>0 / 5 jedál naplánovaných</small></div><button>Naplánovať deň</button></div>`)}
+    ${moreCard('Text size', `<div class="more-option-grid">${['compact','normal','large'].map(v => morePill(v === 'compact' ? 'Compact' : v === 'normal' ? 'Normal' : 'Large', s.textSize === v, `setMoreTextSize('${v}')`)).join('')}</div>`)}
+    ${moreCard('UI density', `<div class="more-option-grid">${['compact','normal'].map(v => morePill(v === 'compact' ? 'Compact' : 'Comfortable', (s.uiDensity === v || (v === 'normal' && s.uiDensity === 'large')), `setMoreDensity('${v}')`)).join('')}</div>`)}
+    ${moreCard('Live preview', `<div class="more-live-preview"><span>🍳</span><div><strong>Raňajky</strong><small>+ Pridať jedlo</small></div><button>+</button></div>`)}
+  `;
+  return renderMoreShell('Vzhľad', 'Téma, farby a čitateľnosť', body);
+}
+
+function setMoreTheme(value) { appSettings.theme = value; saveSettings(); applySettings(); openMorePage('appearance'); }
+function setMoreAccent(value) { appSettings.accentColor = value; saveSettings(); applySettings(); openMorePage('appearance'); }
+function setMoreTextSize(value) { appSettings.textSize = value; saveSettings(); applySettings(); openMorePage('appearance'); }
+function setMoreDensity(value) { appSettings.uiDensity = value; saveSettings(); applySettings(); openMorePage('appearance'); }
+
+function renderMoreTasksPage() {
+  const today = getTodayTasks();
+  const upcoming = getWeekTasks().slice(0, 4);
+  const completed = getCompletedTasks().slice(0, 4);
+  const total = Array.isArray(tasks) ? tasks.length : 0;
+  const done = Array.isArray(tasks) ? tasks.filter(t => t.completed).length : 0;
+  const body = `
+    ${moreCard('Statistics', `<div class="more-stat-grid"><div><strong>${today.length}</strong><small>dnes</small></div><div><strong>${upcoming.length}</strong><small>nadchádza</small></div><div><strong>${done}</strong><small>hotovo</small></div><div><strong>${total}</strong><small>spolu</small></div></div>`)}
+    ${moreCard('Dnešné úlohy', renderMoreTaskRows(today, ['Kúpiť mlieko','Nakrájať zeleninu','Umyť fľašku']))}
+    ${moreCard('Upcoming tasks', renderMoreTaskRows(upcoming, ['Pripraviť obed','Skontrolovať nákup']))}
+    ${moreCard('Completed tasks', renderMoreTaskRows(completed, ['Umyté ovocie','Hotový plán']))}
+    ${moreCard('Categories', `<div class="more-chip-row"><span>🍳 Varenie</span><span>🛒 Nákup</span><span>🏠 Domácnosť</span><span>👶 Dieťa</span></div>`)}
+    ${moreCard('Filters', `<div class="more-option-grid">${['Dnes','Týždeň','Priorita','Kategória'].map(x => morePill(x, x === 'Dnes', '')).join('')}</div>`)}
+  `;
+  return renderMoreShell('Úlohy', 'Dnešné, nadchádzajúce a hotové úlohy', body, "<button class=\"more-top-action\" onclick=\"switchTab('tasks')\">Správca</button>");
+}
+
+function renderMoreTaskRows(items, fallback) {
+  const rows = items.length ? items : fallback.map((title, i) => ({ title, completed: i === 0 }));
+  return `<div class="more-feed">${rows.slice(0, 4).map(t => `<div><span>${t.completed ? '☑' : '☐'}</span><strong>${esc(t.title)}</strong><small>${t.date ? formatTaskDate(t.date) : 'náhľad'}</small></div>`).join('')}</div>`;
+}
+
+function renderMoreBoardPage() {
+  const todaysRecipes = getTodayRecipes();
+  const shoppingCount = Array.isArray(shopItems) ? shopItems.filter(i => i && !i.checked).length : 0;
+  const openTasks = Array.isArray(tasks) ? tasks.filter(t => !t.completed).length : 0;
+  const body = `
+    ${moreCard('Family summary', `<div class="more-family-strip"><span>👨</span><span>👩</span><span>👦</span><strong>${familyCode ? '3 členovia online' : 'Rodina nepripojená'}</strong></div>`)}
+    ${moreCard('Dnešné jedlá', todaysRecipes.length ? `<div class="more-feed">${todaysRecipes.slice(0, 3).map(r => `<div><span>🍽️</span><strong>${esc(r.name)}</strong><small>${r.time || 20} min</small></div>`).join('')}</div>` : `<div class="more-empty-line">Dnes ešte nie sú naplánované jedlá.</div>`)}
+    ${moreCard('Shared shopping list', `<div class="more-board-row"><span>🛒</span><strong>${shoppingCount} položiek čaká</strong><button onclick="switchTab('shopping')">Otvoriť</button></div>`)}
+    ${moreCard('Upcoming tasks', `<div class="more-board-row"><span>✅</span><strong>${openTasks} otvorených úloh</strong><button onclick="openMorePage('tasks')">Pozrieť</button></div>`)}
+    ${moreCard('Recent activity', renderMoreActivityFeed())}
+  `;
+  return renderMoreShell('Nástenka', 'Rodinný dashboard bez starých kariet', body);
+}
+
+function renderMoreLanguagePage() {
+  const current = appSettings.lang || lang || 'sk';
+  const body = `
+    ${moreCard('Language cards', `<div class="more-language-grid">
+      <button class="${current === 'sk' ? 'active' : ''}" onclick="setMoreLanguage('sk')"><span>🇸🇰</span><strong>Slovenčina</strong><small>Okamžitý náhľad aplikácie</small></button>
+      <button class="${current === 'en' ? 'active' : ''}" onclick="setMoreLanguage('en')"><span>🇬🇧</span><strong>English</strong><small>Instant app preview</small></button>
+    </div>`)}
+    ${moreCard('Instant preview', `<div class="more-live-preview"><span>🌐</span><div><strong>${current === 'sk' ? 'Dnešné jedlá' : "Today's meals"}</strong><small>${current === 'sk' ? 'Jazyk sa zmení hneď' : 'Language changes instantly'}</small></div></div>`)}
+  `;
+  return renderMoreShell('Jazyk', 'Vyber jazyk aplikácie', body);
+}
+
+function setMoreLanguage(value) {
+  appSettings.lang = value;
+  lang = value;
+  localStorage.setItem('lang', value);
+  saveSettings();
+  applyLang();
+  openMorePage('language');
+}
+
+function renderMoreShoppingPage() {
+  try { loadShopItems(); } catch(e) {}
+  const current = Array.isArray(shopItems) ? shopItems.filter(i => !i.checked) : [];
+  const history = Array.isArray(shopItems) ? shopItems.filter(i => i.checked) : [];
+  const body = `
+    ${moreCard('Current list', current.length ? `<div class="more-feed">${current.slice(0, 5).map(i => `<div><span>🛒</span><strong>${esc(i.name)}</strong><small>${esc((i.amount || '') + ' ' + (i.unit || ''))}</small></div>`).join('')}</div>` : `<div class="more-empty-line">Nákupný zoznam je prázdny.</div>`)}
+    ${moreCard('History', `<div class="more-stat-grid"><div><strong>${history.length}</strong><small>kúpené</small></div><div><strong>${current.length}</strong><small>čaká</small></div></div>`)}
+    ${moreCard('Categories', `<div class="more-chip-row"><span>🥦 Zelenina</span><span>🥛 Mliečne</span><span>🍞 Pečivo</span><span>🥩 Mäso</span></div>`)}
+    ${moreCard('Shared items', `<div class="more-board-row"><span>👨‍👩‍👧‍👦</span><strong>${familyCode ? 'Zdieľané s rodinou' : 'Rodina nepripojená'}</strong><button onclick="openMorePage('family')">Rodina</button></div>`)}
+    ${moreCard('Statistics', `<div class="more-stat-grid"><div><strong>${current.length + history.length}</strong><small>spolu</small></div><div><strong>${current.length}</strong><small>otvorené</small></div></div>`)}
+  `;
+  return renderMoreShell('Nákup', 'Prehľad nákupov a kategórií', body, "<button class=\"more-top-action\" onclick=\"switchTab('shopping')\">Zoznam</button>");
+}
+
+function renderMoreAiWeekPage() {
+  const body = `
+    ${moreCard('Generate week plan', `<div class="more-ai-panel"><span>🚀</span><strong>AI pripraví týždeň podľa rodiny</strong><small>Raňajky, desiata, obed, olovrant a večera.</small><button class="more-primary" onclick="showToast('AI plánovač je pripravený v tejto obrazovke', 'info')">Generovať plán</button></div>`)}
+    ${moreCard('Family preferences', `<div class="more-chip-row"><span>2 dospelí</span><span>1 dieťa</span><span>Rýchle večere</span></div>`)}
+    ${moreCard('Diet preferences', `<div class="more-chip-row"><span>Vyvážené</span><span>Sezónne</span><span>Menej odpadu</span></div>`)}
+    ${moreCard('Regenerate', `<button class="more-secondary" onclick="showToast('Návrhy obnovené', 'success')">Regenerate button</button>`)}
+    ${moreCard('Previous plans', `<div class="more-feed"><div><span>📅</span><strong>Minulý týždeň</strong><small>28 jedál</small></div><div><span>📅</span><strong>Rodinný plán</strong><small>35 jedál</small></div></div>`)}
+    ${moreCard('AI suggestions', `<div class="more-feed"><div><span>🥗</span><strong>Ľahký obed</strong><small>Sezónna zelenina</small></div><div><span>🍲</span><strong>Teplá večera</strong><small>30 min</small></div></div>`)}
+  `;
+  return renderMoreShell('AI Týždeň', 'Plánovanie s preferenciami', body);
+}
+
+function renderMoreOnboardingPage() {
+  const items = [
+    ['Introduction','Základy aplikácie','100%'],
+    ['Features','Jedlá, recepty, nákup, úlohy','80%'],
+    ['Family sync','Zdieľanie v rodine','60%'],
+    ['Recipe import','Import receptov z URL','40%'],
+    ['AI planner','Týždenný plán cez AI','40%']
+  ];
+  const body = `
+    ${moreCard('Tutorial progress', `<div class="more-progress"><span style="width:68%"></span></div><small class="more-muted">68% dokončené</small>`)}
+    ${moreCard('Onboarding center', `<div class="more-feed">${items.map(i => `<div><span>❓</span><strong>${i[0]}</strong><small>${i[1]} · ${i[2]}</small></div>`).join('')}</div>`)}
+    ${moreCard('Start again', `<button class="more-secondary" onclick="showToast('Onboarding centrum ostáva v tejto obrazovke', 'info')">Prejsť tutorial</button>`)}
+  `;
+  return renderMoreShell('Onboarding', 'Návody bez modálneho okna', body);
+}
+
+function renderMoreNotificationsPage() {
+  const body = `
+    ${moreCard('Notifications', `
+      ${moreActionRow('🌅','Raňajky','08:00','','Zapnuté')}
+      ${moreActionRow('🛒','Nákup','Pripomienka zoznamu','','Zapnuté')}
+      ${moreActionRow('🌙','Večerný plán','20:00','','Zapnuté')}
+    `)}
+    ${moreCard('Permissions', `${moreActionRow('🔔','Push povolenia', typeof Notification !== 'undefined' ? Notification.permission : 'Nedostupné', 'pushNotifSetup()')}`)}
+  `;
+  return renderMoreShell('Oznámenia', 'Pripomienky a povolenia', body);
+}
+
+function renderMoreAccountPage() {
+  const user = authUser ? (authUser.displayName || authUser.email || 'Používateľ') : 'Hosť';
+  const body = `
+    ${moreCard('Account', `<div class="more-account-card"><button class="more-avatar">${getDashboardAvatar()}</button><div><strong>${esc(user)}</strong><small>${authUser ? 'Prihlásený účet' : 'Režim hosťa'}</small></div></div>`)}
+    ${moreCard('Email', `${moreActionRow('✉️','Email', authUser && authUser.email ? authUser.email : 'Nepripojený', '')}`)}
+    ${moreCard('Subscription', `${moreActionRow('⭐','Mealnest Premium','Aktuálne free plán', '')}`)}
+    ${moreCard('Logout', `<button class="more-danger" onclick="showToast('Odhlásenie pripravíme v účte', 'info')">Odhlásiť</button>`)}
+  `;
+  return renderMoreShell('Účet', 'Profil a prihlásenie', body);
+}
+
+function renderMoreNotificationsAccountPage() {
+  const body = `
+    ${moreCard('Notifications', `${moreActionRow('🔔','Push notifikácie','Raňajky, nákup a plánovanie',"openMorePage('notifications')")}`)}
+    ${moreCard('Email', `${moreActionRow('✉️','Email','Nastavenia emailovej komunikácie',"openMorePage('account')")}`)}
+    ${moreCard('Account', `${moreActionRow('👤','Účet','Profil a prihlásenie',"openMorePage('account')")}`)}
+    ${moreCard('Subscription', `${moreActionRow('⭐','Predplatné','Free plán',"openMorePage('account')")}`)}
+    ${moreCard('Logout', `<button class="more-danger" onclick="showToast('Odhlásenie pripravíme v účte', 'info')">Logout</button>`)}
+  `;
+  return renderMoreShell('Notifikácie a účet', 'Komunikácia, účet a predplatné', body);
+}
+
+function renderMoreBackupSyncPage() {
+  const syncText = familyCode ? 'Rodinný sync aktívny' : 'Lokálny režim';
+  const body = `
+    ${moreCard('Last sync', `<div class="more-board-row"><span>☁️</span><strong>${syncText}</strong><small>pred chvíľou</small></div>`)}
+    ${moreCard('Backup now', `<button class="more-primary" onclick="createBackup()">Backup now</button>`)}
+    ${moreCard('Restore backup', `<button class="more-secondary" onclick="showToast('Obnovenie zálohy pripravíme tu', 'info')">Restore backup</button>`)}
+    ${moreCard('Family sync status', `${moreActionRow('👨‍👩‍👧‍👦','Family sync status', syncText, "openMorePage('family')")}`)}
+    ${moreCard('History', `<div class="more-feed"><div><span>☁️</span><strong>Automatická záloha</strong><small>dnes</small></div><div><span>📤</span><strong>Export dát</strong><small>včera</small></div></div>`)}
+  `;
+  return renderMoreShell('Backup a sync', 'Zálohy, obnovenie a história', body);
+}
+
+function renderMorePrivacySecurityPage() {
+  const body = `
+    ${moreCard('Password', `${moreActionRow('🔑','Password','Správa hesla účtu',"openMorePage('account')")}`)}
+    ${moreCard('Biometrics', `${moreActionRow('🟢','Biometrics','Face/fingerprint pripravené pre wrapper','','Voliteľné')}`)}
+    ${moreCard('Privacy controls', `${moreActionRow('🛡️','Privacy controls','Rodinné zdieľanie a viditeľnosť',"openMorePage('family')")}`)}
+    ${moreCard('Permissions', `${moreActionRow('🔔','Permissions','Notifikácie a lokálne úložisko',"openMorePage('notifications')")}`)}
+    ${moreCard('Export data', `<button class="more-secondary" onclick="createBackup()">Export data</button>`)}
+    ${moreCard('Delete account', `<button class="more-danger" onclick="showToast('Vymazanie účtu vyžaduje potvrdenie v účte', 'warning')">Delete account</button>`)}
+  `;
+  return renderMoreShell('Súkromie', 'Bezpečnosť, dáta a oprávnenia', body);
+}
+
+function renderMoreAboutPage() {
+  const body = `
+    ${moreCard('Version', `<div class="more-board-row"><span>🍽️</span><strong>Mealnest</strong><small>v1.7 · GitHub build</small></div>`)}
+    ${moreCard('Changelog', `<div class="more-feed"><div><span>✨</span><strong>Nový Dashboard a Viac</strong><small>Prémiový mobilný dizajn</small></div><div><span>🛒</span><strong>Nákup a úlohy</strong><small>Rýchle prehľady</small></div></div>`)}
+    ${moreCard('Licenses', `${moreActionRow('📄','Licenses','Open-source knižnice a assety','')}`)}
+    ${moreCard('Contact', `${moreActionRow('✉️','Contact','Podpora aplikácie','')}`)}
+    ${moreCard('Terms', `${moreActionRow('📜','Terms','Podmienky používania','')}`)}
+    ${moreCard('Privacy policy', `${moreActionRow('🔒','Privacy policy','Ochrana súkromia',"window.open('privacy-policy.html', '_blank')")}`)}
+  `;
+  return renderMoreShell('O aplikácii', 'Verzia, licencie a dokumenty', body);
+}
+
+window.renderMoreScreen = renderMoreScreen;
+window.renderMoreHome = renderMoreHome;
+window.openMorePage = openMorePage;
+window.copyFamilyInvite = copyFamilyInvite;
+window.setMoreTheme = setMoreTheme;
+window.setMoreAccent = setMoreAccent;
+window.setMoreTextSize = setMoreTextSize;
+window.setMoreDensity = setMoreDensity;
+window.setMoreLanguage = setMoreLanguage;
 
 // =================== PULL TO REFRESH ===================
 var _ptrState = null;
