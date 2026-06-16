@@ -453,15 +453,15 @@ const ONBOARDING_SLIDES = [
     subEn: 'Keep track of what to cook, buy, and organize. Every day.',
     mockup: `<div class="onboard-mockup" style="text-align:left;">
       <div style="font-size:.7rem;">📅 Dnes</div>
-      <div style="background:var(--bg);border-radius:6px;padding:.3rem;margin:.2rem 0;font-size:.68rem;">☐ Nakúpiť suroviny <span style="color:var(--primary-light);float:right;">🔴</span></div>
-      <div style="background:var(--bg);border-radius:6px;padding:.3rem;font-size:.68rem;opacity:.5;text-decoration:line-through;">✓ Pripraviť obed</div>
-      <div style="font-size:.65rem;color:var(--text3);text-align:center;margin-top:.3rem;">2/5 dokončené</div>
+      <div style="background:var(--bg);border-radius:6px;padding:.3rem;margin:.2rem 0;font-size:.68rem;">☐ Tvoja úloha <span style="color:var(--primary-light);float:right;">●</span></div>
+      <div style="background:var(--bg);border-radius:6px;padding:.3rem;font-size:.68rem;opacity:.5;">Žiadne demo dáta</div>
+      <div style="font-size:.65rem;color:var(--text3);text-align:center;margin-top:.3rem;">Reálne úlohy po pridaní</div>
     </div>`,
     mockupEn: `<div class="onboard-mockup" style="text-align:left;">
       <div style="font-size:.7rem;">📅 Today</div>
-      <div style="background:var(--bg);border-radius:6px;padding:.3rem;margin:.2rem 0;font-size:.68rem;">☐ Buy groceries <span style="color:var(--primary-light);float:right;">🔴</span></div>
-      <div style="background:var(--bg);border-radius:6px;padding:.3rem;font-size:.68rem;opacity:.5;text-decoration:line-through;">✓ Prepare lunch</div>
-      <div style="font-size:.65rem;color:var(--text3);text-align:center;margin-top:.3rem;">2/5 completed</div>
+      <div style="background:var(--bg);border-radius:6px;padding:.3rem;margin:.2rem 0;font-size:.68rem;">☐ Your task <span style="color:var(--primary-light);float:right;">●</span></div>
+      <div style="background:var(--bg);border-radius:6px;padding:.3rem;font-size:.68rem;opacity:.5;">No demo data</div>
+      <div style="font-size:.65rem;color:var(--text3);text-align:center;margin-top:.3rem;">Real tasks after adding</div>
     </div>`
   },
   {
@@ -4146,18 +4146,32 @@ function morePill(label, active, action) {
   return `<button class="more-pill ${active ? 'active' : ''}" onclick="${action || ''}">${label}</button>`;
 }
 
+function moreEmptyState(icon, title, desc, actionLabel, action) {
+  return `<div class="more-empty-state">
+    <span>${icon}</span>
+    <strong>${title}</strong>
+    ${desc ? `<small>${desc}</small>` : ''}
+    ${actionLabel && action ? `<button class="more-primary" onclick="${action}">${actionLabel}</button>` : ''}
+  </div>`;
+}
+
 function renderMoreFamilyPage() {
-  const members = [
-    ['👨', 'Vladimír', 'Vlastník'],
-    ['👩', 'Partner', 'Člen'],
-    ['👦', 'Dieťa', 'Profil dieťaťa']
-  ];
+  const ownerName = authUser && (authUser.displayName || authUser.email)
+    ? (authUser.displayName || authUser.email)
+    : (localStorage.getItem('deviceName') || 'Toto zariadenie');
+  const members = familyCode
+    ? [['👤', ownerName, 'Vlastník']]
+    : [];
+  const shareStatus = familyCode ? 'Zapnuté' : 'Neaktívne';
+  const memberContent = members.length
+    ? `<div class="more-member-list">${members.map(m => `<div class="more-member"><span>${m[0]}</span><div><strong>${esc(m[1])}</strong><small>${esc(m[2])}</small></div></div>`).join('')}</div>`
+    : moreEmptyState('👨‍👩‍👧‍👦', 'Rodina zatiaľ nie je pripojená', 'Po pozvaní členov sa tu zobrazia reálne osoby.', '+ Pozvať člena', 'copyFamilyInvite()');
   const body = `
-    ${moreCard('Family members', `<div class="more-member-list">${members.map(m => `<div class="more-member"><span>${m[0]}</span><div><strong>${m[1]}</strong><small>${m[2]}</small></div></div>`).join('')}</div><button class="more-primary" onclick="copyFamilyInvite()">+ Pozvať člena</button>`)}
+    ${moreCard('Family members', `${memberContent}${familyCode ? '<button class="more-primary" onclick="copyFamilyInvite()">+ Pozvať člena</button>' : ''}`)}
     ${moreCard('Zdieľanie', `
-      ${moreActionRow('📅','Zdieľané plánovanie','Týždenný jedálniček vidí celá rodina','','Zapnuté')}
-      ${moreActionRow('🛒','Zdieľané nákupy','Spoločný nákupný zoznam','','Zapnuté')}
-      ${moreActionRow('📖','Zdieľané recepty','Rodinný receptár','','Zapnuté')}
+      ${moreActionRow('📅','Zdieľané plánovanie','Týždenný jedálniček vidí celá rodina','',shareStatus)}
+      ${moreActionRow('🛒','Zdieľané nákupy','Spoločný nákupný zoznam','',shareStatus)}
+      ${moreActionRow('📖','Zdieľané recepty','Rodinný receptár','',shareStatus)}
     `)}
     ${moreCard('Nastavenia rodiny', `
       ${moreActionRow('🛡️','Permissions','Správa rolí a oprávnení',"openMorePage('family-permissions')")}
@@ -4169,11 +4183,14 @@ function renderMoreFamilyPage() {
 }
 
 function renderMoreFamilyPermissionsPage() {
+  const ownerName = authUser && (authUser.displayName || authUser.email)
+    ? (authUser.displayName || authUser.email)
+    : (localStorage.getItem('deviceName') || 'Toto zariadenie');
   const body = `
     ${moreCard('Permissions', `
-      ${moreActionRow('👨','Vladimír','Vlastník · všetky práva','','Owner')}
-      ${moreActionRow('👩','Partner','Plánovanie, nákup, recepty','','Editor')}
-      ${moreActionRow('👦','Dieťa','Iba úlohy a prehľad','','Limited')}
+      ${familyCode
+        ? moreActionRow('👤', esc(ownerName), 'Vlastník · všetky práva', '', 'Owner')
+        : moreEmptyState('🔒', 'Žiadne rodinné oprávnenia', 'Najprv pripoj alebo vytvor rodinu.', 'Otvoriť rodinu', "openMorePage('family')")}
     `)}
     ${moreCard('Activity log', renderMoreActivityFeed())}
   `;
@@ -4181,17 +4198,21 @@ function renderMoreFamilyPermissionsPage() {
 }
 
 function copyFamilyInvite() {
-  const code = familyCode || 'MEALNEST';
+  if (!familyCode) {
+    showToast('Najprv vytvor alebo pripoj rodinu', 'warning');
+    return;
+  }
+  const code = familyCode;
   try { navigator.clipboard && navigator.clipboard.writeText(code); } catch(e) {}
   showToast('Pozvánka pripravená', 'success');
 }
 
 function renderMoreActivityFeed() {
-  return `<div class="more-feed">
-    <div><span>📖</span><strong>Lívia pridala recept</strong><small>pred 12 min</small></div>
-    <div><span>✅</span><strong>Tomáš dokončil úlohu</strong><small>dnes</small></div>
-    <div><span>📅</span><strong>Vladimír vytvoril plán</strong><small>včera</small></div>
-  </div>`;
+  const recentCompleted = getRecentCompleted().slice(0, 3);
+  if (!recentCompleted.length) {
+    return moreEmptyState('🕘', 'Zatiaľ žiadna aktivita', 'Keď niekto pridá recept, dokončí úlohu alebo zmení plán, zobrazí sa to tu.');
+  }
+  return `<div class="more-feed">${recentCompleted.map(task => `<div><span>✅</span><strong>${esc(task.title)}</strong><small>${task.completedDate ? formatTaskDate(task.completedDate.slice(0,10)) : 'Dokončené'}</small></div>`).join('')}</div>`;
 }
 
 function renderMoreSettingsHub() {
@@ -4235,18 +4256,20 @@ function renderMoreTasksPage() {
   const done = Array.isArray(tasks) ? tasks.filter(t => t.completed).length : 0;
   const body = `
     ${moreCard('Statistics', `<div class="more-stat-grid"><div><strong>${today.length}</strong><small>dnes</small></div><div><strong>${upcoming.length}</strong><small>nadchádza</small></div><div><strong>${done}</strong><small>hotovo</small></div><div><strong>${total}</strong><small>spolu</small></div></div>`)}
-    ${moreCard('Dnešné úlohy', renderMoreTaskRows(today, ['Kúpiť mlieko','Nakrájať zeleninu','Umyť fľašku']))}
-    ${moreCard('Upcoming tasks', renderMoreTaskRows(upcoming, ['Pripraviť obed','Skontrolovať nákup']))}
-    ${moreCard('Completed tasks', renderMoreTaskRows(completed, ['Umyté ovocie','Hotový plán']))}
+    ${moreCard('Dnešné úlohy', renderMoreTaskRows(today, 'Dnes nemáš žiadne úlohy.', 'Pridať úlohu'))}
+    ${moreCard('Upcoming tasks', renderMoreTaskRows(upcoming, 'Žiadne nadchádzajúce úlohy.', 'Otvoriť úlohy'))}
+    ${moreCard('Completed tasks', renderMoreTaskRows(completed, 'Zatiaľ nie sú dokončené žiadne úlohy.', 'Otvoriť úlohy'))}
     ${moreCard('Categories', `<div class="more-chip-row"><span>🍳 Varenie</span><span>🛒 Nákup</span><span>🏠 Domácnosť</span><span>👶 Dieťa</span></div>`)}
     ${moreCard('Filters', `<div class="more-option-grid">${['Dnes','Týždeň','Priorita','Kategória'].map(x => morePill(x, x === 'Dnes', '')).join('')}</div>`)}
   `;
   return renderMoreShell('Úlohy', 'Dnešné, nadchádzajúce a hotové úlohy', body, "<button class=\"more-top-action\" onclick=\"switchTab('tasks')\">Správca</button>");
 }
 
-function renderMoreTaskRows(items, fallback) {
-  const rows = items.length ? items : fallback.map((title, i) => ({ title, completed: i === 0 }));
-  return `<div class="more-feed">${rows.slice(0, 4).map(t => `<div><span>${t.completed ? '☑' : '☐'}</span><strong>${esc(t.title)}</strong><small>${t.date ? formatTaskDate(t.date) : 'náhľad'}</small></div>`).join('')}</div>`;
+function renderMoreTaskRows(items, emptyText, actionLabel) {
+  if (!items.length) {
+    return moreEmptyState('✅', emptyText, 'Zobrazujú sa iba tvoje reálne úlohy.', actionLabel, "switchTab('tasks')");
+  }
+  return `<div class="more-feed">${items.slice(0, 4).map(t => `<div><span>${t.completed ? '☑' : '☐'}</span><strong>${esc(t.title)}</strong><small>${t.date ? formatTaskDate(t.date) : (t.completedDate ? formatTaskDate(t.completedDate.slice(0,10)) : '')}</small></div>`).join('')}</div>`;
 }
 
 function renderMoreBoardPage() {
@@ -4254,7 +4277,7 @@ function renderMoreBoardPage() {
   const shoppingCount = Array.isArray(shopItems) ? shopItems.filter(i => i && !i.checked).length : 0;
   const openTasks = Array.isArray(tasks) ? tasks.filter(t => !t.completed).length : 0;
   const body = `
-    ${moreCard('Family summary', `<div class="more-family-strip"><span>👨</span><span>👩</span><span>👦</span><strong>${familyCode ? '3 členovia online' : 'Rodina nepripojená'}</strong></div>`)}
+    ${moreCard('Family summary', `<div class="more-family-strip"><span>👤</span><strong>${familyCode ? 'Rodina pripojená' : 'Rodina nepripojená'}</strong></div>`)}
     ${moreCard('Dnešné jedlá', todaysRecipes.length ? `<div class="more-feed">${todaysRecipes.slice(0, 3).map(r => `<div><span>🍽️</span><strong>${esc(r.name)}</strong><small>${r.time || 20} min</small></div>`).join('')}</div>` : `<div class="more-empty-line">Dnes ešte nie sú naplánované jedlá.</div>`)}
     ${moreCard('Shared shopping list', `<div class="more-board-row"><span>🛒</span><strong>${shoppingCount} položiek čaká</strong><button onclick="switchTab('shopping')">Otvoriť</button></div>`)}
     ${moreCard('Upcoming tasks', `<div class="more-board-row"><span>✅</span><strong>${openTasks} otvorených úloh</strong><button onclick="openMorePage('tasks')">Pozrieť</button></div>`)}
@@ -4885,16 +4908,16 @@ function renderMobileQuickActions() {
 
 function renderMobileTaskPreview() {
   const todayTasks = getTodayTasks().slice(0, 3);
-  const fallback = [
-    'Kúpiť mlieko',
-    'Nakrájať zeleninu',
-    'Umyť fľašku'
-  ];
-  const rows = todayTasks.length ? todayTasks : fallback.map((title, index) => ({ id: '', title, completed: index < 2 }));
+  if (!todayTasks.length) {
+    return `<section class="mn-preview-card mn-card">
+      <div class="mn-section-head"><h2>Dnešné úlohy</h2><button onclick="switchTab('tasks')">Zobraziť všetky</button></div>
+      <div class="mn-empty-inline"><span>✅</span><strong>Dnes nemáš žiadne úlohy</strong><small>Nové úlohy sa zobrazia hneď po pridaní.</small></div>
+    </section>`;
+  }
   return `<section class="mn-preview-card mn-card">
     <div class="mn-section-head"><h2>Dnešné úlohy</h2><button onclick="switchTab('tasks')">Zobraziť všetky</button></div>
     <div class="mn-task-preview">
-      ${rows.map(task => `<button class="${task.completed ? 'done' : ''}" onclick="${task.id ? `toggleTask('${task.id}');renderDashboard();` : `switchTab('tasks')`}"><span>${task.completed ? '☑' : '☐'}</span><strong>${esc(task.title)}</strong></button>`).join('')}
+      ${todayTasks.map(task => `<button class="${task.completed ? 'done' : ''}" onclick="toggleTask('${task.id}');renderDashboard();"><span>${task.completed ? '☑' : '☐'}</span><strong>${esc(task.title)}</strong></button>`).join('')}
     </div>
   </section>`;
 }

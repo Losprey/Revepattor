@@ -8929,6 +8929,69 @@ body .bottom-nav .nav-item.active .nav-icon {
   font-weight: 650;
 }
 
+.more-empty-state {
+  display: grid;
+  justify-items: start;
+  gap: .38rem;
+  padding: .9rem;
+  border: 1px solid #272D36;
+  border-radius: 18px;
+  background: #11161D;
+}
+
+.more-empty-state > span {
+  width: 2.45rem;
+  height: 2.45rem;
+  display: grid;
+  place-items: center;
+  border-radius: 15px;
+  background: #181C23;
+  font-size: 1.2rem;
+}
+
+.more-empty-state strong {
+  color: #FFFFFF;
+  font-size: .9rem;
+  font-weight: 850;
+}
+
+.more-empty-state small {
+  color: #A1A1AA;
+  font-size: .76rem;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.mn-empty-inline {
+  display: grid;
+  gap: .25rem;
+  padding: .9rem;
+  border: 1px solid #272D36;
+  border-radius: 18px;
+  background: #11161D;
+}
+
+.mn-empty-inline span {
+  width: 2.35rem;
+  height: 2.35rem;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: #181C23;
+}
+
+.mn-empty-inline strong {
+  color: #FFFFFF;
+  font-size: .9rem;
+  font-weight: 850;
+}
+
+.mn-empty-inline small {
+  color: #A1A1AA;
+  font-size: .76rem;
+  line-height: 1.35;
+}
+
 .more-language-grid {
   display: grid;
   gap: .7rem;
