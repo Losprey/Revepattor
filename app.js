@@ -2568,7 +2568,7 @@ function loadSettings() {
   const D = {
     theme: 'system',
     lang: localStorage.getItem('lang') || 'en',
-    accentColor: localStorage.getItem('accent') || '#e63946',
+    accentColor: localStorage.getItem('accent') || '#22C55E',
     textSize: 'normal', uiDensity: 'normal',
     homeWidgets: { weather: true, todayTasks: true, hydration: true, calories: true, quickRecipes: true, seasonal: true },
     mealPlanner: { defaultServings: 4, showNutrition: true },
