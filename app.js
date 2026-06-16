@@ -3904,7 +3904,7 @@ function renderMoreFamilyPage() {
     `)}
     ${moreCard('Recent activity', renderMoreActivityFeed())}
   `;
-  return renderMoreShell('Rodina pripojená', familyCode ? `Kód rodiny ${esc(familyCode)}` : 'Rodinné zdieľanie nie je pripojené', body, '<button class="more-top-action" onclick="copyFamilyInvite()">Pozvať</button>');
+  return renderMoreShell(familyCode ? 'Rodina pripojená' : 'Rodina nie je pripojená', familyCode ? `Kód rodiny ${esc(familyCode)}` : 'Rodinné zdieľanie nie je pripojené', body, '<button class="more-top-action" onclick="copyFamilyInvite()">Pozvať</button>');
 }
 
 function renderMoreFamilyPermissionsPage() {
@@ -4215,7 +4215,7 @@ function renderMoreAiWeekPage() {
     ${moreCard('Generate week plan', `<div class="more-ai-panel"><span>🚀</span><strong>AI pripraví týždeň podľa aktuálnych dát</strong><small>Recepty: ${recipes.length} · naplánované jedlá: ${plannedMeals}</small><button class="more-primary" onclick="aiGenerateFullWeek()">Generovať plán</button></div>`)}
     ${moreCard('Family preferences', `<div class="more-chip-row"><span>${familyCode ? 'Rodina pripojená' : 'Lokálny režim'}</span>${childAge ? `<span>Dieťa ${esc(childAge)} rokov</span>` : '<span>Vek dieťaťa nenastavený</span>'}</div>`)}
     ${moreCard('Diet preferences', (appSettings.dietPrefs && appSettings.dietPrefs.length) ? `<div class="more-chip-row">${appSettings.dietPrefs.map(d => `<span>${d}</span>`).join('')}</div>` : moreEmptyState('🥗', 'Diétne preferencie zatiaľ nie sú nastavené', 'Po pridaní preferencií sa použijú pre AI plán.'))}
-    ${moreCard('Regenerate', `<button class="more-secondary" onclick="aiGenerateFullWeek()">Regenerate button</button>`)}
+    ${moreCard('Regenerate', `<button class="more-secondary" onclick="aiGenerateFullWeek()">${lang==='en' ? 'Regenerate' : 'Znova vygenerovať'}</button>`)}
     ${moreCard('Previous plans', previousPlans)}
     ${moreCard('AI suggestions', recipes.length ? `<div class="more-feed">${recipes.slice(0, 3).map(r => `<div><span>🍽️</span><strong>${esc(r.name)}</strong><small>${r.time || 20} min</small></div>`).join('')}</div>` : moreEmptyState('🤖', 'AI nemá z čoho odporúčať', 'Pridaj recepty alebo importuj recept z URL.'))}
   `;
@@ -4270,8 +4270,8 @@ function renderMoreAccountPage() {
     : `<button class="more-primary" onclick="signInWithGoogle()">Prihlásiť cez Google</button>`;
   const body = `
     ${moreCard('Account', `<div class="more-account-card"><button class="more-avatar">${getDashboardAvatar()}</button><div><strong>${esc(user)}</strong><small>${authUser ? 'Prihlásený účet' : 'Režim hosťa'}</small></div></div>`)}
-    ${moreCard('Email', `${moreActionRow('✉️','Email', authUser && authUser.email ? authUser.email : 'Nepripojený', '')}`)}
-    ${moreCard('Subscription', `${moreActionRow('⭐','Mealnest Premium','Aktuálne free plán', '')}`)}
+    ${moreCard('Email', `${moreActionRow('✉️','Email', authUser && authUser.email ? authUser.email : 'Nepripojený', "showToast('Email je spravovaný cez Google účet', 'info')")}`)}
+    ${moreCard('Subscription', `${moreActionRow('⭐','Mealnest Premium','Aktuálne free plán', "showToast('Predplatné bude dostupné čoskoro', 'info')")}`)}
     ${moreCard(authUser ? 'Logout' : 'Login', authAction)}
   `;
   return renderMoreShell('Účet', 'Profil a prihlásenie', body);
@@ -4308,7 +4308,7 @@ function renderMoreBackupSyncPage() {
 function renderMorePrivacySecurityPage() {
   const body = `
     ${moreCard('Password', `${moreActionRow('🔑','Password','Správa hesla účtu',"openMorePage('account')")}`)}
-    ${moreCard('Biometrics', `${moreActionRow('🟢','Biometrics','Face/fingerprint pripravené pre wrapper','','Voliteľné')}`)}
+    ${moreCard('Biometrics', `${moreActionRow('🟢','Biometrics','Face/fingerprint pripravené pre wrapper',"showToast('Biometrics nie sú v tejto verzii dostupné', 'info')",'Voliteľné')}`)}
     ${moreCard('Privacy controls', `${moreActionRow('🛡️','Privacy controls','Rodinné zdieľanie a viditeľnosť',"openMorePage('family')")}`)}
     ${moreCard('Permissions', `${moreActionRow('🔔','Permissions','Notifikácie a lokálne úložisko',"openMorePage('notifications')")}`)}
     ${moreCard('Export data', `<button class="more-secondary" onclick="createBackup()">Export data</button>`)}
@@ -4321,9 +4321,9 @@ function renderMoreAboutPage() {
   const body = `
     ${moreCard('Version', `<div class="more-board-row"><span>🍽️</span><strong>Mealnest</strong><small>v1.7 · GitHub build</small></div>`)}
     ${moreCard('Changelog', `<div class="more-feed"><div><span>✨</span><strong>Nový Dashboard a Viac</strong><small>Prémiový mobilný dizajn</small></div><div><span>🛒</span><strong>Nákup a úlohy</strong><small>Rýchle prehľady</small></div></div>`)}
-    ${moreCard('Licenses', `${moreActionRow('📄','Licenses','Open-source knižnice a assety','')}`)}
-    ${moreCard('Contact', `${moreActionRow('✉️','Contact','Podpora aplikácie','')}`)}
-    ${moreCard('Terms', `${moreActionRow('📜','Terms','Podmienky používania','')}`)}
+    ${moreCard('Licenses', `${moreActionRow('📄','Licenses','Open-source knižnice a assety',"showToast('Licencie: MIT + CC BY 4.0', 'info')")}`)}
+    ${moreCard('Contact', `${moreActionRow('✉️','Contact','Podpora aplikácie',"showToast('Kontakt: mealnest@app.com', 'info')")}`)}
+    ${moreCard('Terms', `${moreActionRow('📜','Terms','Podmienky používania',"showToast('Pozri privacy policy pre viac informácií', 'info')")}`)}
     ${moreCard('Privacy policy', `${moreActionRow('🔒','Privacy policy','Ochrana súkromia',"window.open('privacy-policy.html', '_blank')")}`)}
   `;
   return renderMoreShell('O aplikácii', 'Verzia, licencie a dokumenty', body);
