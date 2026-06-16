@@ -3884,9 +3884,9 @@ function renderMoreFamilyPage() {
   const body = `
     ${moreCard('Family members', `${memberContent}${familyCode ? '<button class="more-primary" onclick="copyFamilyInvite()">+ Pozvať člena</button>' : ''}`)}
     ${moreCard('Zdieľanie', `
-      ${moreActionRow('📅','Zdieľané plánovanie','Týždenný jedálniček vidí celá rodina','',shareStatus)}
-      ${moreActionRow('🛒','Zdieľané nákupy','Spoločný nákupný zoznam','',shareStatus)}
-      ${moreActionRow('📖','Zdieľané recepty','Rodinný receptár','',shareStatus)}
+      ${moreActionRow('📅','Zdieľané plánovanie','Týždenný jedálniček vidí celá rodina',"showToast(familyCode ? 'Zdieľanie je aktívne' : 'Rodina nie je pripojená', 'info')",shareStatus)}
+      ${moreActionRow('🛒','Zdieľané nákupy','Spoločný nákupný zoznam',"showToast(familyCode ? 'Zdieľanie je aktívne' : 'Rodina nie je pripojená', 'info')",shareStatus)}
+      ${moreActionRow('📖','Zdieľané recepty','Rodinný receptár',"showToast(familyCode ? 'Zdieľanie je aktívne' : 'Rodina nie je pripojená', 'info')",shareStatus)}
     `)}
     ${moreCard('Nastavenia rodiny', `
       ${moreActionRow('🛡️','Permissions','Správa rolí a oprávnení',"openMorePage('family-permissions')")}
@@ -3914,7 +3914,7 @@ function renderMoreFamilyPermissionsPage() {
   const body = `
     ${moreCard('Permissions', `
       ${familyCode
-        ? moreActionRow('👤', esc(ownerName), 'Vlastník · všetky práva', '', 'Owner')
+        ? moreActionRow('👤', esc(ownerName), 'Vlastník · všetky práva', "showToast('Vlastník má všetky práva', 'info')", 'Owner')
         : moreEmptyState('🔒', 'Žiadne rodinné oprávnenia', 'Najprv pripoj alebo vytvor rodinu.', 'Otvoriť rodinu', "openMorePage('family')")}
     `)}
     ${moreCard('Activity log', renderMoreActivityFeed())}
@@ -3968,7 +3968,7 @@ function renderMoreAppearancePage() {
     ${moreCard('Preview cards', (function() { const tp = getTodayRecipes(); return `<div class="more-preview"><div><strong>Dnešný plán</strong><small>${tp.length} / 5 jedál naplánovaných</small></div><button onclick="switchTab('planner')">Naplánovať deň</button></div>`; })())}
     ${moreCard('Text size', `<div class="more-option-grid">${['compact','normal','large'].map(v => morePill(v === 'compact' ? 'Compact' : v === 'normal' ? 'Normal' : 'Large', s.textSize === v, `setMoreTextSize('${v}')`)).join('')}</div>`)}
     ${moreCard('UI density', `<div class="more-option-grid">${['compact','normal'].map(v => morePill(v === 'compact' ? 'Compact' : 'Comfortable', (s.uiDensity === v || (v === 'normal' && s.uiDensity === 'large')), `setMoreDensity('${v}')`)).join('')}</div>`)}
-    ${moreCard('Live preview', `<div class="more-live-preview"><span>🍳</span><div><strong>Raňajky</strong><small>+ Pridať jedlo</small></div><button onclick="switchTab('planner')">+</button></div>`)}
+
   `;
   return renderMoreShell('Vzhľad', 'Téma, farby a čitateľnosť', body);
 }
