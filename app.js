@@ -3752,6 +3752,8 @@ function switchTab(tab) {
     try { renderTasks(); } catch(e) {}
   } else if (tab === 'board' && boardContainer) {
     boardContainer.style.display = 'block'; applyPageTransition(boardContainer, 350);
+    const boardView = document.getElementById('board-container-view');
+    if (boardView) boardView.innerHTML = '';
     try { renderMoreScreen(); } catch(e) {}
   }
 }
@@ -4215,11 +4217,10 @@ function renderMoreAiWeekPage() {
     : moreEmptyState('📅', 'Zatiaľ žiadny uložený plán', 'Keď naplánuješ týždeň, zobrazí sa tu reálny stav.');
   const body = `
     ${moreCard('Generate week plan', `<div class="more-ai-panel"><span>🚀</span><strong>AI pripraví týždeň podľa aktuálnych dát</strong><small>Recepty: ${recipes.length} · naplánované jedlá: ${plannedMeals}</small><button class="more-primary" onclick="aiGenerateFullWeek()">Generovať plán</button></div>`)}
-    ${moreCard('Family preferences', `<div class="more-chip-row"><span>${familyCode ? 'Rodina pripojená' : 'Lokálny režim'}</span>${childAge ? `<span>Dieťa ${esc(childAge)} rokov</span>` : '<span>Vek dieťaťa nenastavený</span>'}</div>`)}
-    ${moreCard('Diet preferences', (appSettings.dietPrefs && appSettings.dietPrefs.length) ? `<div class="more-chip-row">${appSettings.dietPrefs.map(d => `<span>${d}</span>`).join('')}</div>` : moreEmptyState('🥗', 'Diétne preferencie zatiaľ nie sú nastavené', 'Po pridaní preferencií sa použijú pre AI plán.'))}
-    ${moreCard('Regenerate', `<button class="more-secondary" onclick="aiGenerateFullWeek()">${lang==='en' ? 'Regenerate' : 'Znova vygenerovať'}</button>`)}
-    ${moreCard('Previous plans', previousPlans)}
-    ${moreCard('AI suggestions', recipes.length ? `<div class="more-feed">${recipes.slice(0, 3).map(r => `<div><span>🍽️</span><strong>${esc(r.name)}</strong><small>${r.time || 20} min</small></div>`).join('')}</div>` : moreEmptyState('🤖', 'AI nemá z čoho odporúčať', 'Pridaj recepty alebo importuj recept z URL.'))}
+    ${moreCard('Rodina a dieťa', `<div class="more-chip-row"><span>${familyCode ? '👨👩👧👦 Rodina pripojená' : '👤 Lokálny režim'}</span>${childAge ? `<span>👶 Dieťa ${esc(childAge)} rokov</span>` : '<span>👶 Vek dieťaťa nenastavený</span>'}<button class="more-pill" onclick="openMorePage('home-settings')" style="border-color:var(--primary);color:var(--primary)">✏️ Upraviť</button></div>\`)}
+    ${moreCard('Diet preferences', (appSettings.dietPrefs && appSettings.dietPrefs.length) ? `<div class="more-chip-row">${appSettings.dietPrefs.map(d => `<span>${d}</span>`).join('')}</div>` : moreEmptyState('🥗', 'Diétne preferencie nie sú nastavené', 'Nastav ich v Nastavenia → Jedálniček pre lepšie AI návrhy.', 'Nastaviť', "openMorePage('meal-settings')")))}
+    ${moreCard('Aktuálny plán', previousPlans + `<button class="more-secondary" onclick="switchTab('planner')" style="margin-top:.5rem">📅 ${lang==='en' ? 'Open planner' : 'Otvoriť plánovač'}</button>`)}
+    ${moreCard('AI suggestions', recipes.length ? `<div class="more-feed">${recipes.slice(0, 5).map(r => `<div onclick="viewRecipe(${r.id})" style="cursor:pointer"><span>🍽️</span><strong>${esc(r.name)}</strong><small>${r.time || 20} min</small></div>`).join('')}</div><small class="more-muted" style="display:block;margin-top:.3rem;color:var(--text3);font-size:.7rem">${lang==='en' ? 'Click a recipe to view details' : 'Klikni na recept pre zobrazenie detailu'}</small>` : moreEmptyState('🤖', 'AI nemá z čoho odporúčať', 'Pridaj recepty alebo importuj recept z URL.'))}
   `;
   return renderMoreShell('AI Týždeň', 'Plánovanie s preferenciami', body);
 }
