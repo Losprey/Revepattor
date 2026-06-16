@@ -87,9 +87,9 @@
 <header id="app-header">
   <h1 id="main-title">🍽️ <span data-lang="appTitle">Mealnest</span> <span id="recipe-count" style="font-size:.75rem;opacity:.7;font-weight:400;"></span></h1>
   <div class="header-actions">
-    <button class="topbar-btn" onclick="openSettings()" title="Nastavenia">⚙️</button>
+    <button class="topbar-btn" onclick="openSettings()" title="Nastavenia" aria-label="Nastavenia">⚙️</button>
     <button class="topbar-btn" onclick="openMorePageFromAnywhere('language')" id="lang-toggle">🇬🇧 EN</button>
-    <button class="topbar-btn" id="sync-indicator" onclick="openMorePageFromAnywhere('family')" title="Nie si pripojený k rodine">⚪</button>
+    <button class="topbar-btn" id="sync-indicator" onclick="openMorePageFromAnywhere('family')" title="Nie si pripojený k rodine" aria-label="Stav pripojenia k rodine">⚪</button>
     <span id="header-auth-area"></span>
   </div>
 </header>
@@ -119,7 +119,7 @@
   <div class="hero-card" id="hero-card" onclick="viewRecipe(parseInt(this.dataset.id))">
     <div class="hero-bg" id="hero-bg"></div>
     <div class="hero-overlay"></div>
-    <button class="hero-dismiss" onclick="event.stopPropagation();dismissTip()">✕</button>
+    <button class="hero-dismiss" onclick="event.stopPropagation();dismissTip()" aria-label="Zavrieť tip dňa">✕</button>
     <div class="hero-content">
       <div class="hero-badge">💡 <span data-lang="tipOfDay">Tip dňa</span></div>
       <div class="hero-title" id="hero-title"></div>
@@ -127,33 +127,33 @@
         <span>⏱ <span id="hero-time"></span></span>
         <span>🔥 <span id="hero-kcal"></span></span>
       </div>
-      <button class="hero-btn"><span data-lang="heroCta">Zobraziť recept</span></button>
+      <button class="hero-btn" aria-label="Zobraziť recept"><span data-lang="heroCta">Zobraziť recept</span></button>
     </div>
   </div>
   <div class="controls-bar" id="controls-bar">
     <div class="controls">
       <div class="search-wrap">
-        <input type="text" id="search" data-lang="searchPlaceholder" placeholder="">
-        <button class="search-clear" id="search-clear" onclick="clearSearch()">✕</button>
+        <input type="text" id="search" data-lang="searchPlaceholder" placeholder="" aria-label="Hľadať recepty">
+        <button class="search-clear" id="search-clear" onclick="clearSearch()" aria-label="Vymazať vyhľadávanie">✕</button>
         <button class="btn btn-secondary voice-btn" id="voice-search-btn" onclick="toggleVoiceSearch()" title="Hlasové vyhľadávanie">🎤</button>
       </div>
-      <select id="filter-category">
+      <select id="filter-category" aria-label="Filtrovať podľa kategórie">
         <option value="" data-lang="allCategories">Všetky</option>
         <option>Hlavné jedlá</option><option>Polievky</option><option>Šaláty</option><option>Dezerty</option><option>Pečivo</option><option>Nápoje</option><option>Predjedlá</option><option>Raňajky</option><option>Prílohy</option><option>Detské</option>
       </select>
-      <button class="btn btn-primary" onclick="openFormModal()" data-lang="btnAdd">➕</button>
-      <button class="btn btn-secondary recipe-tools-toggle" onclick="toggleRecipeToolsPanel()">☰ <span id="recipe-tools-label">Viac</span></button>
+      <button class="btn btn-primary" onclick="openFormModal()" data-lang="btnAdd" aria-label="Pridať nový recept" title="Pridať nový">➕</button>
+      <button class="btn btn-secondary recipe-tools-toggle" onclick="toggleRecipeToolsPanel()" aria-label="Ďalšie možnosti">☰ <span id="recipe-tools-label">Viac</span></button>
     </div>
     <div class="recipe-tools-panel" id="recipe-tools-panel">
-      <button class="btn" onclick="aiIngredientSuggest()" id="recipe-ai-btn">🤖 Čo uvariť?</button>
+      <button class="btn" onclick="aiIngredientSuggest()" id="recipe-ai-btn" aria-label="AI návrh čo uvariť">🤖 Čo uvariť?</button>
       <button class="btn btn-primary" onclick="showImportUrlModal()" title="Import receptu z URL">🌐 Import</button>
-      <select id="sort-by" onchange="render()" style="padding:.3rem .5rem;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.72rem;background:var(--input-bg);color:var(--text);">
+      <select id="sort-by" aria-label="Zoradiť podľa" onchange="render()" style="padding:.3rem .5rem;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.72rem;background:var(--input-bg);color:var(--text);">
         <option value="name">📋 <span data-lang="sortName">Názov</span></option>
         <option value="time">⏱ <span data-lang="sortTime">Čas</span></option>
         <option value="rating">⭐ <span data-lang="sortRating">Hodnotenie</span></option>
       </select>
       <label class="fav-filter-label"><input type="checkbox" id="filter-fav" onchange="render()"> ❤️</label>
-      <button class="btn btn-secondary" onclick="randomRecipe()" style="font-size:.68rem;padding:.22rem .45rem;">🎲</button>
+      <button class="btn btn-secondary" onclick="randomRecipe()" style="font-size:.68rem;padding:.22rem .45rem;" aria-label="Náhodný recept" title="Náhodný recept">🎲</button>
       <div class="age-filter" id="age-filter">
         <button class="age-btn active" data-age="" onclick="setAgeFilter('')"><span data-lang="allAges">Všetky veky</span></button>
         <button class="age-btn" data-age="baby-6m" onclick="setAgeFilter('baby-6m')">👶 <span data-lang="age6m">6m+</span></button>
@@ -210,7 +210,7 @@
 
   <!-- ACTIONS -->
   <div class="planner-actions">
-    <button class="pa-btn" onclick="clearPlan()">🗑 <span id="pa-clear-label">Vymazať týždeň</span></button>
+    <button class="pa-btn" onclick="clearPlan()" aria-label="Vymazať týždeň">🗑 <span id="pa-clear-label">Vymazať týždeň</span></button>
     <button class="pa-btn" onclick="aiGenerateShoppingList()" style="background:linear-gradient(135deg,#059669,#047857);color:#fff;border:none;" id="pa-ai-label">📝 AI nákup</button>
   </div>
 </div>
@@ -226,13 +226,13 @@
     <div class="sheet-handle"></div>
     <div class="sheet-header">
       <h2 id="shop-sheet-title">✏️ Pridať potravinu</h2>
-      <button class="sheet-close" onclick="closeShopSheet()">✕</button>
+      <button class="sheet-close" onclick="closeShopSheet()" aria-label="Zavrieť">✕</button>
     </div>
     <div class="sheet-body">
-      <div class="form-group"><input id="shop-item-name" placeholder="Názov potraviny" style="font-size:.9rem;font-weight:600;" oninput="guessShopCategory()"></div>
+      <div class="form-group"><input id="shop-item-name" placeholder="Názov potraviny" aria-label="Názov potraviny" style="font-size:.9rem;font-weight:600;" oninput="guessShopCategory()"></div>
       <div class="form-row" style="gap:.35rem;">
-        <div class="form-group" style="flex:1;"><input id="shop-item-amount" type="number" step="0.1" min="0" placeholder="Množstvo"></div>
-        <div class="form-group" style="flex:1;"><input id="shop-item-unit" placeholder="Jednotka (g, ks, ml...)"></div>
+        <div class="form-group" style="flex:1;"><input id="shop-item-amount" type="number" step="0.1" min="0" placeholder="Množstvo" aria-label="Množstvo"></div>
+        <div class="form-group" style="flex:1;"><input id="shop-item-unit" placeholder="Jednotka (g, ks, ml...)" aria-label="Jednotka"></div>
       </div>
       <div class="form-group">
         <label class="shop-sheet-label">Kategória</label>
@@ -259,10 +259,10 @@
     <div class="sheet-handle"></div>
     <div class="sheet-header">
       <h2 id="task-sheet-title">✅ Pridať úlohu</h2>
-      <button class="sheet-close" onclick="closeTaskSheet()">✕</button>
+      <button class="sheet-close" onclick="closeTaskSheet()" aria-label="Zavrieť">✕</button>
     </div>
     <div class="sheet-body">
-      <div class="form-group"><input id="task-title" placeholder="Názov úlohy" style="font-size:.9rem;font-weight:600;"></div>
+      <div class="form-group"><input id="task-title" placeholder="Názov úlohy" aria-label="Názov úlohy" style="font-size:.9rem;font-weight:600;"></div>
       <div class="form-group">
         <label class="shop-sheet-label" data-lang="tasksCategory" id="tl-cat">Kategória</label>
         <div class="shop-cat-chips" id="task-cat-chips"></div>
@@ -275,7 +275,7 @@
         <div class="form-row" style="gap:.35rem;">
           <div class="form-group" style="flex:1;">
             <label class="shop-sheet-label" data-lang="tasksPriority" id="tl-priority">Priorita</label>
-            <select id="task-priority" style="width:100%;padding:.45rem .5rem;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.8rem;background:var(--input-bg);color:var(--text);">
+            <select id="task-priority" aria-label="Priorita úlohy" style="width:100%;padding:.45rem .5rem;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.8rem;background:var(--input-bg);color:var(--text);">
               <option value="low">🟢 Nízka</option>
               <option value="medium" selected>🟡 Stredná</option>
               <option value="high">🔴 Vysoká</option>
@@ -283,7 +283,7 @@
           </div>
           <div class="form-group" style="flex:1;">
             <label class="shop-sheet-label" data-lang="tasksRepeat" id="tl-repeat">Opakovanie</label>
-            <select id="task-repeat" style="width:100%;padding:.45rem .5rem;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.8rem;background:var(--input-bg);color:var(--text);">
+            <select id="task-repeat" aria-label="Opakovanie úlohy" style="width:100%;padding:.45rem .5rem;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.8rem;background:var(--input-bg);color:var(--text);">
               <option value="none">❌ Žiadne</option>
               <option value="daily">🔄 Denne</option>
               <option value="weekly">📅 Týždenne</option>
@@ -310,13 +310,13 @@
       <div class="form-group" id="name-en-group" style="display:none;"><input id="r-nameEn" placeholder="Recipe name (English)"></div>
       <div class="form-row">
         <div class="form-group">
-          <select id="r-category">
+          <select id="r-category" aria-label="Kategória receptu">
             <option>Hlavné jedlá</option><option>Polievky</option><option>Šaláty</option><option>Dezerty</option><option>Pečivo</option><option>Nápoje</option><option>Predjedlá</option><option>Raňajky</option><option>Prílohy</option><option>Detské</option>
           </select>
         </div>
         <div class="form-group"><input id="r-time" type="number" placeholder="⏱ min" min="1"></div>
         <div class="form-group">
-          <select id="r-difficulty">
+          <select id="r-difficulty" aria-label="Náročnosť receptu">
             <option value="1"><span data-lang="diffEasy">Ľahké</span></option>
             <option value="2" selected><span data-lang="diffMedium">Stredné</span></option>
             <option value="3"><span data-lang="diffHard">Ťažké</span></option>
@@ -353,11 +353,11 @@
     </div>
     <div class="form-section">
       <div class="form-section-title" data-lang="formIngredients">Suroviny</div>
-      <textarea id="r-ingredients" data-lang="formIngrPlace" placeholder="200g múky" rows="3" oninput="previewSeasonTags()"></textarea>
+      <textarea id="r-ingredients" data-lang="formIngrPlace" placeholder="200g múky" aria-label="Suroviny" rows="3" oninput="previewSeasonTags()"></textarea>
     </div>
     <div class="form-section">
       <div class="form-section-title" data-lang="formSteps">Postup</div>
-      <textarea id="r-steps" data-lang="formStepsPlace" placeholder="1. Zmiešajte..." rows="4"></textarea>
+      <textarea id="r-steps" data-lang="formStepsPlace" placeholder="1. Zmiešajte..." aria-label="Postup" rows="4"></textarea>
     </div>
     <div class="form-section">
       <div class="form-section-title" data-lang="formTags">Štítky</div>
@@ -374,21 +374,21 @@
 <!-- DETAIL -->
 <div class="modal-overlay" id="detail-modal">
   <div class="modal">
-    <button class="modal-close" onclick="closeModal('detail-modal')">✕</button>
+    <button class="modal-close" onclick="closeModal('detail-modal')" aria-label="Zavrieť">✕</button>
     <div id="recipe-detail"></div>
     <div class="modal-footer recipe-detail-footer">
       <div class="recipe-footer-main">
         <button class="btn btn-primary" onclick="openCookingMode()">👨‍🍳 <span data-lang="btnCook">Variť</span></button>
         <button class="btn btn-secondary" onclick="editCurrent()">✏️ <span data-lang="btnEdit">Upraviť</span></button>
-        <button class="btn btn-secondary recipe-more-toggle" onclick="toggleRecipeMoreTools()">☰ <span>Viac</span></button>
+        <button class="btn btn-secondary recipe-more-toggle" onclick="toggleRecipeMoreTools()" aria-label="Viac možností receptu">☰ <span>Viac</span></button>
         <button class="btn btn-secondary" onclick="closeModal('detail-modal')" data-lang="close">Zavrieť</button>
       </div>
       <div class="recipe-more-tools" id="recipe-more-tools">
         <button class="btn btn-secondary" onclick="printRecipe()">🖨️ <span data-lang="btnPrint">Tlačiť</span></button>
         <button class="btn btn-secondary" onclick="shareRecipe()">📤 <span data-lang="btnShare">Zdieľať</span></button>
-        <button class="btn btn-secondary" onclick="copyRecipe(event)" data-lang="btnCopy">📋</button>
+        <button class="btn btn-secondary" onclick="copyRecipe(event)" data-lang="btnCopy" aria-label="Kopírovať recept" title="Kopírovať">📋</button>
         <button class="btn btn-secondary recipe-ai-toggle" onclick="toggleRecipeAiTools()">🤖 AI</button>
-        <button class="btn btn-danger" onclick="deleteCurrent()">🗑</button>
+        <button class="btn btn-danger" onclick="deleteCurrent()" aria-label="Vymazať recept" title="Vymazať">🗑</button>
       </div>
       <div class="recipe-ai-tools" id="recipe-ai-tools">
         <button class="btn btn-secondary" onclick="aiAdjustPortions(viewingId)" title="Upraviť počet porcií">🍽️ Porcie</button>
@@ -404,9 +404,9 @@
 <div class="cooking-overlay" id="cooking-mode">
   <div class="cooking-header">
     <div class="cooking-top-actions">
-      <button class="btn btn-secondary" onclick="closeCookingMode()" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.06);color:#fff;padding:.28rem .55rem;font-size:.72rem;">✕ <span data-lang="cookingClose">Zavrieť</span></button>
-      <button class="btn btn-secondary" id="voice-btn" onclick="toggleVoice()" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.06);color:#fff;padding:.28rem .55rem;font-size:.72rem;">🎤</button>
-      <button class="btn btn-secondary" id="cooking-timer-btn" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.06);color:#fff;padding:.28rem .55rem;font-size:.72rem;display:none;">⏱</button>
+      <button class="btn btn-secondary" onclick="closeCookingMode()" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.06);color:#fff;padding:.28rem .55rem;font-size:.72rem;" aria-label="Zavrieť režim varenia">✕ <span data-lang="cookingClose">Zavrieť</span></button>
+      <button class="btn btn-secondary" id="voice-btn" onclick="toggleVoice()" aria-label="Hlasové ovládanie" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.06);color:#fff;padding:.28rem .55rem;font-size:.72rem;" title="Hlasové ovládanie">🎤</button>
+      <button class="btn btn-secondary" id="cooking-timer-btn" aria-label="Časovač" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.06);color:#fff;padding:.28rem .55rem;font-size:.72rem;display:none;" title="Časovač">⏱</button>
     </div>
     <h2 id="cooking-title"></h2>
     <div class="cooking-timer" id="cooking-timer" onclick="toggleTimer()">⏱️ 00:00</div>
@@ -416,20 +416,20 @@
   <div class="cooking-step-text" id="cooking-step-text" onclick="cookingNext()"></div>
   <div class="cooking-progress"><div class="cooking-progress-bar" id="cooking-progress-bar"></div></div>
   <div class="cooking-nav">
-    <button id="cooking-prev" onclick="cookingPrev()">← <span data-lang="cookingPrev">Predošlý</span></button>
+    <button id="cooking-prev" onclick="cookingPrev()" aria-label="Predošlý krok">← <span data-lang="cookingPrev">Predošlý</span></button>
     <span id="cooking-step-count"></span>
-    <button id="cooking-next" onclick="cookingNext()"><span data-lang="cookingNext">Ďalší</span> →</button>
+    <button id="cooking-next" onclick="cookingNext()" aria-label="Ďalší krok"><span data-lang="cookingNext">Ďalší</span> →</button>
   </div>
 </div>
 
 <!-- INGREDIENT SEARCH -->
 <div class="modal-overlay" id="ingredient-modal">
   <div class="modal">
-    <button class="modal-close" onclick="closeModal('ingredient-modal')">✕</button>
+    <button class="modal-close" onclick="closeModal('ingredient-modal')" aria-label="Zavrieť">✕</button>
     <h2 data-lang="ingrTitle">🔍 Čo máš doma?</h2>
     <p style="color:var(--text2);margin-bottom:.5rem;" data-lang="ingrHint">Označ suroviny, ktoré máš – zobrazia sa recepty, čo z nich uvaríš.</p>
-    <input type="text" id="ingr-search" data-lang="ingrFilter" placeholder="Filtrovať suroviny..." oninput="renderIngredientSearch()" style="width:100%;padding:.55rem 1rem;border:1px solid var(--border);border-radius:var(--radius-lg);font-size:.85rem;margin-bottom:.5rem;background:var(--input-bg);color:var(--text);box-shadow:var(--inner-shadow);">
-    <select id="ingr-category" style="width:100%;padding:.5rem .8rem;border:1px solid var(--border);border-radius:var(--radius-lg);font-size:.85rem;margin-bottom:.4rem;background:var(--input-bg);color:var(--text);box-shadow:var(--inner-shadow);appearance:none;background-image:url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2710%27 height=%276%27%3E%3Cpath d=%27M0 0l5 6 5-6z%27 fill=%27%2378716c%27/%3E%3C/svg%3E');background-repeat:no-repeat;background-position:right .55rem center;padding-right:1.5rem;" onchange="renderIngredientSearch()">
+    <input type="text" id="ingr-search" data-lang="ingrFilter" placeholder="Filtrovať suroviny..." aria-label="Filtrovať suroviny" oninput="renderIngredientSearch()" style="width:100%;padding:.55rem 1rem;border:1px solid var(--border);border-radius:var(--radius-lg);font-size:.85rem;margin-bottom:.5rem;background:var(--input-bg);color:var(--text);box-shadow:var(--inner-shadow);">
+    <select id="ingr-category" aria-label="Kategória surovín" style="width:100%;padding:.5rem .8rem;border:1px solid var(--border);border-radius:var(--radius-lg);font-size:.85rem;margin-bottom:.4rem;background:var(--input-bg);color:var(--text);box-shadow:var(--inner-shadow);appearance:none;background-image:url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2710%27 height=%276%27%3E%3Cpath d=%27M0 0l5 6 5-6z%27 fill=%27%2378716c%27/%3E%3C/svg%3E');background-repeat:no-repeat;background-position:right .55rem center;padding-right:1.5rem;" onchange="renderIngredientSearch()">
       <option value="" data-lang="allCategories">Všetky kategórie</option>
       <option>Hlavné jedlá</option><option>Polievky</option><option>Šaláty</option><option>Dezerty</option><option>Pečivo</option><option>Nápoje</option><option>Predjedlá</option><option>Raňajky</option><option>Prílohy</option><option>Detské</option>
     </select>
@@ -444,7 +444,7 @@
 
 <div class="modal-overlay" id="history-modal">
   <div class="modal" style="max-width:480px;">
-    <button class="modal-close" onclick="closeModal('history-modal')">✕</button>
+    <button class="modal-close" onclick="closeModal('history-modal')" aria-label="Zavrieť">✕</button>
     <h2 data-lang="cookingHistory">📜 História varenia</h2>
     <div id="history-list"></div>
     <div class="modal-footer">
@@ -456,10 +456,10 @@
 
 <div class="modal-overlay" id="import-url-modal">
   <div class="modal" style="max-width:480px;">
-    <button class="modal-close" onclick="closeModal('import-url-modal')">✕</button>
+    <button class="modal-close" onclick="closeModal('import-url-modal')" aria-label="Zavrieť">✕</button>
     <h2 data-lang="importUrlTitle">🌐 Importovať recept z URL</h2>
     <p style="color:var(--text2);margin-bottom:.5rem;font-size:.85rem;" data-lang="importUrlHint">Vlož odkaz na recept (varecha.pravda.sk) – aplikácia ho stiahne a predvyplní formulár.</p>
-    <input type="url" id="import-url-input" placeholder="https://varecha.pravda.sk/recept/..." style="width:100%;padding:.55rem 1rem;border:1px solid var(--border);border-radius:var(--radius-lg);font-size:.85rem;background:var(--input-bg);color:var(--text);box-shadow:var(--inner-shadow);">
+    <input type="url" id="import-url-input" placeholder="https://varecha.pravda.sk/recept/..." aria-label="URL adresa receptu" style="width:100%;padding:.55rem 1rem;border:1px solid var(--border);border-radius:var(--radius-lg);font-size:.85rem;background:var(--input-bg);color:var(--text);box-shadow:var(--inner-shadow);">
     <div id="import-url-status" style="margin-top:.5rem;font-size:.85rem;color:var(--text2);"></div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('import-url-modal')" data-lang="cancel">Zrušiť</button>
@@ -516,7 +516,7 @@
 <!-- CONFIRM MODAL -->
 <div class="modal-overlay" id="confirm-modal" style="display:none;z-index:10000;">
   <div class="modal" style="max-width:380px;text-align:center;">
-    <button class="modal-close" onclick="closeConfirmModal()">✕</button>
+    <button class="modal-close" onclick="closeConfirmModal()" aria-label="Zavrieť">✕</button>
     <div style="font-size:2.2rem;margin-bottom:.5rem;" id="confirm-icon">⚠️</div>
     <div style="font-size:.9rem;font-weight:600;margin-bottom:.6rem;line-height:1.3;" id="confirm-text">Naozaj chcete pokračovať?</div>
     <div class="form-row" style="gap:.4rem;">
