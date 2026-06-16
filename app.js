@@ -4299,9 +4299,9 @@ function renderMoreBackupSyncPage() {
   try { backupHistory = JSON.parse(localStorage.getItem('_backupHistoryLocal') || '[]'); } catch(e) { backupHistory = []; }
   const body = `
     ${moreCard('Last sync', `<div class="more-board-row"><span>☁️</span><strong>${syncText}</strong><small>${familyCode ? 'Aktívne' : 'Bez rodiny'}</small></div>`)}
-    ${moreCard('Backup now', `<button class="more-primary" onclick="createBackup()">Backup now</button>`)}
-    ${moreCard('Last backup', `<div class="more-board-row"><span>📦</span><strong>${esc(lastBackupText)}</strong><small>Lokálne zariadenie</small></div>`)}
-    ${moreCard('Restore backup', `<button class="more-secondary" onclick="showToast('Vyber JSON zálohu cez import dát', 'info')">Restore backup</button>`)}
+    ${moreCard('Backup now', `<button class="more-primary" onclick="createBackup()">${lang==='en' ? 'Backup now' : 'Zálohovať teraz'}</button>`)}
+    ${moreCard('Last backup', `<div class="more-board-row"><span>📦</span><strong>${esc(lastBackupText)}</strong><small>${lang==='en' ? 'This device' : 'Lokálne zariadenie'}</small></div>`)}
+    ${moreCard('Restore backup', `<button class="more-secondary" onclick="showToast('Vyber JSON zálohu cez import dát', 'info')">${lang==='en' ? 'Restore backup' : 'Obnoviť zálohu'}</button>`)}
     ${moreCard('Family sync status', `${moreActionRow('👨‍👩‍👧‍👦','Family sync status', syncText, "openMorePage('family')")}`)}
     ${moreCard('History', backupHistory.length ? `<div class="more-feed">${backupHistory.slice(-3).reverse().map(item => `<div><span>📦</span><strong>Backup</strong><small>${esc(item)}</small></div>`).join('')}</div>` : moreEmptyState('📦', 'Zatiaľ žiadna história záloh', 'Keď vytvoríš backup, zobrazí sa tu reálny čas.'))}
   `;
@@ -4311,7 +4311,7 @@ function renderMoreBackupSyncPage() {
 function renderMorePrivacySecurityPage() {
   const body = `
     ${moreCard('Password', `${moreActionRow('🔑','Password','Správa hesla účtu',"openMorePage('account')")}`)}
-    ${moreCard('Biometrics', `${moreActionRow('🟢','Biometrics','Face/fingerprint pripravené pre wrapper',"showToast('Biometrics nie sú v tejto verzii dostupné', 'info')",'Voliteľné')}`)}
+    ${moreCard('Biometrics', `${moreActionRow('🟢','Biometrics','Face/fingerprint pripravené pre wrapper',"showToast('Biometrics nie sú v tejto verzii dostupné', 'info')",`${lang==='en' ? 'Optional' : 'Voliteľné'}`)}`)}
     ${moreCard('Privacy controls', `${moreActionRow('🛡️','Privacy controls','Rodinné zdieľanie a viditeľnosť',"openMorePage('family')")}`)}
     ${moreCard('Permissions', `${moreActionRow('🔔','Permissions','Notifikácie a lokálne úložisko',"openMorePage('notifications')")}`)}
     ${moreCard('Export data', `<button class="more-secondary" onclick="createBackup()">Export data</button>`)}
@@ -4322,8 +4322,8 @@ function renderMorePrivacySecurityPage() {
 
 function renderMoreAboutPage() {
   const body = `
-    ${moreCard('Version', `<div class="more-board-row"><span>🍽️</span><strong>Mealnest</strong><small>v1.7 · GitHub build</small></div>`)}
-    ${moreCard('Changelog', `<div class="more-feed"><div><span>✨</span><strong>Nový Dashboard a Viac</strong><small>Prémiový mobilný dizajn</small></div><div><span>🛒</span><strong>Nákup a úlohy</strong><small>Rýchle prehľady</small></div></div>`)}
+    ${moreCard('Version', `<div class="more-board-row"><span>🍽️</span><strong>Mealnest</strong><small>v${APP_VERSION} · ${lang==='en' ? 'GitHub build' : 'GitHub build'}</small></div>`)}
+    ${moreCard('Changelog', `<div class="more-feed"><div><span>✨</span><strong>${lang==='en' ? 'Dashboard & More section' : 'Nový Dashboard a Viac'}</strong><small>${lang==='en' ? 'Premium mobile design' : 'Prémiový mobilný dizajn'}</small></div><div><span>🛒</span><strong>${lang==='en' ? 'Shopping & Tasks' : 'Nákup a úlohy'}</strong><small>${lang==='en' ? 'Quick overviews' : 'Rýchle prehľady'}</small></div></div>`)}
     ${moreCard('Licenses', `${moreActionRow('📄','Licenses','Open-source knižnice a assety',"showToast('Licencie: MIT + CC BY 4.0', 'info')")}`)}
     ${moreCard('Contact', `${moreActionRow('✉️','Contact','Podpora aplikácie',"showToast('Kontakt: mealnest@app.com', 'info')")}`)}
     ${moreCard('Terms', `${moreActionRow('📜','Terms','Podmienky používania',"showToast('Pozri privacy policy pre viac informácií', 'info')")}`)}
