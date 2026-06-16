@@ -8492,6 +8492,15 @@ body .bottom-nav .nav-item.active .nav-icon {
   line-height: 1.16;
 }
 
+.more-list small {
+  display: block;
+  margin-top: .12rem;
+  color: #A1A1AA;
+  font-size: .72rem;
+  font-weight: 650;
+  line-height: 1.25;
+}
+
 .more-tile small {
   overflow: hidden;
   max-width: 100%;
