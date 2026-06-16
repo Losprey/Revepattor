@@ -8796,6 +8796,73 @@ body .bottom-nav .nav-item.active .nav-icon {
   font-weight: 760;
 }
 
+.more-setting-row {
+  min-height: 3.75rem;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: .75rem;
+  width: 100%;
+  padding: .72rem;
+  border: 1px solid #272D36;
+  border-radius: 18px;
+  background: #11161D;
+  color: #FFFFFF;
+  text-align: left;
+}
+
+.more-setting-row + .more-setting-row,
+.more-setting-row + .more-primary,
+.more-action-row + .more-setting-row {
+  margin-top: .55rem;
+}
+
+.more-setting-row > span {
+  width: 2.35rem;
+  height: 2.35rem;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: #181C23;
+  font-size: 1.05rem;
+}
+
+.more-setting-row strong {
+  display: block;
+  color: #FFFFFF;
+  font-size: .86rem;
+  font-weight: 850;
+  line-height: 1.2;
+}
+
+.more-setting-row small {
+  display: block;
+  margin-top: .14rem;
+  color: #A1A1AA;
+  font-size: .72rem;
+  font-weight: 650;
+  line-height: 1.28;
+}
+
+.more-input,
+.more-time-input {
+  min-height: 2.35rem;
+  max-width: 7.8rem;
+  padding: 0 .7rem;
+  border: 1px solid #272D36;
+  border-radius: 14px;
+  background: #181C23;
+  color: #FFFFFF;
+  font: inherit;
+  font-size: .78rem;
+  font-weight: 750;
+  outline: none;
+}
+
+.more-time-input {
+  max-width: 6rem;
+}
+
 .more-option-grid,
 .more-chip-row {
   display: flex;

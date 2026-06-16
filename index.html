@@ -15,7 +15,7 @@
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <title data-lang="appTitle">Mealnest</title>
-  <link rel="stylesheet" href="styles.css?v=48">
+  <link rel="stylesheet" href="styles.css?v=49">
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -88,8 +88,8 @@
   <h1 id="main-title">🍽️ <span data-lang="appTitle">Mealnest</span> <span id="recipe-count" style="font-size:.75rem;opacity:.7;font-weight:400;"></span></h1>
   <div class="header-actions">
     <button class="topbar-btn" onclick="openSettings()" title="Nastavenia">⚙️</button>
-    <button class="topbar-btn" onclick="switchLang()" id="lang-toggle">🇬🇧 EN</button>
-    <button class="topbar-btn" id="sync-indicator" onclick="openSettings()" title="Nie si pripojený k rodine">⚪</button>
+    <button class="topbar-btn" onclick="openMorePageFromAnywhere('language')" id="lang-toggle">🇬🇧 EN</button>
+    <button class="topbar-btn" id="sync-indicator" onclick="openMorePageFromAnywhere('family')" title="Nie si pripojený k rodine">⚪</button>
     <span id="header-auth-area"></span>
   </div>
 </header>
@@ -474,18 +474,6 @@
   <div class="board-scroll" id="board-container-view"></div>
 </div>
 
-<!-- SETTINGS -->
-<div class="sheet-overlay" id="settings-sheet" onclick="if(event.target===this)closeSettings()">
-  <div class="sheet" style="max-height:88vh;">
-    <div class="sheet-handle"></div>
-    <div class="sheet-header">
-      <h2>⚙️ <span data-lang="settingsTitle">Nastavenia</span></h2>
-      <button class="sheet-close" onclick="closeSettings()">✕</button>
-    </div>
-    <div class="sheet-body" id="settings-body"></div>
-  </div>
-</div>
-
 <!-- BOTTOM NAV -->
 <nav class="bottom-nav">
   <button class="nav-item active" data-tab="dashboard" onclick="switchTab('dashboard')">
@@ -511,8 +499,8 @@
 </nav>
 
 
-<script src="app.js?v=48"></script>
-<script src="board.js?v=48"></script>
+<script src="app.js?v=49"></script>
+<script src="board.js?v=49"></script>
 
 <!-- Quick add FAB -->
 <div id="fab-quick-add" style="display:none">

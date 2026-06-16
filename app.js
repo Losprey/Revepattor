@@ -316,38 +316,14 @@ function updateAuthUI() {
   const el = document.getElementById('header-auth-area');
   if (!el) return;
   if (authUser && authUser.photoURL) {
-    el.innerHTML = `<img class="user-avatar" src="${authUser.photoURL}" alt="${authUser.displayName||''}" title="${authUser.displayName||''} — nastavenia" onclick="openSettings()">`;
+    el.innerHTML = `<img class="user-avatar" src="${authUser.photoURL}" alt="${authUser.displayName||''}" title="${authUser.displayName||''} — účet" onclick="openMorePageFromAnywhere('account')">`;
   } else if (authUser) {
-    el.innerHTML = `<span class="topbar-btn" onclick="openSettings()" title="${lang==='en'?'Account':'Účet'}">👤</span>`;
+    el.innerHTML = `<span class="topbar-btn" onclick="openMorePageFromAnywhere('account')" title="${lang==='en'?'Account':'Účet'}">👤</span>`;
   } else if (authIsGuest) {
-    el.innerHTML = `<span class="guest-badge" onclick="openSettings()">${lang==='en'?'Guest':'Hosť'}</span>`;
+    el.innerHTML = `<span class="guest-badge" onclick="openMorePageFromAnywhere('account')">${lang==='en'?'Guest':'Hosť'}</span>`;
   } else {
     el.innerHTML = '';
   }
-}
-
-function getSettingsAuthHTML() {
-  if (authUser) {
-    return `<div class="settings-row">
-      <span class="sr-label"><span class="sr-icon">${authUser.photoURL ? `<img src="${authUser.photoURL}" style="width:20px;height:20px;border-radius:50%">` : '👤'}</span> ${authUser.displayName||authUser.email||''}</span>
-    </div>
-    <div class="settings-row">
-      <span class="sr-label"><span class="sr-icon">📧</span> ${authUser.email||''}</span>
-    </div>
-    <div class="settings-row" onclick="signOutUser()">
-      <span class="sr-label" style="color:var(--danger);"><span class="sr-icon">🚪</span> ${lang==='en'?'Sign out':'Odhlásiť sa'}</span>
-      <span class="sr-value"><span class="sr-arrow">›</span></span>
-    </div>`;
-  } else if (authIsGuest) {
-    return `<div class="settings-row">
-      <span class="sr-label"><span class="sr-icon">👤</span> ${lang==='en'?'Guest':'Hosť'} <span class="guest-badge">${lang==='en'?'Guest':'Hosť'}</span></span>
-    </div>
-    <div class="settings-row" onclick="signInWithGoogle()">
-      <span class="sr-label"><span class="sr-icon">🔐</span> ${lang==='en'?'Sign in with Google':'Prihlásiť sa cez Google'}</span>
-      <span class="sr-value"><span class="sr-arrow">›</span></span>
-    </div>`;
-  }
-  return '';
 }
 
 // Wait for Firebase SDK to load (max 5s), then init with small delay to let app.js finish parsing
@@ -555,7 +531,7 @@ function pickOnboardLang(l) {
 setTimeout(() => showOnboarding(), 300);
 
 // ======================== AI (DEEPSEEK PROXY) ========================
-const APP_VERSION = '1.0.39';
+const APP_VERSION = '1.0.40';
 const VAPID_PUBLIC_KEY = 'BI6Fga-GXSKggkNJ58R1VEYEfGE6KfWgnuDtI9sHqQLQJzGLshJuIuODmI13AVzX5D2Kd7SBxrr7Cvf-xRAowg0';
 const PUSH_PROXY_URL = 'https://receptar.waldis994.workers.dev';
 
@@ -991,7 +967,12 @@ async function aiEstimateNutrition(recipeId) {
 }
 
 async function aiBatchNutrition() {
-  if (!confirm(t('Aktualizovať nutričné hodnoty pre VŠETKY recepty cez AI? Môže to chvíľu trvať.','Update nutrition for ALL recipes via AI? This may take a while.'))) return;
+  showConfirmModal(t('Aktualizovať nutričné hodnoty pre VŠETKY recepty cez AI? Môže to chvíľu trvať.','Update nutrition for ALL recipes via AI? This may take a while.'), '🤖', 'Spustiť', function() {
+    aiBatchNutritionRun();
+  });
+}
+
+async function aiBatchNutritionRun() {
   const needUpdate = recipes.filter(r => !r.nutrition || !r.nutrition.kcal || r.nutrition.kcal < 10);
   if (!needUpdate.length) { showToast(t('Všetky recepty už majú nutričné hodnoty.','All recipes already have nutrition.'),'info'); return; }
   let count = 0; const total = needUpdate.length;
@@ -1179,7 +1160,7 @@ function createFamily() {
   });
   showToast(t('Rodinný kód: ','Family code: ') + code, 'success', 5000);
   setTimeout(function() { navigator.clipboard.writeText(code).catch(function(){}); }, 100);
-  openSettings();
+  openMorePageFromAnywhere('family');
   updateSyncIndicator();
 }
 
@@ -1199,16 +1180,14 @@ function joinFamily(code) {
       if (mp && mp !== '{}') hasRemote = true;
     } catch(e) {}
     if (hasRemote) {
-      if (confirm(t('Rodina má dáta. Použiť rodinné dáta?','Family has data. Use family data?'))) {
-        // Already loaded by listener, nothing to do
-      } else {
-        pushAllLocalData();
-      }
+      showConfirmModal(t('Rodina má dáta. Použiť rodinné dáta?','Family has data. Use family data?'), '👨‍👩‍👧‍👦', t('Použiť rodinné','Use family'), function() {
+        showToast(t('Rodinné dáta zostali aktívne','Family data kept active'), 'success');
+      });
     } else {
       pushAllLocalData();
     }
   }, 2000);
-  openSettings();
+  openMorePageFromAnywhere('family');
   updateSyncIndicator();
 }
 
@@ -1238,7 +1217,7 @@ function leaveFamily() {
   familyDbRef = null;
   localStorage.removeItem('familyCode');
   updateSyncIndicator();
-  openSettings();
+  openMorePageFromAnywhere('family');
   });
 }
 
@@ -2360,7 +2339,12 @@ function translateRecipeQuery(name) {
 
 // ======================== AI: CELÝ TÝŽDEŇ + NÁKUP ========================
 async function aiGenerateFullWeek() {
-  if (!confirm(lang==='en'?'Generate full week + shopping list? This will replace your current plan.':'Vygenerovať celý týždeň + nákupný zoznam? Prepíše sa aktuálny plán.')) return;
+  showConfirmModal(lang==='en'?'Generate full week + shopping list? This will replace your current plan.':'Vygenerovať celý týždeň + nákupný zoznam? Prepíše sa aktuálny plán.', '🚀', lang==='en'?'Generate':'Generovať', function() {
+    aiGenerateFullWeekRun();
+  });
+}
+
+async function aiGenerateFullWeekRun() {
   const menuText = await aiWeeklyPlan();
   if (!menuText) return;
   // Remove any existing AI plan modal
@@ -2662,290 +2646,7 @@ loadSettings();
 applySettings();
 
 function openSettings() {
-  loadSettings();
-  const body = document.getElementById('settings-body');
-  const totalRecipes = recipes.length;
-  const plannedCount = Object.keys(Object.assign({}, ...Object.values(mealPlan || {}), ...Object.values(mealPlanKids || {}))).length;
-  const tasksDone = tasks.filter(t => t.completed).length;
-  const streak = calcPlanningStreak();
-  const s = appSettings;
-  const w = s.homeWidgets, m = s.mealPlanner;
-  // Expose for onclick handlers in settings HTML
-  window.s = appSettings; window.w = w; window.m = m;
-  window.n = s.notifications; window.f = s.family;
-
-  let html = '';
-  html += `<div class="settings-quick-nav">
-    <a href="#settings-appearance">🎨 ${t('Vzhľad','Appearance')}</a>
-    <a href="#settings-home">🏠 ${t('Domov','Home')}</a>
-    <a href="#settings-meals">📅 ${t('Jedálniček','Meals')}</a>
-    <a href="#settings-shopping">🛒 ${t('Nákup','Shopping')}</a>
-    <a href="#settings-data">💾 ${t('Dáta','Data')}</a>
-  </div>`;
-
-  // Účet — always at top
-  const authHtml = getSettingsAuthHTML();
-  if (authHtml) {
-    html += `<div class="settings-group">
-      <div class="settings-group-title">👤 ${t('Účet','Account')}</div>
-      <div class="settings-card">${authHtml}</div>
-    </div>`;
-  }
-
-  // 1. Vzhľad
-  const accentColors = [
-    { val: '#e63946', label: 'Červená' },
-    { val: '#10b981', label: 'Zelená' },
-    { val: '#3b82f6', label: 'Modrá' },
-    { val: '#f59e0b', label: 'Oranžová' },
-    { val: '#8b5cf6', label: 'Fialová' },
-    { val: '#ec4899', label: 'Ružová' },
-    { val: '#06b6d4', label: 'Tyrkysová' },
-  ];
-  html += `<div class="settings-group" id="settings-appearance">
-    <div class="settings-group-title">🎨 ${t('Vzhľad','Appearance')}</div>
-    <div class="settings-card">
-      <div class="settings-row" onclick="cycleLang()">
-        <span class="sr-label"><span class="sr-icon">🌐</span> ${t('Jazyk','Language')}</span>
-        <span class="sr-value">${s.lang === 'en' ? 'English' : 'Slovenčina'} <span class="sr-arrow">›</span></span>
-      </div>
-      <div class="settings-row" onclick="cycleSetting('theme',['system','dark','light'])">
-        <span class="sr-label"><span class="sr-icon">🌓</span> ${t('Téma','Theme')}</span>
-        <span class="sr-value">${t({system:'Systémová',dark:'Tmavá',light:'Svetlá'}[s.theme]||'Systémová', {system:'System',dark:'Dark',light:'Light'}[s.theme]||'System')} <span class="sr-arrow">›</span></span>
-      </div>
-      <div class="settings-row">
-        <span class="sr-label"><span class="sr-icon">🎯</span> ${t('Farba akcentu','Accent color')}</span>
-        <div class="color-chips">${accentColors.map(c =>
-          `<div class="color-chip${s.accentColor===c.val?' active':''}" style="background:${c.val};color:${c.val}" onclick="s.accentColor='${c.val}';document.querySelectorAll('.color-chip').forEach(x=>x.classList.remove('active'));this.classList.add('active');applyAccentColor('${c.val}');saveSettings()" title="${c.label}"></div>`
-        ).join('')}</div>
-      </div>
-      <div class="settings-row" onclick="cycleSetting('textSize',['compact','normal','large'])">
-        <span class="sr-label"><span class="sr-icon">🔤</span> ${t('Veľkosť textu','Text size')}</span>
-        <span class="sr-value">${t({compact:'Malá',normal:'Normálna',large:'Veľká'}[s.textSize]||'Normálna', {compact:'Small',normal:'Normal',large:'Large'}[s.textSize]||'Normal')} <span class="sr-arrow">›</span></span>
-      </div>
-      <div class="settings-row" onclick="cycleSetting('uiDensity',['compact','normal','large'])">
-        <span class="sr-label"><span class="sr-icon">📐</span> ${t('Hustota UI','UI density')}</span>
-        <span class="sr-value">${t({compact:'Kompaktné',normal:'Normálne',large:'Veľké'}[s.uiDensity]||'Normálne', {compact:'Compact',normal:'Normal',large:'Large'}[s.uiDensity]||'Normal')} <span class="sr-arrow">›</span></span>
-      </div>
-    </div>
-  </div>`;
-
-  // 2. Domov — widgets + weather + family + notifications
-  const widgets = [
-    ['weather','🌤️',t('Počasie','Weather')],
-    ['todayTasks','✅',t('Dnešné úlohy','Tasks')],
-    ['hydration','💧',t('Pitný režim','Hydration')],
-    ['calories','🔥',t('Kalórie','Calories')],
-    ['quickRecipes','🍽️',t('Rýchle recepty','Quick recipes')],
-    ['seasonal','🌿',t('Sezónny kalendár','Seasonal calendar')],
-  ];
-  html += `<div class="settings-group" id="settings-home">
-    <div class="settings-group-title">🏠 ${t('Domov','Home')}</div>
-    <div class="settings-card">
-      <div style="font-size:.65rem;font-weight:600;color:var(--text3);margin-bottom:.2rem;text-transform:uppercase;letter-spacing:.05em;">${t('Widgety','Widgets')}</div>
-      ${widgets.map(([k,icon,label]) =>
-        `<div class="settings-row">
-          <span class="sr-label"><span class="sr-icon">${icon}</span> ${label}</span>
-          <label class="toggle-switch"><input type="checkbox" ${w[k]?'checked':''} onchange="w.${k}=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
-        </div>`
-      ).join('')}
-      <div style="font-size:.65rem;font-weight:600;color:var(--text3);margin:.6rem 0 .2rem;text-transform:uppercase;letter-spacing:.05em;">🌤️ ${t('Počasie','Weather')}</div>
-      <div class="settings-row" onclick="editText('weather.location','Mesto')">
-        <span class="sr-label"><span class="sr-icon">📍</span> ${t('Mesto','City')}</span>
-        <span class="sr-value">${s.weather.location||t('Nenastavené','Not set')} <span class="sr-arrow">›</span></span>
-      </div>
-      <div style="font-size:.6rem;color:var(--text3);padding:.2rem 0 0;">${t('Widget Počasie musí byť zapnutý vyššie.','Weather widget must be enabled above.')}</div>
-      <div style="font-size:.65rem;font-weight:600;color:var(--text3);margin:.6rem 0 .2rem;text-transform:uppercase;letter-spacing:.05em;">👨‍👩‍👧 ${t('Rodina','Family')}</div>
-      ${familyCode ? `
-        <div class="settings-row" onclick="navigator.clipboard.writeText('${familyCode}').then(()=>showToast('${t('Kód skopírovaný!','Code copied!')}','success'))">
-          <span class="sr-label"><span class="sr-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span> ${t('Rodinný kód','Family code')}</span>
-          <span class="sr-value" style="font-weight:700;letter-spacing:.08em;">${familyCode} 📋</span>
-        </div>
-        <div class="settings-row" onclick="pushAllLocalData();showToast('${t('Dáta odoslané.','Data synced.')}','success')">
-          <span class="sr-label"><span class="sr-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span> ${t('Synchronizovať teraz','Sync now')}</span>
-          <span class="sr-value"><span class="sr-arrow">›</span></span>
-        </div>
-        <div class="settings-row" onclick="showFamilyMembers()">
-          <span class="sr-label"><span class="sr-icon">👥</span> ${t('Zobraziť členov','Show members')}</span>
-          <span class="sr-value"><span class="sr-arrow">›</span></span>
-        </div>
-        <div class="settings-row" onclick="var n=prompt('${t('Názov zariadenia:','Device name:')}',localStorage.getItem('deviceName')||'');if(n){localStorage.setItem('deviceName',n.trim());if(familyDbRef)familyDbRef.child('members').child(getDeviceId()).update({name:n.trim()});openSettings()}">
-          <span class="sr-label"><span class="sr-icon">📱</span> ${t('Názov zariadenia','Device name')}</span>
-          <span class="sr-value">${(localStorage.getItem('deviceName')||t('Zariadenie','Device')).slice(0,12)} <span class="sr-arrow">›</span></span>
-        </div>
-        <div class="settings-row" onclick="leaveFamily()">
-          <span class="sr-label" style="color:var(--danger);"><span class="sr-icon">🚪</span> ${t('Opustiť rodinu','Leave family')}</span>
-          <span class="sr-value" style="color:var(--danger);"><span class="sr-arrow">›</span></span>
-        </div>
-      ` : `
-        <div class="settings-row" onclick="createFamily()">
-          <span class="sr-label"><span class="sr-icon">✨</span> ${t('Vytvoriť rodinu','Create family')}</span>
-          <span class="sr-value"><span class="sr-arrow">›</span></span>
-        </div>
-        <div class="settings-row" onclick="const c=prompt('${t('Zadaj rodinný kód:','Enter family code:')}');if(c)joinFamily(c)">
-          <span class="sr-label"><span class="sr-icon">🔑</span> ${t('Pripojiť sa k rodine','Join family')}</span>
-          <span class="sr-value"><span class="sr-arrow">›</span></span>
-        </div>
-      `}
-      <div style="font-size:.6rem;color:var(--text3);padding:.2rem 0 0;">${t('Nákupný zoznam a plánovač sa zdieľajú v reálnom čase.','Shopping list & planner shared in real-time.')}</div>
-      <div style="border-top:1px solid var(--border);margin:.4rem 0;"></div>
-      <div class="settings-row" onclick="var v=prompt('${t('childAge')} ${t('childAgeHint')}','${localStorage.getItem('childAge')||''}');if(v!==null&&!isNaN(v)){localStorage.setItem('childAge',v);showToast(lang==='en'?'Saved':'Uložené','success');openSettings()}">
-        <span class="sr-label"><span class="sr-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 0-4 4v1a4 4 0 0 0 8 0V6a4 4 0 0 0-4-4z"/><path d="M6 12h.01M18 12h.01"/><path d="M6 20h12"/><path d="m8 16 4 4 4-4"/></svg></span> ${t('childAge')}</span>
-        <span class="sr-value">${localStorage.getItem('childAge')||'—'} ${t('childAgeHint','rokov')} <span class="sr-arrow">›</span></span>
-      </div>
-      <div style="border-top:1px solid var(--border);margin:.4rem 0;"></div>
-      <div style="font-size:.65rem;font-weight:600;color:var(--text3);margin:.6rem 0 .2rem;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:.35rem;"><span>🔔 ${t('Notifikácie','Notifications')}</span><span id="notif-perm-badge" style="font-size:.6rem;padding:.1rem .35rem;border-radius:99px;font-weight:500;background:var(--border);color:var(--text2);">${({'granted':'🟢 '+t('Povolené','Allowed'),'denied':'🔴 '+t('Zakázané','Blocked'),'default':'⚪ '+t('Nepovolené','Not set')})[(typeof Notification!=='undefined'?Notification.permission:'')]||'⚪ '+t('Nepovolené','Not set')}</span></div>
-      ${[['breakfastReminder','breakfast','🌅',t('Pripomenutie raňajok','Breakfast reminder')],
-         ['todayCookingReminder','whatCook','🍳',t('Čo variť dnes','What to cook today')],
-         ['shoppingReminder','shopping','🛒',t('Ísť nakúpiť','Go shopping')],
-         ['hydrationReminder','water','💧',t('Pitný režim','Hydration reminder')],
-         ['childMealReminder','kids','👶',t('Jedlo pre dieťa','Kids meal prep')],
-         ['eveningPlanningReminder','evening','🌙',t('Večerné plánovanie','Evening planning')],
-       ].map(([k,timeK,icon,label]) =>
-        `<div class="settings-row">
-          <span class="sr-label"><span class="sr-icon">${icon}</span> ${label}</span>
-          <div style="display:flex;align-items:center;gap:.2rem;">
-            <input type="time" value="${s.notifTimes[timeK]}" onchange="s.notifTimes.${timeK}=this.value;saveSettings()" style="width:70px;padding:.15rem;border:1px solid var(--border);border-radius:4px;font-size:.6rem;background:var(--input-bg);color:var(--text);">
-            <label class="toggle-switch"><input type="checkbox" ${s.notifications[k]?'checked':''} onchange="s.notifications.${k}=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
-          </div>
-        </div>`
-      ).join('')}
-      <div class="settings-row" onclick="pushNotifSetup()" style="cursor:pointer;">
-        <span class="sr-label"><span class="sr-icon">🔔</span> ${t('Povoliť notifikácie na pozadí','Enable background notifications')}</span>
-        <span class="sr-value"><span class="sr-arrow">›</span></span>
-      </div>
-    </div>
-  </div>`;
-
-  // 3. Jedálniček
-  html += `<div class="settings-group" id="settings-meals">
-    <div class="settings-group-title">📅 ${t('Jedálniček','Meal planner')}</div>
-    <div class="settings-card">
-      <div class="settings-row" onclick="promptNumber('mealPlanner.defaultServings',1,8)">
-        <span class="sr-label"><span class="sr-icon">🍽️</span> ${t('Predvolené porcie','Default servings')}</span>
-        <span class="sr-value">${m.defaultServings} <span class="sr-arrow">›</span></span>
-      </div>
-      <div class="settings-row">
-        <span class="sr-label"><span class="sr-icon">📊</span> ${t('Zobrazovať nutričné hodnoty','Show nutrition')}</span>
-        <label class="toggle-switch"><input type="checkbox" ${m.showNutrition?'checked':''} onchange="m.showNutrition=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
-      </div>
-    </div>
-  </div>`;
-
-  // 4. Nákup
-  html += `<div class="settings-group" id="settings-shopping">
-    <div class="settings-group-title">🛒 ${t('Nákup','Shopping')}</div>
-    <div class="settings-card">
-      <div class="settings-row">
-        <span class="sr-label"><span class="sr-icon">🛒</span> ${t('Režim obchodu','Store mode')}</span>
-        <label class="toggle-switch"><input type="checkbox" ${s.shopping.storeMode?'checked':''} onchange="s.shopping.storeMode=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
-      </div>
-      <div class="settings-row">
-        <span class="sr-label"><span class="sr-icon">📦</span> ${t('Auto kategórie','Auto categories')}</span>
-        <label class="toggle-switch"><input type="checkbox" ${s.shopping.autoCategories?'checked':''} onchange="s.shopping.autoCategories=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
-      </div>
-      <div class="settings-row">
-        <span class="sr-label"><span class="sr-icon">🤖</span> ${t('AI nákupný zoznam','AI shopping list')}</span>
-        <label class="toggle-switch"><input type="checkbox" ${s.shopping.aiShoppingList?'checked':''} onchange="s.shopping.aiShoppingList=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
-      </div>
-      <div class="settings-row">
-        <span class="sr-label"><span class="sr-icon">➕</span> ${t('Rýchle pridanie','Quick add FAB')}</span>
-        <label class="toggle-switch"><input type="checkbox" ${s.quickAdd.enabled?'checked':''} onchange="s.quickAdd.enabled=this.checked;saveSettings()"><span class="toggle-slider"></span></label>
-      </div>
-    </div>
-  </div>`;
-
-  // 5. Účet
-  // 6. Dáta
-  html += `<div class="settings-group" id="settings-data">
-    <div class="settings-group-title">💾 ${t('Dáta','Data')}</div>
-    <div class="settings-card">
-      <div class="settings-row" onclick="refreshRecipeImages();closeSettings()">
-        <span class="sr-label"><span class="sr-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></span> ${t('Obnoviť obrázky','Refresh images')}</span>
-        <span class="sr-value"><span class="sr-arrow">›</span></span>
-      </div>
-      <!-- Debug tools — skryté, tapnutím na nadpis sa zobrazia -->
-      <div class="form-section-title" style="cursor:pointer;user-select:none;opacity:.4;font-size:.55rem;" onclick="var n=this.nextElementSibling;n.style.display=n.style.display==='none'?'block':'none'">🔬 ${t('Debug (klepni pre zobrazenie)','Debug (tap to show)')}</div>
-      <div style="display:none;">
-      <div class="settings-row" onclick="debugFirebase();showToast('Debug info v konzole','info')">
-        <span class="sr-label"><span class="sr-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span> ${t('Debug Firebase','Debug Firebase')}</span>
-        <span class="sr-value"><span class="sr-arrow">›</span></span>
-      </div>
-      <div class="settings-row" onclick="firebaseHardTest();showToast('Test zapísaný','info')">
-        <span class="sr-label"><span class="sr-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span> ${t('Hard Test','Hard Test')}</span>
-        <span class="sr-value"><span class="sr-arrow">›</span></span>
-      </div>
-      <div class="settings-row" onclick="debugFirebaseWrite();showToast('Test zapísaný','info')">
-        <span class="sr-label"><span class="sr-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span> ${t('Force Push','Force Push')}</span>
-        <span class="sr-value"><span class="sr-arrow">›</span></span>
-      </div>
-      <div class="settings-row" onclick="debugFirebasePull()">
-        <span class="sr-label"><span class="sr-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span> ${t('Force Pull','Force Pull')}</span>
-        <span class="sr-value"><span class="sr-arrow">›</span></span>
-      </div>
-      </div>
-      <div class="settings-row" onclick="localStorage.removeItem('onboardingCompleted');showOnboarding(true);closeSettings()">
-        <span class="sr-label"><span class="sr-icon">❓</span> ${t('Zobraziť onboarding','Show onboarding')}</span>
-        <span class="sr-value"><span class="sr-arrow">›</span></span>
-      </div>
-      <div class="settings-row" onclick="showImportUrlModal()" style="background:linear-gradient(135deg,rgba(255,77,109,.06),transparent);border:1px solid rgba(255,77,109,.1);border-radius:var(--radius-sm);margin:.1rem 0;">
-        <span class="sr-label"><span class="sr-icon" style="font-size:1.1rem;">🌐</span> <strong>${t('Import z URL','Import from URL')}</strong></span>
-        <span class="sr-value" style="color:var(--primary);font-weight:600;">${t('Importovať','Import')} ›</span>
-      </div>
-      <div class="settings-row" onclick="__confirmDemo(tings()}">
-        <span class="sr-label"><span class="sr-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span> ${t('Obnoviť demo','Reset demo')}</span>
-        <span class="sr-value"><span class="sr-arrow">›</span></span>
-      </div>
-      <div class="settings-row" onclick="aiBatchNutrition()">
-        <span class="sr-label"><span class="sr-icon">🤖</span> ${t('AI nutričné hodnoty','AI nutrition estimates')}</span>
-        <span class="sr-value"><span class="sr-arrow">›</span></span>
-      </div>
-      <div class="settings-row" onclick="createBackup()">
-        <span class="sr-label"><span class="sr-icon">💾</span> ${t('Vytvoriť zálohu','Create backup')}</span>
-        <span class="sr-value"><span class="sr-arrow">›</span></span>
-      </div>
-      <div class="settings-row" onclick="__confirmDeleteAll(">
-        <span class="sr-label" style="color:var(--danger);"><span class="sr-icon">🗑</span> ${t('Vymazať všetky dáta','Delete all data')}</span>
-        <span class="sr-value" style="color:var(--danger);"><span class="sr-arrow">›</span></span>
-      </div>
-    </div>
-  </div>`;
-
-  // 7. O aplikácii
-  html += `<div class="settings-group">
-    <div class="settings-group-title">ℹ️ ${t('O aplikácii','About')}</div>
-    <div class="settings-card">
-      <div class="settings-stats">
-        <div class="settings-stat"><div class="stat-val">${totalRecipes}</div><div class="stat-label">${t('receptov','recipes')}</div></div>
-        <div class="settings-stat"><div class="stat-val">${plannedCount}</div><div class="stat-label">${t('naplánovaných','planned')}</div></div>
-        <div class="settings-stat"><div class="stat-val">${tasksDone}</div><div class="stat-label">${t('úloh','tasks done')}</div></div>
-        <div class="settings-stat"><div class="stat-val">${streak}</div><div class="stat-label">${t('dní v rade','day streak')}</div></div>
-      </div>
-      <div style="text-align:center;padding:.3rem 0 .15rem;font-size:.6rem;color:var(--text3);">
-        <span data-lang="appTitle">Mealnest</span> · v1.6 · ${totalRecipes} ${t('receptov','recipes')}
-      </div>
-      <div style="text-align:center;padding:.15rem 0;font-size:.6rem;" onclick="var c=parseInt(localStorage.getItem('_devClicks')||'0')+1;localStorage.setItem('_devClicks',c);if(c>=5){localStorage.setItem('devMode','1');localStorage.removeItem('_devClicks');closeSettings();setTimeout(function(){openSettings()},100)}">
-        <a href="privacy-policy.html" target="_blank" style="color:var(--text3);text-decoration:underline;">${t('Ochrana súkromia','Privacy Policy')}</a>
-      </div>
-    </div>
-  </div>`;
-
-  // Dev tools — shown after 5 taps on version
-  if (localStorage.getItem('devMode') === '1') {
-    html += `<div class="settings-group">
-      <div class="settings-group-title">🛠️ ${t('Vývojárske','Developer')}</div>
-      <div class="settings-card">
-        ${['debugFirebase','📊','Debug Firebase'],['firebaseHardTest','🛠️','Hard Test'],['debugFirebaseWrite','📤','Force Push'],['debugFirebasePull','📥','Force Pull']}.map(function(b) { return '<div class="settings-row" onclick="'+b[0]+'()"><span class="sr-label"><span class="sr-icon">'+b[1]+'</span> '+b[2]+'</span><span class="sr-value"><span class="sr-arrow">›</span></span></div>'; }).join('')}
-        <div class="settings-row" onclick="localStorage.removeItem(\'devMode\');closeSettings()">
-          <span class="sr-label" style="color:var(--danger);"><span class="sr-icon">🚫</span> ${t('Skryť vývojárske','Hide developer')}</span>
-          <span class="sr-value"><span class="sr-arrow">›</span></span>
-        </div>
-      </div>
-    </div>`;
-  }
-
-  body.innerHTML = html;
-  document.getElementById('settings-sheet').classList.add('active');
+  openMorePageFromAnywhere('settings');
 }
 
 function cycleSetting(path, values) {
@@ -3011,7 +2712,7 @@ function calcPlanningStreak() {
   return streak;
 }
 function closeSettings() {
-  document.getElementById('settings-sheet').classList.remove('active');
+  openMorePageFromAnywhere('settings');
 }
 
 function toggleFav(id) {
@@ -3598,6 +3299,11 @@ function createBackup() {
   showToast(lang==='en' ? 'Backup downloaded ✓' : 'Záloha stiahnutá ✓', 'success');
   // Store last backup timestamp
   localStorage.setItem('_lastBackup', Date.now().toString());
+  try {
+    const history = JSON.parse(localStorage.getItem('_backupHistoryLocal') || '[]');
+    history.push(new Date().toISOString());
+    localStorage.setItem('_backupHistoryLocal', JSON.stringify(history.slice(-5)));
+  } catch(e) {}
   return data;
 }
 
@@ -4054,6 +3760,11 @@ function renderMoreScreen() {
   renderMoreHome();
 }
 
+function openMorePageFromAnywhere(page) {
+  switchTab('board');
+  openMorePage(page || 'settings');
+}
+
 function renderMoreHome() {
   const view = document.getElementById('board-container-view');
   if (!view) return;
@@ -4103,6 +3814,10 @@ function openMorePage(page) {
     family: renderMoreFamilyPage,
     settings: renderMoreSettingsHub,
     appearance: renderMoreAppearancePage,
+    'home-settings': renderMoreHomeSettingsPage,
+    'meal-settings': renderMoreMealSettingsPage,
+    'shopping-settings': renderMoreShoppingSettingsPage,
+    'data-settings': renderMoreDataSettingsPage,
     notifications: renderMoreNotificationsPage,
     account: renderMoreAccountPage,
     privacy: renderMorePrivacySecurityPage,
@@ -4177,6 +3892,16 @@ function renderMoreFamilyPage() {
       ${moreActionRow('🛡️','Permissions','Správa rolí a oprávnení',"openMorePage('family-permissions')")}
       ${moreActionRow('🕘','Activity log','Posledné rodinné zmeny','','')}
     `)}
+    ${moreCard('Pripojenie', familyCode ? `
+      ${moreActionRow('🔗','Rodinný kód', esc(familyCode), 'copyFamilyInvite()', 'Kopírovať')}
+      ${moreActionRow('🔄','Synchronizovať teraz','Odošle lokálne dáta do rodiny',"pushAllLocalData();showToast('Dáta odoslané.','success')")}
+      ${moreInputRow('📱','Názov zariadenia','Zobrazuje sa pri rodinnom syncu', localStorage.getItem('deviceName') || '', 'setMoreDeviceName(this.value)')}
+      ${moreActionRow('🚪','Opustiť rodinu','Lokálne dáta ostanú v zariadení','leaveFamily()','›')}
+    ` : `
+      ${moreActionRow('✨','Vytvoriť rodinu','Vygeneruje nový rodinný kód','createFamily()')}
+      <label class="more-setting-row"><span>🔑</span><div><strong>Pripojiť sa k rodine</strong><small>Zadaj existujúci rodinný kód</small></div><input id="more-family-code-input" class="more-input" type="text" placeholder="Kód"></label>
+      <button class="more-primary" onclick="joinFamilyFromMore()">Pripojiť rodinu</button>
+    `)}
     ${moreCard('Recent activity', renderMoreActivityFeed())}
   `;
   return renderMoreShell('Rodina pripojená', familyCode ? `Kód rodiny ${esc(familyCode)}` : 'Rodinné zdieľanie nie je pripojené', body, '<button class="more-top-action" onclick="copyFamilyInvite()">Pozvať</button>');
@@ -4218,11 +3943,16 @@ function renderMoreActivityFeed() {
 function renderMoreSettingsHub() {
   const cards = [
     ['appearance','🎨','Vzhľad','Téma, akcent, text a hustota'],
+    ['home-settings','🏠','Domov','Widgety, počasie a dieťa'],
+    ['meal-settings','📅','Jedálniček','Porcie a nutričné hodnoty'],
+    ['shopping-settings','🛒','Nákup','Režim obchodu a AI zoznam'],
     ['notifications','🔔','Oznámenia','Pripomienky a push nastavenia'],
     ['account','👤','Účet','Profil, prihlásenie a odhlásenie'],
     ['language','🌐','Jazyk','Slovenčina alebo English'],
+    ['family','👨‍👩‍👧‍👦','Rodina','Kód, členovia a synchronizácia'],
     ['privacy-security','🔒','Súkromie','Oprávnenia a export dát'],
-    ['backup-sync','☁️','Synchronizácia','Backup, restore a rodinný sync']
+    ['backup-sync','☁️','Synchronizácia','Backup, restore a rodinný sync'],
+    ['data-settings','🧰','Dáta a údržba','Import, obrázky a reset dát']
   ];
   const body = `<div class="more-grid">${cards.map(c => renderMoreTile(c[0], c[1], c[2], c[3], 'Otvoriť')).join('')}</div>`;
   return renderMoreShell('Nastavenia', 'Všetky nastavenia bez starých panelov', body);
@@ -4247,6 +3977,160 @@ function setMoreTheme(value) { appSettings.theme = value; saveSettings(); applyS
 function setMoreAccent(value) { appSettings.accentColor = value; saveSettings(); applySettings(); openMorePage('appearance'); }
 function setMoreTextSize(value) { appSettings.textSize = value; saveSettings(); applySettings(); openMorePage('appearance'); }
 function setMoreDensity(value) { appSettings.uiDensity = value; saveSettings(); applySettings(); openMorePage('appearance'); }
+
+function moreToggleRow(icon, title, desc, checked, action) {
+  return `<div class="more-setting-row"><span>${icon}</span><div><strong>${title}</strong>${desc ? `<small>${desc}</small>` : ''}</div><label class="toggle-switch"><input type="checkbox" ${checked ? 'checked' : ''} onchange="${action}"><span class="toggle-slider"></span></label></div>`;
+}
+
+function moreInputRow(icon, title, desc, value, action, type) {
+  return `<label class="more-setting-row"><span>${icon}</span><div><strong>${title}</strong>${desc ? `<small>${desc}</small>` : ''}</div><input class="more-input" type="${type || 'text'}" value="${escAttr(value || '')}" onchange="${action}"></label>`;
+}
+
+function setNestedSetting(path, value, page) {
+  const parts = path.split('.');
+  let target = appSettings;
+  for (let i = 0; i < parts.length - 1; i++) {
+    if (!target[parts[i]]) target[parts[i]] = {};
+    target = target[parts[i]];
+  }
+  target[parts[parts.length - 1]] = value;
+  saveSettings();
+  if (page) openMorePage(page);
+}
+
+function setMoreCheckbox(path, checked, page) {
+  setNestedSetting(path, !!checked, page);
+}
+
+function setMoreNumber(path, value, min, max, page) {
+  const num = parseInt(value, 10);
+  if (Number.isNaN(num) || num < min || num > max) {
+    showToast(`Zadaj číslo ${min}-${max}`, 'warning');
+    if (page) openMorePage(page);
+    return;
+  }
+  setNestedSetting(path, num, page);
+}
+
+function setMoreWeatherLocation(value) {
+  setNestedSetting('weather.location', (value || '').trim(), 'home-settings');
+}
+
+function setMoreChildAge(value) {
+  const clean = String(value || '').trim();
+  if (clean && Number.isNaN(parseFloat(clean))) {
+    showToast('Zadaj vek ako číslo', 'warning');
+    openMorePage('home-settings');
+    return;
+  }
+  if (clean) localStorage.setItem('childAge', clean);
+  else localStorage.removeItem('childAge');
+  showToast('Uložené', 'success');
+  openMorePage('home-settings');
+}
+
+function setMoreDeviceName(value) {
+  const clean = String(value || '').trim();
+  if (!clean) return;
+  localStorage.setItem('deviceName', clean);
+  if (familyDbRef) {
+    try { familyDbRef.child('members').child(getDeviceId()).update({ name: clean }); } catch(e) {}
+  }
+  showToast('Názov zariadenia uložený', 'success');
+  openMorePage('family');
+}
+
+function joinFamilyFromMore() {
+  const input = document.getElementById('more-family-code-input');
+  const code = input ? input.value.trim() : '';
+  if (!code) {
+    showToast('Zadaj rodinný kód', 'warning');
+    return;
+  }
+  joinFamily(code);
+}
+
+function renderMoreHomeSettingsPage() {
+  loadSettings();
+  const w = appSettings.homeWidgets || {};
+  const widgets = [
+    ['weather','🌤️','Počasie','Teplota a sezónna veta v hlavičke'],
+    ['todayTasks','✅','Dnešné úlohy','Prehľad úloh na dashboarde'],
+    ['hydration','💧','Pitný režim','Voliteľný widget'],
+    ['calories','🔥','Kalórie','Nutričný súhrn'],
+    ['quickRecipes','🍽️','Rýchle recepty','Rýchle návrhy jedál'],
+    ['seasonal','🌿','Sezónny kalendár','Sezónne odporúčania']
+  ];
+  const body = `
+    ${moreCard('Widgety domova', widgets.map(([key, icon, title, desc]) => moreToggleRow(icon, title, desc, !!w[key], `setMoreCheckbox('homeWidgets.${key}', this.checked, 'home-settings')`)).join(''))}
+    ${moreCard('Počasie', `
+      ${moreToggleRow('🌤️','Počasie aktívne','Použije sa v kompaktnej hlavičke', !!appSettings.weather.enabled, "setMoreCheckbox('weather.enabled', this.checked, 'home-settings')")}
+      ${moreInputRow('📍','Mesto','Prázdne = automaticky alebo bez lokality', appSettings.weather.location || '', "setMoreWeatherLocation(this.value)")}
+    `)}
+    ${moreCard('Dieťa', `${moreInputRow('👶','Vek dieťaťa','Používa sa pre detské odporúčania', localStorage.getItem('childAge') || '', "setMoreChildAge(this.value)", 'number')}`)}
+    ${moreCard('Reset', `<button class="more-secondary" onclick="resetWidgetsToDefaults();openMorePage('home-settings')">Obnoviť predvolené widgety</button>`)}
+  `;
+  return renderMoreShell('Domov', 'Widgety, počasie a detské nastavenia', body);
+}
+
+function renderMoreMealSettingsPage() {
+  loadSettings();
+  const m = appSettings.mealPlanner || {};
+  const body = `
+    ${moreCard('Jedálniček', `
+      ${moreInputRow('🍽️','Predvolené porcie','Použité pri plánovaní a receptoch', m.defaultServings || 4, "setMoreNumber('mealPlanner.defaultServings', this.value, 1, 8, 'meal-settings')", 'number')}
+      ${moreToggleRow('📊','Zobrazovať nutričné hodnoty','Kalórie a makrá v pláne', !!m.showNutrition, "setMoreCheckbox('mealPlanner.showNutrition', this.checked, 'meal-settings')")}
+    `)}
+    ${moreCard('AI plánovanie', `
+      ${moreActionRow('🚀','AI Týždeň','Generovanie týždenného plánu',"openMorePage('ai-week')")}
+      ${moreActionRow('📅','Týždenný plán','Otvoriť plánovač',"switchTab('planner')")}
+    `)}
+  `;
+  return renderMoreShell('Jedálniček', 'Porcie, výživa a plánovanie', body);
+}
+
+function renderMoreShoppingSettingsPage() {
+  loadSettings();
+  const shopping = appSettings.shopping || {};
+  const quickAdd = appSettings.quickAdd || {};
+  const body = `
+    ${moreCard('Nákup', `
+      ${moreToggleRow('🛒','Režim obchodu','Prispôsobí nákupný zoznam pre obchod', !!shopping.storeMode, "setMoreCheckbox('shopping.storeMode', this.checked, 'shopping-settings')")}
+      ${moreToggleRow('📦','Auto kategórie','Automaticky triedi položky', !!shopping.autoCategories, "setMoreCheckbox('shopping.autoCategories', this.checked, 'shopping-settings')")}
+      ${moreToggleRow('🤖','AI nákupný zoznam','AI návrhy položiek z plánu', !!shopping.aiShoppingList, "setMoreCheckbox('shopping.aiShoppingList', this.checked, 'shopping-settings')")}
+      ${moreToggleRow('➕','Rýchle pridanie','Plávajúce tlačidlo pre pridanie', !!quickAdd.enabled, "setMoreCheckbox('quickAdd.enabled', this.checked, 'shopping-settings')")}
+    `)}
+    ${moreCard('Prepojenia', `
+      ${moreActionRow('🛒','Aktuálny nákup','Otvoriť nákupný zoznam',"switchTab('shopping')")}
+      ${moreActionRow('👨‍👩‍👧‍👦','Zdieľané položky', familyCode ? 'Aktívne s rodinou' : 'Rodina nepripojená',"openMorePage('family')")}
+    `)}
+  `;
+  return renderMoreShell('Nákup nastavenia', 'Režim obchodu, kategórie a AI', body);
+}
+
+function renderMoreDataSettingsPage() {
+  const recipeCount = Array.isArray(recipes) ? recipes.length : 0;
+  const taskCount = Array.isArray(tasks) ? tasks.length : 0;
+  const shoppingCount = Array.isArray(shopItems) ? shopItems.length : 0;
+  const body = `
+    ${moreCard('Aktuálne dáta', `<div class="more-stat-grid"><div><strong>${recipeCount}</strong><small>recepty</small></div><div><strong>${taskCount}</strong><small>úlohy</small></div><div><strong>${shoppingCount}</strong><small>nákup</small></div></div>`)}
+    ${moreCard('Import a recepty', `
+      ${moreActionRow('🌐','Import receptu z URL','Otvorí import URL obrazovku','showImportUrlModal()')}
+      ${moreActionRow('🖼️','Obnoviť obrázky','Znovu načíta obrázky receptov',"refreshRecipeImages();openMorePage('data-settings')")}
+      ${moreActionRow('🤖','AI nutričné hodnoty','Doplniť výživu cez AI','aiBatchNutrition()')}
+    `)}
+    ${moreCard('Backup', `
+      ${moreActionRow('📦','Export / backup','Stiahnuť zálohu dát',"createBackup();openMorePage('data-settings')")}
+      ${moreActionRow('☁️','Backup a sync','Zálohy a rodinná synchronizácia',"openMorePage('backup-sync')")}
+    `)}
+    ${moreCard('Údržba', `
+      ${moreActionRow('❓','Onboarding centrum','Návody bez modálneho okna',"openMorePage('onboarding')")}
+      ${moreActionRow('🧪','Demo recepty','Obnoviť demo recepty cez potvrdenie','__confirmDemo && __confirmDemo()')}
+      ${moreActionRow('🗑️','Vymazať všetky dáta','Nebezpečná akcia cez potvrdenie','__confirmDeleteAll && __confirmDeleteAll()','›')}
+    `)}
+  `;
+  return renderMoreShell('Dáta a údržba', 'Import, export a servisné akcie', body);
+}
 
 function renderMoreTasksPage() {
   const today = getTodayTasks();
@@ -4322,13 +4206,18 @@ function renderMoreShoppingPage() {
 }
 
 function renderMoreAiWeekPage() {
+  const plannedMeals = Object.values(mealPlan || {}).reduce((sum, week) => sum + Object.values(week || {}).reduce((daySum, day) => daySum + Object.values(day || {}).filter(Boolean).length, 0), 0);
+  const childAge = localStorage.getItem('childAge') || '';
+  const previousPlans = plannedMeals
+    ? `<div class="more-feed"><div><span>📅</span><strong>Aktuálny plán</strong><small>${plannedMeals} jedál v plánovači</small></div></div>`
+    : moreEmptyState('📅', 'Zatiaľ žiadny uložený plán', 'Keď naplánuješ týždeň, zobrazí sa tu reálny stav.');
   const body = `
-    ${moreCard('Generate week plan', `<div class="more-ai-panel"><span>🚀</span><strong>AI pripraví týždeň podľa rodiny</strong><small>Raňajky, desiata, obed, olovrant a večera.</small><button class="more-primary" onclick="showToast('AI plánovač je pripravený v tejto obrazovke', 'info')">Generovať plán</button></div>`)}
-    ${moreCard('Family preferences', `<div class="more-chip-row"><span>2 dospelí</span><span>1 dieťa</span><span>Rýchle večere</span></div>`)}
-    ${moreCard('Diet preferences', `<div class="more-chip-row"><span>Vyvážené</span><span>Sezónne</span><span>Menej odpadu</span></div>`)}
-    ${moreCard('Regenerate', `<button class="more-secondary" onclick="showToast('Návrhy obnovené', 'success')">Regenerate button</button>`)}
-    ${moreCard('Previous plans', `<div class="more-feed"><div><span>📅</span><strong>Minulý týždeň</strong><small>28 jedál</small></div><div><span>📅</span><strong>Rodinný plán</strong><small>35 jedál</small></div></div>`)}
-    ${moreCard('AI suggestions', `<div class="more-feed"><div><span>🥗</span><strong>Ľahký obed</strong><small>Sezónna zelenina</small></div><div><span>🍲</span><strong>Teplá večera</strong><small>30 min</small></div></div>`)}
+    ${moreCard('Generate week plan', `<div class="more-ai-panel"><span>🚀</span><strong>AI pripraví týždeň podľa aktuálnych dát</strong><small>Recepty: ${recipes.length} · naplánované jedlá: ${plannedMeals}</small><button class="more-primary" onclick="aiGenerateFullWeek()">Generovať plán</button></div>`)}
+    ${moreCard('Family preferences', `<div class="more-chip-row"><span>${familyCode ? 'Rodina pripojená' : 'Lokálny režim'}</span>${childAge ? `<span>Dieťa ${esc(childAge)} rokov</span>` : '<span>Vek dieťaťa nenastavený</span>'}</div>`)}
+    ${moreCard('Diet preferences', moreEmptyState('🥗', 'Diétne preferencie zatiaľ nie sú nastavené', 'Po pridaní preferencií sa použijú pre AI plán.'))}
+    ${moreCard('Regenerate', `<button class="more-secondary" onclick="aiGenerateFullWeek()">Regenerate button</button>`)}
+    ${moreCard('Previous plans', previousPlans)}
+    ${moreCard('AI suggestions', recipes.length ? `<div class="more-feed">${recipes.slice(0, 3).map(r => `<div><span>🍽️</span><strong>${esc(r.name)}</strong><small>${r.time || 20} min</small></div>`).join('')}</div>` : moreEmptyState('🤖', 'AI nemá z čoho odporúčať', 'Pridaj recepty alebo importuj recept z URL.'))}
   `;
   return renderMoreShell('AI Týždeň', 'Plánovanie s preferenciami', body);
 }
@@ -4350,12 +4239,19 @@ function renderMoreOnboardingPage() {
 }
 
 function renderMoreNotificationsPage() {
+  loadSettings();
+  const notifications = appSettings.notifications || {};
+  const times = appSettings.notifTimes || {};
+  const rows = [
+    ['breakfastReminder','breakfast','🌅','Pripomenutie raňajok'],
+    ['todayCookingReminder','whatCook','🍳','Čo variť dnes'],
+    ['shoppingReminder','shopping','🛒','Ísť nakúpiť'],
+    ['hydrationReminder','water','💧','Pitný režim'],
+    ['childMealReminder','kids','👶','Jedlo pre dieťa'],
+    ['eveningPlanningReminder','evening','🌙','Večerné plánovanie']
+  ];
   const body = `
-    ${moreCard('Notifications', `
-      ${moreActionRow('🌅','Raňajky','08:00','','Zapnuté')}
-      ${moreActionRow('🛒','Nákup','Pripomienka zoznamu','','Zapnuté')}
-      ${moreActionRow('🌙','Večerný plán','20:00','','Zapnuté')}
-    `)}
+    ${moreCard('Notifications', rows.map(([key, timeKey, icon, title]) => `<div class="more-setting-row"><span>${icon}</span><div><strong>${title}</strong><small>${times[timeKey] || '--:--'} · ${notifications[key] ? 'Zapnuté' : 'Vypnuté'}</small></div><input class="more-time-input" type="time" value="${escAttr(times[timeKey] || '')}" onchange="setNestedSetting('notifTimes.${timeKey}', this.value, 'notifications')"><label class="toggle-switch"><input type="checkbox" ${notifications[key] ? 'checked' : ''} onchange="setMoreCheckbox('notifications.${key}', this.checked, 'notifications')"><span class="toggle-slider"></span></label></div>`).join(''))}
     ${moreCard('Permissions', `${moreActionRow('🔔','Push povolenia', typeof Notification !== 'undefined' ? Notification.permission : 'Nedostupné', 'pushNotifSetup()')}`)}
   `;
   return renderMoreShell('Oznámenia', 'Pripomienky a povolenia', body);
@@ -4363,11 +4259,14 @@ function renderMoreNotificationsPage() {
 
 function renderMoreAccountPage() {
   const user = authUser ? (authUser.displayName || authUser.email || 'Používateľ') : 'Hosť';
+  const authAction = authUser
+    ? `<button class="more-danger" onclick="signOutUser()">Odhlásiť</button>`
+    : `<button class="more-primary" onclick="signInWithGoogle()">Prihlásiť cez Google</button>`;
   const body = `
     ${moreCard('Account', `<div class="more-account-card"><button class="more-avatar">${getDashboardAvatar()}</button><div><strong>${esc(user)}</strong><small>${authUser ? 'Prihlásený účet' : 'Režim hosťa'}</small></div></div>`)}
     ${moreCard('Email', `${moreActionRow('✉️','Email', authUser && authUser.email ? authUser.email : 'Nepripojený', '')}`)}
     ${moreCard('Subscription', `${moreActionRow('⭐','Mealnest Premium','Aktuálne free plán', '')}`)}
-    ${moreCard('Logout', `<button class="more-danger" onclick="showToast('Odhlásenie pripravíme v účte', 'info')">Odhlásiť</button>`)}
+    ${moreCard(authUser ? 'Logout' : 'Login', authAction)}
   `;
   return renderMoreShell('Účet', 'Profil a prihlásenie', body);
 }
@@ -4378,19 +4277,24 @@ function renderMoreNotificationsAccountPage() {
     ${moreCard('Email', `${moreActionRow('✉️','Email','Nastavenia emailovej komunikácie',"openMorePage('account')")}`)}
     ${moreCard('Account', `${moreActionRow('👤','Účet','Profil a prihlásenie',"openMorePage('account')")}`)}
     ${moreCard('Subscription', `${moreActionRow('⭐','Predplatné','Free plán',"openMorePage('account')")}`)}
-    ${moreCard('Logout', `<button class="more-danger" onclick="showToast('Odhlásenie pripravíme v účte', 'info')">Logout</button>`)}
+    ${moreCard(authUser ? 'Logout' : 'Login', authUser ? `<button class="more-danger" onclick="signOutUser()">Logout</button>` : `<button class="more-primary" onclick="signInWithGoogle()">Prihlásiť cez Google</button>`)}
   `;
   return renderMoreShell('Notifikácie a účet', 'Komunikácia, účet a predplatné', body);
 }
 
 function renderMoreBackupSyncPage() {
   const syncText = familyCode ? 'Rodinný sync aktívny' : 'Lokálny režim';
+  const lastBackup = parseInt(localStorage.getItem('_lastBackup') || '0', 10);
+  const lastBackupText = lastBackup ? new Date(lastBackup).toLocaleString(lang === 'en' ? 'en-GB' : 'sk-SK') : 'Zatiaľ nebola vytvorená záloha';
+  let backupHistory = [];
+  try { backupHistory = JSON.parse(localStorage.getItem('_backupHistoryLocal') || '[]'); } catch(e) { backupHistory = []; }
   const body = `
-    ${moreCard('Last sync', `<div class="more-board-row"><span>☁️</span><strong>${syncText}</strong><small>pred chvíľou</small></div>`)}
+    ${moreCard('Last sync', `<div class="more-board-row"><span>☁️</span><strong>${syncText}</strong><small>${familyCode ? 'Aktívne' : 'Bez rodiny'}</small></div>`)}
     ${moreCard('Backup now', `<button class="more-primary" onclick="createBackup()">Backup now</button>`)}
-    ${moreCard('Restore backup', `<button class="more-secondary" onclick="showToast('Obnovenie zálohy pripravíme tu', 'info')">Restore backup</button>`)}
+    ${moreCard('Last backup', `<div class="more-board-row"><span>📦</span><strong>${esc(lastBackupText)}</strong><small>Lokálne zariadenie</small></div>`)}
+    ${moreCard('Restore backup', `<button class="more-secondary" onclick="showToast('Vyber JSON zálohu cez import dát', 'info')">Restore backup</button>`)}
     ${moreCard('Family sync status', `${moreActionRow('👨‍👩‍👧‍👦','Family sync status', syncText, "openMorePage('family')")}`)}
-    ${moreCard('History', `<div class="more-feed"><div><span>☁️</span><strong>Automatická záloha</strong><small>dnes</small></div><div><span>📤</span><strong>Export dát</strong><small>včera</small></div></div>`)}
+    ${moreCard('History', backupHistory.length ? `<div class="more-feed">${backupHistory.slice(-3).reverse().map(item => `<div><span>📦</span><strong>Backup</strong><small>${esc(item)}</small></div>`).join('')}</div>` : moreEmptyState('📦', 'Zatiaľ žiadna história záloh', 'Keď vytvoríš backup, zobrazí sa tu reálny čas.'))}
   `;
   return renderMoreShell('Backup a sync', 'Zálohy, obnovenie a história', body);
 }
@@ -4742,8 +4646,8 @@ function renderDashboard() {
         <p>${weatherLine}</p>
       </div>
       <div class="mn-home-actions">
-        <button class="mn-icon-btn" onclick="if (typeof requestNotificationPermission === 'function') requestNotificationPermission(); else openSettings();" aria-label="Notifikácie">🔔</button>
-        <button class="mn-avatar-btn" onclick="openSettings()" aria-label="Profil">${getDashboardAvatar()}</button>
+        <button class="mn-icon-btn" onclick="openMorePageFromAnywhere('notifications')" aria-label="Notifikácie">🔔</button>
+        <button class="mn-avatar-btn" onclick="openMorePageFromAnywhere('account')" aria-label="Profil">${getDashboardAvatar()}</button>
       </div>
     </section>
     ${renderMobileHeroCard({ todayMeals, totalMeals: MEALS.length, mealPct, uncheckedShop, todayTasks: todayTasksArr.length, streak })}
@@ -7078,7 +6982,7 @@ function importFromUrl() {
 let _backPressTimer = 0;
 
 function isAnyModalOpen() {
-  return document.querySelector('.modal-overlay.active, #planner-picker.active, #login-overlay[style*="flex"], #settings-sheet.active, .sheet-overlay.active') !== null;
+  return document.querySelector('.modal-overlay.active, #planner-picker.active, #login-overlay[style*="flex"], .sheet-overlay.active') !== null;
 }
 
 // =================== CUSTOM CONFIRM MODAL ===================
@@ -7118,7 +7022,6 @@ function closeTopModal() {
     '#planner-picker.active',                // Recipe picker
     '#shop-sheet.active',                    // Shop sheet
     '#task-sheet.active',                    // Task sheet
-    '#settings-sheet.active',               // Settings
     '#board-form-modal',                     // Board form
     '#login-overlay'                         // Login (check inline style)
   ];
@@ -7129,7 +7032,6 @@ function closeTopModal() {
       if (active) {
         if (typeof closeModal === 'function' && el.id.endsWith('-modal')) closeModal(el.id);
         else if (el.id === 'planner-picker') closePickerModal();
-        else if (el.id === 'settings-sheet') closeSettings();
         else if (el.id === 'shop-sheet') closeShopSheet();
         else if (el.id === 'task-sheet') closeTaskSheet();
         else if (el.id === 'login-overlay') { el.style.display = 'none'; }
@@ -7178,7 +7080,7 @@ window.addEventListener('popstate', function(e) {
     // Only edge swipe from left edge (< 40px from left)
     if (e.touches[0].clientX > 40) { _edgeSwipeData = null; return; }
     // Don't swipe on inputs or when a sheet is open
-    if (e.target.closest('input, textarea, .sheet-overlay, #settings-sheet, .cooking-overlay')) { _edgeSwipeData = null; return; }
+    if (e.target.closest('input, textarea, .sheet-overlay, .cooking-overlay')) { _edgeSwipeData = null; return; }
     _edgeSwipeData = { startX: e.touches[0].clientX, startY: e.touches[0].clientY };
     // Cancel tab swipe when edge swipe is active
     if (typeof _swipeTabData !== 'undefined') _swipeTabData = null;
@@ -7519,7 +7421,7 @@ async function updateWeatherWidget() {
         <span class="weather-temp-main">${w.temperature}°C</span>
         <span class="weather-temp">${wi.label}</span>
       </div>
-      <span class="weather-cta" onclick="event.stopPropagation();openSettings()">${appSettings.lang==='en'?'Edit':'Upraviť'} ›</span>`;
+      <span class="weather-cta" onclick="event.stopPropagation();openMorePageFromAnywhere('home-settings')">${appSettings.lang==='en'?'Edit':'Upraviť'} ›</span>`;
     widgetEl.classList.remove('weather-fallback');
   } else {
     widgetEl.innerHTML = `<div class="weather-orb">🌡️</div>
@@ -7529,7 +7431,7 @@ async function updateWeatherWidget() {
         <span class="weather-temp-main">—°C</span>
         <span class="weather-temp">${appSettings.lang==='en'?'Set city for forecast':'Nastav mesto pre predpoveď'}</span>
       </div>
-      <span class="weather-cta" onclick="event.stopPropagation();openSettings()">${appSettings.lang==='en'?'Set':'Nastaviť'} ›</span>`;
+      <span class="weather-cta" onclick="event.stopPropagation();openMorePageFromAnywhere('home-settings')">${appSettings.lang==='en'?'Set':'Nastaviť'} ›</span>`;
     widgetEl.classList.add('weather-fallback');
   }
 }
