@@ -3803,11 +3803,11 @@ function renderMoreHome() {
 }
 
 function renderMoreTile(page, icon, title, desc, detail) {
-  return `<button class="more-tile" onclick="openMorePage('${page}')"><span>${icon}</span><strong>${title}</strong><small>${desc}</small><em>${detail}</em><b>›</b></button>`;
+  return `<button class="more-tile" onclick="openMorePage('${page}')"><span>${icon}</span><strong>${esc(title)}</strong><small>${esc(desc)}</small><em>${esc(detail)}</em><b>›</b></button>`;
 }
 
 function renderMoreRow(page, icon, title, desc) {
-  return `<button onclick="openMorePage('${page}')"><span>${icon}</span><div><strong>${title}</strong><small>${desc}</small></div><em>›</em></button>`;
+  return `<button onclick="openMorePage('${page}')"><span>${icon}</span><div><strong>${esc(title)}</strong><small>${esc(desc)}</small></div><em>›</em></button>`;
 }
 
 function openMorePage(page) {
@@ -3857,7 +3857,7 @@ function moreCard(title, content, cls) {
 }
 
 function moreActionRow(icon, title, desc, action, meta) {
-  return `<button class="more-action-row" onclick="${action || ''}"><span>${icon}</span><div><strong>${title}</strong>${desc ? `<small>${desc}</small>` : ''}</div>${meta ? `<em>${meta}</em>` : '<em>›</em>'}</button>`;
+  return `<button class="more-action-row" onclick="${action || ''}"><span>${icon}</span><div><strong>${esc(title)}</strong>${desc ? `<small>${esc(desc)}</small>` : ''}</div>${meta ? `<em>${meta}</em>` : '<em>›</em>'}</button>`;
 }
 
 function morePill(label, active, action) {
