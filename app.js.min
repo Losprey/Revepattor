@@ -1,4 +1,4 @@
-// ======================== TRANSLATIONS ========================
+
 const LANG = {
   sk: {
     appTitle: 'Plánovač jedál', appSubtitle: 'Týždenný plánovač s receptami',
@@ -152,22 +152,19 @@ const LANG = {
   }
  };
 
-// ======================== AUTH + DATA NAMESPACE ========================
-let authUser = null;      // Firebase user object
-let authIsGuest = false;  // true = guest mode, false = logged in
-let authLoading = true;   // waiting for Firebase Auth init
-let storeNs = 'guest_';   // default: guest namespace
-// Restore correct namespace BEFORE data loads
+let authUser = null;
+let authIsGuest = false;
+let authLoading = true;
+let storeNs = 'guest_';
+
 try {
   const savedAuth = JSON.parse(localStorage.getItem('authUser') || 'null');
   if (savedAuth && savedAuth.uid) { storeNs = 'user_' + savedAuth.uid + '_'; }
   else if (localStorage.getItem('authGuest') === '1') { storeNs = 'guest_'; }
 } catch(e) { storeNs = 'guest_'; }
 
-// Shared keys that are NOT user-scoped
 const GLOBAL_KEYS = new Set(['lang','dark','accent','appSettings','notifFired','notifFiredToday','familyCode','deviceId','tipDismissed','authUser','authGuest','authMigrateFromGuest','_appVersion','_migrated_v2','_imgcache_cleared_v4','onboardingCompleted','childAge']);
 
-// Patch localStorage to auto-namespace data keys
 (function patchLocalStorage() {
   const _get = Storage.prototype.getItem;
   const _set = Storage.prototype.setItem;
@@ -184,14 +181,13 @@ const GLOBAL_KEYS = new Set(['lang','dark','accent','appSettings','notifFired','
     if (GLOBAL_KEYS.has(key)) return _remove.call(this, key);
     return _remove.call(this, storeNs + key);
   };
-  // Save raw refs for migration
+
   window._lsGet = _get;
   window._lsSet = _set;
 })();
 
 function setStoreNamespace(ns) { storeNs = ns; }
 
-// Firebase Auth functions
 function initFirebaseAuth() {
   if (!firebaseReady || typeof firebase.auth !== 'function') return;
   firebase.auth().onAuthStateChanged(user => {
@@ -200,13 +196,13 @@ function initFirebaseAuth() {
       authIsGuest = false;
       authLoading = false;
       setStoreNamespace('user_' + user.uid + '_');
-      // Reload data from new namespace
+
       try { recipes = JSON.parse(localStorage.getItem('recipes') || 'null') || []; } catch(e) {}
       try { mealPlan = JSON.parse(localStorage.getItem('mealPlan') || '{}'); } catch(e) {}
       try { mealPlanKids = JSON.parse(localStorage.getItem('mealPlanKids') || '{}'); } catch(e) {}
       try { loadShopItems(); } catch(e) {}
       try { tasks = JSON.parse(localStorage.getItem('tasks') || '[]'); } catch(e) {}
-      // If user namespace is empty, try to load from guest namespace
+
       if (!recipes || (Array.isArray(recipes) && recipes.length === 0)) {
         var guestRecipes = window._lsGet.call(localStorage, 'guest_recipes');
         if (guestRecipes) {
@@ -237,7 +233,7 @@ function initFirebaseAuth() {
         updateAuthUI();
       }
     }
-    // Hide splash after first auth state is resolved
+
     if (window._hideSplash) window._hideSplash();
   });
 }
@@ -251,7 +247,7 @@ function signInWithGoogle() {
     }
   });
   if (authIsGuest) {
-    // Guest logging in — ask about migration
+
     showConfirmModal(lang==='en'?'Transfer your data to this account?':'Chceš preniesť aktuálne dáta do účtu?', '📦', lang==='en'?'Transfer':'Preniesť', function() {
         localStorage.setItem('authMigrateFromGuest', '1');
       });
@@ -261,7 +257,7 @@ function signInWithGoogle() {
 
 function signOutUser() {
   showConfirmModal(lang==='en'?'Sign out from Mealnest?':'Odhlásiť sa z Mealnestu?', '👋', lang==='en'?'Sign out':'Odhlásiť', function() {
-    
+
   if (!firebase.auth) return;
   firebase.auth().signOut().then(() => {
     authUser = null;
@@ -283,8 +279,8 @@ function continueAsGuest() {
   localStorage.removeItem('authUser');
   document.getElementById('login-overlay').style.display = 'none';
   updateAuthUI();
-  // onAuthStateChanged callback už prekreslí UI a načíta správny namespace
-  // location.reload() nie je potrebný a spôsobuje zbytočné bliknutie
+
+
 }
 
 function migrateGuestToUser() {
@@ -297,18 +293,18 @@ function migrateGuestToUser() {
     const k = localStorage.key(i);
     if (k.startsWith('guest_')) guestKeys.push(k);
   }
-  // Bypass namespace patch: use raw getItem
+
   const rawGet = Storage.prototype.getItem;
   guestKeys.forEach(k => {
     const dataKey = k.replace('guest_', '');
     if (GLOBAL_KEYS.has(dataKey)) return;
     const val = rawGet.call(localStorage, k);
     if (val !== null) {
-      // Write using current namespace (user_{uid}_ key)
+
       localStorage.setItem(dataKey, val);
     }
   });
-  // Reload to pick up migrated data in JS variables
+
   setTimeout(() => location.reload(), 300);
 }
 
@@ -326,7 +322,6 @@ function updateAuthUI() {
   }
 }
 
-// Wait for Firebase SDK to load (max 5s), then init with small delay to let app.js finish parsing
 (function waitForFirebaseSDK(retries) {
   if (typeof firebase !== 'undefined' && firebase.initializeApp) {
     setTimeout(function() {
@@ -342,9 +337,8 @@ function updateAuthUI() {
       initFirebaseAuth();
     }, 50);
   }
-}(25)); // max ~5s wait
+}(25));
 
-// ======================== ONBOARDING ========================
 const ONBOARDING_SLIDES = [
   {
     icon: '🌐', title: 'Vyber si jazyk', titleEn: 'Choose language',
@@ -465,7 +459,7 @@ function showOnboarding(forceShow) {
   _onboardIndex = 0;
   renderOnboardSlide();
   document.getElementById('onboard-next').onclick = nextOnboardSlide;
-  // Swipe support
+
   let touchStartX = 0;
   ov.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
   ov.addEventListener('touchend', e => {
@@ -493,10 +487,10 @@ function renderOnboardSlide() {
       : l === 'en' && s2.mockupEn ? s2.mockupEn : s2.mockup || '';
     return `<div class="${cls}"><div class="onboard-illustration">${s2.icon}</div><div class="onboard-title">${title}</div><div class="onboard-sub">${sub}</div>${mockup}</div>`;
   }).join('');
-  // Dots
+
   const dots = document.getElementById('onboard-dots');
   dots.innerHTML = ONBOARDING_SLIDES.map((_, i) => `<div class="onboard-dot${i === _onboardIndex ? ' active' : ''}"></div>`).join('');
-  // Button
+
   const btn = document.getElementById('onboard-next');
   const isLast = _onboardIndex === ONBOARDING_SLIDES.length - 1;
   btn.textContent = isLast ? (l==='en'?'Start using Mealnest':'Začať používať') : (l==='en'?'Next →':'Ďalej →');
@@ -519,7 +513,7 @@ function pickOnboardLang(l) {
   lang = l;
   localStorage.setItem('lang', l);
   saveSettings();
-  // Highlight active
+
   const enBtn = document.getElementById('onboard-lang-en');
   const skBtn = document.getElementById('onboard-lang-sk');
   if (enBtn) { enBtn.style.borderColor = l==='en'?'var(--primary)':'var(--border)'; enBtn.style.background = l==='en'?'rgba(220,38,38,.08)':'var(--surface)'; enBtn.style.color = l==='en'?'var(--primary)':'var(--text)'; }
@@ -527,15 +521,12 @@ function pickOnboardLang(l) {
   renderOnboardSlide();
 }
 
-// Show onboarding on first visit (after data loads)
 setTimeout(() => showOnboarding(), 300);
 
-// ======================== AI (DEEPSEEK PROXY) ========================
 const APP_VERSION = '1.0.40';
 const VAPID_PUBLIC_KEY = 'BI6Fga-GXSKggkNJ58R1VEYEfGE6KfWgnuDtI9sHqQLQJzGLshJuIuODmI13AVzX5D2Kd7SBxrr7Cvf-xRAowg0';
-const PUSH_PROXY_URL = 'https://receptar.waldis994.workers.dev';
+const PUSH_PROXY_URL = 'https:
 
-// ======================== PUSH NOTIFICATIONS ========================
 let _pushSubscription = null;
 
 async function registerPushSubscription() {
@@ -569,23 +560,23 @@ function savePushSubscription(sub) {
     var deviceId = getDeviceId();
     var key = 'push_subs_' + deviceId;
     localStorage.setItem(key, JSON.stringify(data));
-    // Save to Firebase if family connected
+
     if (typeof familyDbRef !== 'undefined' && familyDbRef) {
       familyDbRef.child('pushSubscriptions/' + deviceId).set(data);
     }
-  } catch(e) { /* silent */ }
+  } catch(e) {  }
 }
 
 async function sendPushToFamily(title, body, tab) {
   try {
     if (typeof familyDbRef === 'undefined' || !familyDbRef) return;
-    // Get all subscriptions from Firebase
+
     var snap = await familyDbRef.child('pushSubscriptions').once('value');
     var subs = snap.val();
     if (!subs) return;
     var list = Object.values(subs);
     if (!list.length) return;
-    // Send to Cloudflare Worker
+
     await fetch(PUSH_PROXY_URL + '/api/notify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -606,7 +597,7 @@ function urlBase64ToUint8Array(base64String) {
   return output;
 }
 
-const AI_PROXY_URL = 'https://receptar.waldis994.workers.dev'; // Cloudflare Worker proxy pre DeepSeek
+const AI_PROXY_URL = 'https:
 
 async function aiGenerate(messages, timeoutMs) {
   if (!AI_PROXY_URL || AI_PROXY_URL.includes('YOUR_CLOUDFLARE')) {
@@ -699,7 +690,7 @@ function parseAndFillAIPlan() {
   for (const line of lines) {
     const cleanLine = line.replace(/^[•\-\*\d\.\s]+/, '').trim();
     if (!cleanLine) continue;
-    // Check if this is a day header
+
     const dayMatch = cleanLine.match(/^([A-ZÁ-Ž][a-zá-ž]+)/);
     if (dayMatch && dayMap[dayMatch[1].toLowerCase()]) {
       currentDay = dayMap[dayMatch[1].toLowerCase()];
@@ -707,7 +698,7 @@ function parseAndFillAIPlan() {
       continue;
     }
     if (!currentDay) continue;
-    // Check if this is a meal line
+
     for (const [slot, aliases] of Object.entries(slotAliases)) {
       for (const alias of aliases) {
         const idx = cleanLine.toLowerCase().indexOf(alias);
@@ -722,7 +713,7 @@ function parseAndFillAIPlan() {
     }
   }
 
-  // Fill the planner
+
   const weekPlan = getWeekPlan(weekKey);
   Object.entries(plan).forEach(([day, meals]) => {
     if (!weekPlan[day]) weekPlan[day] = {};
@@ -890,7 +881,7 @@ async function aiDailyTip() {
     document.getElementById('dash-message').textContent = reply;
     document.getElementById('dash-message-sub').textContent = t('🤖 Vygenerované AI','🤖 AI-generated');
   }
-  // Restore button
+
   if (btn) { btn.disabled = false; btn.innerHTML = origHTML || ('🤖 <span id="dash-ai-label">' + t('AI tip dňa','AI tip of the day') + '</span>'); }
 }
 
@@ -922,7 +913,7 @@ async function aiFillEmptySlots() {
     });
   });
   if (!emptySlots.length) { showToast(t('Všetky sloty sú vyplnené.','All slots are filled.'),'warning'); return; }
-  // Fill up to 10 empty slots
+
   const toFill = emptySlots.slice(0, 10);
   for (const { day, slot } of toFill) {
     await aiSuggestForSlot(day, slot);
@@ -1017,7 +1008,7 @@ async function aiGenerateShoppingList() {
   var plan = planType === 'kids' ? mealPlanKids : mealPlan;
   allMeals = collectMeals(plan);
 
-  // If local empty but family is connected, try Firebase
+
   if (!allMeals.length && familyCode && firebaseReady && familyDbRef) {
     showToast(t('Načítavam rodinné dáta...','Loading family data...'),'info');
     try {
@@ -1078,7 +1069,7 @@ function addAIShoppingItems() {
   saveShopItems();
   try { localStorage.setItem('shoppingItems', JSON.stringify(shopItems)); } catch(e) {}
   document.getElementById('ai-modal')?.remove();
-  // Fallback: if main parser found nothing, add every line as an item
+
   if (added === 0) {
     lines.forEach(function(l) {
       var cl2 = l.replace(/^[•\-\*\s\d\.\)]+\s*/, '').trim();
@@ -1099,14 +1090,10 @@ function addAIShoppingItems() {
 let ageFilter = '';
 let voiceSearch = null, voiceSearchListening = false;
 
-// ======================== FIREBASE FAMILY SYNC ========================
-// 1. Go to https://console.firebase.google.com → Create project
-// 2. Build → Realtime Database → Create Database → Start in test mode
-// 3. Project settings → Add web app → Copy firebaseConfig below
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyBGAgGCz6Ff_WElerrHHqZnT65N7CVTQJQ",
   authDomain: "receptar2.firebaseapp.com",
-  databaseURL: "https://receptar2-default-rtdb.europe-west1.firebasedatabase.app",
+  databaseURL: "https:
   projectId: "receptar2",
   storageBucket: "receptar2.firebasestorage.app",
   messagingSenderId: "852171374029",
@@ -1116,8 +1103,8 @@ const FIREBASE_CONFIG = {
 let firebaseReady = false;
 let familyCode = '';
 let familyDbRef = null;
-let firebaseListeners = []; // track active listeners for cleanup
-let _syncing = {}; // Track which keys are being pushed to Firebase
+let firebaseListeners = [];
+let _syncing = {};
 
 function initFirebase() {
   if (firebaseReady) return;
@@ -1133,7 +1120,7 @@ function initFirebase() {
       firebaseReady = true;
     }
   } catch(e) {
-    // Already initialized
+
     firebaseReady = true;
   }
 }
@@ -1154,7 +1141,7 @@ function createFamily() {
   familyCode = code;
   localStorage.setItem('familyCode', code);
   connectToFamily(code);
-  // Only push if user confirms (creator is first, so safe to push)
+
   showConfirmModal(t('Vytvorená nová rodina. Synchronizovať aktuálne dáta?','New family created. Sync your current data?'), '👨‍👩‍👧‍👦', lang==='en'?'Sync':'Syncovať', function() {
     pushAllLocalData();
   });
@@ -1172,7 +1159,7 @@ function joinFamily(code) {
   familyCode = code;
   localStorage.setItem('familyCode', code);
   connectToFamily(code);
-  // Wait for remote data, then ask about merge
+
   setTimeout(function() {
     var hasRemote = false;
     try {
@@ -1209,8 +1196,8 @@ function showFamilyMembers() {
 
 function leaveFamily() {
   showConfirmModal(t('Naozaj opustiť rodinu? Lokálne dáta ostanú.','Really leave family? Local data stays.'), '💪', lang==='en'?'Leave':'Opustiť', function() {
-    
-  // Remove all Firebase listeners
+
+
   firebaseListeners.forEach(ref => { try { ref.off(); } catch(e) {} });
   firebaseListeners = [];
   familyCode = '';
@@ -1225,11 +1212,11 @@ function connectToFamily(code) {
   if (!firebaseReady || !code) return;
   const db = firebase.database();
   familyDbRef = db.ref('families/' + code);
-  // Clean up old listeners
+
   firebaseListeners.forEach(ref => { try { ref.off(); } catch(e) {} });
   firebaseListeners = [];
 
-  // Listen for remote changes on each data set
+
   const bindPath = (path, localKey, mergeFn) => {
     const ref = familyDbRef.child(path);
     ref.on('value', snap => {
@@ -1246,7 +1233,7 @@ function connectToFamily(code) {
         reloadFromLocalStorage(localKey, remoteData);
       }
       showSyncToast(localKey);
-      // Force re-render
+
       try { renderTasks(); } catch(e) {}
       try { renderPlanner(); } catch(e) {}
       try { renderShoppingList(); } catch(e) {}
@@ -1262,10 +1249,10 @@ function connectToFamily(code) {
   bindPath('planType', 'planType');
   bindPath('childAge', 'childAge');
 
-  // Listen for recipe changes (merge by id, keep local-only recipes)
+
   bindPath('recipes', 'recipes', mergeRecipes);
 
-  // Also push local device presence
+
   const presenceRef = familyDbRef.child('members').child(getDeviceId());
   presenceRef.set({ name: localStorage.getItem('deviceName') || (lang==='en'?'Device':'Zariadenie'), lastSeen: firebase.database.ServerValue.TIMESTAMP, online: true });
   presenceRef.onDisconnect().update({ online: false, lastSeen: firebase.database.ServerValue.TIMESTAMP });
@@ -1321,20 +1308,20 @@ function debugFirebasePull() {
     var val = snap.val();
     if (!val) { showToast('No data at families/'+familyCode,'info'); return; }
     var keys = Object.keys(val);
-    // Directly set JS variables
+
     if (val.mealPlan) { mealPlan = val.mealPlan; }
     if (val.mealPlanKids) { mealPlanKids = val.mealPlanKids; }
     if (val.shoppingItems) { shopItems = Array.isArray(val.shoppingItems) ? val.shoppingItems : []; saveShopItems(); }
     if (val.tasks) { tasks = Array.isArray(val.tasks) ? val.tasks : []; }
     if (val.recipes) { recipes = Array.isArray(val.recipes) ? val.recipes : []; saveToLS(); }
     if (val.planType) { planType = val.planType; localStorage.setItem('planType', planType); }
-    // Also save to localStorage
+
     keys.forEach(function(k) {
       if (val[k] !== null && val[k] !== undefined) {
         try { localStorage.setItem(k, JSON.stringify(val[k])); } catch(e) {}
       }
     });
-    // Force render everything
+
     try { renderPlanner(); } catch(e) {}
     try { renderTasks(); } catch(e) {}
     try { renderShoppingList(); } catch(e) {}
@@ -1383,7 +1370,6 @@ function getDeviceId() {
   return id;
 }
 
-// Network and sync state
 var _isOnline = navigator.onLine !== false;
 var _isSyncing = false;
 var _justConnected = false;
@@ -1392,27 +1378,27 @@ function updateSyncIndicator() {
   var el = document.getElementById('sync-indicator');
   if (!el) return;
   el.classList.remove('syncing', 'offline', 'connected', 'error', 'sync-just-connected');
-  
+
   if (_isSyncing) {
     el.textContent = '🔄';
     el.title = 'Synchronizujem...';
     el.classList.add('syncing');
     return;
   }
-  
+
   if (!_isOnline) {
     el.textContent = '📵';
     el.title = 'Offline — zmeny sa uložia lokálne';
     el.classList.add('offline');
     return;
   }
-  
+
   if (!familyCode) {
     el.textContent = '⚪';
     el.title = 'Nie si pripojený k rodine';
     return;
   }
-  
+
   if (firebaseReady) {
     el.textContent = '🟢';
     el.title = 'Synchronizované — kód: ' + familyCode;
@@ -1433,7 +1419,6 @@ function setSyncing(syncing) {
   updateSyncIndicator();
 }
 
-// Online/offline listeners
 window.addEventListener('online', function() {
   _isOnline = true;
   updateSyncIndicator();
@@ -1443,7 +1428,7 @@ window.addEventListener('online', function() {
     bar.textContent = '🔗 Späť online — synchronizujem...';
     setTimeout(function() { bar.classList.remove('show'); }, 2000);
   }
-  // Reconnect to Firebase
+
   if (familyCode && firebaseReady) {
     _isSyncing = true;
     updateSyncIndicator();
@@ -1477,26 +1462,21 @@ function setDynamicGradient() {
 function refreshActiveTab() {
   const tab = document.body.dataset.tab;
   setDynamicGradient();
-  // Set season in real time
+
   updateSeason();
   if (tab === 'shopping') renderShoppingList();
   if (tab === 'planner') renderPlanner();
   if (tab === 'tasks') renderTasks();
   if (tab === 'dashboard') { renderDashboard(); }
-  // Always update task widget on dashboard
+
   try { renderTaskWidget(); } catch(e) {}
 }
 
-// =================== AUTO DARK MODE ===================
-// Dark mode is always on — system preference not needed
-
-// =================== SEASON UPDATE IN REAL TIME ===================
 function updateSeason() {
   var seasons = ['zima','zima','jar','jar','jar','leto','leto','leto','leto','jesen','jesen','zima'];
   document.body.dataset.season = seasons[new Date().getMonth()];
 }
 
-// =================== PARALLAX HERO COLLAPSE ===================
 var _plannerScrollHandler = null;
 function initPlannerParallax() {
   if (_plannerScrollHandler) { document.removeEventListener('scroll', _plannerScrollHandler, { passive: true }); }
@@ -1508,7 +1488,7 @@ function initPlannerParallax() {
     var scrollY = window.pageYOffset || document.documentElement.scrollTop;
     hero.classList.toggle('collapsed', scrollY > 20);
     pip.classList.toggle('visible', scrollY > 80);
-    // Auto-hide floating panel after 2.5s of no scroll
+
     if (scrollY > 80) {
       if (_pipAutoHide) clearTimeout(_pipAutoHide);
       _pipAutoHide = setTimeout(function() {
@@ -1520,14 +1500,12 @@ function initPlannerParallax() {
   document.addEventListener('scroll', _plannerScrollHandler, { passive: true });
 }
 
-// Call parallax init after each planner render
 var _origRenderPlanner2 = renderPlanner;
 renderPlanner = function() {
   _origRenderPlanner2.apply(this, arguments);
   initPlannerParallax();
 };
 
-// Load family code from localStorage on init
 try { familyCode = localStorage.getItem('familyCode') || ''; } catch(e) { familyCode = ''; }
 if (familyCode) { setTimeout(function() { initFirebase(); if (firebaseReady) { connectToFamily(familyCode); setTimeout(function() { autoPullFromFirebase(); }, 2500); } }, 1500); }
 
@@ -1545,15 +1523,15 @@ function autoPullFromFirebase() {
       setTimeout(function() { if (el) el.style.display = 'none'; }, 3000);
       return;
     }
-    // Merge recipes (preserve local recipes not in remote)
+
     if (val.recipes && Array.isArray(val.recipes)) {
       recipes = mergeRecipes(recipes, val.recipes);
     }
-    // Merge shopping items
+
     if (val.shoppingItems && Array.isArray(val.shoppingItems)) {
       shopItems = mergeShoppingItems(shopItems, val.shoppingItems);
     }
-    // Direct assignments for simple data
+
     if (val.mealPlan) { mealPlan = val.mealPlan; }
     if (val.mealPlanKids) { mealPlanKids = val.mealPlanKids; }
     if (val.tasks) { tasks = Array.isArray(val.tasks) ? val.tasks : []; }
@@ -1572,8 +1550,6 @@ function autoPullFromFirebase() {
   });
 }
 
-// ======================== DATA ========================
-// Default recipes loaded from external JSON to save 74KB
 var FALLBACK_RECIPES = [
   {id:1,name:'Nový recept',nameEn:'New recipe',category:'Hlavné jedlá',time:30,image:'',imageData:'',ingredients:['Surovina 1','Surovina 2'],ingredientsEn:['Ingredient 1','Ingredient 2'],steps:['Krok 1','Krok 2'],stepsEn:['Step 1','Step 2'],tags:[],tagsEn:[],rating:0,notes:'',notesEn:'',favorite:false,nutrition:{kcal:0,protein:0,fat:0,carbs:0}}
 ];
@@ -1591,16 +1567,15 @@ async function loadDefaultRecipes() {
       return;
     }
   } catch(e) {
-    // Silent fail - use minimal fallback
+
   }
-  // If fetch failed, use minimal fallback
+
   if (!recipes || recipes.length === 0) {
     recipes = JSON.parse(JSON.stringify(FALLBACK_RECIPES));
     saveToLS();
   }
 }
 
-// Migrate old raw localStorage data to namespaced keys BEFORE loading data
 (function migrateOldDataIfNeeded() {
   if (window._lsGet.call(localStorage, '_migrated_v2') === '1') return;
   const dataKeys = ['mealPlan','mealPlanKids','planType','shoppingItems','tasks','recipes','cookingHistory'];
@@ -1611,13 +1586,12 @@ async function loadDefaultRecipes() {
   window._lsSet.call(localStorage, '_migrated_v2', '1');
 })();
 
-// One-time: clear old Pexels caches and force re-fetch on v1.0.4+
 (function migrateClearImageCache() {
   if (window._lsGet.call(localStorage, '_imgcache_cleared_v4') === '1') return;
-  // Remove old pexels caches
+
   try { localStorage.removeItem('pexels_cache_v2'); } catch(e) {}
   try { localStorage.removeItem('pexels_cache_v3'); } catch(e) {}
-  // Strip all pexels/placehold image URLs to force fresh fetch
+
   try {
     const rawRecipes = window._lsGet.call(localStorage, storeNs + 'recipes');
     if (rawRecipes) {
@@ -1636,7 +1610,7 @@ async function loadDefaultRecipes() {
 })();
 
 let recipes = (function() { var parsed = JSON.parse(localStorage.getItem('recipes') || 'null'); if (!parsed || !Array.isArray(parsed) || parsed.length === 0) { setTimeout(loadDefaultRecipes, 200); return []; } return parsed.filter(function(r) { return r != null && typeof r === 'object'; }); })();
-// Migrate: add allergens/difficulty if missing
+
 recipes = recipes.filter(function(r) { return r != null && typeof r === 'object'; }).map(r => ({
   ...r,
   allergens: r.allergens || [],
@@ -1653,7 +1627,7 @@ let mealPlan = (() => { try { return JSON.parse(localStorage.getItem('mealPlan')
 let mealPlanKids = (() => { try { return JSON.parse(localStorage.getItem('mealPlanKids') || '{}'); } catch(e) { return {}; } })();
 let planType = localStorage.getItem('planType') || 'adults';
 let plannerWeekOffset = 0;
-let _selectedPlannerDay = (new Date().getDay() + 6) % 7; // Today's index
+let _selectedPlannerDay = (new Date().getDay() + 6) % 7;
 
 function getWeekKey(date) {
   const d = new Date(date);
@@ -1699,7 +1673,6 @@ function saveWeekPlan() {
   localStorage.setItem('planType', planType);
 }
 
-// Migrate old flat mealPlan to week-based
 (function() {
   const keys = Object.keys(mealPlan);
   if (keys.length && DAYS.includes(keys[0])) {
@@ -1709,7 +1682,6 @@ function saveWeekPlan() {
   }
 })();
 
-// ======================== LANGUAGE ========================
 function t(key, enFallback) {
   if (enFallback !== undefined) return appSettings.lang === 'en' ? enFallback : key;
   return (LANG[lang] && LANG[lang][key]) || LANG.sk[key] || key;
@@ -1730,12 +1702,12 @@ function applyLang() {
     if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
       if ('placeholder' in el) el.placeholder = t(key);
     } else {
-      // preserve leading emoji/icons
+
       const txt = t(key);
       if (el.children.length === 0 || (el.children.length === 1 && el.querySelector('span'))) {
         el.textContent = txt;
       } else {
-        // Set text on text nodes only or last child
+
         const spans = el.querySelectorAll('span');
         if (spans.length === 1 && spans[0].dataset.lang) {
           spans[0].textContent = txt.replace(/^[^\w]*\s*/,'');
@@ -1745,17 +1717,17 @@ function applyLang() {
   });
   const langToggle = document.getElementById('lang-toggle');
   if (langToggle) langToggle.textContent = lang === 'en' ? '🇸🇰 SK' : '🇬🇧 EN';
-  // Show/hide English name field in form
+
   const nameEnGroup = document.getElementById('name-en-group');
   if (nameEnGroup) nameEnGroup.style.display = lang === 'en' ? 'block' : 'none';
-  // Update form title
+
   const formTitle = document.getElementById('form-title');
   if (editingId !== null) {
     if (formTitle) formTitle.textContent = t('formTitle') + ' (edit)';
   } else {
     if (formTitle) formTitle.textContent = t('formTitle');
   }
-  // Planner labels
+
   const phTitle = document.getElementById('planner-hero-title'); if (phTitle) phTitle.textContent = lang==='en'?'📅 Meal Planner':'📅 Plánovač jedál';
   const phSub = document.getElementById('planner-hero-sub'); if (phSub) phSub.textContent = lang==='en'?'Plan the whole week in a few taps':'Naplánuj si celý týždeň na pár kliknutí';
   const phBtns = document.querySelectorAll('#planner-hero .hero-header-actions .btn');
@@ -1770,7 +1742,7 @@ function applyLang() {
   const pipMealsLabel = document.getElementById('pip-meals-label'); if (pipMealsLabel) pipMealsLabel.textContent = lang==='en'?'meals':'jedál';
   const aiTip = document.getElementById('dash-ai-label'); if (aiTip) aiTip.textContent = lang==='en'?'AI tip of the day':'AI tip dňa';
   const rab = document.getElementById('recipe-ai-btn'); if (rab) { rab.textContent = lang==='en'?'🤖 What to cook?':'🤖 Čo uvariť?'; rab.title = lang==='en'?'AI suggestion from your ingredients':'AI návrh z vašich surovín'; }
-  // Category dropdowns
+
   const cats = ['Hlavné jedlá','Polievky','Šaláty','Dezerty','Pečivo','Nápoje','Predjedlá','Raňajky','Prílohy','Detské'];
   ['filter-category','r-category','ingr-category'].forEach(id => {
     const sel = document.getElementById(id); if (!sel) return;
@@ -1779,10 +1751,10 @@ function applyLang() {
     opts.forEach((opt,i) => { if (cats[i]) opt.textContent = catLabel(cats[i]); });
     sel.value = val;
   });
-  // Form placeholders
+
   [['shop-item-name','Názov potraviny','Food name'],['shop-item-amount','Množstvo','Quantity'],['shop-item-unit','Jednotka (g, ks, ml...)','Unit (g, pcs, ml...)'],['shop-item-note','Poznámka (voliteľné)','Note (optional)'],['task-title','Názov úlohy','Task title'],['task-note','✏️ Poznámka (voliteľné)','✏️ Note (optional)']].forEach(p => { const el=document.getElementById(p[0]); if(el) el.placeholder = lang==='en'?p[2]:p[1]; });
   [['r-kcal','🔥 kcal / porcia','🔥 kcal / serving'],['r-protein','💪 bielkoviny g','💪 protein g'],['r-fat','🧈 tuky g','🧈 fat g'],['r-carbs','🍚 sacharidy g','🍚 carbs g']].forEach(p => { const el=document.getElementById(p[0]); if(el) el.placeholder = lang==='en'?p[2]:p[1]; });
-  // FAB
+
   const fbt = document.getElementById('fab-btn-task'); if (fbt) fbt.textContent = lang==='en'?'✅ Task':'✅ Úloha';
   const fbm = document.getElementById('fab-btn-meal'); if (fbm) fbm.textContent = lang==='en'?'🍽️ Meal':'🍽️ Jedlo';
   const fbf = document.getElementById('fab-btn-food'); if (fbf) fbf.textContent = lang==='en'?'🛒 Grocery':'🛒 Potravina';
@@ -1806,8 +1778,6 @@ function updateMainHeader(tab, count) {
   if (countEl) countEl.textContent = count != null ? '(' + count + ')' : '';
 }
 
-// Dark mode is always on — toggle was removed
-
 function switchLang() {
   appSettings.lang = lang === 'en' ? 'sk' : 'en';
   saveSettings();
@@ -1830,8 +1800,6 @@ function matchesAgeFilter(recipe) {
   return targets.some(t => rtags.includes(t));
 }
 
-// ======================== THEME ========================
-// ======================== PERSISTENCE ========================
 function mergeRecipes(localArr, remoteArr) {
   if (!Array.isArray(localArr)) localArr = [];
   if (!Array.isArray(remoteArr)) remoteArr = [];
@@ -1872,9 +1840,8 @@ function esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replac
 
 function escAttr(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-// ======================== NUTRITION ESTIMATOR ========================
 const NUTRITION_DB = {
-  // Mäso
+
   'kuracie prsia': {kcal:165, protein:31, fat:3.6, carbs:0}, 'kuracie stehno':{kcal:177, protein:25, fat:8.2, carbs:0}, 'kurací':{kcal:172, protein:27, fat:6.3, carbs:0}, 'kurča':{kcal:172, protein:27, fat:6.3, carbs:0},
   'mleté mäso':{kcal:250, protein:20, fat:18, carbs:0}, 'hovädzie':{kcal:250, protein:26, fat:15, carbs:0}, 'bravčové':{kcal:242, protein:27, fat:14, carbs:0}, 'bravčová krkovička':{kcal:250, protein:20, fat:18, carbs:0},
   'bravčová kotleta':{kcal:220, protein:28, fat:12, carbs:0}, 'bravčový bôčik':{kcal:300, protein:16, fat:26, carbs:0}, 'bravčové mäso':{kcal:242, protein:27, fat:14, carbs:0},
@@ -1886,11 +1853,11 @@ const NUTRITION_DB = {
   'pečeň':{kcal:135, protein:21, fat:5, carbs:2}, 'bryndza':{kcal:190, protein:14, fat:15, carbs:1},
   'paštéta':{kcal:300, protein:13, fat:27, carbs:1}, 'salam':{kcal:300, protein:18, fat:25, carbs:1},
 
-  // Ryby
+
   'losos':{kcal:208, protein:20, fat:13, carbs:0}, 'tuniak':{kcal:184, protein:26, fat:8, carbs:0}, 'pstruh':{kcal:148, protein:21, fat:7, carbs:0},
   'makrela':{kcal:205, protein:19, fat:14, carbs:0}, 'sardinky':{kcal:208, protein:25, fat:11, carbs:0}, 'rybie filé':{kcal:150, protein:22, fat:6, carbs:0}, 'ryba':{kcal:150, protein:22, fat:6, carbs:0}, 'krevety':{kcal:85, protein:20, fat:0.5, carbs:0},
 
-  // Mliečne
+
   'mlieko':{kcal:65, protein:3.3, fat:3.5, carbs:4.7}, 'smotana':{kcal:292, protein:2.5, fat:30, carbs:3}, 'šľahačková smotana':{kcal:340, protein:2, fat:36, carbs:3},
   'tvaroh':{kcal:103, protein:14, fat:4, carbs:3}, 'jogurt':{kcal:60, protein:5, fat:1.5, carbs:7}, 'biely jogurt':{kcal:62, protein:5, fat:1.5, carbs:7},
   'syr':{kcal:350, protein:25, fat:28, carbs:1.5}, 'mozzarella':{kcal:280, protein:22, fat:20, carbs:2}, 'parmezán':{kcal:431, protein:38, fat:29, carbs:4},
@@ -1898,7 +1865,7 @@ const NUTRITION_DB = {
   'maslo':{kcal:717, protein:0.9, fat:81, carbs:0.1}, 'margarín':{kcal:717, protein:0.5, fat:80, carbs:0.5},
   'vajce':{kcal:155, protein:13, fat:11, carbs:1.1}, 'vajcia':{kcal:155, protein:13, fat:11, carbs:1.1}, 'vajíčko':{kcal:155, protein:13, fat:11, carbs:1.1},
 
-  // Obilniny a pečivo
+
   'múka':{kcal:364, protein:10, fat:1, carbs:76}, 'hladká múka':{kcal:364, protein:10, fat:1, carbs:76}, 'polohrubá múka':{kcal:364, protein:10, fat:1, carbs:76},
   'hrubá múka':{kcal:364, protein:10, fat:1, carbs:76}, 'celozrnná múka':{kcal:340, protein:13, fat:2, carbs:66},
   'chlieb':{kcal:265, protein:9, fat:1.5, carbs:52}, 'rožok':{kcal:286, protein:9, fat:2.5, carbs:55}, 'bageta':{kcal:280, protein:9, fat:2, carbs:55},
@@ -1910,7 +1877,7 @@ const NUTRITION_DB = {
   'pita':{kcal:260, protein:8, fat:1, carbs:52}, 'tortilla':{kcal:300, protein:8, fat:8, carbs:48},
   'kukurica':{kcal:365, protein:9, fat:4.7, carbs:74}, 'kukuričná':{kcal:365, protein:9, fat:4.7, carbs:74},
 
-  // Zelenina
+
   'mrkva':{kcal:41, protein:0.9, fat:0.2, carbs:10}, 'petržlen':{kcal:36, protein:1.3, fat:0.5, carbs:6}, 'zeler':{kcal:16, protein:0.7, fat:0.2, carbs:3},
   'kapusta':{kcal:25, protein:1.3, fat:0.1, carbs:6}, 'kyslá kapusta':{kcal:15, protein:0.9, fat:0.1, carbs:3},
   'brokolica':{kcal:34, protein:2.8, fat:0.4, carbs:7}, 'karfiol':{kcal:25, protein:1.9, fat:0.3, carbs:5},
@@ -1928,7 +1895,7 @@ const NUTRITION_DB = {
   'kôpor':{kcal:43, protein:3.5, fat:1.1, carbs:7}, 'pažítka':{kcal:30, protein:3, fat:0.7, carbs:4},
   'huby':{kcal:22, protein:3.1, fat:0.3, carbs:3.3}, 'šampiňóny':{kcal:22, protein:3.1, fat:0.3, carbs:3.3},
 
-  // Ovocie
+
   'jablko':{kcal:52, protein:0.3, fat:0.2, carbs:14}, 'hruška':{kcal:57, protein:0.4, fat:0.1, carbs:15},
   'banán':{kcal:89, protein:1.1, fat:0.3, carbs:23}, 'pomaranč':{kcal:47, protein:0.9, fat:0.1, carbs:12},
   'citrón':{kcal:29, protein:1.1, fat:0.3, carbs:9}, 'grejf':{kcal:42, protein:0.8, fat:0.1, carbs:10},
@@ -1940,7 +1907,7 @@ const NUTRITION_DB = {
   'ananas':{kcal:50, protein:0.5, fat:0.1, carbs:13}, 'mango':{kcal:60, protein:0.8, fat:0.4, carbs:15},
   'vodný melón':{kcal:30, protein:0.6, fat:0.2, carbs:8}, 'melón':{kcal:34, protein:0.8, fat:0.2, carbs:8},
 
-  // Oleje, tuky, orechy
+
   'olivový olej':{kcal:884, protein:0, fat:100, carbs:0}, 'olej':{kcal:884, protein:0, fat:100, carbs:0}, 'slnečnicový olej':{kcal:884, protein:0, fat:100, carbs:0},
   'masť':{kcal:902, protein:0, fat:100, carbs:0},
   'vlašské orechy':{kcal:654, protein:15, fat:65, carbs:14}, 'lieskové orechy':{kcal:628, protein:15, fat:61, carbs:17},
@@ -1951,7 +1918,7 @@ const NUTRITION_DB = {
   'kokos':{kcal:354, protein:3.3, fat:33, carbs:15},
   'kešu maslo':{kcal:615, protein:18, fat:49, carbs:28}, 'arašidové maslo':{kcal:588, protein:25, fat:50, carbs:20},
 
-  // Konzervy a omáčky
+
   'paradajkový pyré':{kcal:40, protein:1.8, fat:0.2, carbs:9}, 'paradajkový pretlak':{kcal:40, protein:1.8, fat:0.2, carbs:9}, 'pyré paradajkové':{kcal:40, protein:1.8, fat:0.2, carbs:9}, 'paradajková omáčka':{kcal:42, protein:1.8, fat:0.2, carbs:9},
   'kečup':{kcal:101, protein:1.3, fat:0.2, carbs:24}, 'horčica':{kcal:52, protein:3.7, fat:3.3, carbs:4},
   'majonéza':{kcal:680, protein:1, fat:75, carbs:1}, 'tatárska omáčka':{kcal:600, protein:0.8, fat:65, carbs:5},
@@ -1961,7 +1928,7 @@ const NUTRITION_DB = {
   'bujón':{kcal:5, protein:0.5, fat:0.3, carbs:0.5}, 'vývar':{kcal:5, protein:0.5, fat:0.3, carbs:0.5},
   'konzervované paradajky':{kcal:18, protein:0.9, fat:0.2, carbs:3.9},
 
-  // Koreniny, dochucovadlá
+
   'soľ':{kcal:0, protein:0, fat:0, carbs:0}, 'korenie':{kcal:20, protein:1, fat:0.5, carbs:5}, 'čierne korenie':{kcal:20, protein:1, fat:0.5, carbs:5},
   'paprika korenistá':{kcal:282, protein:14, fat:13, carbs:54}, 'mletá paprika':{kcal:282, protein:14, fat:13, carbs:54},
   'kmín':{kcal:333, protein:18, fat:15, carbs:44}, 'rasca':{kcal:333, protein:18, fat:15, carbs:44},
@@ -1974,7 +1941,7 @@ const NUTRITION_DB = {
   'ocot':{kcal:18, protein:0, fat:0, carbs:0.6},
   'sóda bikarbóna':{kcal:0, protein:0, fat:0, carbs:0},
 
-  // Sladkosti
+
   'čokoláda':{kcal:546, protein:5, fat:31, carbs:61}, 'mliečna čokoláda':{kcal:546, protein:5, fat:31, carbs:61},
   'kakao':{kcal:228, protein:19, fat:14, carbs:57}, 'nutella':{kcal:544, protein:7, fat:33, carbs:58},
   'džem':{kcal:260, protein:0.4, fat:0.1, carbs:68}, 'marmeláda':{kcal:260, protein:0.4, fat:0.1, carbs:68},
@@ -1982,15 +1949,15 @@ const NUTRITION_DB = {
   'medovník':{kcal:380, protein:5, fat:15, carbs:60}, 'bábovka':{kcal:350, protein:5, fat:14, carbs:52},
   'zmrzlina':{kcal:207, protein:3.5, fat:11, carbs:24},
 
-  // Nápoje
+
   'pivo':{kcal:43, protein:0.5, fat:0, carbs:3.6}, 'víno':{kcal:85, protein:0.1, fat:0, carbs:2.6},
   'džús':{kcal:45, protein:0.6, fat:0, carbs:10}, 'sirup':{kcal:180, protein:0, fat:0, carbs:45},
   'káva':{kcal:2, protein:0.1, fat:0, carbs:0}, 'čaj':{kcal:1, protein:0, fat:0, carbs:0},
 
-  // Ostatné
+
   'voda':{kcal:0, protein:0, fat:0, carbs:0}, 'minerálka':{kcal:0, protein:0, fat:0, carbs:0},
 };
-// Items that are typically counted per piece (approximate weight in g per piece)
+
 const PIECE_WEIGHT = {
   'vajce':50, 'vajcia':50, 'vajíčko':50,
   'zemiak':150, 'zemiaky':150,
@@ -2002,7 +1969,7 @@ const PIECE_WEIGHT = {
   'kuracie prsia':200, 'kuracie stehno':150, 'kurací':150, 'kurča':1200,
   'strúčik':4, 'strúčiky':4, 'cesnak':4,
 };
-// Unit conversions
+
 const UNIT_G = {
   'g':1, 'kg':1000, 'dkg':10, 'dag':10,
   'ml':1, 'l':1000, 'dl':100, 'cl':10,
@@ -2031,11 +1998,11 @@ function parseQuantity(raw) {
     if (!unit) {
       const pieceMatch = afterNum.match(/^(ks|kus|kusy|strúčik|strúčiky|plátok|plátky|list|listy|balík|balenia|vajce|vajcia|kura|cibule|mrkvy|zemiaky|papriky|paradajky|stehná|prsia)\b/);
       if (pieceMatch) unit = 'ks';
-      // If followed by word chars (no space-delimited unit), also treat as pieces
+
       else if (afterNum.match(/^[a-záčďéěíňóřšťúůýž]/)) unit = 'ks';
     }
   }
-  // Comma-separated fallback: try to find quantity anywhere in string
+
   if (!val || val === 100) {
     const gMatch = normed.match(/(\d+[\.\,]?\d*)\s*(kg|g|dkg|dag|ml|l|dl|cl)/);
     if (gMatch) {
@@ -2114,19 +2081,19 @@ function estimateNutrition(ingredients, portions) {
       unmatched.push(ing);
     }
   }
-  // Round total
+
   total.kcal = Math.round(total.kcal) || 0;
   total.protein = Math.round(total.protein) || 0;
   total.fat = Math.round(total.fat) || 0;
   total.carbs = Math.round(total.carbs) || 0;
-  // Compute per-portion
+
   const pp = {
     kcal: Math.round(total.kcal / portionsNum) || 0,
     protein: Math.round(total.protein / portionsNum) || 0,
     fat: Math.round(total.fat / portionsNum) || 0,
     carbs: Math.round(total.carbs / portionsNum) || 0,
   };
-  // Confidence
+
   const totalItems = matchedCount + estimatedCount + unmatchedCount;
   let confidence = 'presny';
   if (unmatchedCount > 0 || estimatedCount > 0) confidence = 'odhad';
@@ -2160,12 +2127,12 @@ function autoFillNutrition() {
   if (!ingredients.length) return;
   const portions = parseInt(document.getElementById('r-portions').value) || 4;
   const result = estimateNutrition(ingredients, portions);
-  // Fill per-portion values
+
   document.getElementById('r-kcal').value = result.perPortion.kcal;
   document.getElementById('r-protein').value = result.perPortion.protein || '';
   document.getElementById('r-fat').value = result.perPortion.fat || '';
   document.getElementById('r-carbs').value = result.perPortion.carbs || '';
-  // Show confidence
+
   const status = document.getElementById('nutrition-status');
   if (status) {
     const labels = {presny: '✅ Presný výpočet', odhad: '📐 Odhad', hruby: '⚠️ Hrubý odhad'};
@@ -2175,7 +2142,7 @@ function autoFillNutrition() {
     }
     status.innerHTML = text;
   }
-  // Portion info
+
   const info = document.getElementById('nutrition-portion-info');
   if (info) {
     info.textContent = `Na 1 porciu z ${result.portions} (celý recept: ${result.total.kcal} kcal)`;
@@ -2194,10 +2161,9 @@ function estimateAndFillImport(ingrArray, yieldNum) {
   return result;
 }
 
-// ======================== PEXELS IMAGE SERVICE ========================
 const IMG_CACHE_KEY = 'pexels_cache_v3';
-// Preloaded images fetched at build time — avoids 89 Pexels API calls on first load
-const PRELOADED_IMAGES = {"1":"https://images.pexels.com/photos/5807022/pexels-photo-5807022.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","2":"https://images.pexels.com/photos/37043949/pexels-photo-37043949.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","3":"https://images.pexels.com/photos/4115066/pexels-photo-4115066.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","4":"https://images.pexels.com/photos/7462819/pexels-photo-7462819.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","5":"https://images.pexels.com/photos/53483/strawberries-crepe-dessert-sweet-53483.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","6":"https://images.pexels.com/photos/4202387/pexels-photo-4202387.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","7":"https://images.pexels.com/photos/27381566/pexels-photo-27381566.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","8":"https://images.pexels.com/photos/10422365/pexels-photo-10422365.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","9":"https://images.pexels.com/photos/37275056/pexels-photo-37275056.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","10":"https://images.pexels.com/photos/37043949/pexels-photo-37043949.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","11":"https://images.pexels.com/photos/5639482/pexels-photo-5639482.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","12":"https://images.pexels.com/photos/17872670/pexels-photo-17872670.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","13":"https://images.pexels.com/photos/11256670/pexels-photo-11256670.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","14":"https://images.pexels.com/photos/34307857/pexels-photo-34307857.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","15":"https://images.pexels.com/photos/6612672/pexels-photo-6612672.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","16":"https://images.pexels.com/photos/12118045/pexels-photo-12118045.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","17":"https://images.pexels.com/photos/9170501/pexels-photo-9170501.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","18":"https://images.pexels.com/photos/30895291/pexels-photo-30895291.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","19":"https://images.pexels.com/photos/14966000/pexels-photo-14966000.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","20":"https://images.pexels.com/photos/7111387/pexels-photo-7111387.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","21":"https://images.pexels.com/photos/7936680/pexels-photo-7936680.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","22":"https://images.pexels.com/photos/4099238/pexels-photo-4099238.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","23":"https://images.pexels.com/photos/12927134/pexels-photo-12927134.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","24":"https://images.pexels.com/photos/11132399/pexels-photo-11132399.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","25":"https://images.pexels.com/photos/273825/pexels-photo-273825.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","26":"https://images.pexels.com/photos/15058965/pexels-photo-15058965.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","27":"https://images.pexels.com/photos/31779538/pexels-photo-31779538.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","28":"https://images.pexels.com/photos/13458086/pexels-photo-13458086.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","29":"https://images.pexels.com/photos/6287376/pexels-photo-6287376.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","30":"https://images.pexels.com/photos/10338434/pexels-photo-10338434.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","31":"https://images.pexels.com/photos/31953510/pexels-photo-31953510.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","32":"https://images.pexels.com/photos/6046493/pexels-photo-6046493.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","33":"https://images.pexels.com/photos/273825/pexels-photo-273825.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","34":"https://images.pexels.com/photos/33088383/pexels-photo-33088383.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","35":"https://images.pexels.com/photos/13458086/pexels-photo-13458086.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","36":"https://images.pexels.com/photos/7469395/pexels-photo-7469395.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","37":"https://images.pexels.com/photos/1277483/pexels-photo-1277483.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","38":"https://images.pexels.com/photos/5639445/pexels-photo-5639445.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","39":"https://images.pexels.com/photos/35695377/pexels-photo-35695377.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","40":"https://images.pexels.com/photos/3832348/pexels-photo-3832348.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","41":"https://images.pexels.com/photos/7282789/pexels-photo-7282789.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","42":"https://images.pexels.com/photos/18535642/pexels-photo-18535642.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","43":"https://images.pexels.com/photos/9213914/pexels-photo-9213914.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","44":"https://images.pexels.com/photos/17749740/pexels-photo-17749740.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","45":"https://images.pexels.com/photos/19051901/pexels-photo-19051901.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","46":"https://images.pexels.com/photos/36040964/pexels-photo-36040964.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","47":"https://images.pexels.com/photos/10338448/pexels-photo-10338448.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","48":"https://images.pexels.com/photos/7715715/pexels-photo-7715715.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","49":"https://images.pexels.com/photos/730922/pancakes-food-eat-breakfast-730922.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","50":"https://images.pexels.com/photos/11190138/pexels-photo-11190138.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","51":"https://images.pexels.com/photos/5793/food-healthy-hand-cooking.jpg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","52":"https://images.pexels.com/photos/25946547/pexels-photo-25946547.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","53":"https://images.pexels.com/photos/248428/pexels-photo-248428.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","54":"https://images.pexels.com/photos/273825/pexels-photo-273825.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","55":"https://images.pexels.com/photos/8520760/pexels-photo-8520760.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","56":"https://images.pexels.com/photos/4784025/pexels-photo-4784025.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","57":"https://images.pexels.com/photos/16725422/pexels-photo-16725422.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","58":"https://images.pexels.com/photos/9673804/pexels-photo-9673804.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","59":"https://images.pexels.com/photos/8880741/pexels-photo-8880741.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","60":"https://images.pexels.com/photos/9089767/pexels-photo-9089767.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","61":"https://images.pexels.com/photos/3768316/pexels-photo-3768316.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","62":"https://images.pexels.com/photos/15813489/pexels-photo-15813489.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","63":"https://images.pexels.com/photos/35290622/pexels-photo-35290622.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","64":"https://images.pexels.com/photos/3926126/pexels-photo-3926126.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","65":"https://images.pexels.com/photos/3810779/pexels-photo-3810779.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","66":"https://images.pexels.com/photos/9305088/pexels-photo-9305088.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","67":"https://images.pexels.com/photos/36242488/pexels-photo-36242488.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","68":"https://images.pexels.com/photos/29172200/pexels-photo-29172200.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","69":"https://images.pexels.com/photos/9213963/pexels-photo-9213963.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","70":"https://images.pexels.com/photos/4451834/pexels-photo-4451834.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","71":"https://images.pexels.com/photos/142579/pexels-photo-142579.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","72":"https://images.pexels.com/photos/31965033/pexels-photo-31965033.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","73":"https://images.pexels.com/photos/19837090/pexels-photo-19837090.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","74":"https://images.pexels.com/photos/14909203/pexels-photo-14909203.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","75":"https://images.pexels.com/photos/142579/pexels-photo-142579.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","76":"https://images.pexels.com/photos/20220708/pexels-photo-20220708.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","77":"https://images.pexels.com/photos/7253549/pexels-photo-7253549.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","78":"https://images.pexels.com/photos/1438672/pexels-photo-1438672.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","79":"https://images.pexels.com/photos/5953837/pexels-photo-5953837.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","80":"https://images.pexels.com/photos/18602417/pexels-photo-18602417.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","81":"https://images.pexels.com/photos/5374414/pexels-photo-5374414.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","82":"https://images.pexels.com/photos/8056670/pexels-photo-8056670.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","83":"https://images.pexels.com/photos/1438672/pexels-photo-1438672.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","84":"https://images.pexels.com/photos/14966000/pexels-photo-14966000.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","85":"https://images.pexels.com/photos/36897343/pexels-photo-36897343.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","86":"https://images.pexels.com/photos/7352787/pexels-photo-7352787.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","87":"https://images.pexels.com/photos/1321884/pexels-photo-1321884.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","88":"https://images.pexels.com/photos/4397236/pexels-photo-4397236.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940","89":"https://images.pexels.com/photos/1194369/pexels-photo-1194369.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"};
+
+const PRELOADED_IMAGES = {"1":"https:
 
 function getImageCache() {
   try { return JSON.parse(localStorage.getItem(IMG_CACHE_KEY) || '{}'); } catch(e) { return {}; }
@@ -2318,18 +2284,18 @@ function translateRecipeQuery(name) {
   const lower = name.toLowerCase();
   const found = [];
   const used = new Set();
-  // Collect ALL matching keys, use the longest match for overlapping
+
   const entries = Object.entries(map).sort((a,b) => b[0].length - a[0].length);
   for (const [sk, en] of entries) {
     if (lower.includes(sk)) {
-      // Avoid adding if already covered by a longer match
+
       let covered = false;
       for (const u of used) { if (u.includes(sk)) { covered = true; break; } }
       if (!covered) { found.push(en); used.add(sk); }
     }
   }
   if (found.length) return found.join(' ');
-  // Fallback: strip diacritics for a raw English-ish query
+
   return lower.replace(/[áä]/g,'a').replace(/[č]/g,'c').replace(/[ď]/g,'d')
     .replace(/[éě]/g,'e').replace(/[í]/g,'i').replace(/[ň]/g,'n')
     .replace(/[ó]/g,'o').replace(/[ř]/g,'r').replace(/[š]/g,'s')
@@ -2337,7 +2303,6 @@ function translateRecipeQuery(name) {
     .replace(/[ž]/g,'z');
 }
 
-// ======================== AI: CELÝ TÝŽDEŇ + NÁKUP ========================
 async function aiGenerateFullWeek() {
   showConfirmModal(lang==='en'?'Generate full week + shopping list? This will replace your current plan.':'Vygenerovať celý týždeň + nákupný zoznam? Prepíše sa aktuálny plán.', '🚀', lang==='en'?'Generate':'Generovať', function() {
     aiGenerateFullWeekRun();
@@ -2347,10 +2312,10 @@ async function aiGenerateFullWeek() {
 async function aiGenerateFullWeekRun() {
   const menuText = await aiWeeklyPlan();
   if (!menuText) return;
-  // Remove any existing AI plan modal
+
   const old = document.getElementById('ai-plan-modal');
   if (old) old.remove();
-  // Show the plan in a modal with a custom button
+
   const div = document.createElement('div');
   div.id = 'ai-plan-modal';
   div.className = 'modal-overlay active';
@@ -2375,7 +2340,7 @@ async function fetchPexelsImage(query) {
     if (!res.ok) return null;
     const data = await res.json();
     if (data.photos && data.photos.length > 0) {
-      // Prefer food-looking images (try to avoid non-food results)
+
       for (const photo of data.photos) {
         if (photo.alt && /food|meal|dish|breakfast|lunch|dinner|cook/i.test(photo.alt)) {
           return photo.src.large2x || photo.src.large || photo.src.medium;
@@ -2391,12 +2356,12 @@ async function fetchPexelsImage(query) {
 
 async function getRecipeImage(recipe) {
   if (recipe.imageData) return recipe.imageData;
-  // Never overwrite existing real image with cached/fetched one
+
   if (recipe.image && !recipe.image.includes('placehold.co')) return recipe.image;
-  // Fetch from Pexels only for recipes without images
+
   const cache = getImageCache();
   if (cache[recipe.id]) { recipe.image = imgUrl(cache[recipe.id]); saveToLS(); return cache[recipe.id]; }
-  // Priority 4: Pexels fetch
+
   const query = translateRecipeQuery(lang === 'en' && recipe.nameEn ? recipe.nameEn : recipe.name);
   const img = await fetchPexelsImage(query);
   if (img) {
@@ -2405,7 +2370,7 @@ async function getRecipeImage(recipe) {
     saveToLS();
     return img;
   }
-  // Priority 5: category fallback via Pexels
+
   const catQuery = categoryFallbackQuery(recipe.category);
   if (catQuery) {
     const fallbackImg = await fetchPexelsImage(catQuery);
@@ -2453,21 +2418,20 @@ async function refreshRecipeImages() {
 
 async function batchFetchImages() {
   const toFetch = recipes.filter(r => {
-    if (r.imageData) return false;  // Never touch recipes with user-uploaded images
-    if (r.image && !r.image.includes('placehold.co')) return false;  // Never overwrite real images
-    return true;  // Only fetch for recipes with no image or placeholder
+    if (r.imageData) return false;
+    if (r.image && !r.image.includes('placehold.co')) return false;
+    return true;
   });
   if (!toFetch.length) return;
-  // Fetch in batches of 3 to avoid rate limiting
+
   for (let i = 0; i < toFetch.length; i += 3) {
     const batch = toFetch.slice(i, i + 3);
     await Promise.all(batch.map(r => getRecipeImage(r).catch(() => {})));
-    // Small delay between batches
+
     if (i + 3 < toFetch.length) await new Promise(r => setTimeout(r, 500));
   }
 }
 
-// ======================== RECIPES TAB ========================
 function render() {
   try {
   if (!Array.isArray(recipes)) recipes = [];
@@ -2559,9 +2523,8 @@ function clearSearch() {
   render();
 }
 
-// ======================== SETTINGS STATE ========================
 let settings = {};
-// ======================== SETTINGS ========================
+
 let appSettings = {};
 function loadSettings() {
   try { appSettings = JSON.parse(localStorage.getItem('appSettings') || '{}'); } catch(e) { appSettings = {}; }
@@ -2578,7 +2541,7 @@ function loadSettings() {
     notifTimes: { breakfast: '08:00', whatCook: '10:00', shopping: '16:00', water: '12:00', kids: '07:30', evening: '20:00' },
     weather: { enabled: true, location: '', lat: null, lon: null },
   };
-  // Deep merge defaults
+
   function deepMerge(obj, def) {
     Object.keys(def).forEach(k => {
       if (obj[k] === undefined) obj[k] = def[k];
@@ -2586,7 +2549,7 @@ function loadSettings() {
     });
   }
   deepMerge(appSettings, D);
-  // Global alias for onclick handlers in settings
+
   window.s = appSettings;
 }
 function saveSettings() {
@@ -2629,9 +2592,9 @@ function applySettings() {
   document.body.classList.toggle('store-mode', appSettings.shopping.storeMode);
   const fab = document.getElementById('fab-quick-add');
   if (fab) fab.style.display = appSettings.quickAdd.enabled ? '' : 'none';
-  // Re-check after DOM fully loads (FAB element is after the script tag)
+
   setTimeout(() => { const f = document.getElementById('fab-quick-add'); if (f) f.style.display = appSettings.quickAdd.enabled ? '' : 'none'; }, 100);
-  if (langChanged) { try { render(); } catch(e) {} try {   // Init Lucide icons
+  if (langChanged) { try { render(); } catch(e) {} try {
   if (typeof lucide !== "undefined") { try { lucide.createIcons(); } catch(e) {} }
   showTipOfDay(); } catch(e) {} }
   try { initNotifications(); } catch(e) {}
@@ -2677,7 +2640,7 @@ function editText(path, label) {
   const val = prompt(label + ':', obj[key] || '');
   if (val === null) return;
   obj[key] = val.trim();
-  // Reset weather cache & coords when location changes
+
   if (path === 'weather.location') { weatherCache = null; weatherCacheTs = 0; appSettings.weather.lat = null; appSettings.weather.lon = null; }
   saveSettings();
   openSettings();
@@ -2698,7 +2661,7 @@ function applyAccentColor(color) {
 function calcPlanningStreak() {
   let streak = 0;
   const today = new Date();
-  const plan = planType === 'kids' ? mealPlanKids : mealPlan; // read-only, don't mutate
+  const plan = planType === 'kids' ? mealPlanKids : mealPlan;
   for (let i = 0; i < 365; i++) {
     const d = new Date(today); d.setDate(d.getDate() - i);
     const key = getWeekKey(d);
@@ -2742,7 +2705,7 @@ function toggleFav(id) {
   }
 }
 
-function updateFavFilter() { /* renders fav filter badge */ }
+function updateFavFilter() {  }
 
 function setTextSafe(id, value) {
   const el = document.getElementById(id);
@@ -2757,7 +2720,6 @@ function setValueSafe(id, value) {
   if (el) el.value = value == null ? '' : value;
 }
 
-// ======================== RANDOM ========================
 function randomRecipe() {
   if (!recipes.length) return;
   const r = recipes[Math.floor(Math.random() * recipes.length)];
@@ -2772,7 +2734,6 @@ function toggleRecipeToolsPanel() {
   if (toggle) toggle.classList.toggle('btn-primary', isOpen);
 }
 
-// ======================== MODALS ========================
 function openModal(id) {
   const el = document.getElementById(id);
   if (el) el.classList.add('active');
@@ -2802,10 +2763,9 @@ document.querySelectorAll('.modal-overlay').forEach(el => {
   el.addEventListener('click', e => { if (e.target === el) { el.classList.remove('active'); } });
 });
 
-// ======================== FORM ========================
 function openFormModal(recipe) {
   editingId = recipe ? recipe.id : null;
-  // Inject import card dynamically (sure way to handle translations)
+
   var importCard = document.getElementById('form-import-card');
   if (importCard) {
     importCard.innerHTML = '<div onclick="closeModal(\'form-modal\');setTimeout(showImportUrlModal,300)" style="display:flex;align-items:center;gap:.5rem;padding:.5rem .6rem;margin-bottom:.6rem;background:linear-gradient(135deg,rgba(255,77,109,.08),rgba(255,77,109,.02));border:1px dashed rgba(255,77,109,.25);border-radius:var(--radius-md);cursor:pointer;transition:all .2s ease;" onmouseover="this.style.borderColor=\'rgba(255,77,109,.5)\';this.style.background=\'linear-gradient(135deg,rgba(255,77,109,.12),rgba(255,77,109,.04))\'" onmouseout="this.style.borderColor=\'rgba(255,77,109,.25)\';this.style.background=\'linear-gradient(135deg,rgba(255,77,109,.08),rgba(255,77,109,.02))\'"><span style="font-size:1.3rem;">🌐</span><div style="flex:1;"><div style="font-size:.82rem;font-weight:600;color:var(--text);">' + t('btnImportUrl') + '</div><div style="font-size:.65rem;color:var(--text3);">' + t('importUrlHint') + '</div></div><span style="font-size:1.1rem;color:var(--primary);">›</span></div>';
@@ -2869,17 +2829,17 @@ function saveRecipe() {
   const fat = parseInt(document.getElementById('r-fat').value) || 0;
   const carbs = parseInt(document.getElementById('r-carbs').value) || 0;
   const portions = parseInt(document.getElementById('r-portions').value) || 4;
-  // Auto-detect season from ingredients
+
   var autoSeason = autoSeasonTag(ingredients, name);
   autoSeason.tags.forEach(function(t) { if (tags.indexOf(t) < 0) tags.push(t); });
-  // Show a small indicator on save
+
   if (autoSeason.tags.length) {
     document.getElementById('season-status').textContent = (lang==='en'?'Detected season: ':'Detekovaná sezóna: ') + autoSeason.tags.map(function(t) { return {jar:'🌸',leto:'🌞',jesen:'🍂',zima:'❄️'}[t]||t; }).join(' ');
   }
   if (!name) return showToast(t('formName')+(lang==='en'?' is required.':' je povinný.'),'error');
   if (!ingredients.length) return showToast(t('formIngredients')+(lang==='en'?' are required.':' sú povinné.'),'error');
   const nutrition = {kcal,protein,fat,carbs};
-  // Sanity check
+
   const check = sanitizeNutrition(nutrition, portions);
   if (check.hasWarnings) {
     showConfirmModal(
@@ -2890,7 +2850,7 @@ function saveRecipe() {
       }).join('\n') + '\n\n' +
       (lang === 'en' ? 'Save anyway?' : 'Aj tak uložiť?'),
       '⚠️', lang==='en'?'Save anyway':'Aj tak uložiť', function() {
-        // continue saving
+
       }
     );
     if (!check._proceed) return;
@@ -2907,9 +2867,6 @@ function saveRecipe() {
   render();
 }
 
-
-
-// ======================== PREPOČET PORCIÍ ========================
 function scaleAmount(text, factor) {
   if (factor === 1) return text;
   const m = text.match(/^(\d+(?:\.\d+)?(?:\/\d+)?)\s*/);
@@ -2917,8 +2874,8 @@ function scaleAmount(text, factor) {
   const val = parseFloat(m[1]);
   if (isNaN(val)) return text;
   const scaled = val * factor;
-  const rounded = Math.abs(scaled - Math.round(scaled)) < 0.05 
-    ? Math.round(scaled) 
+  const rounded = Math.abs(scaled - Math.round(scaled)) < 0.05
+    ? Math.round(scaled)
     : Math.round(scaled * 10) / 10;
   return text.replace(m[1], String(rounded));
 }
@@ -2930,7 +2887,6 @@ function scaleIngredients(ingredients, oldPortions, newPortions) {
   return ingredients.map(ing => scaleAmount(ing, displayFactor));
 }
 
-// ======================== ZMENA POČTU PORCIÍ ========================
 function changePortions(delta) {
   const r = getCurrentRecipe();
   if (!r) return;
@@ -3073,7 +3029,7 @@ function viewRecipe(id) {
   requestAnimationFrame(function() {
     try { window.scrollTo(0, pageScrollY); } catch(e) {}
   });
-  // Async image fetch in background
+
   if (!r.image && !r.imageData) {
     getRecipeImage(r).then(url => {
       if (url) {
@@ -3086,8 +3042,6 @@ function viewRecipe(id) {
     });
   }
 }
-
-// ======================== SHARE ========================
 
 function setRating(id, val) {
   const r = recipes.find(rec => rec.id === id);
@@ -3131,7 +3085,6 @@ function deleteCurrent() {
   });
 }
 
-// ======================== PRINT ========================
 function printRecipe() {
   const r = recipes.find(rec => rec.id === viewingId);
   if (!r) return;
@@ -3146,8 +3099,8 @@ function printRecipe() {
     h1{font-size:1.8rem;} .meta{color:#64748b;} h2{border-bottom:2px solid #fef3c7;padding-bottom:.3rem;margin-top:1.5rem;}
     ul,ol{padding-left:1.25rem;} li{margin-bottom:.3rem;}
     @media print{body{padding:0;}}
-  
-/* ===== TOAST NOTIFICATIONS ===== */
+
+
 .toast-container { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: .5rem; pointer-events: none; width: calc(100% - 2rem); max-width: 400px; }
 .toast { background: var(--surface-solid); color: var(--text); padding: .7rem 1rem; border-radius: var(--radius-md); font-size: .82rem; box-shadow: 0 8px 32px rgba(0,0,0,.4); border: 1px solid var(--border); animation: toastIn .35s var(--ease-smooth); display: flex; align-items: center; gap: .5rem; pointer-events: auto; backdrop-filter: blur(12px); }
 .toast.toast-success { border-color: var(--success); box-shadow: 0 4px 16px var(--success-glow); }
@@ -3167,7 +3120,6 @@ function printRecipe() {
   win.document.close();
 }
 
-// ======================== SHARE ========================
 function shareRecipe() {
   const r = recipes.find(rec => rec.id === viewingId);
   if (!r) return;
@@ -3184,8 +3136,8 @@ function shareRecipe() {
     a.className = 'share-popup';
     const btns = [
       {label:'📋 Copy', fn:()=>{copyText(text)}},
-      {label:`📱 ${t('shareWhatsApp')}`, fn:()=>{window.open('https://api.whatsapp.com/send?text='+encodeURIComponent(text),'_blank')}},
-      {label:`💬 ${t('shareMessenger')}`, fn:()=>{window.open('https://www.facebook.com/sharer/sharer.php?quote='+encodeURIComponent(text),'_blank')}},
+      {label:`📱 ${t('shareWhatsApp')}`, fn:()=>{window.open('https:
+      {label:`💬 ${t('shareMessenger')}`, fn:()=>{window.open('https:
       {label:`✉️ ${t('shareEmail')}`, fn:()=>{window.location.href='mailto:?subject='+encodeURIComponent(name)+'&body='+encodeURIComponent(text)}},
       {label:'✕', fn:()=>{a.remove()}, cls:'btn-primary'}
     ];
@@ -3204,7 +3156,6 @@ function copyText(text) {
   navigator.clipboard.writeText(text).then(() => showToast(lang==='en'?'Copied!':'Skopírované!','success')).catch(() => prompt('Copy:', text));
 }
 
-// ======================== COPY RECIPE ========================
 function copyRecipe(e) {
   const r = recipes.find(rec => rec.id === viewingId);
   if (!r) return;
@@ -3219,7 +3170,6 @@ function copyRecipe(e) {
   }).catch(() => prompt('Copy:', text));
 }
 
-// ======================== EXPORT/IMPORT ========================
 function resetRecipes() {
   localStorage.removeItem('recipes');
   localStorage.removeItem('mealPlan');
@@ -3258,7 +3208,6 @@ function importRecipes(e) {
   e.target.value = '';
 }
 
-// ======================== AUTOMATED BACKUP ========================
 function createBackup() {
   var data = {
     version: '1.7',
@@ -3297,7 +3246,7 @@ function createBackup() {
     URL.revokeObjectURL(url);
   }, 100);
   showToast(lang==='en' ? 'Backup downloaded ✓' : 'Záloha stiahnutá ✓', 'success');
-  // Store last backup timestamp
+
   localStorage.setItem('_lastBackup', Date.now().toString());
   try {
     const history = JSON.parse(localStorage.getItem('_backupHistoryLocal') || '[]');
@@ -3307,7 +3256,6 @@ function createBackup() {
   return data;
 }
 
-// Daily backup into IndexedDB (local fallback)
 function saveLocalBackup() {
   var data = {
     date: new Date().toISOString().slice(0,10),
@@ -3317,7 +3265,7 @@ function saveLocalBackup() {
     tasks: tasks
   };
   dbSet('_dailyBackup', data);
-  // Keep last 3 backups
+
   dbGet('_backupHistory').then(function(h) {
     h = h || [];
     h.push(data.date);
@@ -3326,7 +3274,6 @@ function saveLocalBackup() {
   });
 }
 
-// Check and run daily backup
 function checkDailyBackup() {
   var last = parseInt(localStorage.getItem('_lastBackup') || '0');
   var now = Date.now();
@@ -3335,13 +3282,11 @@ function checkDailyBackup() {
   }
 }
 
-// Schedule daily backup check
 setTimeout(function() {
   checkDailyBackup();
-  setInterval(checkDailyBackup, 3600000); // Check every hour
+  setInterval(checkDailyBackup, 3600000);
 }, 5000);
 
-// ======================== COOKING MODE ========================
 function openCookingMode() {
   cookingRecipeId = viewingId;
   cookingStep = 0;
@@ -3350,7 +3295,7 @@ function openCookingMode() {
   closeModal('detail-modal');
   document.getElementById('cooking-mode').classList.add('active');
   renderCookingStep();
-  // Async image fetch
+
   if (!r.image && !r.imageData) {
     getRecipeImage(r).then(url => {
       if (url) renderCookingStep();
@@ -3411,7 +3356,6 @@ function closeCookingMode() {
   stopVoice();
 }
 
-// ======================== TIMER ========================
 function toggleTimer() {
   if (cookingTimerRunning) { stopTimer(); }
   else {
@@ -3450,7 +3394,6 @@ function updateTimerDisplay() {
   else document.getElementById('cooking-timer').style.color = '';
 }
 
-// ======================== VOICE ========================
 function toggleVoice() {
   if (voiceSearchListening) stopVoiceSearch();
   if (voiceListening) { stopVoice(); return; }
@@ -3482,9 +3425,6 @@ function stopVoice() {
   document.getElementById('voice-btn').textContent = '🎤';
 }
 
-
-
-// ======================== VOICE SEARCH ========================
 function toggleVoiceSearch() {
   if (voiceListening) stopVoice();
   if (voiceSearchListening) { stopVoiceSearch(); return; }
@@ -3515,7 +3455,6 @@ function stopVoiceSearch() {
   if (btn) { btn.textContent = '🎤'; btn.style.background = ''; btn.style.color = ''; }
 }
 
-// ======================== INGREDIENT SEARCH ========================
 function openIngredientSearch() {
   const allIngrs = [...new Set(recipes.flatMap(r => {
     const ingr = (lang === "en" && r.ingredientsEn ? r.ingredientsEn : r.ingredients) || [];
@@ -3561,7 +3500,6 @@ function toggleIngrSearch(ingr) {
 
 function clearIngredientSearch() { ingredientSearchSelected.clear(); renderIngredientSearch(); }
 
-// Close ingredient modal -> update recipe grid
 document.getElementById('ingredient-modal').addEventListener('click', function(e) {
   if (e.target === this) {
     closeModal('ingredient-modal');
@@ -3573,7 +3511,6 @@ document.getElementById('ingr-list').addEventListener('click', function(e) {
   if (tag) toggleIngrSearch(tag.dataset.ingr);
 });
 
-// ======================== PORTION SCALING ========================
 function changePortion(delta) {
   currentPortion = Math.max(1, currentPortion + delta);
   document.getElementById('portion-num').textContent = currentPortion;
@@ -3595,8 +3532,6 @@ function scaleIngredient(text, ratio) {
   });
 }
 
-// ======================== COLLECTIONS ========================
-// ======================== TIP OF THE DAY ========================
 function showTipOfDay() {
   if (localStorage.getItem('tipDismissed') === new Date().toISOString().slice(0,10)) return;
   if (!recipes.length) return;
@@ -3617,7 +3552,6 @@ function showTipOfDay() {
   card.classList.add('show');
 }
 
-// =================== SKELETON HELPERS ===================
 function renderSkeletonGrid(container, count) {
   if (!container) return;
   count = count || 6;
@@ -3661,7 +3595,6 @@ function applyPageTransition(el, duration) {
   el.style.animation = 'pageEnter ' + duration + 'ms cubic-bezier(.22,1,.36,1) both';
 }
 
-// =================== COUNT-UP ANIMATION ===================
 function animateCountUp(el, target) {
   if (!el) return;
   target = parseInt(target) || 0;
@@ -4342,21 +4275,20 @@ window.setMoreTextSize = setMoreTextSize;
 window.setMoreDensity = setMoreDensity;
 window.setMoreLanguage = setMoreLanguage;
 
-// =================== PULL TO REFRESH ===================
 var _ptrState = null;
 function initPullToRefresh() {
   var ptrEl = document.createElement('div');
   ptrEl.className = 'ptr-indicator';
   ptrEl.innerHTML = '<div class="ptr-spinner"></div><span class="ptr-text">' + (lang==='en'?'Pull to refresh':'Potiahnite pre obnovenie') + '</span>';
   document.body.appendChild(ptrEl);
-  
+
   var main = document.querySelector('.container') || document.body;
   main.addEventListener('touchstart', function(e) {
     if (window.scrollY > 5) return;
     if (e.target.closest('input') || e.target.closest('button') || e.target.closest('.bottom-nav') || e.target.closest('.modal-overlay.active') || e.target.closest('.sheet-overlay') || e.target.closest('.cooking-overlay.active')) return;
     _ptrState = { startY: e.touches[0].clientY, pulled: false, ready: false };
   }, { passive: true });
-  
+
   main.addEventListener('touchmove', function(e) {
     if (!_ptrState || _ptrState.refreshing) return;
     var dy = e.touches[0].clientY - _ptrState.startY;
@@ -4375,7 +4307,7 @@ function initPullToRefresh() {
       ptrEl.querySelector('.ptr-text').textContent = lang==='en' ? 'Pull to refresh' : 'Potiahnite pre obnovenie';
     }
   }, { passive: true });
-  
+
   main.addEventListener('touchend', function(e) {
     if (!_ptrState) return;
     if (_ptrState.ready && _ptrState.pulled) {
@@ -4412,9 +4344,8 @@ function doPullRefresh() {
   }, 500);
 }
 
-// =================== PREVENT CONTEXT MENU ===================
 document.addEventListener('contextmenu', function(e) {
-  // Allow context menu on input/textarea
+
   if (e.target.closest && !e.target.closest('input, textarea, [contenteditable]')) {
     e.preventDefault();
     haptic(6);
@@ -4426,7 +4357,6 @@ document.addEventListener('selectstart', function(e) {
   }
 });
 
-// =================== HAPTIC FEEDBACK ===================
 function haptic(ms) {
   try {
     if (!navigator.vibrate) return;
@@ -4435,7 +4365,6 @@ function haptic(ms) {
   } catch(e) {}
 }
 
-// =================== ANIMATED HEADER ON SCROLL ===================
 function initScrollHeader() {
   var ticking = false;
   var body = document.body;
@@ -4451,16 +4380,15 @@ function initScrollHeader() {
   }, { passive: true });
 }
 
-// =================== SWIPE BETWEEN TABS ===================
 var _swipeTabData = null;
 function initSwipeTabs() {
   var main = document.querySelector('.container') || document.body;
   main.addEventListener('touchstart', function(e) {
-    // Don't swipe on interactive elements
+
     if (e.target.closest('input') || e.target.closest('button') || e.target.closest('.bottom-nav') || e.target.closest('.modal-overlay.active') || e.target.closest('.sheet-overlay') || e.target.closest('.cooking-overlay.active')) return;
     _swipeTabData = { startX: e.touches[0].clientX, startY: e.touches[0].clientY };
   }, { passive: true });
-  
+
   main.addEventListener('touchmove', function(e) {
     if (!_swipeTabData) return;
     var dx = e.touches[0].clientX - _swipeTabData.startX;
@@ -4468,7 +4396,7 @@ function initSwipeTabs() {
     if (Math.abs(dx) < 30 || dy > Math.abs(dx) * 0.5) { _swipeTabData = null; return; }
     e.preventDefault();
   }, { passive: false });
-  
+
   main.addEventListener('touchend', function(e) {
     if (!_swipeTabData) return;
     var dx = e.changedTouches[0].clientX - _swipeTabData.startX;
@@ -4482,7 +4410,7 @@ function initSwipeTabs() {
     _swipeTabData = null;
   }, { passive: true });
 }
-// =================== LONG PRESS ON RECIPES ===================
+
 function initLongPress() {
   document.addEventListener('touchstart', function(e) {
     var card = e.target.closest('.recipe-card');
@@ -4516,22 +4444,20 @@ function showLongPressMenu(card, x, y) {
   setTimeout(function() { document.addEventListener('click', closer); }, 100);
 }
 
-// Initialize on load
 setTimeout(function() {
   setDynamicGradient();
   initSwipeTabs();
   initPullToRefresh();
   initScrollHeader();
   initLongPress();
-  // Toggle masonry grid if setting enabled
+
   var grid = document.getElementById('recipe-grid');
   if (grid && appSettings.masonry) grid.classList.add('masonry');
-  // Add staggered animation class to shopping
+
   var shopView = document.getElementById('shopping-list-view');
   if (shopView) shopView.classList.add('shop-animate-stagger');
 }, 500);
 
-// =================== SEASONAL CALENDAR ===================
 var SEASONAL_PROD = [
   {m:0,produce:[],emoji:'❄️',label:'Zima',labelEn:'Winter',desc:'Koreňová zelenina, kapusta, citrusy',descEn:'Root veg, cabbage, citrus'},
   {m:1,produce:[],emoji:'❄️',label:'Zima',labelEn:'Winter',desc:'Pór, zeler, petržlen, pomaranče',descEn:'Leek, celery, parsley, oranges'},
@@ -4554,7 +4480,7 @@ function getSeasonalMonth() {
 }
 
 function getSeasonalRecipes() {
-  // Find recipes with tags matching the current season
+
   var seasonMap = {0:'zima',1:'zima',2:'jar',3:'jar',4:'jar',5:'leto',6:'leto',7:'leto',8:'leto',9:'jesen',10:'jesen',11:'zima'};
   var season = seasonMap[new Date().getMonth()] || 'leto';
   var seasonEn = {zima:'winter',jar:'spring',leto:'summer',jesen:'autumn'}[season];
@@ -4580,7 +4506,6 @@ function renderSeasonalWidget(compact) {
   return html;
 }
 
-// =================== AUTO SEASON TAGGING ===================
 var SEASONAL_KEYS = {
   jar: { en: 'spring', keywords: ['spargla','asparagus','rebarbora','rhubarb','mlady','mlada','mlade','redkovka','radish','jarna','jahoda','strawberry','jahody','strawberries','spenat','spinach','hrach','pea','pazitka','chives','bylinky','herbs','mata','mint','kopor','dill','zerucha','cress'] },
   leto: { en: 'summer', keywords: ['paradajka','tomato','paradajky','tomatoes','uhorka','cucumber','paprika','pepper','cuketa','zucchini','baklazan','eggplant','kukurica','corn','fazula','bean','ceresne','cherries','bros kyna','peach','bros kyne','peaches','marhula','apricot','slivka','plum','malina','raspberry','maliny','raspberries','ribezle','currants','melon','gril','grill','salat','salad','cvikla','beetroot','sosovica','lentil','osviezujuci'] },
@@ -4592,7 +4517,7 @@ function autoSeasonTag(ingredients, name) {
   if (!ingredients || !ingredients.length) return { tags: [], tagsEn: [] };
   var text = ingredients.join(' ').toLowerCase();
   if (name) text += ' ' + name.toLowerCase();
-  // Normalize
+
   text = text.replace(/\u010d/g,'c').replace(/\u010f/g,'d').replace(/\u013e/g,'l').replace(/\u0148/g,'n').replace(/\u0155/g,'r').replace(/\u0161/g,'s').replace(/\u0165/g,'t').replace(/\u017e/g,'z').replace(/\u00e1/g,'a').replace(/\u00e4/g,'a').replace(/\u00e9/g,'e').replace(/\u00ed/g,'i').replace(/\u00f3/g,'o').replace(/\u00f4/g,'o').replace(/\u00fa/g,'u').replace(/\u00fd/g,'y');
   var result = [], resultEn = [];
   for (var season in SEASONAL_KEYS) {
@@ -4607,7 +4532,7 @@ function autoSeasonTag(ingredients, name) {
     }
   }
   if (result.length === 0) {
-    // Guess based on category if available
+
     return { tags: [], tagsEn: [] };
   }
   return { tags: result, tagsEn: resultEn };
@@ -4627,7 +4552,6 @@ function previewSeasonTags() {
   }
 }
 
-// ======================== DASHBOARD ========================
 function renderDashboard() {
   const now = new Date();
   const hour = now.getHours();
@@ -4972,7 +4896,7 @@ function renderMealTimeline() {
       }
     }
     const filled = !!entry;
-    const defImg = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Crect fill=%22%23252220%22 width=%2240%22 height=%2240%22/%3E%3Ctext x=%2220%22 y=%2226%22 text-anchor=%22middle%22 font-size=%2214%22 fill=%22%2378716c%22%3E${m.icon}%3C/text%3E%3C/svg%3E';
+    const defImg = 'data:image/svg+xml,%3Csvg xmlns=%22http:
     return `<div class="meal-timeline-item ${filled?'filled':''}${(!filled||(entry&&entry.type==='custom'))?'':''} card-enter" onclick="${filled?'':'pickRecipe(\''+todayName+'\',\''+m.id+'\',\''+weekKey+'\')'}">
       <span class="meal-dot"></span>
       <span class="meal-icon">${m.icon}</span>
@@ -5054,10 +4978,10 @@ function renderSuggestions() {
   const isHot = (new Date().getMonth() >= 5 && new Date().getMonth() <= 7);
   const isCold = (new Date().getMonth() <= 2 || new Date().getMonth() >= 10);
 
-  // Quick recipes (≤20 min)
+
   const quick = recipes.filter(r => r.time <= 20).sort(() => Math.random() - .5).slice(0, 4);
 
-  // Weather-inspired
+
   const weatherRecipes = recipes.filter(r => {
     const t = [...(r.tags||[]), ...(r.tagsEn||[])];
     if (isHot) return t.some(tag => ['šalát','salad','studené','cold','gril','grill','osviežujúce','refreshing','letné','summer'].includes(tag));
@@ -5065,7 +4989,7 @@ function renderSuggestions() {
     return false;
   }).sort(() => Math.random() - .5).slice(0, 4);
 
-  // Favorite dinners
+
   const dinners = recipes.filter(r => {
     const t = [...(r.tags||[]), ...(r.tagsEn||[])];
     return t.some(tag => ['večera','dinner','hlavné','main'].includes(tag)) || r.category === 'Hlavné jedlá';
@@ -5098,7 +5022,6 @@ function dismissWaterReminder() {
   if (el) el.style.display = 'none';
 }
 
-// ======================== MEAL PLANNER ========================
 const DAYS_SK = ['pondelok','utorok','streda','štvrtok','piatok','sobota','nedeľa'];
 const DAYS_EN = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
 const MEALS = [
@@ -5170,14 +5093,14 @@ function renderPlanner() {
   const paAi = document.getElementById('pa-ai-label');
   if (paAi) paAi.textContent = lang === 'en' ? '📝 AI Shop' : '📝 AI nákup';
 
-  // Plan type switcher
+
   const pts = document.getElementById('plan-type-switch');
   if (pts) pts.className = 'plan-type-switch' + (planType === 'kids' ? ' kids' : '');
   document.querySelectorAll('.plan-type-btn').forEach(b => b.classList.toggle('active', b.dataset.pt === planType));
   const ptA = document.getElementById('pt-adults-label'); if (ptA) ptA.textContent = lang === 'en' ? 'Adults' : 'Dospelí';
   const ptK = document.getElementById('pt-kids-label'); if (ptK) ptK.textContent = lang === 'en' ? 'Kids' : 'Deti';
 
-  // Week nav active state
+
   const plnThis = document.getElementById('pln-this');
   const plnNext = document.getElementById('pln-next');
   if (plnThis) {
@@ -5189,7 +5112,7 @@ function renderPlanner() {
     plnNext.textContent = lang==='en'?'Next week':'Budúci týždeň';
   }
 
-  // ===== TODAY SECTION =====
+
   const dayNameToday = dayNames[todayIdx];
   const todayDate = new Date();
   const todayDisp = todayDate.getDate() + '. ' + (todayDate.getMonth()+1) + '. ' + todayDate.getFullYear();
@@ -5220,7 +5143,7 @@ function renderPlanner() {
     totalTime += time;
     return { key: d, index: i, day: day, date: date, filled: filled, kcal: kcal, time: time };
   });
-  // Summary with progress bar
+
   var maxMeals = DAYS.length * totalSlots;
   var mealPct = maxMeals > 0 ? Math.round((totalMeals / maxMeals) * 100) : 0;
   const weekRange = getWeekLabel(startOfWeek);
@@ -5302,7 +5225,7 @@ function renderPlanner() {
     });
   }
 
-  // Floating info panel
+
   var pip = document.getElementById('planner-info-panel');
   if (pip) {
     document.getElementById('pip-meals').textContent = totalMeals+'/'+maxMeals;
@@ -5318,7 +5241,7 @@ function goToWeek(offset) {
   var grid = document.getElementById('planner-week-grid');
   if (grid) {
     grid.classList.remove('morph-out', 'morph-in');
-    // Force reflow
+
     void grid.offsetWidth;
     grid.classList.add('morph-out');
   }
@@ -5389,11 +5312,11 @@ function setPlanType(type) {
   if (activeBtn) springBounce(activeBtn);
 }
 function getDayIcon(dayIndex, filledCount) {
-  // Thematic icons per day: pondelok🌙 utorok🔥 streda💧 stvrtok🌿 piatok🎉 sobota☀️ nedela🧘
+
   var icons = ['🌙', '🔥', '💧', '🌿', '🎉', '☀️', '🧘'];
   var icon = icons[dayIndex] || '📅';
   if (filledCount === 0) return icon;
-  if (filledCount === 5) return icon; // all filled, stays thematic
+  if (filledCount === 5) return icon;
   return icon;
 }
 function getSlotRecipe(entry) {
@@ -5540,15 +5463,15 @@ function selectRecipe(day, slot, id, wk) {
   if (!weekPlan[day]) weekPlan[day] = {};
   weekPlan[day][slot] = { type: 'recipe', id };
   saveWeekPlan();
-  // Double-save all plan data to ensure persistence
+
   localStorage.setItem('mealPlan', JSON.stringify(mealPlan));
   localStorage.setItem('mealPlanKids', JSON.stringify(mealPlanKids));
   renderPlanner();
-  // Confetti if day is fully filled
+
   var filled = Object.values(weekPlan[day]).filter(Boolean).length;
   if (filled === MEALS.length) triggerConfetti();
   if (day === DAYS[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1] && !plannerIsVisible()) renderDashboard();
-  // Toast feedback
+
   showToast('✅ ' + (lang==='en'?'Added to planner':'Pridané do plánovača'), 'success', 1500);
 }
 
@@ -5600,12 +5523,9 @@ function copyWeekPlan() {
   }).catch(() => {});
 }
 
-// Keep these helpers unchanged
 function toggleWeekGrid() {}
 function resetWeek() { plannerWeekOffset = 0; renderPlanner(); }
 
-// ======================== SHOPPING LIST ========================
-// ======================== SHOPPING LIST ========================
 const SHOP_CATEGORIES = [
   { id: 'meat',  icon: '🥩', nameSk: 'Mäso a ryby',      nameEn: 'Meat & Fish',      keywords: ['mäso','meat','kura','chicken','kuracie','hovädzie','beef','bravčové','pork','biftek','steak','mleté','minced','salmon','losos','tuniak','tuna','ryba','fish','ryby','slanina','bacon','klobása','sausage','šunka','ham','párky','frankfurter','špek','spek','krkovička','rebro','rib'] },
   { id: 'dairy',  icon: '🥛', nameSk: 'Mliečne výrobky',  nameEn: 'Dairy',           keywords: ['mlieko','milk','smotana','cream','syr','cheese','maslo','butter','tvaroh','cottage','cottage','jogurt','yogurt','mozzarella','parmezán','parmesan','ricotta','vajce','egg','vajcia','eggs','feta','bryndza','kefír','kefir','cmar','buttermilk'] },
@@ -5651,7 +5571,7 @@ let shopItems = [];
 function loadShopItems() {
   try { shopItems = JSON.parse(localStorage.getItem('shoppingItems') || '[]'); } catch(e) { shopItems = []; }
   if (!Array.isArray(shopItems)) shopItems = [];
-  // Keep only manual items (recipe auto-population removed)
+
   shopItems = shopItems.filter(function(it) { return it && it.source === 'manual'; });
 }
 function saveShopItems() {
@@ -5718,7 +5638,7 @@ function generateShopId() {
 function renderShoppingList() {
   const container = document.getElementById('shopping-list-view');
   loadShopItems();
-  // Only keep manual items (recipe auto-population removed per user request)
+
   shopItems = shopItems.filter(function(it) { return it && it.source === 'manual'; });
 
   if (!shopItems.length) {
@@ -5746,10 +5666,10 @@ function renderShoppingList() {
   const catCount = Object.keys(openGroups).length || Object.keys(boughtGroups).length;
   const biggestCat = Object.keys(openGroups).sort((a,b) => openGroups[b].length - openGroups[a].length)[0] || Object.keys(boughtGroups).sort((a,b) => boughtGroups[b].length - boughtGroups[a].length)[0];
 
-  // Build HTML
+
   let html = '';
 
-  // Summary
+
   html += `<section class="shop-hero">
     <div>
       <span class="shop-hero-kicker">${lang==='en'?'Shopping':'Nákup'}</span>
@@ -5771,7 +5691,7 @@ function renderShoppingList() {
     <div class="shop-summary-progress"><div class="shop-summary-progress-bar" style="width:${pctAll}%"></div></div>
   </div>`;
 
-  // Top actions
+
   html += `<div class="shop-actions">
     <button class="sa-btn primary-action" onclick="openAddItemSheet()">➕ ${lang==='en'?'Add item':'Pridať položku'}</button>
     <button class="sa-btn" onclick="copyShopList()">📋 ${lang==='en'?'Copy':'Kopírovať'}</button>
@@ -5791,7 +5711,7 @@ function renderShoppingList() {
     </div>`;
   }
 
-  // Add item button
+
   html += `<button class="shop-add-btn" onclick="openAddItemSheet();springBounce(this)">➕ ${lang==='en'?'Add food item':'Pridať potravinu'}</button>`;
 
   container.innerHTML = html;
@@ -5859,11 +5779,10 @@ function renderShopItem(it) {
   </div>`;
 }
 
-// =================== SWIPE TO DELETE ===================
 var _swipeData = null;
-// Close any open swipe when tapping elsewhere
+
 document.addEventListener('touchstart', function(e) {
-  if (_swipeData || !e.target.closest) return; // tracking active swipe
+  if (_swipeData || !e.target.closest) return;
   if (!e.target.closest('.shop-item')) {
     document.querySelectorAll('.si-swipe-delete.revealed').forEach(function(d) {
       var item = d.closest('.shop-item');
@@ -5885,7 +5804,7 @@ function initShopSwipe() {
     item.addEventListener('touchstart', onSwipeStart, { passive: true });
     item.addEventListener('touchmove', onSwipeMove, { passive: false });
     item.addEventListener('touchend', onSwipeEnd, { passive: true });
-    // Reset any existing revealed state
+
     var del = item.querySelector('.si-swipe-delete');
     if (del) del.classList.remove('revealed');
   });
@@ -5893,7 +5812,7 @@ function initShopSwipe() {
 
 function onSwipeStart(e) {
   var item = e.currentTarget;
-  // Close any other open swipe
+
   document.querySelectorAll('.si-swipe-delete.revealed').forEach(function(d) {
     d.closest('.shop-item').querySelector('.si-swipe-delete').classList.remove('revealed');
   });
@@ -5904,12 +5823,12 @@ function onSwipeMove(e) {
   if (!_swipeData) return;
   var dx = e.touches[0].clientX - _swipeData.startX;
   var dy = Math.abs(e.touches[0].clientY - _swipeData.startY);
-  // If scrolling vertically, don't swipe
+
   if (dy > 20 && Math.abs(dx) < 10) {
     _swipeData = null;
     return;
   }
-  if (dx > 0) { _swipeData = null; return; } // Only left swipe
+  if (dx > 0) { _swipeData = null; return; }
   _swipeData.moved = true;
   var translateX = Math.max(dx, -80);
   _swipeData.item.querySelector('.si-check').style.transform = 'translateX(' + translateX + 'px)';
@@ -5933,9 +5852,9 @@ function onSwipeEnd(e) {
     });
     if (del) { del.style.transition = ''; del.classList.remove('revealed'); }
   };
-  
+
   if (dx < -50 && _swipeData.moved) {
-    // Reveal delete button
+
     if (del) {
       del.classList.add('revealed');
       var check = _swipeData.item.querySelector('.si-check');
@@ -6099,7 +6018,7 @@ function saveShopItem() {
       recipeId: ''
     });
   }
-  // Auto-merge duplicates after adding new item
+
   try { autoMergeShopItems(); } catch(e) {}
   saveShopItems();
   closeShopSheet();
@@ -6138,7 +6057,6 @@ function guessShopCategory() {
   });
 }
 
-// ======================== TASKS ========================
 const TASK_CATEGORIES = [
   { id: 'cooking',  icon: '🥘', color: '#dc2626' },
   { id: 'shopping', icon: '🛒', color: '#f59e0b' },
@@ -6215,7 +6133,7 @@ function getRecentCompleted() {
 }
 function clearCompletedTasks() {
   showConfirmModal(lang==='en'?'Delete all completed tasks?':'Vymazať všetky dokončené úlohy?', '🗑️', lang==='en'?'Delete':'Vymazať', function() {
-  
+
   tasks = tasks.filter(t => !t.completed);
   saveTasks();
   renderTasks();
@@ -6242,7 +6160,6 @@ function formatTaskDate(dateStr) {
   return d.toLocaleDateString(lang === 'en' ? 'en-GB' : 'sk-SK', { day: 'numeric', month: 'short' });
 }
 
-// ===== DASHBOARD WIDGET =====
 function renderTaskWidget() {
   const el = document.getElementById('dash-tasks');
   if (!el) return;
@@ -6281,7 +6198,7 @@ function renderTaskWidget() {
     }
   }
 
-  // Quick add
+
   html += `<div class="tw-add-quick">
     <input id="tw-quick-input" placeholder="${lang==='en'?'Quick add...':'Rýchlo pridať...'}" aria-label="${lang==='en'?'Quick add task':'Rýchlo pridať úlohu'}" onkeydown="if(event.key==='Enter')quickAddTask()">
     <button onclick="quickAddTask()" aria-label="Pridať úlohu" title="Pridať úlohu">+</button>
@@ -6311,7 +6228,6 @@ function guessTaskCategory(title) {
   return 'custom';
 }
 
-// ===== TASKS SCREEN =====
 function renderTasks() {
   const container = document.getElementById('tasks-view');
   loadTasks();
@@ -6353,7 +6269,7 @@ function renderTasks() {
     <button class="task-hero-add" onclick="openTaskSheet()">➕ ${lang==='en'?'Add':'Pridať'}</button>
   </section>`;
 
-  // Filter chips
+
   html += `<div class="task-filters">
     <button class="task-filter-chip${activeTaskFilterClass('today')}" onclick="filterTasksTab(this,'today')">📅 ${lang==='en'?'Today':'Dnes'}</button>
     <button class="task-filter-chip${activeTaskFilterClass('tomorrow')}" onclick="filterTasksTab(this,'tomorrow')">🌟 ${lang==='en'?'Tomorrow':'Zajtra'}</button>
@@ -6362,8 +6278,8 @@ function renderTasks() {
     <button class="task-filter-chip${activeTaskFilterClass('done')}" onclick="filterTasksTab(this,'done')">✅ ${lang==='en'?'Done':'Hotové'}</button>
   </div>`;
 
-  const headerLen = html.length; // track header length for empty state check
-  // Filter-aware section rendering
+  const headerLen = html.length;
+
   if (_taskFilter === 'today') {
     if (todayTasks.length) {
       html += `<div class="task-section-title">📅 ${lang==='en'?'Today':'Dnes'} <span class="task-section-count">${todayTasks.length}</span></div>`;
@@ -6401,7 +6317,7 @@ function renderTasks() {
       html += `<div class="task-section-title">${s.icon} ${s.title} <span class="task-section-count">${s.tasks.length}</span></div>`;
       html += s.tasks.map(t => renderTaskCard(t)).join('');
     });
-    // Other tasks (no date / old date) - not shown in today/week sections
+
     const otherOpen = tasks.filter(t => !t.completed && !weekTasks.find(wt => wt.id === t.id) && !todayTasks.find(tt => tt.id === t.id));
     if (otherOpen.length) {
       html += `<div class="task-section-title">📋 ${lang==='en'?'Other':'Ďalšie'} <span class="task-section-count">${otherOpen.length}</span></div>`;
@@ -6529,7 +6445,6 @@ function taskCatLabel(catId) {
   return map[catId] || '—';
 }
 
-// ===== TASK CRUD =====
 function toggleTask(id) {
   const t = tasks.find(x => x.id === id);
   if (!t) return;
@@ -6580,7 +6495,7 @@ function openTaskSheet(editId) {
     ? (lang==='en'?'💾 Save':'💾 Uložiť')
     : (lang==='en'?'💾 Add':'💾 Pridať');
 
-  // Hide extra fields by default for new tasks
+
   if (!editId) {
     document.getElementById('task-extra-fields').style.display = 'none';
     document.getElementById('task-extra-toggle').textContent = '▼ ' + (lang==='en'?'More options':'Viac možností');
@@ -6592,12 +6507,12 @@ function openTaskSheet(editId) {
     document.getElementById('task-title').value = '';
     document.getElementById('task-edit-id').value = '';
   } else {
-    // Show extra fields when editing
+
     document.getElementById('task-extra-fields').style.display = '';
     document.getElementById('task-extra-toggle').textContent = '▲ ' + (lang==='en'?'Less options':'Menej možností');
   }
 
-  // Render category chips
+
   const chips = document.getElementById('task-cat-chips');
   chips.innerHTML = TASK_CATEGORIES.map(c =>
     `<button class="cat-chip${c.id === 'custom' ? ' active' : ''}" data-cat="${c.id}" onclick="selectTaskCat(this)">${c.icon} ${taskCatLabel(c.id)}</button>`
@@ -6661,7 +6576,7 @@ function saveTask() {
     tasks.push({ id: generateTaskId(), title, category, completed: false, date: date || new Date().toISOString().slice(0,10), time, priority, repeat, note, source: 'manual', completedDate: '' });
   }
   saveTasks();
-  // Notify family
+
   if (typeof sendPushToFamily === 'function' && typeof taskTitle !== 'undefined' && taskTitle) {
     var pushAuthor = authUser ? (authUser.displayName || authUser.email || '👤') : t('Hosť','Guest');
     var pushText = taskTitle.length > 80 ? taskTitle.slice(0, 80) + '...' : taskTitle;
@@ -6672,7 +6587,6 @@ function saveTask() {
   renderTaskWidget();
 }
 
-// ======================== COOKING HISTORY ========================
 function logCooking(recipeId) {
   const existing = cookingHistory.find(h => h.recipeId === recipeId && h.date === new Date().toISOString().slice(0,10));
   if (existing) {
@@ -6703,14 +6617,13 @@ function openHistory() {
 
 function clearHistory() {
   showConfirmModal(lang==='en'?'Clear cooking history?':'Vymazať celú históriu?', '🗑️', lang==='en'?'Clear':'Vymazať', function() {
-  
+
   cookingHistory = [];
   localStorage.setItem('cookingHistory', JSON.stringify(cookingHistory));
   openHistory();
   });
 }
 
-// ======================== DEEP SEARCH ========================
 function applyIngredientSearch() {
   if (ingredientSearchSelected.size > 0) {
     const sel = [...ingredientSearchSelected];
@@ -6742,11 +6655,10 @@ function applyIngredientSearch() {
   }
 }
 
-// ======================== IMPORT FROM URL ========================
 function cleanHtml(text) {
   if (!text || typeof text !== 'string') return '';
   let t = text;
-  // Decode HTML entities (run twice for double-encoded entities)
+
   for (let pass = 0; pass < 2; pass++) {
     t = t.replace(/&aacute;/gi, '\u00e1').replace(/&eacute;/gi, '\u00e9').replace(/&iacute;/gi, '\u00ed')
       .replace(/&oacute;/gi, '\u00f3').replace(/&uacute;/gi, '\u00fa').replace(/&yacute;/gi, '\u00fd')
@@ -6765,18 +6677,18 @@ function cleanHtml(text) {
       .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(parseInt(n)))
       .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCharCode(parseInt(n, 16)));
   }
-  // Convert HTML breaks to newlines
+
   t = t.replace(/<br\s*\/?>/gi, '\n').replace(/<p[^>]*>/gi, '\n').replace(/<\/p>/gi, '\n');
   t = t.replace(/<\/li>/gi, '\n').replace(/<li[^>]*>/gi, '');
   t = t.replace(/<\/div>/gi, '\n').replace(/<div[^>]*>/gi, '');
   t = t.replace(/<ol[^>]*>/gi, '').replace(/<\/ol>/gi, '\n');
   t = t.replace(/<ul[^>]*>/gi, '').replace(/<\/ul>/gi, '\n');
-  // Strip all remaining HTML tags
+
   t = t.replace(/<[^>]+>/g, '');
-  // Normalize
+
   t = t.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
   t = t.split('\n').map(l => l.trim()).filter(Boolean).join('\n');
-  t = t.replace(/[ \t]{2,}/g, ' ').replace(/^\d+\.\s*/, ''); // Remove leading step numbers
+  t = t.replace(/[ \t]{2,}/g, ' ').replace(/^\d+\.\s*/, '');
   return t.trim();
 }
 
@@ -6868,7 +6780,7 @@ function importFromUrl() {
   if (!url) return;
   setImportStatus('⏳ Načítavam...');
   setImportBusy(true);
-  const SCRAPER_URL = 'https://mealnest-scraper.waldis994.workers.dev';
+  const SCRAPER_URL = 'https:
   let maxRetries = 2;
   function tryFetch(retriesLeft) {
     if (retriesLeft === undefined) retriesLeft = maxRetries;
@@ -6938,7 +6850,7 @@ function importFromUrl() {
         const ingrText = (Array.isArray(ingr) ? ingr : []).map(i => cleanHtml(typeof i === 'string' ? i : '')).join('\n');
         const stepsArr = Array.isArray(steps) ? steps.map(s => cleanHtml(typeof s === 'string' ? s : s.text || s.name || '')) :
           typeof steps === 'string' ? cleanHtml(steps).split('\n').filter(Boolean) : [];
-        // Ak nedostaneme vela krokov, skusime delit podla <p> alebo <br>
+
         if (stepsArr.length <= 2 && typeof steps === 'string' && steps.match(/<p|<br|<li/i)) {
           const htmlSteps = steps.split(/<\/p>|<br\s*\/?|<\/li>/i).map(s => cleanHtml(s)).filter(s => s.length > 3);
           if (htmlSteps.length > stepsArr.length) stepsArr.length = 0, stepsArr.push.apply(stepsArr, htmlSteps);
@@ -6961,7 +6873,7 @@ function importFromUrl() {
         if (recipe.keywords) { const t = (typeof recipe.keywords === 'string' ? recipe.keywords : (Array.isArray(recipe.keywords) ? recipe.keywords.join(',') : '')).split(',').map(s => s.trim().toLowerCase()); tags.push(...t); }
         let perPortionCalories = '';
         if (calories) {
-          // Source provided total calories - divide by yield for per-portion
+
           const calTotal = parseInt(calories);
           perPortionCalories = Math.round(calTotal / yieldNum) || calTotal;
         }
@@ -6983,8 +6895,8 @@ function importFromUrl() {
         showImportReview(importData);
       })
       .catch(err => {
-        // Chyba už je ošetrená v .catch() pred .then()
-        // Ak by sa dostala sem, skúsime ešte raz
+
+
         setImportStatus(t('importUrlFail'));
         setImportBusy(false);
         console.error('Scraper error:', err);
@@ -6993,14 +6905,12 @@ function importFromUrl() {
   tryFetch(maxRetries);
 }
 
-// ======================== BACK BUTTON + HISTORY ========================
 let _backPressTimer = 0;
 
 function isAnyModalOpen() {
   return document.querySelector('.modal-overlay.active, #planner-picker.active, #login-overlay[style*="flex"], .sheet-overlay.active') !== null;
 }
 
-// =================== CUSTOM CONFIRM MODAL ===================
 var _confirmCallback = null;
 function showConfirmModal(msg, icon, okLabel, callback) {
   var modal = document.getElementById('confirm-modal');
@@ -7027,18 +6937,18 @@ function executeConfirm() {
 }
 
 function closeTopModal() {
-  // Close any open modal/sheet/overlay
+
   const selectors = [
-    '#ai-modal', '#ai-plan-modal',          // AI modals
-    '#detail-modal.active',                  // Recipe detail
-    '#cooking-overlay.active',               // Cooking mode
-    '#import-url-modal.active',              // Import URL
-    '#form-modal.active',                    // Recipe form
-    '#planner-picker.active',                // Recipe picker
-    '#shop-sheet.active',                    // Shop sheet
-    '#task-sheet.active',                    // Task sheet
-    '#board-form-modal',                     // Board form
-    '#login-overlay'                         // Login (check inline style)
+    '#ai-modal', '#ai-plan-modal',
+    '#detail-modal.active',
+    '#cooking-overlay.active',
+    '#import-url-modal.active',
+    '#form-modal.active',
+    '#planner-picker.active',
+    '#shop-sheet.active',
+    '#task-sheet.active',
+    '#board-form-modal',
+    '#login-overlay'
   ];
   for (const sel of selectors) {
     const el = document.getElementById(sel.replace(/\.active/, '')) || document.querySelector(sel);
@@ -7053,15 +6963,15 @@ function closeTopModal() {
         else if (el.id === 'ai-modal' || el.id === 'ai-plan-modal') el.remove();
         else if (el.id === 'board-form-modal') el.remove();
         else el.classList.remove('active');
-        return true; // Closed something
+        return true;
       }
     }
   }
-  return false; // Nothing was open
+  return false;
 }
 
 window.addEventListener('popstate', function(e) {
-  // First: close any open modal/detail/overlay
+
   if (closeTopModal()) {
     const currentTab = document.body.dataset.tab || 'dashboard';
     history.pushState({ tab: currentTab }, '', '#tab-' + currentTab);
@@ -7071,12 +6981,12 @@ window.addEventListener('popstate', function(e) {
   if (e.state && e.state.tab) {
     window._skipHistory = true;
     switchTab(e.state.tab);
-    // Always keep a history cushion so swipe-back doesn't exit
+
     if (history.length <= 2) {
       history.pushState({ tab: e.state.tab }, '', '#tab-' + e.state.tab);
     }
   } else {
-    // On home — push replacement state instead of exiting immediately
+
     const now = Date.now();
     if (now - _backPressTimer < 2000) {
       history.go(-1);
@@ -7088,16 +6998,15 @@ window.addEventListener('popstate', function(e) {
   }
 });
 
-// ======================== EDGE SWIPE BACK GESTURE ========================
 (function() {
   let _edgeSwipeData = null;
   document.addEventListener('touchstart', function(e) {
-    // Only edge swipe from left edge (< 40px from left)
+
     if (e.touches[0].clientX > 40) { _edgeSwipeData = null; return; }
-    // Don't swipe on inputs or when a sheet is open
+
     if (e.target.closest('input, textarea, .sheet-overlay, .cooking-overlay')) { _edgeSwipeData = null; return; }
     _edgeSwipeData = { startX: e.touches[0].clientX, startY: e.touches[0].clientY };
-    // Cancel tab swipe when edge swipe is active
+
     if (typeof _swipeTabData !== 'undefined') _swipeTabData = null;
   }, { passive: true });
 
@@ -7105,11 +7014,11 @@ window.addEventListener('popstate', function(e) {
     if (!_edgeSwipeData) return;
     const dx = e.touches[0].clientX - _edgeSwipeData.startX;
     const dy = Math.abs(e.touches[0].clientY - _edgeSwipeData.startY);
-    // Horizontal swipe only, minimum ~20px to show indicator
+
     if (dx < 20 || dy > dx * 0.5) { _edgeSwipeData = null; return; }
-    // Cancel tab swipe while edge swipe is active
+
     if (typeof _swipeTabData !== 'undefined') _swipeTabData = null;
-    // Visual hint: show a subtle edge glow when swiping
+
     if (!document.getElementById('edge-swipe-indicator')) {
       const ind = document.createElement('div');
       ind.id = 'edge-swipe-indicator';
@@ -7129,29 +7038,26 @@ window.addEventListener('popstate', function(e) {
     if (indicator) { indicator.style.opacity = '0'; setTimeout(function() { if (indicator.parentNode) indicator.remove(); }, 300); }
     if (dx < 80 || dy > dx * 0.6) { _edgeSwipeData = null; return; }
     _edgeSwipeData = null;
-    // Cancel any tab swipe
+
     if (typeof _swipeTabData !== 'undefined') _swipeTabData = null;
-    // Edge swipe detected — go back
+
     if (closeTopModal()) {
-      // Modal was closed, don't also navigate
+
     } else {
       history.back();
     }
   }, { passive: true });
 })();
 
-// Ensure we always have at least 2 history entries on page load
 if (history.length <= 1) {
   history.pushState({ tab: 'dashboard' }, '', '#tab-dashboard');
 }
 
-// Global error handler
 window.addEventListener('error', function(evt) {
   var el = document.getElementById('boot-status');
   if (el) { el.style.display = 'block'; el.style.background = 'rgba(200,0,0,.92)'; el.textContent = '❌ CHYBA: ' + (evt.message || evt.error || ''); }
 });
 
-// ======================== INIT ========================
 (function showBootInfo() {
   var el = document.getElementById('boot-status');
   if (!el) return;
@@ -7190,10 +7096,8 @@ setTimeout(function() {
 render();
 showTipOfDay();
 
-// Background image fetch for Pexels – fetches any still-missing images
 batchFetchImages().then(() => { render(); renderDashboard(); showTipOfDay(); });
 
-// Register service worker for PWA — user-controlled update handoff
 let _refreshingForUpdate = false;
 
 function showServiceWorkerUpdateBanner(worker) {
@@ -7241,7 +7145,6 @@ if ('serviceWorker' in navigator) {
   }).catch(() => {});
 }
 
-// ======================== NOTIFICATIONS ========================
 const NOTIF_MESSAGES = {
   breakfastReminder: { sk: ['Raňajky 🌅', 'Čas na raňajky! Čo si dáš dobré?'], en: ['Breakfast time 🌅', 'Time for breakfast! What\'s cooking?'] },
   todayCookingReminder: { sk: ['Čo uvariť dnes? 🍳', 'Pozri si návrhy na dnešné jedlá.'], en: ['What to cook today? 🍳', 'Check your meal suggestions.'] },
@@ -7272,7 +7175,7 @@ function reloadFromLocalStorage(key, data) {
     else if (key === 'shoppingItems') { loadShopItems(); renderShoppingList(); }
     else if (key === 'tasks') { tasks = Array.isArray(data) ? data.slice() : []; renderTasks(); }
     else if (key === 'planType') { planType = data; renderPlanner(); }
-    else if (key === 'recipes') { var rd = JSON.parse(JSON.stringify(data)); if (Array.isArray(rd) && rd.length) recipes = rd; else if (!Array.isArray(rd) || !rd.length) { /* don't overwrite */ } }
+    else if (key === 'recipes') { var rd = JSON.parse(JSON.stringify(data)); if (Array.isArray(rd) && rd.length) recipes = rd; else if (!Array.isArray(rd) || !rd.length) {  } }
   } catch(e) {}
 }
 
@@ -7286,8 +7189,6 @@ function requestNotifPermission() {
     Notification.requestPermission();
   }
 }
-
-
 
 function pushNotifSetup() {
   if (!('Notification' in window)) { showToast(t('Notifikácie nie sú podporované','Notifications not supported'),'error'); return; }
@@ -7316,8 +7217,8 @@ function initNotifications() {
   const anyEnabled = Object.values(appSettings.notifications).some(v => v);
   if (!anyEnabled) return;
   requestNotifPermission();
-  notifInterval = setInterval(checkAndFireNotifications, 60000); // check every 60s
-  checkAndFireNotifications(); // immediate first check
+  notifInterval = setInterval(checkAndFireNotifications, 60000);
+  checkAndFireNotifications();
 }
 
 function checkAndFireNotifications() {
@@ -7335,7 +7236,7 @@ function checkAndFireNotifications() {
     { key: 'eveningPlanningReminder', timeKey: 'evening' },
   ];
 
-  // Reset fired state if new day
+
   Object.keys(notifFiredToday).forEach(k => {
     if (notifFiredToday[k] !== today) delete notifFiredToday[k];
   });
@@ -7345,24 +7246,23 @@ function checkAndFireNotifications() {
     if (notifFiredToday[m.key] === today) continue;
     const target = appSettings.notifTimes[m.timeKey];
     if (target !== hhmm) continue;
-    // Fire!
+
     const msg = NOTIF_MESSAGES[m.key];
     const l = appSettings.lang === 'en' ? 'en' : 'sk';
     try {
       new Notification(msg[l][0], { body: msg[l][1], icon: '/icon-192.png', badge: '/icon-192.png' });
-    } catch(e) { /* ignore */ }
+    } catch(e) {  }
     notifFiredToday[m.key] = today;
     saveNotifFired();
   }
 }
 
-// ======================== WEATHER ========================
 let weatherCache = null;
 let weatherCacheTs = 0;
 
 async function fetchWeatherCoords(city) {
   try {
-    const r = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=${appSettings.lang}`);
+    const r = await fetch(`https:
     const data = await r.json();
     if (data.results && data.results.length) {
       const loc = data.results[0];
@@ -7372,7 +7272,7 @@ async function fetchWeatherCoords(city) {
       saveSettings();
       return { lat: loc.latitude, lon: loc.longitude, name: appSettings.weather.location };
     }
-  } catch(e) { /* ignore */ }
+  } catch(e) {  }
   return null;
 }
 
@@ -7380,7 +7280,7 @@ async function fetchWeatherData() {
   const loc = appSettings.weather.location;
   if (!loc) return null;
 
-  // Cache for 30 minutes
+
   if (weatherCache && (Date.now() - weatherCacheTs) < 30 * 60 * 1000) return weatherCache;
 
   try {
@@ -7392,14 +7292,14 @@ async function fetchWeatherData() {
       lat = coords.lat;
       lon = coords.lon;
     }
-    const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+    const r = await fetch(`https:
     const data = await r.json();
     if (data.current_weather) {
       weatherCache = data.current_weather;
       weatherCacheTs = Date.now();
       return weatherCache;
     }
-  } catch(e) { /* ignore */ }
+  } catch(e) {  }
   return null;
 }
 
@@ -7451,10 +7351,8 @@ async function updateWeatherWidget() {
   }
 }
 
-// Init notifications on load
 try { initNotifications(); } catch(e) {}
 
-// Firebase sync hooks — always active, they check familyCode internally
 (function hookFirebaseSync() {
   const _origSSI = saveShopItems;
   const _origSWP = saveWeekPlan;
@@ -7470,7 +7368,6 @@ setTimeout(() => {
   if (familyCode && firebaseReady) updateSyncIndicator();
 }, 2000);
 
-// Init weather fetch when dashboard renders with weather enabled
 const _origRenderDashboard = renderDashboard;
 renderDashboard = function() {
   try { _origRenderDashboard(); } catch(e) {}
@@ -7479,20 +7376,16 @@ renderDashboard = function() {
   }
 };
 
-
-
-// ======================== CLOSE MODAL ON OUTSIDE CLICK ========================
 document.addEventListener('click', function(e) {
   var modal = e.target.closest('.modal-overlay.active, #confirm-modal');
   if (modal && e.target === modal) {
-    // Clicked on overlay background, close it
+
     var closeBtn = modal.querySelector('.modal-close, .sheet-close');
     if (closeBtn) closeBtn.click();
     else { modal.classList.remove('active'); setTimeout(function() { modal.style.display = 'none'; }, 200); }
   }
 });
 
-// ======================== TOAST NOTIFICATIONS ========================
 function showToast(msg, type, duration) {
   type = type || 'info';
   duration = duration || 3000;
@@ -7507,7 +7400,7 @@ function showToast(msg, type, duration) {
   const toast = document.createElement('div');
   toast.className = 'toast toast-' + type + ' toast-stacked';
   toast.innerHTML = '<span class="toast-icon">' + (icons[type] || 'ℹ️') + '</span><span class="toast-text">' + msg + '</span>';
-  // Stack positioning - shift existing toasts up
+
   var existing = container.querySelectorAll('.toast');
   existing.forEach(function(t) {
     t.style.transform = 'translateY(-' + (existing.length * 6) + 'px)';
@@ -7518,7 +7411,7 @@ function showToast(msg, type, duration) {
     toast.style.animation = 'toastOut .3s ease forwards';
     setTimeout(function() {
       toast.remove();
-      // Restore remaining toasts
+
       container.querySelectorAll('.toast').forEach(function(t, i) {
         t.style.transform = '';
         t.style.opacity = '';
@@ -7558,7 +7451,6 @@ function showUndoToast(msg, undoFn, duration) {
   }, duration);
 }
 
-// =================== INDEXEDDB WRAPPER ===================
 var DB_VERSION = 1;
 var DB_NAME = 'MealnestDB';
 var dbInstance = null;
@@ -7615,7 +7507,7 @@ function checkStorageLimit() {
       var val = localStorage.getItem(key);
       if (val) total += val.length * 2;
     }
-    // Warn at ~4MB (80% of 5MB limit)
+
     if (total > 4000000) {
       var existing = document.querySelector('.storage-warning');
       if (!existing) {
@@ -7641,7 +7533,6 @@ function dbDelete(key) {
   }).catch(function() { return false; });
 }
 
-// Migrate localStorage -> IndexedDB on first run
 function migrateToIndexedDB() {
   if (localStorage.getItem('_idbMigrated') === '1') return;
   var keys = ['recipes','mealPlan','mealPlanKids','shoppingItems','tasks','cookingHistory','planType'];
@@ -7656,7 +7547,6 @@ function migrateToIndexedDB() {
 setTimeout(migrateToIndexedDB, 2000);
 setTimeout(checkStorageLimit, 3000);
 
-// =================== GLOBAL ERROR HANDLER ===================
 window.onerror = function(msg, url, line, col, err) {
   var el = document.getElementById('boot-status');
   if (el) {
@@ -7672,9 +7562,8 @@ window.addEventListener('unhandledrejection', function(e) {
   e.preventDefault();
 });
 
-// =================== PREVENT CONTEXT MENU ===================
 document.addEventListener('contextmenu', function(e) {
-  // Allow context menu on input/textarea
+
   if (e.target.closest && !e.target.closest('input, textarea, [contenteditable]')) {
     e.preventDefault();
     haptic(6);
@@ -7686,7 +7575,6 @@ document.addEventListener('selectstart', function(e) {
   }
 });
 
-// =================== HAPTIC FEEDBACK ===================
 function haptic(ms) {
   try {
     if (!navigator.vibrate) return;
@@ -7695,7 +7583,6 @@ function haptic(ms) {
   } catch(_) {}
 }
 
-// =================== CONFETTI ===================
 function triggerConfetti() {
   try {
     var colors = ['#10b981','#34d399','#06b6d4','#f59e0b','#a78bfa','#f472b6','#ef4444'];
@@ -7720,8 +7607,6 @@ function triggerConfetti() {
     }
   } catch(_) {}
 }
-
-// =================== BUTTON TOUCH RIPPLE ===================
 
 function __confirmDemo() {
   showConfirmModal(
@@ -7753,7 +7638,7 @@ function addRipple(e, el) {
     ripple.style.top = (cy - size/2) + 'px';
     btn.appendChild(ripple);
     setTimeout(function() { ripple.remove(); }, 500);
-  } catch(_) { /* silent */ }
+  } catch(_) {  }
 }
 document.addEventListener('click', function(e) {
   try {
