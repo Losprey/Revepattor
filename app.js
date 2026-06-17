@@ -531,7 +531,7 @@ function pickOnboardLang(l) {
 setTimeout(() => showOnboarding(), 300);
 
 // ======================== AI (DEEPSEEK PROXY) ========================
-const APP_VERSION = '1.0.48';
+const APP_VERSION = '1.0.49';
 const VAPID_PUBLIC_KEY = 'BI6Fga-GXSKggkNJ58R1VEYEfGE6KfWgnuDtI9sHqQLQJzGLshJuIuODmI13AVzX5D2Kd7SBxrr7Cvf-xRAowg0';
 const PUSH_PROXY_URL = 'https://receptar.waldis994.workers.dev';
 
@@ -3804,8 +3804,8 @@ function renderMoreHome() {
     </div>
     <div class="more-grid">
       ${renderMoreTile('recipes-shortcut', '📖', 'Recepty', `${recipes.length} receptov`, 'Receptár a import')}
-      ${renderMoreTile('shopping', '🛒', 'Nákup', `${shoppingCount} položiek`, 'Aktuálny zoznam')}
-      ${renderMoreTile('tasks', '✅', 'Úlohy', `${openTasks} otvorených`, 'Dnes, nadchádzajúce a hotové úlohy')}
+      ${renderMoreTile('shopping', '🛒', 'Nákup', `${shoppingCount} položiek`, 'Aktuálny zoznam', "switchTab('shopping')")}
+      ${renderMoreTile('tasks', '✅', 'Úlohy', `${openTasks} otvorených`, 'Pôvodná sekcia úloh', "switchTab('tasks')")}
       ${renderMoreTile('family-board', '📌', 'Nástenka', 'Dnešný prehľad', 'Jedlá, nákup a úlohy')}
       ${renderMoreTile('ai-week', '🚀', 'AI Týždeň', 'Plán na mieru', 'Preferencie a návrhy AI')}
       ${renderMoreTile('settings', '⚙️', 'Nastavenia', 'Účet, jazyk, dáta', 'Moderné nastavenia')}
@@ -3821,8 +3821,9 @@ function renderMoreHome() {
   </section>`;
 }
 
-function renderMoreTile(page, icon, title, desc, detail) {
-  return `<button class="more-tile" onclick="openMorePage('${page}')"><span>${icon}</span><strong>${esc(title)}</strong><small>${esc(desc)}</small><em>${esc(detail)}</em><b>›</b></button>`;
+function renderMoreTile(page, icon, title, desc, detail, action) {
+  const clickAction = action || `openMorePage('${page}')`;
+  return `<button class="more-tile" onclick="${clickAction}"><span>${icon}</span><strong>${esc(title)}</strong><small>${esc(desc)}</small><em>${esc(detail)}</em><b>›</b></button>`;
 }
 
 function renderMoreRow(page, icon, title, desc) {
@@ -3844,13 +3845,11 @@ function openMorePage(page) {
     account: renderMoreAccountPage,
     privacy: renderMorePrivacySecurityPage,
     sync: renderMoreBackupSyncPage,
-    tasks: renderMoreTasksPage,
     board: renderMoreBoardPage,
     'family-board': renderMoreBoardPage,
     'recipes-shortcut': renderMoreRecipesShortcutPage,
     'family-permissions': renderMoreFamilyPermissionsPage,
     language: renderMoreLanguagePage,
-    shopping: renderMoreShoppingPage,
     'ai-week': renderMoreAiWeekPage,
     onboarding: renderMoreOnboardingPage,
     'notifications-account': renderMoreNotificationsAccountPage,
@@ -4152,24 +4151,6 @@ function renderMoreDataSettingsPage() {
   return renderMoreShell('Dáta a údržba', 'Import, export a servisné akcie', body);
 }
 
-function renderMoreTasksPage() {
-  try { loadTasks(); } catch(e) {}
-  const today = getTodayTasks();
-  const upcoming = getWeekTasks().slice(0, 4);
-  const completed = getCompletedTasks().slice(0, 4);
-  const total = Array.isArray(tasks) ? tasks.length : 0;
-  const done = Array.isArray(tasks) ? tasks.filter(t => t.completed).length : 0;
-  const body = `
-    ${moreCard('Statistics', `<div class="more-stat-grid"><div><strong>${today.length}</strong><small>dnes</small></div><div><strong>${upcoming.length}</strong><small>nadchádza</small></div><div><strong>${done}</strong><small>hotovo</small></div><div><strong>${total}</strong><small>spolu</small></div></div>`)}
-    ${moreCard('Dnešné úlohy', renderMoreTaskRows(today, 'Dnes nemáš žiadne úlohy.', 'Pridať úlohu'))}
-    ${moreCard('Upcoming tasks', renderMoreTaskRows(upcoming, 'Žiadne nadchádzajúce úlohy.', 'Otvoriť úlohy'))}
-    ${moreCard('Completed tasks', renderMoreTaskRows(completed, 'Zatiaľ nie sú dokončené žiadne úlohy.', 'Otvoriť úlohy'))}
-    ${moreCard('Categories', `<div class="more-chip-row">${TASK_CATEGORIES.map(c => `<span>${c.icon}</span>`).join('')}</div>`)}
-    ${moreCard('Actions', `<div class="more-option-grid">${[['Dnes',"switchTab('tasks')"],['Týždeň',"switchTab('tasks')"],['+ Nová úloha',"switchTab('tasks')"]].map(x => morePill(x[0], x[0] === 'Dnes', x[1])).join('')}</div>`)}
-  `;
-  return renderMoreShell('Úlohy', 'Dnešné, nadchádzajúce a hotové úlohy', body, "<button class=\"more-top-action\" onclick=\"switchTab('tasks')\">Správca</button>");
-}
-
 function renderMoreTaskRows(items, emptyText, actionLabel) {
   if (!items.length) {
     return moreEmptyState('✅', emptyText, 'Zobrazujú sa iba tvoje reálne úlohy.', actionLabel, "switchTab('tasks')");
@@ -4226,20 +4207,6 @@ function setMoreLanguage(value) {
   saveSettings();
   applyLang();
   openMorePage('language');
-}
-
-function renderMoreShoppingPage() {
-  try { loadShopItems(); } catch(e) {}
-  const current = Array.isArray(shopItems) ? shopItems.filter(i => !i.checked) : [];
-  const history = Array.isArray(shopItems) ? shopItems.filter(i => i.checked) : [];
-  const body = `
-    ${moreCard('Current list', current.length ? `<div class="more-feed">${current.slice(0, 5).map(i => `<div><span>🛒</span><strong>${esc(i.name)}</strong><small>${esc((i.amount || '') + ' ' + (i.unit || ''))}</small></div>`).join('')}</div>` : `<div class="more-empty-line">Nákupný zoznam je prázdny.</div>`)}
-    ${moreCard('History', `<div class="more-stat-grid"><div><strong>${history.length}</strong><small>kúpené</small></div><div><strong>${current.length}</strong><small>čaká</small></div></div>`)}
-    ${moreCard('Categories', `<div class="more-chip-row">${SHOP_CATEGORIES.slice(0, 6).map(c => `<span>${c.icon} ${lang === 'en' ? c.nameEn : c.nameSk}</span>`).join('')}</div>`)}
-    ${moreCard('Shared items', `<div class="more-board-row"><span>👨‍👩‍👧‍👦</span><strong>${familyCode ? 'Zdieľané s rodinou' : 'Rodina nepripojená'}</strong><button onclick="openMorePage('family')">Rodina</button></div>`)}
-    ${moreCard('Statistics', `<div class="more-stat-grid"><div><strong>${current.length + history.length}</strong><small>spolu</small></div><div><strong>${current.length}</strong><small>otvorené</small></div></div>`)}
-  `;
-  return renderMoreShell('Nákup', 'Prehľad nákupov a kategórií', body, "<button class=\"more-top-action\" onclick=\"switchTab('shopping')\">Zoznam</button>");
 }
 
 function renderMoreAiWeekPage() {
