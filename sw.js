@@ -51,7 +51,7 @@ self.addEventListener('message', function(e) {
   }
 });
 
-var CACHE = 'mealnest-v51';
+var CACHE = 'mealnest-v52';
 var PRECACHE = [
   'recipes-default.json',
   'manifest.json',

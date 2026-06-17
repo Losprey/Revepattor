@@ -531,7 +531,7 @@ function pickOnboardLang(l) {
 setTimeout(() => showOnboarding(), 300);
 
 // ======================== AI (DEEPSEEK PROXY) ========================
-const APP_VERSION = '1.0.45';
+const APP_VERSION = '1.0.46';
 const VAPID_PUBLIC_KEY = 'BI6Fga-GXSKggkNJ58R1VEYEfGE6KfWgnuDtI9sHqQLQJzGLshJuIuODmI13AVzX5D2Kd7SBxrr7Cvf-xRAowg0';
 const PUSH_PROXY_URL = 'https://receptar.waldis994.workers.dev';
 
@@ -5343,40 +5343,7 @@ function renderPlanner() {
   var maxMeals = DAYS.length * totalSlots;
   var mealPct = maxMeals > 0 ? Math.round((totalMeals / maxMeals) * 100) : 0;
   const weekRange = getWeekLabel(startOfWeek);
-  const selectedIdx = typeof _selectedPlannerDay === 'number' ? _selectedPlannerDay : todayIdx;
-  todayEl.innerHTML = `<section class="planner-mobile-shell">
-    <div class="planner-reference-title-row">
-      <div class="planner-reference-title">
-        <span class="planner-reference-icon">🗓️</span>
-        <strong>${lang==='en'?'Calendar':'Kalendár'}</strong>
-      </div>
-      <div class="planner-reference-actions">
-        <button class="planner-main-action" onclick="aiGenerateFullWeek()">🤖 ${lang==='en'?'AI week':'AI týždeň'}</button>
-      </div>
-    </div>
-    <div class="planner-view-toggle" aria-label="${lang==='en'?'Calendar view':'Zobrazenie kalendára'}">
-      <button class="active">${lang==='en'?'Day':'Deň'}</button>
-      <button onclick="document.getElementById('planner-week-grid')?.scrollIntoView({behavior:'smooth'})">${lang==='en'?'Week':'Týždeň'}</button>
-    </div>
-    <div class="planner-day-strip">
-      ${DAYS.map((dayKey, index) => {
-        const date = new Date(startOfWeek);
-        date.setDate(startOfWeek.getDate() + index);
-        return `<button class="${index === selectedIdx ? 'active' : ''}" onclick="selectPlannerDay(${index})"><span>${esc((dayNames[index] || '').slice(0, 2))}</span><strong>${date.getDate()}</strong></button>`;
-      }).join('')}
-    </div>
-    ${renderPlannerDayView(dayStats[selectedIdx], weekKey, totalSlots)}
-    <div class="planner-control-row">
-      <div class="planner-segment" aria-label="${lang==='en'?'Week':'Týždeň'}">
-        <button class="${plannerWeekOffset===0?'active':''}" onclick="goToWeek(0)">${lang==='en'?'This week':'Tento týždeň'}</button>
-        <button class="${plannerWeekOffset===1?'active':''}" onclick="goToWeek(1)">${lang==='en'?'Next week':'Budúci týždeň'}</button>
-      </div>
-      <div class="planner-segment" aria-label="${lang==='en'?'Audience':'Režim'}">
-        <button class="${planType==='adults'?'active':''}" onclick="setPlanType('adults')">👨 ${lang==='en'?'Adults':'Dospelí'}</button>
-        <button class="${planType==='kids'?'active':''}" onclick="setPlanType('kids')">👶 ${lang==='en'?'Kids':'Deti'}</button>
-      </div>
-    </div>
-  </section>`;
+  if (todayEl) todayEl.innerHTML = '';
 
   const weekMealLegend = MEALS.map(function(m) {
     return `<span title="${escAttr(mealLabel(m.id))}"><i>${m.icon}</i>${esc(mealShortLabel(m.id))}</span>`;

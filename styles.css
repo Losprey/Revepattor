@@ -4871,10 +4871,17 @@ html.light .planner-week-card {
 
 /* ===== PLANNER PRACTICAL BOARD LAYOUT ===== */
 #planner-hero,
-#planner-info-panel,
+#planner-info-panel {
+  display: none !important;
+}
+
+#planner-today {
+  display: none !important;
+}
+
 #planner-week-nav,
 #plan-type-switch {
-  display: none !important;
+  display: flex !important;
 }
 .planner-control-panel {
   display: grid;
