@@ -531,7 +531,7 @@ function pickOnboardLang(l) {
 setTimeout(() => showOnboarding(), 300);
 
 // ======================== AI (DEEPSEEK PROXY) ========================
-const APP_VERSION = '1.0.51';
+const APP_VERSION = '1.0.52';
 const VAPID_PUBLIC_KEY = 'BI6Fga-GXSKggkNJ58R1VEYEfGE6KfWgnuDtI9sHqQLQJzGLshJuIuODmI13AVzX5D2Kd7SBxrr7Cvf-xRAowg0';
 const PUSH_PROXY_URL = 'https://receptar.waldis994.workers.dev';
 
@@ -4762,7 +4762,7 @@ function renderFamilyOverviewCards(stats) {
 function renderFamilyActivityCard() {
   const activity = getRealFamilyActivity();
   return `<section class="mn-activity-card mn-card">
-    <div class="mn-section-head compact"><h2>AKTIVITA RODINY</h2><button onclick="switchTab('family')">Rodina</button></div>
+    <div class="mn-section-head compact"><h2>AKTIVITA RODINY</h2><button onclick="openMorePageFromAnywhere('family')">Rodina</button></div>
     ${activity.length ? `<div class="mn-activity-feed">${activity.slice(0, 4).map(item => `<div><span>${esc(item.icon || '•')}</span><strong>${esc(item.title || '')}</strong>${item.time ? `<small>${esc(item.time)}</small>` : ''}</div>`).join('')}</div>` : `<div class="mn-empty-inline"><span>👨‍👩‍👧‍👦</span><strong>Zatiaľ žiadna aktivita rodiny.</strong><small>Aktivita sa zobrazí až po reálnych synchronizovaných zmenách.</small></div>`}
   </section>`;
 }
