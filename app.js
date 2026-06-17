@@ -531,7 +531,7 @@ function pickOnboardLang(l) {
 setTimeout(() => showOnboarding(), 300);
 
 // ======================== AI (DEEPSEEK PROXY) ========================
-const APP_VERSION = '1.0.46';
+const APP_VERSION = '1.0.47';
 const VAPID_PUBLIC_KEY = 'BI6Fga-GXSKggkNJ58R1VEYEfGE6KfWgnuDtI9sHqQLQJzGLshJuIuODmI13AVzX5D2Kd7SBxrr7Cvf-xRAowg0';
 const PUSH_PROXY_URL = 'https://receptar.waldis994.workers.dev';
 
@@ -4888,7 +4888,14 @@ function dashboardMealLabel(id) {
 
 function pickDashboardAiRecipe() {
   const todays = new Set(getTodayRecipes().map(r => r.id));
-  return recipes.find(r => !todays.has(r.id) && (r.imageData || r.image)) || recipes.find(r => !todays.has(r.id)) || recipes[0] || null;
+  const candidates = (Array.isArray(recipes) ? recipes : []).filter(recipe => recipe && !todays.has(recipe.id));
+  if (!candidates.length) return recipes[0] || null;
+  const withImages = candidates.filter(recipe => recipe.imageData || recipe.image);
+  const pool = withImages.length >= 3 ? withImages : candidates;
+  const dayKey = new Date().toISOString().slice(0, 10);
+  const seed = dayKey.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+  const preferenceSeed = (appSettings.dietPrefs || []).join('|').split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+  return pool[(seed + preferenceSeed) % pool.length] || candidates[0] || null;
 }
 
 function renderMobileAiRecommendation() {
@@ -4907,7 +4914,7 @@ function renderMobileAiRecommendation() {
     ${img ? `<img class="mn-ai-image" src="${escAttr(img)}" alt="${escAttr(title)}" loading="lazy" onerror="this.style.display='none'">` : `<div class="mn-ai-image mn-ai-fallback">🍽️</div>`}
     <div class="mn-ai-copy">
       <strong>${esc(title)}</strong>
-      <span>⏱ ${recipe.time || 25} min • 🔥 ${kcal}</span>
+      <span>⏱ ${recipe.time || 25} min • 🔥 ${kcal} • Denný návrh</span>
     </div>
     <button class="mn-ai-button" onclick="event.stopPropagation();addDashboardRecommendationToPlan(${recipe.id})">Pridať do plánu</button>
   </section>`;
