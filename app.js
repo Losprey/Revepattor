@@ -531,7 +531,7 @@ function pickOnboardLang(l) {
 setTimeout(() => showOnboarding(), 300);
 
 // ======================== AI (DEEPSEEK PROXY) ========================
-const APP_VERSION = '1.0.44';
+const APP_VERSION = '1.0.45';
 const VAPID_PUBLIC_KEY = 'BI6Fga-GXSKggkNJ58R1VEYEfGE6KfWgnuDtI9sHqQLQJzGLshJuIuODmI13AVzX5D2Kd7SBxrr7Cvf-xRAowg0';
 const PUSH_PROXY_URL = 'https://receptar.waldis994.workers.dev';
 
@@ -4742,7 +4742,7 @@ function renderFamilyHubHero(stats) {
   let desc = '';
   let cta = 'Naplánovať večeru';
   let action = "switchTab('planner')";
-  let image = dinner && dinner.recipe ? getDashboardRecipeImage(dinner.recipe) : '';
+  let image = dinner && dinner.recipe ? getDashboardRecipeImage(dinner.recipe) : 'family-dinner-hero.png';
   if (dinner && dinner.title) {
     title = dinner.title;
     desc = 'Dnešná večera';

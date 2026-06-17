@@ -51,7 +51,7 @@ self.addEventListener('message', function(e) {
   }
 });
 
-var CACHE = 'mealnest-v50';
+var CACHE = 'mealnest-v51';
 var PRECACHE = [
   'recipes-default.json',
   'manifest.json',
@@ -59,7 +59,8 @@ var PRECACHE = [
   'icon-192.png',
   'icon-512.png',
   'icon-180.png',
-  'icon-48.png'
+  'icon-48.png',
+  'family-dinner-hero.png'
 ];
 
 self.addEventListener('install', function(e) {
