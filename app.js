@@ -668,7 +668,7 @@ function showAIPlanModal(text) {
   div.style.cssText = 'z-index:2000;';
   div.onclick = function(e) { if (e.target === this) this.remove(); };
   div.innerHTML = `<div class="modal" style="max-width:500px;max-height:85vh;overflow-y:auto;">
-    <button class="modal-close" onclick="document.getElementById('ai-plan-modal').remove()">✕</button>
+    <button class="modal-close" onclick="document.getElementById('ai-plan-modal').remove()" aria-label="Zavrieť">✕</button>
     <h2>🤖 AI návrh jedálnička</h2>
     <pre id="ai-plan-text" style="white-space:pre-wrap;font-size:.75rem;font-family:inherit;background:var(--bg);padding:.8rem;border-radius:8px;max-height:50vh;overflow-y:auto;">${esc(text)}</pre>
     <div style="display:flex;gap:.5rem;margin-top:.8rem;">
@@ -748,7 +748,7 @@ function openIngredientSuggestModal() {
   div.style.cssText = 'z-index:2000;';
   div.onclick = function(e) { if (e.target === this) this.remove(); };
   div.innerHTML = `<div class="modal ai-ingredient-modal">
-    <button class="modal-close" onclick="document.getElementById('ai-ingredient-modal').remove()">✕</button>
+    <button class="modal-close" onclick="document.getElementById('ai-ingredient-modal').remove()" aria-label="Zavrieť">✕</button>
     <h2>🤖 ${lang === 'en' ? 'What to cook?' : 'Čo uvariť?'}</h2>
     <p class="ai-ingredient-desc">${lang === 'en'
       ? 'Write what you have at home and I will suggest meals from your ingredients.'
@@ -856,7 +856,7 @@ function showIngredientSuggestResult(reply, source) {
     ? `<div class="ai-source-note">${lang === 'en' ? 'Fallback from saved recipes' : 'Fallback z uložených receptov'}</div>`
     : '';
   div.innerHTML = `<div class="modal ai-result-modal">
-    <button class="modal-close" onclick="document.getElementById('ai-modal').remove()">✕</button>
+    <button class="modal-close" onclick="document.getElementById('ai-modal').remove()" aria-label="Zavrieť">✕</button>
     <h2>🤖 ${lang === 'en' ? 'What to cook' : 'Čo uvariť'}</h2>
     ${sourceNote}
     <div class="ai-result-text">${formatAiSuggestionReply(reply)}</div>
@@ -945,7 +945,7 @@ async function aiSubstituteIngredient() {
   if (!ingr) return;
   const reply = await aiGenerate([{ role: 'user', content: 'Čím môžem nahradiť "'+ingr+'" pri varení? Daj mi 2-3 alternatívy s vysvetlením. Odpovedaj v slovenčine.' }]);
   if (reply) { const old = document.getElementById('ai-modal'); if (old) old.remove(); const div = document.createElement('div'); div.id = 'ai-modal'; div.className = 'modal-overlay active'; div.style.cssText = 'z-index:2000;';
-  div.onclick = function(e) { if (e.target === this) this.remove(); }; div.innerHTML = '<div class="modal" style="max-width:500px;"><button class="modal-close" onclick="document.getElementById(\'ai-modal\').remove()">✕</button><h2>🔄 '+t('Náhrada: ','Substitute: ')+esc(ingr)+'</h2><pre style="white-space:pre-wrap;font-size:.78rem;font-family:inherit;background:var(--bg);padding:.8rem;border-radius:8px;">'+esc(reply)+'</pre></div>'; document.body.appendChild(div); }
+  div.onclick = function(e) { if (e.target === this) this.remove(); }; div.innerHTML = '<div class="modal" style="max-width:500px;"><button class="modal-close" onclick="document.getElementById(\'ai-modal\').remove()" aria-label="Zavrieť">✕</button><h2>🔄 '+t('Náhrada: ','Substitute: ')+esc(ingr)+'</h2><pre style="white-space:pre-wrap;font-size:.78rem;font-family:inherit;background:var(--bg);padding:.8rem;border-radius:8px;">'+esc(reply)+'</pre></div>'; document.body.appendChild(div); }
 }
 
 async function aiSimplifyRecipe(recipeId) {
@@ -2357,7 +2357,7 @@ async function aiGenerateFullWeekRun() {
   div.style.cssText = 'z-index:2000;';
   div.onclick = function(e) { if (e.target === this) this.remove(); };
   div.innerHTML = '<div class="modal" style="max-width:500px;max-height:85vh;overflow-y:auto;">' +
-    '<button class="modal-close" onclick="this.closest(\'.modal-overlay\').remove()">✕</button>' +
+    '<button class="modal-close" onclick="this.closest(\'.modal-overlay\').remove()" aria-label="Zavrieť">✕</button>' +
     '<h2>🤖 ' + t('AI návrh jedálnička','AI meal plan') + '</h2>' +
     '<pre id="ai-plan-text" style="white-space:pre-wrap;font-size:.75rem;font-family:inherit;background:var(--bg);padding:.8rem;border-radius:8px;max-height:50vh;overflow-y:auto;">' + esc(menuText) + '</pre>' +
     '<div style="display:flex;gap:.5rem;margin-top:.8rem;flex-wrap:wrap;">' +
@@ -3053,9 +3053,9 @@ function viewRecipe(id) {
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.3rem;">
         <h3>🥕 ${lang === 'en' ? 'Ingredients' : 'Suroviny'}</h3>
         <div style="display:flex;align-items:center;gap:.35rem;">
-          <button class="btn btn-secondary" onclick="changePortion(-1)" style="padding:.1rem .45rem;font-size:.85rem;">−</button>
+          <button class="btn btn-secondary" onclick="changePortion(-1)" style="padding:.1rem .45rem;font-size:.85rem;" aria-label="${lang==='en'?'Less portions':'Menej porcií'}">−</button>
           <span id="portion-num" style="font-weight:700;font-size:.9rem;min-width:1.5rem;text-align:center;">${basePortion}</span>
-          <button class="btn btn-secondary" onclick="changePortion(1)" style="padding:.1rem .45rem;font-size:.85rem;">+</button>
+          <button class="btn btn-secondary" onclick="changePortion(1)" style="padding:.1rem .45rem;font-size:.85rem;" aria-label="${lang==='en'?'More portions':'Viac porcií'}">+</button>
         </div>
       </div>
       <ul id="ingredient-list" style="margin-top:.3rem;">${scaleIngredients(ingr, 4, r.portions||4).map(i=>`<li>${esc(i)}</li>`).join('')}</ul>
@@ -3902,7 +3902,7 @@ function renderMoreFamilyPage() {
       ${moreActionRow('🚪','Opustiť rodinu','Lokálne dáta ostanú v zariadení','leaveFamily()','›')}
     ` : `
       ${moreActionRow('✨','Vytvoriť rodinu','Vygeneruje nový rodinný kód','createFamily()')}
-      <label class="more-setting-row"><span>🔑</span><div><strong>Pripojiť sa k rodine</strong><small>Zadaj existujúci rodinný kód</small></div><input id="more-family-code-input" class="more-input" type="text" placeholder="Kód"></label>
+      <label class="more-setting-row"><span>🔑</span><div><strong>Pripojiť sa k rodine</strong><small>Zadaj existujúci rodinný kód</small></div><input id="more-family-code-input" class="more-input" type="text" placeholder="Kód" aria-label="Rodinný kód"></label>
       <button class="more-primary" onclick="joinFamilyFromMore()">Pripojiť rodinu</button>
     `)}
     ${moreCard('Recent activity', renderMoreActivityFeed())}
@@ -4983,8 +4983,8 @@ function renderMealTimeline() {
         ${filled && time ? `<div class="meal-meta"><span>${time}</span>${kcal ? `<span>${kcal}</span>` : ''}</div>` : ''}
       </div>
       ${filled ? `<div class="meal-actions">
-        <button class="meal-action-btn" onclick="event.stopPropagation();pickRecipe('${todayName}','${m.id}','${weekKey}')" title="${lang==='en'?'Replace':'Vymeniť'}">↻</button>
-        <button class="meal-action-btn" onclick="event.stopPropagation();removeSlot('${todayName}','${m.id}','${weekKey}')" title="${lang==='en'?'Remove':'Odstrániť'}">✕</button>
+        <button class="meal-action-btn" onclick="event.stopPropagation();pickRecipe('${todayName}','${m.id}','${weekKey}')" title="${lang==='en'?'Replace':'Vymeniť'}" aria-label="${lang==='en'?'Replace meal':'Vymeniť jedlo'}">↻</button>
+        <button class="meal-action-btn" onclick="event.stopPropagation();removeSlot('${todayName}','${m.id}','${weekKey}')" title="${lang==='en'?'Remove':'Odstrániť'}" aria-label="${lang==='en'?'Remove meal':'Odstrániť jedlo'}">✕</button>
       </div>` : ''}
     </div>`;
   }).join('');
@@ -5347,7 +5347,7 @@ function showDayDetail(dayKey) {
   var filled = Object.values(d).filter(Boolean).length;
   var html = '<div class="modal-overlay active" id="day-detail-modal" style="z-index:2000;" onclick="if(event.target===this)closeDayDetail()">'
     + '<div class="modal" style="max-width:480px;">'
-    + '<button class="modal-close" onclick="closeDayDetail()">\u2715</button>'
+    + '<button class="modal-close" onclick="closeDayDetail()" aria-label="Zavrieť">\u2715</button>'
     + '<h2>\ud83d\udcc5 '+name+' ('+filled+'/'+totalSlots+')</h2>';
   MEALS.forEach(function(m) {
     var e = d[m.id];
@@ -5362,7 +5362,7 @@ function showDayDetail(dayKey) {
       + '<span style="font-size:.6rem;text-transform:uppercase;color:var(--text3);width:65px;font-weight:600;">'+mealLabel(m.id)+'</span>'
       + '<span style="flex:1;font-weight:600;font-size:.78rem;color:var(--text);">'+(f?esc(nm):'<span style="opacity:.3">'+(lang==='en'?'Pick recipe':'Vybra\u0165 recept')+'</span>')+'</span>'
       + (r&&r.nutrition?'<span style="font-size:.55rem;color:var(--text3);">\ud83d\udd25'+(r.nutrition.kcal||'?')+'</span>':'')
-      + (f?'<button class="pv-del-btn" onclick="event.stopPropagation();removeSlot(\''+dayKey+'\',\''+m.id+'\',\''+wk+'\');closeDayDetail()">\u2715</button>':'')
+      + (f?'<button class="pv-del-btn" onclick="event.stopPropagation();removeSlot(\''+dayKey+'\',\''+m.id+'\',\''+wk+'\');closeDayDetail()" aria-label="Odstrániť jedlo">\u2715</button>':'')
       + '</div>';
   });
   html += '</div></div>';
@@ -5427,10 +5427,10 @@ function createPickerModal() {
   div.innerHTML = `<div class="picker-sheet">
     <div class="picker-header">
       <span class="picker-title">${lang==='en'?'Pick a recipe':'Vybrať recept'}</span>
-      <button class="picker-close" onclick="closePickerModal()">✕</button>
+      <button class="picker-close" onclick="closePickerModal()" aria-label="Zavrieť">✕</button>
     </div>
     <div class="picker-search-wrap">
-      <input id="picker-search" type="text" placeholder="🔍 ${lang==='en'?'Search recipes...':'Hľadať recept...'}" oninput="filterPickerRecipes()">
+      <input id="picker-search" type="text" placeholder="🔍 ${lang==='en'?'Search recipes...':'Hľadať recept...'}" aria-label="${lang==='en'?'Search recipes':'Hľadať recepty'}" oninput="filterPickerRecipes()">
     </div>
     <div class="picker-chips" id="picker-chips">
       <span class="picker-chip active" data-cat="" onclick="setPickerFilter(this,'')">${lang==='en'?'All':'Všetky'}</span>
@@ -5443,7 +5443,7 @@ function createPickerModal() {
     </div>
     <div class="picker-list" id="picker-recipes"></div>
     <div class="picker-custom-row" id="picker-custom-row">
-      <input id="picker-custom" type="text" placeholder="✍️ ${lang==='en'?'Or type custom meal...':'Alebo napíš vlastné jedlo...'}">
+      <input id="picker-custom" type="text" placeholder="✍️ ${lang==='en'?'Or type custom meal...':'Alebo napíš vlastné jedlo...'}" aria-label="${lang==='en'?'Custom meal':'Vlastné jedlo'}">
       <button id="picker-custom-btn" onclick="submitCustomMeal()">${lang==='en'?'Add':'Pridať'}</button>
     </div>
   </div>`;
@@ -5777,7 +5777,7 @@ function renderShoppingList() {
     <button class="sa-btn" onclick="copyShopList()">📋 ${lang==='en'?'Copy':'Kopírovať'}</button>
     <button class="sa-btn" onclick="mergeDuplicateShopItems()">🔄 ${lang==='en'?'Merge dupes':'Zlúčiť duplicity'}</button>
     <button class="sa-btn" onclick="clearCheckedShopItems()">✅ ${lang==='en'?'Clear checked':'Vyčistiť'}</button>
-    <button class="sa-btn danger" onclick="clearAllShopItems()">🗑 ${lang==='en'?'Clear all':'Všetko'}</button>
+    <button class="sa-btn danger" onclick="clearAllShopItems()" aria-label="${lang==='en'?'Clear all items':'Vymazať všetky položky'}">🗑 ${lang==='en'?'Clear all':'Všetko'}</button>
   </div>`;
 
   html += renderShopCategoryCards(openGroups, { bought: false });
@@ -5852,8 +5852,8 @@ function renderShopItem(it) {
       </div>
     </div>
     <div class="si-actions">
-      <button class="si-btn" onclick="event.stopPropagation();openAddItemSheet('${it.id}')" title="${lang==='en'?'Edit':'Upraviť'}">✏️</button>
-      <button class="si-btn danger" onclick="event.stopPropagation();deleteShopItem('${it.id}')" title="${lang==='en'?'Delete':'Vymazať'}">🗑</button>
+      <button class="si-btn" onclick="event.stopPropagation();openAddItemSheet('${it.id}')" title="${lang==='en'?'Edit':'Upraviť'}" aria-label="${lang==='en'?'Edit item':'Upraviť položku'}">✏️</button>
+      <button class="si-btn danger" onclick="event.stopPropagation();deleteShopItem('${it.id}')" title="${lang==='en'?'Delete':'Vymazať'}" aria-label="${lang==='en'?'Delete item':'Vymazať položku'}">🗑</button>
     </div>
     <div class="si-swipe-delete" onclick="event.stopPropagation();deleteShopItem('${it.id}')">🗑 ${lang==='en'?'Delete':'Vymazať'}</div>
   </div>`;
@@ -6283,8 +6283,8 @@ function renderTaskWidget() {
 
   // Quick add
   html += `<div class="tw-add-quick">
-    <input id="tw-quick-input" placeholder="${lang==='en'?'Quick add...':'Rýchlo pridať...'}" onkeydown="if(event.key==='Enter')quickAddTask()">
-    <button onclick="quickAddTask()">+</button>
+    <input id="tw-quick-input" placeholder="${lang==='en'?'Quick add...':'Rýchlo pridať...'}" aria-label="${lang==='en'?'Quick add task':'Rýchlo pridať úlohu'}" onkeydown="if(event.key==='Enter')quickAddTask()">
+    <button onclick="quickAddTask()" aria-label="Pridať úlohu" title="Pridať úlohu">+</button>
   </div></div>`;
 
   el.innerHTML = html;
@@ -6511,8 +6511,8 @@ function renderTaskCard(t) {
         </div>
       </div>
       <div class="tc-actions">
-        <button class="tc-btn" onclick="event.stopPropagation();openTaskSheet('${t.id}')" title="${lang==='en'?'Edit':'Upraviť'}">✏️</button>
-        <button class="tc-btn danger" onclick="event.stopPropagation();deleteTask('${t.id}')" title="${lang==='en'?'Delete':'Vymazať'}">🗑</button>
+        <button class="tc-btn" onclick="event.stopPropagation();openTaskSheet('${t.id}')" title="${lang==='en'?'Edit':'Upraviť'}" aria-label="${lang==='en'?'Edit task':'Upraviť úlohu'}">✏️</button>
+        <button class="tc-btn danger" onclick="event.stopPropagation();deleteTask('${t.id}')" title="${lang==='en'?'Delete':'Vymazať'}" aria-label="${lang==='en'?'Delete task':'Vymazať úlohu'}">🗑</button>
       </div>
     </div>
   </div>`;
@@ -6726,7 +6726,7 @@ function applyIngredientSearch() {
       const tags = ((lang==="en"&&r.tagsEn?r.tagsEn:r.tags)||[]).slice(0, 2);
       const diff = r.difficulty||1;
       const san = esc(name), sanCat = esc(r.category), sanTime = esc(r.time);
-      return `<div class="recipe-card" data-id="${r.id}"><button class="fav-btn ${r.favorite?'fav-active':''}" onclick="event.stopPropagation();toggleFav(${r.id})">${r.favorite?'❤️':'🤍'}</button>
+      return `<div class="recipe-card" data-id="${r.id}"><button class="fav-btn ${r.favorite?'fav-active':''}" onclick="event.stopPropagation();toggleFav(${r.id})" aria-label="${r.favorite ? (lang==='en'?'Remove from favorites':'Odstrániť z obľúbených') : (lang==='en'?'Add to favorites':'Pridať do obľúbených')}">${r.favorite?'❤️':'🤍'}</button>
         ${r.image||r.imageData?`<div class="recipe-card-img"><img src="${escAttr(r.imageData||r.image)}" alt="${san}" loading="lazy" style="width:100%;height:100%;object-fit:cover" onerror="this.outerHTML='<span style=\\'font-size:2.4rem\\'>🍽️</span>'"></div>`:`<div class="recipe-card-img">🍽️</div>`}
         <div class="recipe-card-body">
         <h3>${san}</h3>
@@ -6822,7 +6822,7 @@ function showImportReview(data) {
   div.id = 'import-review-modal';
   div.className = 'modal-overlay active';
   div.innerHTML = `<div class="modal import-review-modal">
-    <button class="modal-close" onclick="document.getElementById('import-review-modal').remove()">✕</button>
+    <button class="modal-close" onclick="document.getElementById('import-review-modal').remove()" aria-label="Zavrieť">✕</button>
     <h2>🌐 ${lang === 'en' ? 'Review import' : 'Skontrolovať import'}</h2>
     <div class="import-review-card">
       ${data.image ? `<img class="import-review-img" src="${escAttr(data.image)}" alt="">` : '<div class="import-review-img placeholder">🍽️</div>'}
