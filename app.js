@@ -531,7 +531,7 @@ function pickOnboardLang(l) {
 setTimeout(() => showOnboarding(), 300);
 
 // ======================== AI (DEEPSEEK PROXY) ========================
-const APP_VERSION = '1.0.47';
+const APP_VERSION = '1.0.48';
 const VAPID_PUBLIC_KEY = 'BI6Fga-GXSKggkNJ58R1VEYEfGE6KfWgnuDtI9sHqQLQJzGLshJuIuODmI13AVzX5D2Kd7SBxrr7Cvf-xRAowg0';
 const PUSH_PROXY_URL = 'https://receptar.waldis994.workers.dev';
 
@@ -3803,17 +3803,17 @@ function renderMoreHome() {
       <button class="more-avatar" onclick="openMorePage('account')">${getDashboardAvatar()}</button>
     </div>
     <div class="more-grid">
+      ${renderMoreTile('recipes-shortcut', '📖', 'Recepty', `${recipes.length} receptov`, 'Receptár a import')}
+      ${renderMoreTile('shopping', '🛒', 'Nákup', `${shoppingCount} položiek`, 'Aktuálny zoznam')}
       ${renderMoreTile('tasks', '✅', 'Úlohy', `${openTasks} otvorených`, 'Dnes, nadchádzajúce a hotové úlohy')}
-      ${renderMoreTile('board', '📌', 'Nástenka', 'Rodinný dashboard', 'Jedlá, nákup, aktivita a členovia')}
-      ${renderMoreTile('settings', '⚙️', 'Nastavenia', 'Vzhľad, účet, súkromie', 'Moderné nastavenia aplikácie')}
-      ${renderMoreTile('language', '🌐', 'Jazyk', 'Slovenčina / English', 'Rýchla zmena jazyka')}
-      ${renderMoreTile('shopping', '🛒', 'Nákup', `${shoppingCount} položiek`, 'Zoznamy, história a kategórie')}
+      ${renderMoreTile('family-board', '📌', 'Nástenka', 'Dnešný prehľad', 'Jedlá, nákup a úlohy')}
       ${renderMoreTile('ai-week', '🚀', 'AI Týždeň', 'Plán na mieru', 'Preferencie a návrhy AI')}
+      ${renderMoreTile('settings', '⚙️', 'Nastavenia', 'Účet, jazyk, dáta', 'Moderné nastavenia')}
     </div>
     <div class="more-list">
       ${renderMoreRow('family', '👨‍👩‍👧‍👦', familyState, familyCode ? 'Členovia, zdieľanie a aktivita' : 'Pozvánky a spoločné plánovanie')}
-      ${renderMoreRow('onboarding', '❓', 'Onboarding centrum', 'Funkcie, import, AI plánovač')}
-      ${renderMoreRow('notifications-account', '🔔', 'Notifikácie a účet', 'Email, odhlásenie, predplatné')}
+      ${renderMoreRow('language', '🌐', 'Jazyk', 'Slovenčina / English')}
+      ${renderMoreRow('notifications', '🔔', 'Oznámenia', 'Pripomienky a push povolenia')}
       ${renderMoreRow('backup-sync', '☁️', 'Backup a synchronizácia', 'Zálohy, obnovenie a história')}
       ${renderMoreRow('privacy-security', '🔒', 'Súkromie a bezpečnosť', 'Oprávnenia, export a vymazanie dát')}
       ${renderMoreRow('about', 'ℹ️', 'O aplikácii', 'Verzia, changelog, licencie')}
@@ -3846,6 +3846,8 @@ function openMorePage(page) {
     sync: renderMoreBackupSyncPage,
     tasks: renderMoreTasksPage,
     board: renderMoreBoardPage,
+    'family-board': renderMoreBoardPage,
+    'recipes-shortcut': renderMoreRecipesShortcutPage,
     'family-permissions': renderMoreFamilyPermissionsPage,
     language: renderMoreLanguagePage,
     shopping: renderMoreShoppingPage,
@@ -3964,19 +3966,16 @@ function renderMoreActivityFeed() {
 function renderMoreSettingsHub() {
   const cards = [
     ['appearance','🎨','Vzhľad','Téma, akcent, text a hustota'],
-    ['home-settings','🏠','Domov','Widgety, počasie a dieťa'],
-    ['meal-settings','📅','Jedálniček','Porcie a nutričné hodnoty'],
-    ['shopping-settings','🛒','Nákup','Režim obchodu a AI zoznam'],
     ['notifications','🔔','Oznámenia','Pripomienky a push nastavenia'],
     ['account','👤','Účet','Profil, prihlásenie a odhlásenie'],
     ['language','🌐','Jazyk','Slovenčina alebo English'],
     ['family','👨‍👩‍👧‍👦','Rodina','Kód, členovia a synchronizácia'],
     ['privacy-security','🔒','Súkromie','Oprávnenia a export dát'],
     ['backup-sync','☁️','Synchronizácia','Backup, restore a rodinný sync'],
-    ['data-settings','🧰','Dáta a údržba','Import, obrázky a reset dát']
+    ['data-settings','🧰','Dáta','Import, export a údržba']
   ];
   const body = `<div class="more-grid">${cards.map(c => renderMoreTile(c[0], c[1], c[2], c[3], 'Otvoriť')).join('')}</div>`;
-  return renderMoreShell('Nastavenia', 'Všetky nastavenia bez starých panelov', body);
+  return renderMoreShell('Nastavenia', 'Len dôležité nastavenia aplikácie', body);
 }
 
 function renderMoreAppearancePage() {
@@ -4178,18 +4177,34 @@ function renderMoreTaskRows(items, emptyText, actionLabel) {
   return `<div class="more-feed">${items.slice(0, 4).map(t => `<div><span>${t.completed ? '☑' : '☐'}</span><strong>${esc(t.title)}</strong><small>${t.date ? formatTaskDate(t.date) : (t.completedDate ? formatTaskDate(t.completedDate.slice(0,10)) : '')}</small></div>`).join('')}</div>`;
 }
 
+function renderMoreRecipesShortcutPage() {
+  const recent = Array.isArray(recipes) ? recipes.slice(-5).reverse() : [];
+  const favorites = Array.isArray(recipes) ? recipes.filter(r => r.favorite).slice(0, 4) : [];
+  const body = `
+    ${moreCard('Receptár', `<div class="more-stat-grid"><div><strong>${recipes.length}</strong><small>receptov</small></div><div><strong>${favorites.length}</strong><small>obľúbené</small></div></div>`)}
+    ${moreCard('Nedávne recepty', recent.length ? `<div class="more-feed">${recent.map(r => `<div onclick="viewRecipe(${r.id})" style="cursor:pointer"><span>🍽️</span><strong>${esc(r.name)}</strong><small>${r.time || 20} min</small></div>`).join('')}</div>` : moreEmptyState('📖', 'Zatiaľ žiadne recepty', 'Importuj alebo vytvor prvý recept.', 'Otvoriť recepty', "switchTab('home')"))}
+    ${moreCard('Akcie', `<div class="more-option-grid">${[
+      ['Otvoriť recepty',"switchTab('home')"],
+      ['Importovať URL',"showImportUrlModal()"],
+      ['AI odporúčanie',"aiDailyTip()"]
+    ].map(x => morePill(x[0], false, x[1])).join('')}</div>`)}
+  `;
+  return renderMoreShell('Recepty', 'Receptár, import a odporúčania', body, "<button class=\"more-top-action\" onclick=\"switchTab('home')\">Receptár</button>");
+}
+
 function renderMoreBoardPage() {
   const todaysRecipes = getTodayRecipes();
   const shoppingCount = Array.isArray(shopItems) ? shopItems.filter(i => i && !i.checked).length : 0;
+  const todayTasks = getTodayTasks();
   const openTasks = Array.isArray(tasks) ? tasks.filter(t => !t.completed).length : 0;
+  const aiRecipe = pickDashboardAiRecipe();
   const body = `
-    ${moreCard('Family summary', `<div class="more-family-strip"><span>👤</span><strong>${familyCode ? 'Rodina pripojená' : 'Rodina nepripojená'}</strong></div>`)}
     ${moreCard('Dnešné jedlá', todaysRecipes.length ? `<div class="more-feed">${todaysRecipes.slice(0, 3).map(r => `<div><span>🍽️</span><strong>${esc(r.name)}</strong><small>${r.time || 20} min</small></div>`).join('')}</div>` : `<div class="more-empty-line">Dnes ešte nie sú naplánované jedlá.</div>`)}
-    ${moreCard('Shared shopping list', `<div class="more-board-row"><span>🛒</span><strong>${shoppingCount} položiek čaká</strong><button onclick="switchTab('shopping')">Otvoriť</button></div>`)}
-    ${moreCard('Upcoming tasks', `<div class="more-board-row"><span>✅</span><strong>${openTasks} otvorených úloh</strong><button onclick="openMorePage('tasks')">Pozrieť</button></div>`)}
-    ${moreCard('Recent activity', renderMoreActivityFeed())}
+    ${moreCard('Nákup', `<div class="more-board-row"><span>🛒</span><strong>${shoppingCount} položiek čaká</strong><button onclick="switchTab('shopping')">Otvoriť</button></div>`)}
+    ${moreCard('Úlohy', todayTasks.length ? renderMoreTaskRows(todayTasks, '', 'Otvoriť úlohy') : `<div class="more-board-row"><span>✅</span><strong>${openTasks} otvorených úloh spolu</strong><button onclick="switchTab('tasks')">Otvoriť</button></div>`)}
+    ${moreCard('AI odporúčanie', aiRecipe ? `<div class="more-board-row"><span>🤖</span><strong>${esc(aiRecipe.name)}</strong><button onclick="viewRecipe(${aiRecipe.id})">Pozrieť</button></div>` : moreEmptyState('🤖', 'AI nemá návrh', 'Pridaj recepty pre odporúčanie.'))}
   `;
-  return renderMoreShell('Nástenka', 'Rodinný dashboard bez starých kariet', body);
+  return renderMoreShell('Nástenka', 'Dnešný prehľad jedál, nákupu a úloh', body);
 }
 
 function renderMoreLanguagePage() {
