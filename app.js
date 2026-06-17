@@ -531,7 +531,7 @@ function pickOnboardLang(l) {
 setTimeout(() => showOnboarding(), 300);
 
 // ======================== AI (DEEPSEEK PROXY) ========================
-const APP_VERSION = '1.0.42';
+const APP_VERSION = '1.0.44';
 const VAPID_PUBLIC_KEY = 'BI6Fga-GXSKggkNJ58R1VEYEfGE6KfWgnuDtI9sHqQLQJzGLshJuIuODmI13AVzX5D2Kd7SBxrr7Cvf-xRAowg0';
 const PUSH_PROXY_URL = 'https://receptar.waldis994.workers.dev';
 
@@ -3897,23 +3897,23 @@ function renderMoreFamilyPage() {
     ? (authUser.displayName || authUser.email)
     : (localStorage.getItem('deviceName') || 'Toto zariadenie');
   const members = familyCode
-    ? [['👤', ownerName, 'Vlastník']]
+    ? getRealFamilyMembers().map((member, index) => [member.photo || member.initial || '👤', member.name || ownerName, index === 0 ? 'Ty' : 'Člen'])
     : [];
+  if (familyCode && !members.length) members.push(['👤', ownerName, 'Ty']);
   const shareStatus = familyCode ? 'Zapnuté' : 'Neaktívne';
   const memberContent = members.length
-    ? `<div class="more-member-list">${members.map(m => `<div class="more-member"><span>${m[0]}</span><div><strong>${esc(m[1])}</strong><small>${esc(m[2])}</small></div></div>`).join('')}</div>`
+    ? `<div class="more-member-list hub-family-members">${members.map((m, index) => `<div class="more-member"><span>${String(m[0]).startsWith('http') ? `<img src="${escAttr(m[0])}" alt="">` : esc(m[0])}</span><div><strong>${esc(m[1])}</strong><small>${esc(m[2])}</small></div><em>${index === 0 ? '85%' : '—'}</em></div>`).join('')}</div>`
     : moreEmptyState('👨‍👩‍👧‍👦', 'Rodina zatiaľ nie je pripojená', 'Po pozvaní členov sa tu zobrazia reálne osoby.', '+ Pozvať člena', 'copyFamilyInvite()');
   const body = `
-    ${moreCard('Family members', `${memberContent}${familyCode ? '<button class="more-primary" onclick="copyFamilyInvite()">+ Pozvať člena</button>' : ''}`)}
-    ${moreCard('Zdieľanie', `
-      ${moreActionRow('📅','Zdieľané plánovanie','Týždenný jedálniček vidí celá rodina',"showToast(familyCode ? 'Zdieľanie je aktívne' : 'Rodina nie je pripojená', 'info')",shareStatus)}
-      ${moreActionRow('🛒','Zdieľané nákupy','Spoločný nákupný zoznam',"showToast(familyCode ? 'Zdieľanie je aktívne' : 'Rodina nie je pripojená', 'info')",shareStatus)}
-      ${moreActionRow('📖','Zdieľané recepty','Rodinný receptár',"showToast(familyCode ? 'Zdieľanie je aktívne' : 'Rodina nie je pripojená', 'info')",shareStatus)}
-    `)}
-    ${moreCard('Nastavenia rodiny', `
-      ${moreActionRow('🛡️','Permissions','Správa rolí a oprávnení',"openMorePage('family-permissions')")}
-      ${moreActionRow('🕘','Activity log','Posledné rodinné zmeny',"openMorePage('board')",'›')}
-    `)}
+    ${moreCard('', `${memberContent}${familyCode ? '<button class="more-primary family-invite" onclick="copyFamilyInvite()">＋ Pridať člena</button>' : ''}`)}
+    ${moreCard('Zdieľané', `<div class="family-shared-grid">
+      <button onclick="switchTab('planner')"><span>🗓️</span><strong>Plány</strong></button>
+      <button onclick="switchTab('shopping')"><span>🛒</span><strong>Nákup</strong></button>
+      <button onclick="switchTab('home')"><span>📖</span><strong>Recepty</strong></button>
+      <button onclick="switchTab('tasks')"><span>✓</span><strong>Úlohy</strong></button>
+    </div>`)}
+    ${moreCard('Nedávna aktivita', renderMoreActivityFeed())}
+    ${moreCard('Rodinný cieľ', `<div class="family-goal"><span>🥦</span><div><strong>Zdravšia strava</strong><small>${familyCode ? 'Rodinný cieľ aktívny' : 'Pripoj rodinu pre spoločné ciele'}</small><i><b style="width:${familyCode ? 75 : 0}%"></b></i></div><em>${familyCode ? '75%' : '0%'}</em></div>`)}
     ${moreCard('Pripojenie', familyCode ? `
       ${moreActionRow('🔗','Rodinný kód', esc(familyCode), 'copyFamilyInvite()', 'Kopírovať')}
       ${moreActionRow('🔄','Synchronizovať teraz','Odošle lokálne dáta do rodiny',"pushAllLocalData();showToast('Dáta odoslané.','success')")}
@@ -3924,9 +3924,8 @@ function renderMoreFamilyPage() {
       <label class="more-setting-row"><span>🔑</span><div><strong>Pripojiť sa k rodine</strong><small>Zadaj existujúci rodinný kód</small></div><input id="more-family-code-input" class="more-input" type="text" placeholder="Kód" aria-label="Rodinný kód"></label>
       <button class="more-primary" onclick="joinFamilyFromMore()">Pripojiť rodinu</button>
     `)}
-    ${moreCard('Recent activity', renderMoreActivityFeed())}
   `;
-  return renderMoreShell(familyCode ? 'Rodina pripojená' : 'Rodina nie je pripojená', familyCode ? `Kód rodiny ${esc(familyCode)}` : 'Rodinné zdieľanie nie je pripojené', body, '<button class="more-top-action" onclick="copyFamilyInvite()">Pozvať</button>');
+  return renderMoreShell('Rodina', familyCode ? `Kód rodiny ${esc(familyCode)}` : 'Rodinné zdieľanie nie je pripojené', body, '<button class="more-top-action" onclick="copyFamilyInvite()">＋ Pridať člena</button>');
 }
 
 function renderMoreFamilyPermissionsPage() {
@@ -4354,6 +4353,8 @@ function renderMoreAboutPage() {
 window.renderMoreScreen = renderMoreScreen;
 window.renderMoreHome = renderMoreHome;
 window.openMorePage = openMorePage;
+window.switchTab = switchTab;
+window.renderTasks = renderTasks;
 window.copyFamilyInvite = copyFamilyInvite;
 window.setMoreTheme = setMoreTheme;
 window.setMoreAccent = setMoreAccent;
@@ -4664,10 +4665,9 @@ function renderDashboard() {
       <div class="mn-home-greeting">
         <h1>${esc(greetingText)}</h1>
         <p>${esc(currentDate)}</p>
-        ${renderDashboardFamilyAvatars()}
       </div>
       <div class="mn-home-actions">
-        <button class="mn-icon-btn" onclick="openMorePageFromAnywhere('notifications')" aria-label="Notifikácie">🔔</button>
+        ${renderDashboardFamilyAvatars()}
         <button class="mn-avatar-btn" onclick="openMorePageFromAnywhere('account')" aria-label="Profil">${getDashboardAvatar()}</button>
       </div>
     </section>
@@ -4676,7 +4676,6 @@ function renderDashboard() {
     ${renderMobileMealsCard()}
     ${renderMobileAiRecommendation()}
     ${renderFamilyActivityCard()}
-    ${renderMobileQuickActions()}
   </div>`;
 
   try { document.getElementById('dash-content').innerHTML = html; } catch(e) {}
@@ -4712,8 +4711,8 @@ function formatDashboardDate(date) {
 
 function renderDashboardFamilyAvatars() {
   const members = getRealFamilyMembers();
-  if (!members.length) return '';
-  return `<div class="mn-family-avatars">${members.slice(0, 4).map(member => `<span title="${escAttr(member.name)}">${member.photo ? `<img src="${escAttr(member.photo)}" alt="">` : esc(member.initial)}</span>`).join('')}</div>`;
+  const visibleMembers = members.length ? members.slice(0, 3) : [{ name: 'Profil', initial: '👤', photo: '' }];
+  return `<div class="mn-family-avatars">${visibleMembers.map(member => `<span title="${escAttr(member.name)}">${member.photo ? `<img src="${escAttr(member.photo)}" alt="">` : esc(member.initial)}</span>`).join('')}<button onclick="toggleQuickAddSheet()" aria-label="Pridať">+</button></div>`;
 }
 
 function getRealFamilyMembers() {
@@ -4739,36 +4738,20 @@ function getRealFamilyMembers() {
 
 function renderFamilyHubHero(stats) {
   const dinner = getDashboardDinnerEntry();
-  let title = 'Naplánovať večeru';
-  let desc = 'Večera dnes ešte nie je naplánovaná.';
+  let title = 'Dnes večera ešte nie je naplánovaná';
+  let desc = '';
   let cta = 'Naplánovať večeru';
   let action = "switchTab('planner')";
-  let image = stats.aiRecipe ? getDashboardRecipeImage(stats.aiRecipe) : '';
+  let image = dinner && dinner.recipe ? getDashboardRecipeImage(dinner.recipe) : '';
   if (dinner && dinner.title) {
-    title = 'Dnešná večera je pripravená';
-    desc = dinner.title;
+    title = dinner.title;
+    desc = 'Dnešná večera';
     cta = 'Otvoriť plán';
-  } else if (stats.uncheckedShop > 0) {
-    title = 'Nákup čaká';
-    desc = `${stats.uncheckedShop} ${stats.uncheckedShop === 1 ? 'položka zostáva' : 'položiek zostáva'} v nákupnom zozname.`;
-    cta = 'Otvoriť nákup';
-    action = "switchTab('shopping')";
-  } else if (stats.todayTasks > 0) {
-    title = 'Úlohy na dnes';
-    desc = `${stats.todayTasks} ${stats.todayTasks === 1 ? 'úloha čaká' : 'úloh čaká'} na dokončenie.`;
-    cta = 'Dokončiť úlohy';
-    action = "switchTab('tasks')";
-  } else if (stats.aiRecipe) {
-    title = 'AI má odporúčanie';
-    desc = stats.aiRecipe.name;
-    cta = 'Pozrieť recept';
-    action = `viewRecipe(${stats.aiRecipe.id})`;
   }
   return `<section class="mn-family-hero mn-card" style="${image ? `--hero-img:url('${escAttr(image)}')` : ''}">
     <div class="mn-family-hero-overlay">
-      <span>Dnes najdôležitejšie</span>
       <h2>${esc(title)}</h2>
-      <p>${esc(desc)}</p>
+      ${desc ? `<p>${esc(desc)}</p>` : ''}
       <button onclick="${action}">${esc(cta)}</button>
     </div>
   </section>`;
@@ -4784,18 +4767,21 @@ function getDashboardDinnerEntry() {
 
 function renderFamilyOverviewCards(stats) {
   const aiText = stats.aiRecipe ? '1' : '0';
-  return `<section class="mn-overview-grid">
-    <button onclick="switchTab('planner')"><span>🍽️</span><strong>${stats.todayMeals}/${stats.totalMeals}</strong><small>Jedlá</small></button>
-    <button onclick="switchTab('shopping')"><span>🛒</span><strong>${stats.uncheckedShop}</strong><small>Nákup</small></button>
-    <button onclick="switchTab('tasks')"><span>✅</span><strong>${stats.todayTasks}</strong><small>Úlohy</small></button>
-    <button onclick="${stats.aiRecipe ? `viewRecipe(${stats.aiRecipe.id})` : 'aiGenerateFullWeek()'}"><span>🤖</span><strong>${aiText}</strong><small>AI</small></button>
+  return `<section class="mn-hub-section">
+    <div class="mn-mini-label">DNES RÝCHLO</div>
+    <div class="mn-overview-grid">
+    <button class="meals" onclick="switchTab('planner')"><span>🥗</span><strong>Jedlá</strong><em>${stats.todayMeals}/${stats.totalMeals}</em><small>naplánované</small></button>
+    <button class="shop" onclick="switchTab('shopping')"><span>🛒</span><strong>Nákup</strong><em>${stats.uncheckedShop}</em><small>položky</small></button>
+    <button class="tasks" onclick="switchTab('tasks')"><span>✓</span><strong>Úlohy</strong><em>${stats.todayTasks}</em><small>čakajú</small></button>
+    <button class="streak" onclick="${stats.aiRecipe ? `viewRecipe(${stats.aiRecipe.id})` : 'aiGenerateFullWeek()'}"><span>🔥</span><strong>AI</strong><em>${aiText}</em><small>návrh</small></button>
+    </div>
   </section>`;
 }
 
 function renderFamilyActivityCard() {
   const activity = getRealFamilyActivity();
   return `<section class="mn-activity-card mn-card">
-    <div class="mn-section-head"><h2>Rodinná aktivita</h2><button onclick="switchTab('family')">Rodina</button></div>
+    <div class="mn-section-head compact"><h2>AKTIVITA RODINY</h2><button onclick="switchTab('family')">Rodina</button></div>
     ${activity.length ? `<div class="mn-activity-feed">${activity.slice(0, 4).map(item => `<div><span>${esc(item.icon || '•')}</span><strong>${esc(item.title || '')}</strong>${item.time ? `<small>${esc(item.time)}</small>` : ''}</div>`).join('')}</div>` : `<div class="mn-empty-inline"><span>👨‍👩‍👧‍👦</span><strong>Zatiaľ žiadna aktivita rodiny.</strong><small>Aktivita sa zobrazí až po reálnych synchronizovaných zmenách.</small></div>`}
   </section>`;
 }
@@ -4865,9 +4851,9 @@ function resolveMealEntry(entry) {
 function renderMobileMealsCard() {
   const ctx = getDashboardDayPlan();
   return `<section class="mn-meals-card mn-card">
-    <div class="mn-section-head">
-      <h2>Dnešné jedlá</h2>
-      <button onclick="switchTab('planner')">Týždeň</button>
+    <div class="mn-section-head compact">
+      <h2>DNEŠNÉ JEDLÁ</h2>
+      <button onclick="switchTab('planner')">Upraviť</button>
     </div>
     <div class="mn-meal-list">
       ${MEALS.map(meal => renderMobileMealRow(meal, ctx)).join('')}
@@ -4887,7 +4873,7 @@ function renderMobileMealRow(meal, ctx) {
     <div class="mn-meal-icon">${meal.icon}</div>
       <div class="mn-meal-body">
       <span>${dashboardMealLabel(meal.id)}</span>
-      ${filled ? `<strong>${esc(title)}</strong>` : `<strong class="mn-empty-meal">+ Pridať jedlo</strong>`}
+      ${filled ? `<strong>${esc(title)}</strong>` : `<strong class="mn-empty-meal">Pridať jedlo</strong>`}
       ${filled ? `<small>${esc(kcal)}</small>` : ''}
     </div>
     ${image ? `<img class="mn-meal-thumb" src="${escAttr(image)}" alt="${escAttr(title)}" loading="lazy" onerror="this.remove()">` : ''}
@@ -4917,7 +4903,7 @@ function renderMobileAiRecommendation() {
   const img = getDashboardRecipeImage(recipe);
   const kcal = recipe.nutrition && recipe.nutrition.kcal ? recipe.nutrition.kcal + ' kcal' : '— kcal';
   return `<section class="mn-ai-card mn-card" onclick="viewRecipe(${recipe.id})">
-    <div class="mn-section-head mn-ai-head"><h2>🤖 AI odporúča</h2></div>
+    <div class="mn-section-head compact mn-ai-head"><h2>AI ODPORÚČA PRE VÁS</h2><button onclick="event.stopPropagation();viewRecipe(${recipe.id})">♡</button></div>
     ${img ? `<img class="mn-ai-image" src="${escAttr(img)}" alt="${escAttr(title)}" loading="lazy" onerror="this.style.display='none'">` : `<div class="mn-ai-image mn-ai-fallback">🍽️</div>`}
     <div class="mn-ai-copy">
       <strong>${esc(title)}</strong>
@@ -6519,23 +6505,13 @@ function renderTasks() {
   const doneTasks = tasks.filter(t => t.completed).length;
   const restWeekTasks = weekTasks.filter(t => t.date !== today && t.date !== tomStr);
   const activeTaskFilterClass = filter => _taskFilter === filter ? ' active' : '';
-  const taskHero = getTaskHeroCopy({
-    filter: _taskFilter,
-    openTasks,
-    doneTasks,
-    todayCount: todayTasks.length,
-    tomorrowCount: tomTasks.length,
-    weekCount: restWeekTasks.length,
-    completedCount: completedList.length
-  });
 
-  html += `<section class="task-hero">
+  html += `<section class="task-screen-head">
+    <h1>${lang==='en'?'Tasks':'Úlohy'}</h1>
     <div>
-      <span class="task-hero-kicker">${lang==='en'?'Tasks':'Úlohy'}</span>
-      <h2>${taskHero.title}</h2>
-      <p>${taskHero.sub}</p>
+      <button onclick="filterTasksTab(this,'today')" aria-label="${lang==='en'?'Filter today':'Filter dnes'}">≡</button>
+      <button onclick="filterTasksTab(this,'all')" aria-label="${lang==='en'?'All filters':'Všetky filtre'}">☰</button>
     </div>
-    <button class="task-hero-add" onclick="openTaskSheet()">➕ ${lang==='en'?'Add':'Pridať'}</button>
   </section>`;
 
   // Filter chips
@@ -6543,29 +6519,32 @@ function renderTasks() {
     <button class="task-filter-chip${activeTaskFilterClass('today')}" onclick="filterTasksTab(this,'today')">📅 ${lang==='en'?'Today':'Dnes'}</button>
     <button class="task-filter-chip${activeTaskFilterClass('tomorrow')}" onclick="filterTasksTab(this,'tomorrow')">🌟 ${lang==='en'?'Tomorrow':'Zajtra'}</button>
     <button class="task-filter-chip${activeTaskFilterClass('week')}" onclick="filterTasksTab(this,'week')">📆 ${lang==='en'?'Week':'Týždeň'}</button>
-    <button class="task-filter-chip${activeTaskFilterClass('all')}" onclick="filterTasksTab(this,'all')">📋 ${lang==='en'?'All':'Všetky'}</button>
     <button class="task-filter-chip${activeTaskFilterClass('done')}" onclick="filterTasksTab(this,'done')">✅ ${lang==='en'?'Done':'Hotové'}</button>
   </div>`;
 
   const headerLen = html.length; // track header length for empty state check
+  const renderPriorityGroups = function(list) {
+    const groups = [
+      { key: 'high', title: lang === 'en' ? 'High priority' : 'Vysoká priorita' },
+      { key: 'medium', title: lang === 'en' ? 'Medium priority' : 'Stredná priorita' },
+      { key: 'low', title: lang === 'en' ? 'Low priority' : 'Nízka priorita' }
+    ];
+    let out = '';
+    groups.forEach(group => {
+      const items = list.filter(t => (t.priority || 'medium') === group.key);
+      if (!items.length) return;
+      out += `<div class="task-section-title">${group.title}</div>`;
+      out += `<div class="task-priority-group">${items.map(t => renderTaskCard(t)).join('')}</div>`;
+    });
+    return out;
+  };
   // Filter-aware section rendering
   if (_taskFilter === 'today') {
-    if (todayTasks.length) {
-      html += `<div class="task-section-title">📅 ${lang==='en'?'Today':'Dnes'} <span class="task-section-count">${todayTasks.length}</span></div>`;
-      html += todayTasks.map(t => renderTaskCard(t)).join('');
-    }
+    html += renderPriorityGroups(todayTasks);
   } else if (_taskFilter === 'tomorrow') {
-    if (tomTasks.length) {
-      html += `<div class="task-section-title">🌟 ${lang==='en'?'Tomorrow':'Zajtra'} <span class="task-section-count">${tomTasks.length}</span></div>`;
-      html += tomTasks.map(t => renderTaskCard(t)).join('');
-    }
+    html += renderPriorityGroups(tomTasks);
   } else if (_taskFilter === 'week') {
-    sections.forEach(s => {
-      const filtered = s.tasks.filter(t => t.date !== today && t.date !== tomStr);
-      if (!filtered.length) return;
-      html += `<div class="task-section-title">${s.icon} ${s.title} <span class="task-section-count">${filtered.length}</span></div>`;
-      html += filtered.map(t => renderTaskCard(t)).join('');
-    });
+    html += renderPriorityGroups(weekTasks);
   } else if (_taskFilter === 'done') {
     const recentDone = getRecentCompleted();
     const olderDone = completedList.filter(t => !recentDone.find(r => r.id === t.id));
@@ -6581,17 +6560,7 @@ function renderTasks() {
       html += `<button class="shop-add-btn" onclick="clearCompletedTasks()" style="color:var(--danger);border-color:var(--danger);margin-top:.3rem;">🗑 ${lang==='en'?'Delete all completed':'Vymazať dokončené'}</button>`;
     }
   } else {
-    sections.forEach(s => {
-      if (!s.tasks.length) return;
-      html += `<div class="task-section-title">${s.icon} ${s.title} <span class="task-section-count">${s.tasks.length}</span></div>`;
-      html += s.tasks.map(t => renderTaskCard(t)).join('');
-    });
-    // Other tasks (no date / old date) - not shown in today/week sections
-    const otherOpen = tasks.filter(t => !t.completed && !weekTasks.find(wt => wt.id === t.id) && !todayTasks.find(tt => tt.id === t.id));
-    if (otherOpen.length) {
-      html += `<div class="task-section-title">📋 ${lang==='en'?'Other':'Ďalšie'} <span class="task-section-count">${otherOpen.length}</span></div>`;
-      html += otherOpen.map(t => renderTaskCard(t)).join('');
-    }
+    html += renderPriorityGroups(tasks.filter(t => !t.completed));
     if (completedList.length) {
       const recentDone = getRecentCompleted();
       if (recentDone.length) {
@@ -6606,7 +6575,7 @@ function renderTasks() {
 
   const hasRenderedTasks = html.length !== headerLen;
   if (hasRenderedTasks) {
-    html = html.slice(0, headerLen) + `<button class="shop-add-btn" onclick="openTaskSheet()" style="margin-bottom:.4rem;">➕ ${lang==='en'?'Add task':'Pridať úlohu'}</button>` + html.slice(headerLen);
+    html = html.slice(0, headerLen) + html.slice(headerLen);
   }
   if (!hasRenderedTasks) {
     const emptyCopy = {
@@ -6628,10 +6597,32 @@ function renderTasks() {
   }
 
   if (hasRenderedTasks) {
-    html += `<button class="shop-add-btn" onclick="openTaskSheet()" style="margin-top:.3rem;">➕ ${lang==='en'?'Add task':'Pridať úlohu'}</button>`;
+    html += `<button class="task-primary-add" onclick="openTaskSheet()">＋ ${lang==='en'?'Add task':'Pridať úlohu'}</button>`;
+    html += renderTaskProductivityCard();
   }
 
   container.innerHTML = html;
+}
+
+function renderTaskProductivityCard() {
+  const labels = ['Po','Ut','St','Št','Pi','So','Ne'];
+  const start = new Date();
+  start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
+  const counts = labels.map((_, index) => {
+    const date = new Date(start);
+    date.setDate(start.getDate() + index);
+    const key = date.toISOString().slice(0, 10);
+    return tasks.filter(t => t.completed && (t.completedDate || '').slice(0, 10) === key).length;
+  });
+  const max = Math.max(1, ...counts);
+  const total = counts.reduce((sum, count) => sum + count, 0);
+  return `<section class="task-productivity">
+    <h2>Tvoja produktivita</h2>
+    <div class="task-productivity-grid">
+      <div><strong>${total}</strong><small>dokončené úlohy tento týždeň</small></div>
+      <div class="task-bars">${counts.map((count, index) => `<span><b style="height:${Math.max(12, Math.round((count / max) * 64))}px"></b><em>${labels[index]}</em></span>`).join('')}</div>
+    </div>
+  </section>`;
 }
 
 let _taskFilter = 'today';
@@ -6683,21 +6674,17 @@ function renderTaskCard(t) {
   const timeStr = t.time ? ` · 🕐 ${t.time}` : '';
   return `<div class="task-card${done?' done':''} prio-${t.priority}">
     <div class="task-card-body">
-      <span class="task-cat-icon">${ci.icon}</span>
       <div class="tc-check${done?' done':''}" onclick="toggleTask('${t.id}')">${done?'✓':''}</div>
       <div class="tc-info" onclick="openTaskSheet('${t.id}')">
         <div class="tc-title">${esc(t.title)}</div>
         <div class="tc-meta">
-          <span class="tc-cat">${ci.icon} ${taskCatLabel(t.category)}</span>
-          <span class="tc-priority ${t.priority}">${prioLabel}</span>
-          <span class="tc-time">${dateLabel}${timeStr}</span>
+          <span class="tc-time">${t.time ? esc(t.time) : esc(dateLabel)}${timeStr && !t.time ? timeStr : ''}</span>
           ${t.note ? `<span>📝 ${esc(t.note)}</span>` : ''}
           ${t.repeat !== 'none' ? `<span>🔄 ${t.repeat === 'daily' ? (lang==='en'?'daily':'denne') : (lang==='en'?'weekly':'týždenne')}</span>` : ''}
         </div>
       </div>
       <div class="tc-actions">
-        <button class="tc-btn" onclick="event.stopPropagation();openTaskSheet('${t.id}')" title="${lang==='en'?'Edit':'Upraviť'}" aria-label="${lang==='en'?'Edit task':'Upraviť úlohu'}">✏️</button>
-        <button class="tc-btn danger" onclick="event.stopPropagation();deleteTask('${t.id}')" title="${lang==='en'?'Delete':'Vymazať'}" aria-label="${lang==='en'?'Delete task':'Vymazať úlohu'}">🗑</button>
+        ${t.priority === 'high' ? '<span class="tc-flag">⚑</span>' : ''}
       </div>
     </div>
   </div>`;
