@@ -531,7 +531,7 @@ function pickOnboardLang(l) {
 setTimeout(() => showOnboarding(), 300);
 
 // ======================== AI (DEEPSEEK PROXY) ========================
-const APP_VERSION = '1.0.41';
+const APP_VERSION = '1.0.42';
 const VAPID_PUBLIC_KEY = 'BI6Fga-GXSKggkNJ58R1VEYEfGE6KfWgnuDtI9sHqQLQJzGLshJuIuODmI13AVzX5D2Kd7SBxrr7Cvf-xRAowg0';
 const PUSH_PROXY_URL = 'https://receptar.waldis994.workers.dev';
 
@@ -3705,14 +3705,20 @@ function dismissTip() {
 }
 
 function switchTab(tab) {
+  if (tab === 'add') {
+    toggleQuickAddSheet();
+    return;
+  }
+  const requestedTab = tab;
+  if (tab === 'family') tab = 'board';
   haptic(8);
-  try { localStorage.setItem('lastTab', tab); } catch(e) {}
+  try { localStorage.setItem('lastTab', requestedTab); } catch(e) {}
   document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-  const btn = document.querySelector(`.nav-item[data-tab="${tab}"]`);
+  const btn = document.querySelector(`.nav-item[data-tab="${requestedTab}"]`) || document.querySelector(`.nav-item[data-tab="${tab}"]`);
   if (btn) { btn.classList.add('active'); springBounce(btn); }
   document.body.dataset.tab = tab;
   if (window._skipHistory) { window._skipHistory = false; }
-  else { history.pushState({ tab }, '', '#tab-' + tab); }
+  else { history.pushState({ tab: requestedTab }, '', '#tab-' + requestedTab); }
   const dashboard = document.getElementById('dashboard');
   const recipeContainer = document.getElementById('home');
   const plannerContainer = document.getElementById('planner-container');
@@ -3754,8 +3760,21 @@ function switchTab(tab) {
     boardContainer.style.display = 'block'; applyPageTransition(boardContainer, 350);
     const boardView = document.getElementById('board-container-view');
     if (boardView) boardView.innerHTML = '';
-    try { renderMoreScreen(); } catch(e) {}
+    try { requestedTab === 'family' ? openMorePage('family') : renderMoreScreen(); } catch(e) {}
   }
+}
+
+function toggleQuickAddSheet() {
+  const sheet = document.getElementById('fab-quick-add');
+  if (!sheet) return;
+  sheet.style.display = 'block';
+  sheet.classList.toggle('open');
+}
+
+function closeQuickAddSheet() {
+  const sheet = document.getElementById('fab-quick-add');
+  if (!sheet) return;
+  sheet.classList.remove('open');
 }
 
 function renderMoreScreen() {
@@ -3763,7 +3782,7 @@ function renderMoreScreen() {
 }
 
 function openMorePageFromAnywhere(page) {
-  switchTab('board');
+  switchTab(page === 'family' ? 'family' : 'board');
   openMorePage(page || 'settings');
 }
 
@@ -4630,42 +4649,34 @@ function previewSeasonTags() {
 // ======================== DASHBOARD ========================
 function renderDashboard() {
   const now = new Date();
-  const hour = now.getHours();
-  const greetings = {
-    sk: { rano: 'Dobré ráno', obed: 'Dobrý deň', vecer: 'Dobrý večer' },
-    en: { rano: 'Good morning', obed: 'Good afternoon', vecer: 'Good evening' }
-  };
-  let period = 'obed';
-  if (hour < 10) period = 'rano';
-  else if (hour >= 18) period = 'vecer';
-  const greeting = { rano: 'Dobré ráno', obed: 'Dobrý deň', vecer: 'Dobrý večer' }[period];
   try { loadShopItems(); } catch(e) {}
+  try { loadTasks(); } catch(e) {}
   const todayMeals = getTodayMealCount();
   const todayTasksArr = getTodayTasks();
-  const todayDone = tasks.filter(t => t.date === new Date().toISOString().slice(0,10) && t.completed).length;
-  const streak = calcPlanningStreak();
   const uncheckedShop = (Array.isArray(shopItems) ? shopItems : []).filter(i => i && !i.checked).length;
   const mealPct = Math.round((todayMeals / MEALS.length) * 100);
-  const weatherLine = buildDashboardWeatherLine();
   const userName = getDashboardUserName();
+  const greetingText = userName ? `Ahoj, ${userName} 👋` : 'Ahoj 👋';
+  const currentDate = formatDashboardDate(now);
+  const aiRecipe = pickDashboardAiRecipe();
   const html = `<div class="mn-home-shell">
     <section class="mn-home-header">
       <div class="mn-home-greeting">
-        <h1>${esc(greeting)}, ${esc(userName)} 👋</h1>
-        <p>${weatherLine}</p>
+        <h1>${esc(greetingText)}</h1>
+        <p>${esc(currentDate)}</p>
+        ${renderDashboardFamilyAvatars()}
       </div>
       <div class="mn-home-actions">
         <button class="mn-icon-btn" onclick="openMorePageFromAnywhere('notifications')" aria-label="Notifikácie">🔔</button>
         <button class="mn-avatar-btn" onclick="openMorePageFromAnywhere('account')" aria-label="Profil">${getDashboardAvatar()}</button>
       </div>
     </section>
-    ${renderMobileHeroCard({ todayMeals, totalMeals: MEALS.length, mealPct, uncheckedShop, todayTasks: todayTasksArr.length, streak })}
-    ${renderMobileWeekSelector()}
+    ${renderFamilyHubHero({ todayMeals, totalMeals: MEALS.length, uncheckedShop, todayTasks: todayTasksArr.filter(t => !t.completed).length, aiRecipe })}
+    ${renderFamilyOverviewCards({ todayMeals, totalMeals: MEALS.length, uncheckedShop, todayTasks: todayTasksArr.filter(t => !t.completed).length, aiRecipe })}
     ${renderMobileMealsCard()}
     ${renderMobileAiRecommendation()}
+    ${renderFamilyActivityCard()}
     ${renderMobileQuickActions()}
-    ${renderMobileTaskPreview()}
-    ${renderMobileShoppingPreview(uncheckedShop)}
   </div>`;
 
   try { document.getElementById('dash-content').innerHTML = html; } catch(e) {}
@@ -4676,18 +4687,131 @@ function renderDashboard() {
 
 function getDashboardUserName() {
   const raw = authUser && (authUser.displayName || authUser.email);
-  if (!raw) return 'Vladis';
+  if (!raw) return '';
   const first = String(raw).split('@')[0].split(/\s+/)[0].trim();
-  return first || 'Vladis';
+  return first || '';
 }
 
 function getDashboardAvatar() {
   if (authUser && authUser.photoURL) return `<img src="${escAttr(authUser.photoURL)}" alt="">`;
-  return '<span>V</span>';
+  const initial = getDashboardUserName().slice(0, 1).toUpperCase() || '👤';
+  return `<span>${esc(initial)}</span>`;
 }
 
-function buildDashboardWeatherLine() {
-  return '☀️ 21°C • Jahody v sezóne';
+function formatDashboardDate(date) {
+  try {
+    return date.toLocaleDateString(lang === 'en' ? 'en-US' : 'sk-SK', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long'
+    });
+  } catch(e) {
+    return date.toISOString().slice(0, 10);
+  }
+}
+
+function renderDashboardFamilyAvatars() {
+  const members = getRealFamilyMembers();
+  if (!members.length) return '';
+  return `<div class="mn-family-avatars">${members.slice(0, 4).map(member => `<span title="${escAttr(member.name)}">${member.photo ? `<img src="${escAttr(member.photo)}" alt="">` : esc(member.initial)}</span>`).join('')}</div>`;
+}
+
+function getRealFamilyMembers() {
+  const members = [];
+  if (authUser) {
+    const name = authUser.displayName || authUser.email || '';
+    members.push({
+      name: name || (lang === 'en' ? 'Account' : 'Účet'),
+      initial: (name || 'U').slice(0, 1).toUpperCase(),
+      photo: authUser.photoURL || ''
+    });
+  }
+  try {
+    const configured = appSettings && appSettings.family && Array.isArray(appSettings.family.members) ? appSettings.family.members : [];
+    configured.forEach(function(member) {
+      const name = member && (member.name || member.email);
+      if (!name || members.find(m => m.name === name)) return;
+      members.push({ name: String(name), initial: String(name).slice(0, 1).toUpperCase(), photo: member.photoURL || member.photo || '' });
+    });
+  } catch(e) {}
+  return members;
+}
+
+function renderFamilyHubHero(stats) {
+  const dinner = getDashboardDinnerEntry();
+  let title = 'Naplánovať večeru';
+  let desc = 'Večera dnes ešte nie je naplánovaná.';
+  let cta = 'Naplánovať večeru';
+  let action = "switchTab('planner')";
+  let image = stats.aiRecipe ? getDashboardRecipeImage(stats.aiRecipe) : '';
+  if (dinner && dinner.title) {
+    title = 'Dnešná večera je pripravená';
+    desc = dinner.title;
+    cta = 'Otvoriť plán';
+  } else if (stats.uncheckedShop > 0) {
+    title = 'Nákup čaká';
+    desc = `${stats.uncheckedShop} ${stats.uncheckedShop === 1 ? 'položka zostáva' : 'položiek zostáva'} v nákupnom zozname.`;
+    cta = 'Otvoriť nákup';
+    action = "switchTab('shopping')";
+  } else if (stats.todayTasks > 0) {
+    title = 'Úlohy na dnes';
+    desc = `${stats.todayTasks} ${stats.todayTasks === 1 ? 'úloha čaká' : 'úloh čaká'} na dokončenie.`;
+    cta = 'Dokončiť úlohy';
+    action = "switchTab('tasks')";
+  } else if (stats.aiRecipe) {
+    title = 'AI má odporúčanie';
+    desc = stats.aiRecipe.name;
+    cta = 'Pozrieť recept';
+    action = `viewRecipe(${stats.aiRecipe.id})`;
+  }
+  return `<section class="mn-family-hero mn-card" style="${image ? `--hero-img:url('${escAttr(image)}')` : ''}">
+    <div class="mn-family-hero-overlay">
+      <span>Dnes najdôležitejšie</span>
+      <h2>${esc(title)}</h2>
+      <p>${esc(desc)}</p>
+      <button onclick="${action}">${esc(cta)}</button>
+    </div>
+  </section>`;
+}
+
+function getDashboardDinnerEntry() {
+  const ctx = getDashboardDayPlan();
+  const resolved = resolveMealEntry(ctx.dayPlan['večera']);
+  if (!resolved) return null;
+  if (resolved.recipe) return { title: resolved.recipe.name, recipe: resolved.recipe };
+  return { title: resolved.title || '' };
+}
+
+function renderFamilyOverviewCards(stats) {
+  const aiText = stats.aiRecipe ? '1' : '0';
+  return `<section class="mn-overview-grid">
+    <button onclick="switchTab('planner')"><span>🍽️</span><strong>${stats.todayMeals}/${stats.totalMeals}</strong><small>Jedlá</small></button>
+    <button onclick="switchTab('shopping')"><span>🛒</span><strong>${stats.uncheckedShop}</strong><small>Nákup</small></button>
+    <button onclick="switchTab('tasks')"><span>✅</span><strong>${stats.todayTasks}</strong><small>Úlohy</small></button>
+    <button onclick="${stats.aiRecipe ? `viewRecipe(${stats.aiRecipe.id})` : 'aiGenerateFullWeek()'}"><span>🤖</span><strong>${aiText}</strong><small>AI</small></button>
+  </section>`;
+}
+
+function renderFamilyActivityCard() {
+  const activity = getRealFamilyActivity();
+  return `<section class="mn-activity-card mn-card">
+    <div class="mn-section-head"><h2>Rodinná aktivita</h2><button onclick="switchTab('family')">Rodina</button></div>
+    ${activity.length ? `<div class="mn-activity-feed">${activity.slice(0, 4).map(item => `<div><span>${esc(item.icon || '•')}</span><strong>${esc(item.title || '')}</strong>${item.time ? `<small>${esc(item.time)}</small>` : ''}</div>`).join('')}</div>` : `<div class="mn-empty-inline"><span>👨‍👩‍👧‍👦</span><strong>Zatiaľ žiadna aktivita rodiny.</strong><small>Aktivita sa zobrazí až po reálnych synchronizovaných zmenách.</small></div>`}
+  </section>`;
+}
+
+function getRealFamilyActivity() {
+  try {
+    const stored = JSON.parse(localStorage.getItem('familyActivity') || '[]');
+    if (Array.isArray(stored)) {
+      return stored.filter(item => item && item.title).map(item => ({
+        icon: item.icon || '•',
+        title: item.title,
+        time: item.time || item.date || ''
+      }));
+    }
+  } catch(e) {}
+  return [];
 }
 
 function renderMobileHeroCard(stats) {
@@ -4799,8 +4923,16 @@ function renderMobileAiRecommendation() {
       <strong>${esc(title)}</strong>
       <span>⏱ ${recipe.time || 25} min • 🔥 ${kcal}</span>
     </div>
-    <button class="mn-ai-button" onclick="event.stopPropagation();pickRecipe('${ctx.todayName}','obed','${ctx.weekKey}')">Pridať do plánu</button>
+    <button class="mn-ai-button" onclick="event.stopPropagation();addDashboardRecommendationToPlan(${recipe.id})">Pridať do plánu</button>
   </section>`;
+}
+
+function addDashboardRecommendationToPlan(recipeId) {
+  const ctx = getDashboardDayPlan();
+  const preferred = ['večera', 'obed', 'raňajky', 'desiata', 'olovrant'];
+  const slot = preferred.find(id => !ctx.dayPlan[id]) || 'večera';
+  selectRecipe(ctx.todayName, slot, recipeId, ctx.weekKey);
+  renderDashboard();
 }
 
 function getDashboardRecipeImage(recipe) {
@@ -4815,6 +4947,7 @@ function renderMobileQuickActions() {
     { icon:'🛒', label: 'Nákup', action:"switchTab('shopping')" },
     { icon:'✅', label: 'Úlohy', action:"switchTab('tasks')" },
     { icon:'🚀', label: 'AI Týždeň', action:'aiGenerateFullWeek()' },
+    { icon:'🌐', label: 'Import receptu', action:'openImportUrlModal()' },
   ];
   return `<section class="mn-quick-grid">${actions.map(item => `<button onclick="${item.action}"><span>${item.icon}</span><strong>${item.label}</strong></button>`).join('')}</section>`;
 }
@@ -5224,17 +5357,29 @@ function renderPlanner() {
   var maxMeals = DAYS.length * totalSlots;
   var mealPct = maxMeals > 0 ? Math.round((totalMeals / maxMeals) * 100) : 0;
   const weekRange = getWeekLabel(startOfWeek);
-  todayEl.innerHTML = `<section class="planner-control-panel planner-reference-panel">
+  const selectedIdx = typeof _selectedPlannerDay === 'number' ? _selectedPlannerDay : todayIdx;
+  todayEl.innerHTML = `<section class="planner-mobile-shell">
     <div class="planner-reference-title-row">
       <div class="planner-reference-title">
         <span class="planner-reference-icon">🗓️</span>
-        <strong>${lang==='en'?'Planner':'Plánovač'}</strong>
+        <strong>${lang==='en'?'Calendar':'Kalendár'}</strong>
       </div>
       <div class="planner-reference-actions">
         <button class="planner-main-action" onclick="aiGenerateFullWeek()">🤖 ${lang==='en'?'AI week':'AI týždeň'}</button>
-        <button class="planner-danger-action" onclick="clearPlan()" title="${escAttr(lang==='en'?'Clear current week':'Vymazať aktuálny týždeň')}">🗑️ ${lang==='en'?'Clear':'Vymazať'}</button>
       </div>
     </div>
+    <div class="planner-view-toggle" aria-label="${lang==='en'?'Calendar view':'Zobrazenie kalendára'}">
+      <button class="active">${lang==='en'?'Day':'Deň'}</button>
+      <button onclick="document.getElementById('planner-week-grid')?.scrollIntoView({behavior:'smooth'})">${lang==='en'?'Week':'Týždeň'}</button>
+    </div>
+    <div class="planner-day-strip">
+      ${DAYS.map((dayKey, index) => {
+        const date = new Date(startOfWeek);
+        date.setDate(startOfWeek.getDate() + index);
+        return `<button class="${index === selectedIdx ? 'active' : ''}" onclick="selectPlannerDay(${index})"><span>${esc((dayNames[index] || '').slice(0, 2))}</span><strong>${date.getDate()}</strong></button>`;
+      }).join('')}
+    </div>
+    ${renderPlannerDayView(dayStats[selectedIdx], weekKey, totalSlots)}
     <div class="planner-control-row">
       <div class="planner-segment" aria-label="${lang==='en'?'Week':'Týždeň'}">
         <button class="${plannerWeekOffset===0?'active':''}" onclick="goToWeek(0)">${lang==='en'?'This week':'Tento týždeň'}</button>
@@ -5312,6 +5457,46 @@ function renderPlanner() {
     document.getElementById('pip-time').textContent = totalTime;
     document.getElementById('pip-fill').style.width = mealPct+'%';
   }
+}
+
+function renderPlannerDayView(info, weekKey, totalSlots) {
+  if (!info) return '';
+  const dayTitle = (lang === 'en' ? DAYS_EN : DAYS_SK)[info.index] || '';
+  const rows = MEALS.map(function(meal) {
+    const entry = info.day[meal.id];
+    const recipe = getSlotRecipe(entry);
+    const name = getSlotName(entry);
+    const status = recipe ? `${recipe.time || 20} min${recipe.nutrition && recipe.nutrition.kcal ? ' · ' + recipe.nutrition.kcal + ' kcal' : ''}` : (entry ? 'Vlastné jedlo' : 'Nenaplánované');
+    return `<article class="planner-day-card ${entry ? 'filled' : 'empty'}">
+      <span>${meal.icon}</span>
+      <div>
+        <strong>${esc(mealLabel(meal.id))}</strong>
+        <small>${entry ? esc(name) : (lang === 'en' ? 'No meal selected' : 'Jedlo zatiaľ nie je vybrané')}</small>
+        <em>${esc(status)}</em>
+      </div>
+      <button onclick="${recipe ? `viewRecipe(${recipe.id})` : `pickRecipe('${info.key}','${meal.id}','${weekKey}')`}">${entry ? (lang === 'en' ? 'Edit' : 'Upraviť') : '+'}</button>
+    </article>`;
+  }).join('');
+  return `<section class="planner-day-view">
+    <div class="planner-day-view-head">
+      <div><h2>${esc(dayTitle)}</h2><p>${info.date.getDate()}. ${info.date.getMonth()+1}. · ${info.filled}/${totalSlots} ${lang==='en'?'meals':'jedál'}</p></div>
+      <button onclick="clearDay('${info.key}','${weekKey}')">Vymazať</button>
+    </div>
+    <div class="planner-day-cards">${rows}</div>
+  </section>`;
+}
+
+function clearDay(dayKey, weekKey) {
+  const plan = getWeekPlan(weekKey || currentWeekKey());
+  if (!plan[dayKey]) return;
+  showConfirmModal(lang === 'en' ? 'Clear this day?' : 'Vymazať tento deň?', '🗑️', lang === 'en' ? 'Clear' : 'Vymazať', function() {
+    plan[dayKey] = {};
+    saveWeekPlan();
+    try { localStorage.setItem('mealPlan', JSON.stringify(mealPlan)); } catch(e) {}
+    try { localStorage.setItem('mealPlanKids', JSON.stringify(mealPlanKids)); } catch(e) {}
+    renderPlanner();
+    renderDashboard();
+  });
 }
 
 function goToWeek(offset) {
@@ -6787,6 +6972,10 @@ function showImportUrlModal() {
   openModal('import-url-modal');
 }
 
+function openImportUrlModal() {
+  showImportUrlModal();
+}
+
 function setImportStatus(message) {
   const status = document.getElementById('import-url-status');
   if (status) status.textContent = message || '';
@@ -7176,7 +7365,7 @@ document.getElementById('recipe-grid').addEventListener('click', function(e) {
 try { applyLang(); } catch(e) {}
 try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch(e) {}
 const initialHashTab = (location.hash || '').replace(/^#tab-/, '').replace('#', '');
-const validInitialTabs = new Set(['dashboard', 'planner', 'home', 'shopping', 'tasks', 'board']);
+const validInitialTabs = new Set(['dashboard', 'planner', 'home', 'shopping', 'tasks', 'board', 'family']);
 const initialTab = validInitialTabs.has(initialHashTab) ? initialHashTab : (localStorage.getItem('lastTab') || 'dashboard');
 document.body.dataset.tab = initialTab;
 switchTab(initialTab);

@@ -15,7 +15,7 @@
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <title data-lang="appTitle">Mealnest</title>
-  <link rel="stylesheet" href="styles.css?v=50">
+  <link rel="stylesheet" href="styles.css?v=51">
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -482,15 +482,15 @@
   </button>
   <button class="nav-item" data-tab="planner" onclick="switchTab('planner')">
     <span class="nav-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
-    <span class="nav-label">Týždeň</span>
+    <span class="nav-label">Kalendár</span>
   </button>
-  <button class="nav-item" data-tab="home" onclick="switchTab('home')">
-    <span class="nav-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span>
-    <span class="nav-label">Recepty</span>
+  <button class="nav-item nav-fab-slot" data-tab="add" onclick="toggleQuickAddSheet()">
+    <span class="nav-plus">+</span>
+    <span class="nav-label">Pridať</span>
   </button>
-  <button class="nav-item" data-tab="shopping" onclick="switchTab('shopping')">
-    <span class="nav-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></span>
-    <span class="nav-label">Nákup</span>
+  <button class="nav-item" data-tab="family" onclick="switchTab('family')">
+    <span class="nav-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-8 0v2"/><circle cx="12" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M2 21v-2a4 4 0 0 1 3-3.87"/></svg></span>
+    <span class="nav-label">Rodina</span>
   </button>
   <button class="nav-item" data-tab="board" onclick="switchTab('board')">
     <span class="nav-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></span>
@@ -499,17 +499,20 @@
 </nav>
 
 
-<script src="app.js?v=50"></script>
-<script src="board.js?v=50"></script>
+<script src="app.js?v=51"></script>
+<script src="board.js?v=51"></script>
 
 <!-- Quick add FAB -->
 <div id="fab-quick-add" style="display:none">
   <div class="fab-backdrop" onclick="document.getElementById('fab-quick-add').classList.remove('open')"></div>
-  <button class="fab-trigger" onclick="this.parentElement.classList.toggle('open')" aria-label="Quick add">➕</button>
   <div class="fab-menu">
-    <button id="fab-btn-task" class="fab-item" onclick="event.stopPropagation();this.closest('#fab-quick-add').classList.remove('open');switchTab('tasks');setTimeout(()=>openTaskSheet(),100)">✅ Úloha</button>
-    <button id="fab-btn-meal" class="fab-item" onclick="event.stopPropagation();this.closest('#fab-quick-add').classList.remove('open');switchTab('planner')">🍽️ Jedlo</button>
-    <button id="fab-btn-food" class="fab-item" onclick="event.stopPropagation();this.closest('#fab-quick-add').classList.remove('open');switchTab('shopping');setTimeout(()=>openAddItemSheet(),100)">🛒 Potravina</button>
+    <div class="fab-sheet-handle"></div>
+    <strong>Rýchlo pridať</strong>
+    <button id="fab-btn-meal" class="fab-item" onclick="event.stopPropagation();closeQuickAddSheet();switchTab('planner')">🍽️ Pridať jedlo</button>
+    <button id="fab-btn-task" class="fab-item" onclick="event.stopPropagation();closeQuickAddSheet();switchTab('tasks');setTimeout(()=>openTaskSheet(),100)">✅ Pridať úlohu</button>
+    <button id="fab-btn-food" class="fab-item" onclick="event.stopPropagation();closeQuickAddSheet();switchTab('shopping');setTimeout(()=>openAddItemSheet(),100)">🛒 Pridať položku</button>
+    <button class="fab-item" onclick="event.stopPropagation();closeQuickAddSheet();openImportUrlModal()">🌐 Importovať recept</button>
+    <button class="fab-item" onclick="event.stopPropagation();closeQuickAddSheet();aiDailyTip()">🤖 Spýtať sa AI</button>
   </div>
 </div>
 
