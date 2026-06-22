@@ -101,7 +101,9 @@ function renderFamilyHubHero(stats) {
     desc = 'Dnešná večera';
     cta = 'Otvoriť plán';
   }
-  return `<section class="mn-family-hero mn-card" style="${image ? `--hero-img:url('${escAttr(image)}')` : ''}">
+  // Use inline style for background-image to avoid CSS variable URL resolution issues
+  const bgStyle = image ? `background-image:linear-gradient(180deg, rgba(8,16,20,.12) 0%, rgba(8,16,20,.94) 100%),url('${escAttr(image)}');background-size:cover;background-position:center;` : '';
+  return `<section class="mn-family-hero mn-card" style="${bgStyle}">
     <div class="mn-family-hero-overlay">
       <h2>${esc(title)}</h2>
       ${desc ? `<p>${esc(desc)}</p>` : ''}
@@ -299,7 +301,7 @@ function cycleAiSuggestion() {
 // Patch pickDashboardAiRecipe to support override
 const _origPick = pickDashboardAiRecipe;
 pickDashboardAiRecipe = function() {
-  if (this._override) return this._override;
+  if (pickDashboardAiRecipe._override) return pickDashboardAiRecipe._override;
   return _origPick.call(this);
 };
 
