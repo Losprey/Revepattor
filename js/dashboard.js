@@ -119,14 +119,15 @@ function getDashboardDinnerEntry() {
 }
 
 function renderFamilyOverviewCards(stats) {
+  const streak = calcPlanningStreak();
   const aiText = stats.aiRecipe ? '1' : '0';
   return `<section class="mn-hub-section">
     <div class="mn-mini-label">DNES RÝCHLO</div>
     <div class="mn-overview-grid">
-    <button class="meals" onclick="switchTab('planner')"><span>🥗</span><strong>Jedlá</strong><em>${stats.todayMeals}/${stats.totalMeals}</em><small>naplánované</small></button>
     <button class="shop" onclick="switchTab('shopping')"><span>🛒</span><strong>Nákup</strong><em>${stats.uncheckedShop}</em><small>položky</small></button>
     <button class="tasks" onclick="switchTab('tasks')"><span>✓</span><strong>Úlohy</strong><em>${stats.todayTasks}</em><small>čakajú</small></button>
     <button class="streak" onclick="${stats.aiRecipe ? `viewRecipe(${stats.aiRecipe.id})` : 'aiGenerateFullWeek()'}"><span>🔥</span><strong>AI</strong><em>${aiText}</em><small>návrh</small></button>
+    <button class="meals" onclick="switchTab('planner')"><span>📊</span><strong>Šnúra</strong><em>${streak}</em><small>dní</small></button>
     </div>
   </section>`;
 }
@@ -135,7 +136,7 @@ function renderFamilyActivityCard() {
   const activity = getRealFamilyActivity();
   return `<section class="mn-activity-card mn-card">
     <div class="mn-section-head compact"><h2>AKTIVITA RODINY</h2><button onclick="openMorePageFromAnywhere('family')">Rodina</button></div>
-    ${activity.length ? `<div class="mn-activity-feed">${activity.slice(0, 4).map(item => `<div><span>${esc(item.icon || '•')}</span><strong>${esc(item.title || '')}</strong>${item.time ? `<small>${esc(item.time)}</small>` : ''}</div>`).join('')}</div>` : `<div class="mn-empty-inline"><span>👨‍👩‍👧‍👦</span><strong>Zatiaľ žiadna aktivita rodiny.</strong><small>Aktivita sa zobrazí až po reálnych synchronizovaných zmenách.</small></div>`}
+    ${activity.length ? `<div class="mn-activity-feed">${activity.slice(0, 4).map(item => `<div><span>${esc(item.icon || '•')}</span><strong>${esc(item.title || '')}</strong>${item.time ? `<small>${esc(item.time)}</small>` : ''}</div>`).join('')}</div>` : `<div class="mn-empty-inline"><span>👨‍👩‍👧‍👦</span><strong>Zatiaľ žiadna aktivita rodiny.</strong><small>Pozvi členov rodiny a začnite plánovať spoločne.</small><button class="btn btn-primary" onclick="openMorePageFromAnywhere('family')" style="margin-top:.5rem;font-size:.75rem;padding:.3rem .7rem;">➕ Pozvať rodinu</button></div>`}
   </section>`;
 }
 
@@ -262,16 +263,45 @@ function renderMobileAiRecommendation() {
   const title = recipe.name;
   const img = getDashboardRecipeImage(recipe);
   const kcal = recipe.nutrition && recipe.nutrition.kcal ? recipe.nutrition.kcal + ' kcal' : '— kcal';
-  return `<section class="mn-ai-card mn-card" onclick="viewRecipe(${recipe.id})">
-    <div class="mn-section-head compact mn-ai-head"><h2>AI ODPORÚČA PRE VÁS</h2><button onclick="event.stopPropagation();viewRecipe(${recipe.id})">♡</button></div>
+  return `<section class="mn-ai-card mn-card">
+    <div class="mn-section-head compact mn-ai-head"><h2>AI ODPORÚČA PRE VÁS</h2><button onclick="event.stopPropagation();cycleAiSuggestion()" title="Ďalší návrh">▶</button></div>
+    <div onclick="viewRecipe(${recipe.id})">
     ${img ? `<img class="mn-ai-image" src="${escAttr(img)}" alt="${escAttr(title)}" loading="lazy" onerror="this.style.display='none'">` : `<div class="mn-ai-image mn-ai-fallback">🍽️</div>`}
     <div class="mn-ai-copy">
       <strong>${esc(title)}</strong>
       <span>⏱ ${recipe.time || 25} min • 🔥 ${kcal} • Denný návrh</span>
     </div>
-    <button class="mn-ai-button" onclick="event.stopPropagation();addDashboardRecommendationToPlan(${recipe.id})">Pridať do plánu</button>
+    </div>
+    <div class="mn-ai-actions">
+      <button class="mn-ai-button" onclick="event.stopPropagation();addDashboardRecommendationToPlan(${recipe.id})">Pridať do plánu</button>
+      <button class="mn-ai-next" onclick="event.stopPropagation();cycleAiSuggestion()" title="Ďalší návrh">Ďalší →</button>
+    </div>
   </section>`;
 }
+
+let _aiSuggestionIndex = 0;
+
+function cycleAiSuggestion() {
+  const todays = new Set(getTodayRecipes().map(r => r.id));
+  const candidates = (Array.isArray(recipes) ? recipes : []).filter(recipe => recipe && !todays.has(recipe.id));
+  if (candidates.length < 2) return;
+  _aiSuggestionIndex = (_aiSuggestionIndex + 1) % candidates.length;
+  // Override pickDashboardAiRecipe temporarily via data attr
+  const dash = document.getElementById('dash-content');
+  if (dash) {
+    // Re-render with next recipe
+    pickDashboardAiRecipe._override = candidates[_aiSuggestionIndex];
+    renderDashboard();
+    pickDashboardAiRecipe._override = null;
+  }
+}
+
+// Patch pickDashboardAiRecipe to support override
+const _origPick = pickDashboardAiRecipe;
+pickDashboardAiRecipe = function() {
+  if (this._override) return this._override;
+  return _origPick.call(this);
+};
 
 function addDashboardRecommendationToPlan(recipeId) {
   const ctx = getDashboardDayPlan();

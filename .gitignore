@@ -17,3 +17,7 @@ yarn-error.log*
 __MACOSX/
 package-lock.json
 package.json
+
+# Build artifacts
+app.js.min
+*.min.js
