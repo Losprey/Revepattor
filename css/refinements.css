@@ -75,8 +75,8 @@
   min-height: 120px !important;
   border-radius: 16px !important;
   background:
-    linear-gradient(180deg, rgba(8,16,20,.15) 0%, rgba(8,16,20,.85) 100%),
-    var(--hero-img, radial-gradient(circle at 72% 45%, rgba(245,155,67,.28), transparent 34%)),
+    linear-gradient(180deg, rgba(8,16,20,.12) 0%, rgba(8,16,20,.94) 100%),
+    radial-gradient(circle at 72% 45%, rgba(245,155,67,.28), transparent 34%),
     linear-gradient(135deg, rgba(245,155,67,.16), rgba(99,212,113,.08)) !important;
   background-size: cover !important;
   background-position: center !important;

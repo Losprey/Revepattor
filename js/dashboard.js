@@ -102,7 +102,8 @@ function renderFamilyHubHero(stats) {
     cta = 'Otvoriť plán';
   }
   // Use inline style for background-image to avoid CSS variable URL resolution issues
-  const bgStyle = image ? `background-image:linear-gradient(180deg, rgba(8,16,20,.12) 0%, rgba(8,16,20,.94) 100%),url('${escAttr(image)}');background-size:cover;background-position:center;` : '';
+  // Must use !important to override styles.css background shorthand
+  const bgStyle = image ? `background-image:linear-gradient(180deg, rgba(8,16,20,.12) 0%, rgba(8,16,20,.94) 100%),url('${escAttr(image)}') !important;background-size:cover !important;background-position:center !important;` : '';
   return `<section class="mn-family-hero mn-card" style="${bgStyle}">
     <div class="mn-family-hero-overlay">
       <h2>${esc(title)}</h2>
