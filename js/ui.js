@@ -953,6 +953,42 @@ document.addEventListener('click', function(e) {
   }
 });
 
+// ======================== SWIPE TO CLOSE MODAL ========================
+function setupDetailSwipeClose() {
+  var overlay = document.getElementById('detail-modal');
+  if (!overlay || overlay.dataset.swipeInit) return;
+  overlay.dataset.swipeInit = '1';
+  var startX = 0, startY = 0, swiping = false;
+  overlay.addEventListener('touchstart', function(e) {
+    if (overlay.style.display === 'none') return;
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    swiping = false;
+  }, { passive: true });
+  overlay.addEventListener('touchmove', function(e) {
+    if (!startX) return;
+    var dx = e.touches[0].clientX - startX;
+    var dy = e.touches[0].clientY - startY;
+    // Only trigger for horizontal right swipe from left edge
+    if (Math.abs(dy) > Math.abs(dx) * 0.8) { swiping = false; return; }
+    if (dx > 30 && startX < 40) {
+      swiping = true;
+      overlay.style.transform = 'translateX(' + (dx * 0.5) + 'px)';
+      overlay.style.transition = 'none';
+    }
+  }, { passive: true });
+  overlay.addEventListener('touchend', function(e) {
+    if (!startX) return;
+    var dx = e.changedTouches[0].clientX - startX;
+    if (swiping && dx > 80 && startX < 40) {
+      closeModal('detail-modal');
+    }
+    overlay.style.transform = '';
+    overlay.style.transition = '';
+    startX = 0; startY = 0; swiping = false;
+  }, { passive: true });
+}
+
 // ======================== TOAST NOTIFICATIONS ========================
 function showToast(msg, type, duration) {
   type = type || 'info';

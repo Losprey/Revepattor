@@ -574,6 +574,8 @@ function viewRecipe(id) {
   openModal('detail-modal');
   const detailModal = document.querySelector('#detail-modal .modal');
   if (detailModal) detailModal.scrollTop = 0;
+  // Add swipe-to-close gesture on detail modal
+  setupDetailSwipeClose();
   requestAnimationFrame(function() {
     try { window.scrollTo(0, pageScrollY); } catch(e) {}
   });
