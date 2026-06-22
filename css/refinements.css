@@ -1,7 +1,5 @@
-/* Mealnest — Refinements & Final Polish */
-/* ================================ */
+/* Auto-cleaned — duplicates removed */
 
-/* ===== REFERENCE MATCH PASS: FAMILY HUB MOCKUP ===== */
 #dashboard,
 #tasks-container,
 #board-container {
@@ -9,15 +7,12 @@
   margin-inline: auto !important;
   background: #071014 !important;
 }
-
 #dashboard {
   padding: calc(22px + env(safe-area-inset-top)) 12px calc(88px + env(safe-area-inset-bottom)) !important;
 }
-
 #dashboard .mn-home-shell {
   gap: 12px !important;
 }
-
 #dashboard .mn-home-header {
   min-height: 52px;
   display: grid !important;
@@ -25,32 +20,27 @@
   align-items: center !important;
   padding: 0 2px 2px !important;
 }
-
 #dashboard .mn-home-greeting h1 {
   margin: 0 0 4px !important;
   font-size: 1.16rem !important;
   line-height: 1.08 !important;
   letter-spacing: -.03em !important;
 }
-
 #dashboard .mn-home-greeting p {
   margin: 0 !important;
   color: rgba(255,255,255,.72) !important;
   font-size: .72rem !important;
   font-weight: 650 !important;
 }
-
 #dashboard .mn-home-actions {
   gap: 6px !important;
 }
-
 #dashboard .mn-family-avatars {
   display: flex !important;
   align-items: center;
   min-height: 34px !important;
   margin: 0 !important;
 }
-
 #dashboard .mn-family-avatars span,
 #dashboard .mn-family-avatars button,
 #dashboard .mn-avatar-btn {
@@ -66,11 +56,9 @@
   font-weight: 850 !important;
   box-shadow: none !important;
 }
-
 #dashboard .mn-family-avatars button {
   margin-left: 4px;
 }
-
 #dashboard .mn-family-hero {
   min-height: 120px !important;
   border-radius: 16px !important;
@@ -81,7 +69,6 @@
   background-size: cover !important;
   box-shadow: none !important;
 }
-
 #dashboard .mn-family-hero-overlay {
   min-height: 120px !important;
   align-content: center !important;
@@ -89,20 +76,17 @@
   gap: 8px !important;
   padding: 18px !important;
 }
-
 #dashboard .mn-family-hero-overlay h2 {
   max-width: 13rem !important;
   font-size: .98rem !important;
   line-height: 1.18 !important;
   letter-spacing: -.01em !important;
 }
-
 #dashboard .mn-family-hero-overlay p {
   order: -1;
   font-size: .68rem !important;
   color: rgba(255,255,255,.70) !important;
 }
-
 #dashboard .mn-family-hero-overlay button {
   min-height: 32px !important;
   padding: 0 14px !important;
@@ -111,7 +95,6 @@
   color: #fff !important;
   font-size: .68rem !important;
 }
-
 #dashboard .mn-mini-label,
 #dashboard .mn-section-head.compact h2 {
   margin: 0 0 8px;
@@ -120,17 +103,14 @@
   font-weight: 900 !important;
   letter-spacing: .05em !important;
 }
-
 #dashboard .mn-hub-section {
   display: grid;
   gap: 0;
 }
-
 #dashboard .mn-overview-grid {
   grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
   gap: 8px !important;
 }
-
 #dashboard .mn-overview-grid button {
   min-height: 86px !important;
   align-content: center !important;
@@ -140,12 +120,10 @@
   border-radius: 14px !important;
   box-shadow: none !important;
 }
-
 #dashboard .mn-overview-grid button.meals { background: linear-gradient(180deg, rgba(99,212,113,.22), rgba(99,212,113,.12)) !important; }
 #dashboard .mn-overview-grid button.shop { background: linear-gradient(180deg, rgba(56,189,248,.22), rgba(56,189,248,.10)) !important; }
 #dashboard .mn-overview-grid button.tasks { background: linear-gradient(180deg, rgba(139,92,246,.24), rgba(139,92,246,.12)) !important; }
 #dashboard .mn-overview-grid button.streak { background: linear-gradient(180deg, rgba(245,155,67,.26), rgba(245,155,67,.12)) !important; }
-
 #dashboard .mn-overview-grid span {
   width: 28px;
   height: 28px;
@@ -156,24 +134,20 @@
   background: rgba(0,0,0,.20);
   font-size: .95rem !important;
 }
-
 #dashboard .mn-overview-grid strong {
   font-size: .7rem !important;
   font-weight: 850 !important;
 }
-
 #dashboard .mn-overview-grid em {
   color: #fff;
   font-size: .95rem;
   font-style: normal;
   font-weight: 950;
 }
-
 #dashboard .mn-overview-grid small {
   font-size: .58rem !important;
   line-height: 1.05;
 }
-
 #dashboard .mn-meals-card,
 #dashboard .mn-ai-card,
 #dashboard .mn-activity-card {
@@ -181,14 +155,12 @@
   border-radius: 15px !important;
   box-shadow: none !important;
 }
-
 #dashboard .mn-section-head.compact {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 4px;
 }
-
 #dashboard .mn-section-head.compact button {
   min-height: 24px !important;
   padding: 0 4px !important;
@@ -198,11 +170,9 @@
   font-size: .62rem !important;
   font-weight: 800 !important;
 }
-
 #dashboard .mn-meal-list {
   gap: 0 !important;
 }
-
 #dashboard .mn-meal-row {
   min-height: 48px !important;
   grid-template-columns: 30px minmax(0, 1fr) auto !important;
@@ -213,11 +183,9 @@
   border-radius: 0 !important;
   background: transparent !important;
 }
-
 #dashboard .mn-meal-row:last-child {
   border-bottom: 0 !important;
 }
-
 #dashboard .mn-meal-icon {
   width: 26px !important;
   height: 26px !important;
@@ -225,19 +193,16 @@
   background: rgba(255,255,255,.07) !important;
   font-size: .86rem !important;
 }
-
 #dashboard .mn-meal-body span {
   color: #fff !important;
   font-size: .68rem !important;
   font-weight: 850 !important;
 }
-
 #dashboard .mn-meal-body strong {
   color: rgba(255,255,255,.64) !important;
   font-size: .62rem !important;
   font-weight: 650 !important;
 }
-
 #dashboard .mn-row-action {
   width: 28px !important;
   height: 28px !important;
@@ -249,30 +214,24 @@
   color: #fff !important;
   font-size: .8rem !important;
 }
-
 #dashboard .mn-meal-row.filled .mn-row-action {
   background: #63d471 !important;
   color: #071014 !important;
 }
-
 #dashboard .mn-ai-card {
   display: grid !important;
   gap: 8px !important;
 }
-
 #dashboard .mn-ai-image {
   height: 122px !important;
   border-radius: 13px !important;
 }
-
 #dashboard .mn-ai-copy strong {
   font-size: .95rem !important;
 }
-
 #dashboard .mn-ai-copy span {
   font-size: .66rem !important;
 }
-
 #dashboard .mn-ai-button {
   width: auto !important;
   justify-self: start !important;
@@ -281,48 +240,39 @@
   border-radius: 9px !important;
   font-size: .68rem !important;
 }
-
 #dashboard .mn-empty-inline {
   padding: 10px !important;
   border-radius: 12px !important;
 }
-
 #dashboard .mn-empty-inline span {
   width: 28px !important;
   height: 28px !important;
 }
-
 #dashboard .mn-empty-inline strong {
   font-size: .72rem !important;
 }
-
 #dashboard .mn-empty-inline small {
   font-size: .62rem !important;
 }
-
 #tasks-container {
   padding: calc(24px + env(safe-area-inset-top)) 12px calc(92px + env(safe-area-inset-bottom)) !important;
 }
-
 .task-screen-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 16px;
 }
-
 .task-screen-head h1 {
   margin: 0;
   color: #fff;
   font-size: 1.35rem;
   letter-spacing: -.035em;
 }
-
 .task-screen-head div {
   display: flex;
   gap: 8px;
 }
-
 .task-screen-head button {
   width: 38px;
   height: 38px;
@@ -332,7 +282,6 @@
   background: rgba(255,255,255,.07);
   color: rgba(255,255,255,.78);
 }
-
 .task-filters {
   display: grid !important;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -341,7 +290,6 @@
   padding: 0 !important;
   overflow: visible !important;
 }
-
 .task-filter-chip {
   min-height: 36px !important;
   padding: 0 8px !important;
@@ -352,25 +300,21 @@
   font-size: .65rem !important;
   font-weight: 850 !important;
 }
-
 .task-filter-chip.active {
   background: #63d471 !important;
   color: #071014 !important;
 }
-
 .task-section-title {
   margin: 16px 2px 8px !important;
   color: rgba(255,255,255,.78) !important;
   font-size: .72rem !important;
   font-weight: 850 !important;
 }
-
 .task-priority-group {
   overflow: hidden;
   border-radius: 15px;
   background: rgba(255,255,255,.055);
 }
-
 .task-priority-group .task-card {
   margin: 0 !important;
   border: 0 !important;
@@ -379,17 +323,14 @@
   background: transparent !important;
   box-shadow: none !important;
 }
-
 .task-priority-group .task-card:last-child {
   border-bottom: 0 !important;
 }
-
 .task-card-body {
   min-height: 52px !important;
   padding: 10px 12px !important;
   gap: 10px !important;
 }
-
 .task-card .tc-check {
   width: 18px !important;
   height: 18px !important;
@@ -397,30 +338,25 @@
   border-radius: 5px !important;
   background: transparent;
 }
-
 .task-card .tc-check.done {
   background: #63d471 !important;
   border-color: #63d471 !important;
   color: #071014 !important;
 }
-
 .task-card .tc-title {
   color: #fff !important;
   font-size: .78rem !important;
   font-weight: 750 !important;
 }
-
 .task-card .tc-meta {
   margin-top: 3px !important;
   color: rgba(255,255,255,.48) !important;
   font-size: .61rem !important;
 }
-
 .tc-flag {
   color: #ef4444;
   font-size: .9rem;
 }
-
 .task-primary-add {
   width: 100%;
   min-height: 48px;
@@ -432,52 +368,44 @@
   font-size: .88rem;
   font-weight: 900;
 }
-
 .task-productivity {
   padding: 16px;
   border: 1px solid rgba(255,255,255,.06);
   border-radius: 16px;
   background: rgba(255,255,255,.045);
 }
-
 .task-productivity h2 {
   margin: 0 0 14px;
   color: #fff;
   font-size: .82rem;
 }
-
 .task-productivity-grid {
   display: grid;
   grid-template-columns: 82px minmax(0, 1fr);
   gap: 12px;
   align-items: end;
 }
-
 .task-productivity strong {
   display: block;
   color: #fff;
   font-size: 1.6rem;
 }
-
 .task-productivity small {
   color: rgba(255,255,255,.55);
   font-size: .6rem;
   line-height: 1.2;
 }
-
 .task-bars {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 7px;
   align-items: end;
 }
-
 .task-bars span {
   display: grid;
   justify-items: center;
   gap: 5px;
 }
-
 .task-bars b {
   width: 12px;
   display: block;
@@ -485,36 +413,29 @@
   border-radius: 999px;
   background: #63d471;
 }
-
 .task-bars em {
   color: rgba(255,255,255,.50);
   font-size: .56rem;
   font-style: normal;
 }
-
 #board-container .more-subhead {
   padding-top: 6px !important;
 }
-
 #board-container .more-subhead h1 {
   font-size: 1.35rem !important;
 }
-
 .hub-family-members .more-member {
   grid-template-columns: 42px minmax(0, 1fr) auto !important;
   min-height: 58px;
 }
-
 .hub-family-members .more-member span {
   overflow: hidden;
 }
-
 .hub-family-members .more-member img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
-
 .hub-family-members .more-member em {
   width: 38px;
   height: 38px;
@@ -527,7 +448,6 @@
   font-style: normal;
   font-weight: 900;
 }
-
 .family-invite {
   width: auto !important;
   justify-self: end;
@@ -537,13 +457,11 @@
   border-radius: 10px !important;
   font-size: .68rem !important;
 }
-
 .family-shared-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
 }
-
 .family-shared-grid button {
   min-height: 70px;
   display: grid;
@@ -555,22 +473,18 @@
   background: rgba(255,255,255,.06);
   color: #fff;
 }
-
 .family-shared-grid span {
   font-size: 1.15rem;
 }
-
 .family-shared-grid strong {
   font-size: .64rem;
 }
-
 .family-goal {
   display: grid;
   grid-template-columns: 38px minmax(0, 1fr) auto;
   gap: 10px;
   align-items: center;
 }
-
 .family-goal > span {
   width: 38px;
   height: 38px;
@@ -579,23 +493,19 @@
   border-radius: 13px;
   background: rgba(99,212,113,.12);
 }
-
 .family-goal strong,
 .family-goal small {
   display: block;
 }
-
 .family-goal strong {
   color: #fff;
   font-size: .78rem;
 }
-
 .family-goal small {
   margin-top: 2px;
   color: rgba(255,255,255,.55);
   font-size: .64rem;
 }
-
 .family-goal i {
   display: block;
   height: 5px;
@@ -604,17 +514,16 @@
   border-radius: 999px;
   background: rgba(255,255,255,.08);
 }
-
 .family-goal b {
   display: block;
   height: 100%;
   border-radius: inherit;
   background: #63d471;
 }
-
 .family-goal em {
   color: #fff;
   font-size: .74rem;
   font-style: normal;
   font-weight: 850;
 }
+

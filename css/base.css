@@ -1,9 +1,8 @@
-/* Mealnest — CSS Variables & Design Tokens */
-/* ================================ */
+/* Auto-cleaned — duplicates removed */
 
 :root {
   color-scheme: dark;
-  /* === PREMIUM MOBILE DESIGN SYSTEM 2026 === */
+  
   --bg: #121212;
   --bg-gradient: linear-gradient(180deg, #121212 0%, #161616 30%, #141414 60%, #121212 100%);
   --surface: #1E1E1E;
