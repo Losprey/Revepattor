@@ -89,6 +89,8 @@
   justify-items: start;
   gap: 8px !important;
   padding: 18px !important;
+  background: linear-gradient(180deg, rgba(0,0,0,.15) 0%, rgba(0,0,0,.55) 100%) !important;
+  border-radius: inherit !important;
 }
 
 #dashboard .mn-family-hero-overlay h2 {
