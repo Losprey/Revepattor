@@ -38,7 +38,7 @@ async function aiGenerateFullWeekRun() {
 
 async function fetchPexelsImage(query) {
   if (!query) return null;
-  const url = AI_PROXY_URL + '/api/pexels?query=' + encodeURIComponent(query + ' food');
+  const url = AI_PROXY_URL + '/api/pexels?query=' + encodeURIComponent(query);
   try {
     const res = await fetch(url);
     if (!res.ok) return null;

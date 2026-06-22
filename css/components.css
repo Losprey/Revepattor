@@ -2133,5 +2133,26 @@ body { overscroll-behavior: none; -webkit-overflow-scrolling: touch; -webkit-tou
 .site-chip { display:inline-block; font-size:.62rem; padding:.15rem .4rem; background:var(--surface); border:1px solid var(--border); border-radius:6px; cursor:pointer; transition:all .15s; color:var(--text2); }
 .site-chip:hover { background:var(--hover-bg); border-color:var(--primary); color:var(--text); }
 
+/* Card shadows for depth */
+#dashboard .mn-overview-grid button {
+  box-shadow: 0 2px 8px rgba(0,0,0,.2) !important;
+  transition: transform .15s ease, box-shadow .15s ease !important;
+}
+#dashboard .mn-overview-grid button:active {
+  transform: translateY(1px) !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,.2) !important;
+}
+#dashboard .mn-card {
+  box-shadow: 0 2px 12px rgba(0,0,0,.15) !important;
+}
+
+/* Larger section headers */
+.mn-mini-label,
+#dashboard .mn-section-head h2,
+#dashboard .mn-hub-section .mn-mini-label {
+  font-size: .75rem !important;
+  letter-spacing: .08em !important;
+}
+
 input, textarea, select, [contenteditable] { -webkit-user-select: text; user-select: text; }
 

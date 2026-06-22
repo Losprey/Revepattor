@@ -130,7 +130,7 @@ function renderFamilyOverviewCards(stats) {
     <button class="shop" onclick="switchTab('shopping')"><span>🛒</span><strong>Nákup</strong><em>${stats.uncheckedShop}</em><small>položky</small></button>
     <button class="tasks" onclick="switchTab('tasks')"><span>✓</span><strong>Úlohy</strong><em>${stats.todayTasks}</em><small>čakajú</small></button>
     <button class="streak" onclick="${stats.aiRecipe ? `viewRecipe(${stats.aiRecipe.id})` : 'aiGenerateFullWeek()'}"><span>🔥</span><strong>AI</strong><em>${aiText}</em><small>návrh</small></button>
-    <button class="meals" onclick="switchTab('planner')"><span>📊</span><strong>Šnúra</strong><em>${streak}</em><small>dní</small></button>
+    <button class="meals" onclick="switchTab('planner')"><span>📊</span><strong>Šnúra</strong><em>${streak > 0 ? streak : '—'}</em><small>${streak > 0 ? 'dní' : 'začni dnes'}</small></button>
     </div>
   </section>`;
 }
