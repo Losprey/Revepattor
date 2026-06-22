@@ -5110,5 +5110,658 @@
       "fat": 2,
       "carbs": 32
     }
+  },
+  {
+    "id": 90,
+    "name": "Hruškové pyré",
+    "nameEn": "Pear puree",
+    "category": "Detské",
+    "time": 15,
+    "image": "",
+    "imageData": "",
+    "ingredients": [
+      "2 zrelé hrušky",
+      "trocha vody"
+    ],
+    "ingredientsEn": [
+      "2 ripe pears",
+      "a little water"
+    ],
+    "steps": [
+      "Hrušky ošúpte a nakrájajte na kocky.",
+      "Dajte do hrnca s trochou vody.",
+      "Duste 8-10 minút domäkka.",
+      "Rozmixujte dohladka."
+    ],
+    "stepsEn": [
+      "Peel and dice pears.",
+      "Put in a pot with a little water.",
+      "Stew 8-10 min until soft.",
+      "Blend until smooth."
+    ],
+    "tags": [
+      "deti-6m",
+      "baby",
+      "prvé jedlo",
+      "jesen"
+    ],
+    "tagsEn": [
+      "baby-6m",
+      "baby",
+      "first food",
+      "autumn"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 70,
+      "protein": 0,
+      "fat": 0,
+      "carbs": 18
+    }
+  },
+  {
+    "id": 91,
+    "name": "Brokolicové pyré",
+    "nameEn": "Broccoli puree",
+    "category": "Detské",
+    "time": 15,
+    "image": "",
+    "imageData": "",
+    "ingredients": [
+      "1 menšia brokolica",
+      "trocha vody"
+    ],
+    "ingredientsEn": [
+      "1 small broccoli head",
+      "a little water"
+    ],
+    "steps": [
+      "Brokolicu rozdeľte na ružičky a dobre umyte.",
+      "Dajte do hrnca s trochou vody.",
+      "Varte 10 minút domäkka.",
+      "Rozmixujte dohladka."
+    ],
+    "stepsEn": [
+      "Divide broccoli into florets and wash well.",
+      "Put in a pot with a little water.",
+      "Cook 10 min until soft.",
+      "Blend until smooth."
+    ],
+    "tags": [
+      "deti-6m",
+      "baby",
+      "prvé jedlo"
+    ],
+    "tagsEn": [
+      "baby-6m",
+      "baby",
+      "first food"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 35,
+      "protein": 3,
+      "fat": 0,
+      "carbs": 5
+    }
+  },
+  {
+    "id": 92,
+    "name": "Cuketové pyré",
+    "nameEn": "Zucchini puree",
+    "category": "Detské",
+    "time": 15,
+    "image": "",
+    "imageData": "",
+    "ingredients": [
+      "1 menšia cuketa",
+      "trocha vody"
+    ],
+    "ingredientsEn": [
+      "1 small zucchini",
+      "a little water"
+    ],
+    "steps": [
+      "Cuketu ošúpte a nakrájajte na kolieska.",
+      "Dajte do hrnca s trochou vody.",
+      "Duste 10 minút domäkka.",
+      "Rozmixujte dohladka."
+    ],
+    "stepsEn": [
+      "Peel zucchini and slice into rounds.",
+      "Put in a pot with a little water.",
+      "Stew 10 min until soft.",
+      "Blend until smooth."
+    ],
+    "tags": [
+      "deti-6m",
+      "baby",
+      "prvé jedlo",
+      "leto"
+    ],
+    "tagsEn": [
+      "baby-6m",
+      "baby",
+      "first food",
+      "summer"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 25,
+      "protein": 1,
+      "fat": 0,
+      "carbs": 4
+    }
+  },
+  {
+    "id": 93,
+    "name": "Slivkové pyré",
+    "nameEn": "Plum puree",
+    "category": "Detské",
+    "time": 15,
+    "image": "",
+    "imageData": "",
+    "ingredients": [
+      "5 zrelých sliviek",
+      "trocha vody"
+    ],
+    "ingredientsEn": [
+      "5 ripe plums",
+      "a little water"
+    ],
+    "steps": [
+      "Slivky umyte a prekrojte na polovicu, vyberte kôstku.",
+      "Dajte do hrnca s trochou vody.",
+      "Duste 10 minút domäkka.",
+      "Rozmixujte dohladka a preceďte."
+    ],
+    "stepsEn": [
+      "Wash plums, cut in half and remove pit.",
+      "Put in a pot with a little water.",
+      "Stew 10 min until soft.",
+      "Blend until smooth and strain."
+    ],
+    "tags": [
+      "deti-6m",
+      "baby",
+      "prvé jedlo",
+      "jesen"
+    ],
+    "tagsEn": [
+      "baby-6m",
+      "baby",
+      "first food",
+      "autumn"
+    ],
+    "rating": 0,
+    "notes": "Dobré pri zápche",
+    "notesEn": "Good for constipation",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 60,
+      "protein": 1,
+      "fat": 0,
+      "carbs": 14
+    }
+  },
+  {
+    "id": 94,
+    "name": "Karfiolové pyré",
+    "nameEn": "Cauliflower puree",
+    "category": "Detské",
+    "time": 15,
+    "image": "",
+    "imageData": "",
+    "ingredients": [
+      "1/4 karfiolu",
+      "trocha vody",
+      "kvapka olivového oleja"
+    ],
+    "ingredientsEn": [
+      "1/4 cauliflower",
+      "a little water",
+      "a drop of olive oil"
+    ],
+    "steps": [
+      "Karfiol rozdeľte na ružičky a umyte.",
+      "Dajte do hrnca s trochou vody.",
+      "Varte 12 minút domäkka.",
+      "Rozmixujte dohladka s kvapkou oleja."
+    ],
+    "stepsEn": [
+      "Divide cauliflower into florets and wash.",
+      "Put in a pot with a little water.",
+      "Cook 12 min until soft.",
+      "Blend until smooth with a drop of oil."
+    ],
+    "tags": [
+      "deti-6m",
+      "baby",
+      "prvé jedlo"
+    ],
+    "tagsEn": [
+      "baby-6m",
+      "baby",
+      "first food"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 30,
+      "protein": 2,
+      "fat": 1,
+      "carbs": 4
+    }
+  },
+  {
+    "id": 95,
+    "name": "Hokkaido tekvicové pyré",
+    "nameEn": "Hokkaido pumpkin puree",
+    "category": "Detské",
+    "time": 20,
+    "image": "",
+    "imageData": "",
+    "ingredients": [
+      "200g Hokkaido tekvice",
+      "trocha vody"
+    ],
+    "ingredientsEn": [
+      "200g Hokkaido pumpkin",
+      "a little water"
+    ],
+    "steps": [
+      "Tekvicu umyte a nakrájajte na kúsky (Hokkaido netreba šúpať).",
+      "Dajte do hrnca s trochou vody.",
+      "Duste 15 minút domäkka.",
+      "Rozmixujte dohladka."
+    ],
+    "stepsEn": [
+      "Wash pumpkin and cut into cubes (Hokkaido doesn't need peeling).",
+      "Put in a pot with a little water.",
+      "Stew 15 min until soft.",
+      "Blend until smooth."
+    ],
+    "tags": [
+      "deti-6m",
+      "baby",
+      "prvé jedlo",
+      "jesen"
+    ],
+    "tagsEn": [
+      "baby-6m",
+      "baby",
+      "first food",
+      "autumn"
+    ],
+    "rating": 0,
+    "notes": "Hokkaido netreba šúpať",
+    "notesEn": "Hokkaido doesn't need peeling",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 45,
+      "protein": 1,
+      "fat": 1,
+      "carbs": 9
+    }
+  },
+  {
+    "id": 96,
+    "name": "Kuracie pyré s mrkvou",
+    "nameEn": "Chicken puree with carrots",
+    "category": "Detské",
+    "time": 25,
+    "image": "",
+    "imageData": "",
+    "ingredients": [
+      "50g kuracieho mäsa",
+      "2 mrkvy",
+      "trocha vody"
+    ],
+    "ingredientsEn": [
+      "50g chicken meat",
+      "2 carrots",
+      "a little water"
+    ],
+    "steps": [
+      "Kuracie mäso uvaríme domäkka.",
+      "Mrkvu ošúpeme a nakrájame na kolieska.",
+      "Uvaríme mrkvu domäkka.",
+      "Mäso a mrkvu rozmixujeme dohladka."
+    ],
+    "stepsEn": [
+      "Cook chicken until tender.",
+      "Peel and slice carrots.",
+      "Cook carrots until soft.",
+      "Blend chicken and carrots until smooth."
+    ],
+    "tags": [
+      "deti-8m",
+      "baby"
+    ],
+    "tagsEn": [
+      "baby-8m",
+      "baby"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 90,
+      "protein": 10,
+      "fat": 3,
+      "carbs": 6
+    }
+  },
+  {
+    "id": 97,
+    "name": "Lososové pyré s batatom",
+    "nameEn": "Salmon puree with sweet potato",
+    "category": "Detské",
+    "time": 25,
+    "image": "",
+    "imageData": "",
+    "ingredients": [
+      "50g lososa",
+      "1 malý batat",
+      "trocha vody"
+    ],
+    "ingredientsEn": [
+      "50g salmon",
+      "1 small sweet potato",
+      "a little water"
+    ],
+    "steps": [
+      "Lososa uvaríme v pare.",
+      "Batat ošúpeme a nakrájame.",
+      "Uvaríme batat domäkka.",
+      "Rozmixujeme dohladka."
+    ],
+    "stepsEn": [
+      "Steam the salmon.",
+      "Peel and dice sweet potato.",
+      "Cook sweet potato until soft.",
+      "Blend until smooth."
+    ],
+    "tags": [
+      "deti-8m",
+      "baby"
+    ],
+    "tagsEn": [
+      "baby-8m",
+      "baby"
+    ],
+    "rating": 0,
+    "notes": "Zdravé omega-3",
+    "notesEn": "Healthy omega-3",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 110,
+      "protein": 10,
+      "fat": 4,
+      "carbs": 8
+    }
+  },
+  {
+    "id": 98,
+    "name": "Hovädzie pyré s tekvicou",
+    "nameEn": "Beef puree with pumpkin",
+    "category": "Detské",
+    "time": 30,
+    "image": "",
+    "imageData": "",
+    "ingredients": [
+      "50g hovädzieho mäsa",
+      "150g tekvice",
+      "trocha vody"
+    ],
+    "ingredientsEn": [
+      "50g beef",
+      "150g pumpkin",
+      "a little water"
+    ],
+    "steps": [
+      "Hovädzie mäso uvaríme domäkka.",
+      "Tekvicu nakrájame na kocky a uvaríme.",
+      "Mäso a tekvicu rozmixujeme dohladka."
+    ],
+    "stepsEn": [
+      "Cook beef until very tender.",
+      "Dice pumpkin and cook until soft.",
+      "Blend beef and pumpkin until smooth."
+    ],
+    "tags": [
+      "deti-8m",
+      "baby"
+    ],
+    "tagsEn": [
+      "baby-8m",
+      "baby"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 100,
+      "protein": 12,
+      "fat": 3,
+      "carbs": 6
+    }
+  },
+  {
+    "id": 99,
+    "name": "Ryžová kaša s mrkvou a hovädzím",
+    "nameEn": "Rice porridge with carrot and beef",
+    "category": "Detské",
+    "time": 30,
+    "image": "",
+    "imageData": "",
+    "ingredients": [
+      "30g ryže",
+      "1 mrkva",
+      "40g hovädzieho mäsa",
+      "voda"
+    ],
+    "ingredientsEn": [
+      "30g rice",
+      "1 carrot",
+      "40g beef",
+      "water"
+    ],
+    "steps": [
+      "Ryžu uvaríme domäkka.",
+      "Mrkvu ošúpeme a uvaríme.",
+      "Hovädzie mäso uvaríme domäkka.",
+      "Všetko spolu rozmixujeme dohladka."
+    ],
+    "stepsEn": [
+      "Cook rice until soft.",
+      "Peel and cook carrot.",
+      "Cook beef until tender.",
+      "Blend everything together until smooth."
+    ],
+    "tags": [
+      "deti-8m",
+      "baby"
+    ],
+    "tagsEn": [
+      "baby-8m",
+      "baby"
+    ],
+    "rating": 0,
+    "notes": "Sýtejšie jedlo pre bábätká",
+    "notesEn": "More filling baby meal",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 120,
+      "protein": 8,
+      "fat": 2,
+      "carbs": 18
+    }
+  },
+  {
+    "id": 100,
+    "name": "Hrachová kaša s morčacím",
+    "nameEn": "Pea porridge with turkey",
+    "category": "Detské",
+    "time": 25,
+    "image": "",
+    "imageData": "",
+    "ingredients": [
+      "50g hrášku",
+      "40g morčacieho mäsa",
+      "trocha vody"
+    ],
+    "ingredientsEn": [
+      "50g peas",
+      "40g turkey",
+      "a little water"
+    ],
+    "steps": [
+      "Morčacie mäso uvaríme domäkka.",
+      "Hrášok dáme do vriacej vody na 5 minút.",
+      "Scedíme a rozmixujeme spolu s mäsom."
+    ],
+    "stepsEn": [
+      "Cook turkey until tender.",
+      "Put peas in boiling water for 5 minutes.",
+      "Drain and blend together with meat."
+    ],
+    "tags": [
+      "deti-8m",
+      "baby"
+    ],
+    "tagsEn": [
+      "baby-8m",
+      "baby"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 85,
+      "protein": 10,
+      "fat": 2,
+      "carbs": 7
+    }
+  },
+  {
+    "id": 101,
+    "name": "Zeleninová polievka s quinoou",
+    "nameEn": "Vegetable soup with quinoa",
+    "category": "Detské",
+    "time": 25,
+    "image": "",
+    "imageData": "",
+    "ingredients": [
+      "1 mrkva",
+      "1 zemiak",
+      "2 lyžice quinoi",
+      "voda",
+      "kvapka oleja"
+    ],
+    "ingredientsEn": [
+      "1 carrot",
+      "1 potato",
+      "2 tbsp quinoa",
+      "water",
+      "a drop of oil"
+    ],
+    "steps": [
+      "Zeleninu ošúpeme a nakrájame na kocky.",
+      "Quinou prepláchneme vodou.",
+      "Všetko dáme variť do vody na 20 minút.",
+      "Môžeme ponechať kúsky alebo jemne rozmixovať."
+    ],
+    "stepsEn": [
+      "Peel and dice vegetables.",
+      "Rinse quinoa.",
+      "Boil everything in water for 20 minutes.",
+      "Keep chunky or lightly blend."
+    ],
+    "tags": [
+      "deti-1",
+      "baby"
+    ],
+    "tagsEn": [
+      "baby-1y",
+      "baby"
+    ],
+    "rating": 0,
+    "notes": "",
+    "notesEn": "",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 80,
+      "protein": 3,
+      "fat": 2,
+      "carbs": 13
+    }
+  },
+  {
+    "id": 102,
+    "name": "Domáce zeleninové nugetky",
+    "nameEn": "Homemade veggie nuggets",
+    "category": "Detské",
+    "time": 30,
+    "image": "",
+    "imageData": "",
+    "ingredients": [
+      "1 mrkva",
+      "1 cuketa",
+      "1 vajce",
+      "2 lyžice strúhanky",
+      "soľ"
+    ],
+    "ingredientsEn": [
+      "1 carrot",
+      "1 zucchini",
+      "1 egg",
+      "2 tbsp breadcrumbs",
+      "salt"
+    ],
+    "steps": [
+      "Zeleninu nastrúhame nahrubo.",
+      "Zmiešame s vajcom a strúhankou.",
+      "Tvarujeme malé nugetky.",
+      "Pečieme v rúre 15 minút pri 180°C."
+    ],
+    "stepsEn": [
+      "Grate vegetables coarsely.",
+      "Mix with egg and breadcrumbs.",
+      "Shape into small nuggets.",
+      "Bake in oven 15 min at 180°C."
+    ],
+    "tags": [
+      "deti-1",
+      "baby"
+    ],
+    "tagsEn": [
+      "baby-1y",
+      "baby"
+    ],
+    "rating": 0,
+    "notes": "Môžeme podávať s jogurtovým dipom",
+    "notesEn": "Can serve with yogurt dip",
+    "favorite": false,
+    "nutrition": {
+      "kcal": 65,
+      "protein": 4,
+      "fat": 3,
+      "carbs": 6
+    }
   }
 ]
