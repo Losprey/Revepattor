@@ -461,15 +461,23 @@
   <div class="modal" style="max-width:480px;">
     <button class="modal-close" onclick="closeModal('import-url-modal')" aria-label="Zavrieť">✕</button>
     <h2 data-lang="importUrlTitle">🌐 Importovať recept z URL</h2>
-    <p style="color:var(--text2);margin-bottom:.5rem;font-size:.85rem;" data-lang="importUrlHint">Vlož odkaz na recept (varecha.pravda.sk) – aplikácia ho stiahne a predvyplní formulár.</p>
-    <input type="url" id="import-url-input" placeholder="https://varecha.pravda.sk/recept/..." aria-label="URL adresa receptu" style="width:100%;padding:.55rem 1rem;border:1px solid var(--border);border-radius:var(--radius-lg);font-size:.85rem;background:var(--input-bg);color:var(--text);box-shadow:var(--inner-shadow);">
-    <div id="import-url-status" style="margin-top:.5rem;font-size:.85rem;color:var(--text2);"></div>
+    <p style="color:var(--text2);margin-bottom:.5rem;font-size:.78rem;" data-lang="importUrlHint">Vlož odkaz na recept – aplikácia ho stiahne a predvyplní formulár.</p>
+    <div style="display:flex;gap:.3rem;margin-bottom:.3rem;">
+      <input type="url" id="import-url-input" oninput="validateImportUrl()" placeholder="https://varecha.pravda.sk/recept/..." aria-label="URL adresa receptu" style="flex:1;padding:.55rem 1rem;border:1px solid var(--border);border-radius:var(--radius-lg);font-size:.82rem;background:var(--input-bg);color:var(--text);box-shadow:var(--inner-shadow);transition:border-color .2s;">
+      <button class="btn btn-secondary" onclick="pasteImportUrl()" title="Vložiť z klávesnice" style="padding:.3rem .5rem;font-size:.9rem;">📋</button>
+    </div>
+    <div id="import-url-status" style="margin-top:.3rem;font-size:.75rem;color:var(--text2);min-height:1.2rem;"></div>
+    <div id="import-url-chips" style="display:flex;flex-wrap:wrap;gap:.25rem;margin-top:.2rem;margin-bottom:.3rem;"></div>
+    <div id="import-url-history" style="display:none;margin-top:.3rem;"></div>
+    <div id="import-url-loader" style="display:none;text-align:center;padding:.5rem;">
+      <span style="display:inline-block;width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:ptrSpin .6s linear infinite;"></span>
+      <span style="font-size:.72rem;color:var(--text3);margin-left:.4rem;" data-lang="importUrlLoading">Sťahujem recept...</span>
+    </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('import-url-modal')" data-lang="cancel">Zrušiť</button>
-      <button class="btn btn-primary" onclick="importFromUrl()" id="import-url-btn" data-lang="importUrlDo">📥 Importovať</button>
+      <button class="btn btn-primary" onclick="importFromUrl()" id="import-url-btn" disabled data-lang="importUrlDo">📥 Importovať</button>
     </div>
   </div>
-
 </div>
 
 <!-- BOARD -->

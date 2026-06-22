@@ -2127,5 +2127,11 @@ body[data-season="zima"] .planner-week-nav .pln-btn.active { background: linear-
 
 body { overscroll-behavior: none; -webkit-overflow-scrolling: touch; -webkit-touch-callout: none !important; -webkit-user-select: none !important; user-select: none !important; }
 
+/* URL Import */
+#import-url-input.valid { border-color: var(--success, #22c55e) !important; }
+#import-url-input.invalid { border-color: var(--danger, #ef4444) !important; }
+.site-chip { display:inline-block; font-size:.62rem; padding:.15rem .4rem; background:var(--surface); border:1px solid var(--border); border-radius:6px; cursor:pointer; transition:all .15s; color:var(--text2); }
+.site-chip:hover { background:var(--hover-bg); border-color:var(--primary); color:var(--text); }
+
 input, textarea, select, [contenteditable] { -webkit-user-select: text; user-select: text; }
 

@@ -824,3 +824,486 @@ function showTipOfDay() {
   card.dataset.id = r.id;
   card.classList.add('show');
 }
+
+setTimeout(function() {
+  setDynamicGradient();
+  initSwipeTabs();
+  initPullToRefresh();
+  initScrollHeader();
+  initLongPress();
+  // Toggle masonry grid if setting enabled
+  var grid = document.getElementById('recipe-grid');
+  if (grid && appSettings.masonry) grid.classList.add('masonry');
+  // Add staggered animation class to shopping
+  var shopView = document.getElementById('shopping-list-view');
+  if (shopView) shopView.classList.add('shop-animate-stagger');
+}, 500);
+
+// =================== SEASONAL CALENDAR ===================
+var SEASONAL_PROD = [
+  {m:0,produce:[],emoji:'❄️',label:'Zima',labelEn:'Winter',desc:'Koreňová zelenina, kapusta, citrusy',descEn:'Root veg, cabbage, citrus'},
+  {m:1,produce:[],emoji:'❄️',label:'Zima',labelEn:'Winter',desc:'Pór, zeler, petržlen, pomaranče',descEn:'Leek, celery, parsley, oranges'},
+  {m:2,produce:[],emoji:'🌸',label:'Jar',labelEn:'Spring',desc:'Rebarbora, špargľa, špenát, hlávkový šalát',descEn:'Rhubarb, asparagus, spinach, lettuce'},
+  {m:3,produce:[],emoji:'🌸',label:'Jar',labelEn:'Spring',desc:'Špargľa, reďkovka, jarná cibuľka, žerucha',descEn:'Asparagus, radish, spring onion, cress'},
+  {m:4,produce:[],emoji:'🌸',label:'Jar',labelEn:'Spring',desc:'Jahody, reďkovka, špenát, mladé zemiaky',descEn:'Strawberries, radish, spinach, new potatoes'},
+  {m:5,produce:[],emoji:'🌞',label:'Leto',labelEn:'Summer',desc:'Čerešne, jahody, hrach, cuketa, uhorky',descEn:'Cherries, strawberries, peas, zucchini'},
+  {m:6,produce:[],emoji:'🌞',label:'Leto',labelEn:'Summer',desc:'Maliny, ríbezle, broskyne, paradajky, paprika',descEn:'Raspberries, currants, peaches, tomatoes'},
+  {m:7,produce:[],emoji:'🌞',label:'Leto',labelEn:'Summer',desc:'Slivky, marhule, kukurica, baklažán, fazuľa',descEn:'Plums, apricots, corn, eggplant, beans'},
+  {m:8,produce:[],emoji:'🌞',label:'Leto',labelEn:'Summer',desc:'Hrozno, jablká, hrušky, tekvica, cesnak',descEn:'Grapes, apples, pears, pumpkin, garlic'},
+  {m:9,produce:[],emoji:'🍂',label:'Jeseň',labelEn:'Autumn',desc:'Hrozno, jablká, orechy, kapusta, mrkva',descEn:'Grapes, apples, nuts, cabbage, carrots'},
+  {m:10,produce:[],emoji:'🍂',label:'Jeseň',labelEn:'Autumn',desc:'Tekvica, gaštany, hrušky, cvikla, zemiaky',descEn:'Pumpkin, chestnuts, pears, beetroot'},
+  {m:11,produce:[],emoji:'❄️',label:'Zima',labelEn:'Winter',desc:'Kapusta, kel, citrusy, datle, orechy',descEn:'Cabbage, kale, citrus, dates, nuts'},
+];
+
+function getSeasonalMonth() {
+  var now = new Date();
+  var m = now.getMonth();
+  return SEASONAL_PROD[m] || SEASONAL_PROD[0];
+}
+
+function getSeasonalRecipes() {
+  // Find recipes with tags matching the current season
+  var seasonMap = {0:'zima',1:'zima',2:'jar',3:'jar',4:'jar',5:'leto',6:'leto',7:'leto',8:'leto',9:'jesen',10:'jesen',11:'zima'};
+  var season = seasonMap[new Date().getMonth()] || 'leto';
+  var seasonEn = {zima:'winter',jar:'spring',leto:'summer',jesen:'autumn'}[season];
+  return recipes.filter(function(r) {
+    var tags = (lang==='en' && r.tagsEn ? r.tagsEn : r.tags) || [];
+    return tags.some(function(t) { return t === season || t === seasonEn; });
+  }).slice(0, 3);
+}
+
+function renderSeasonalWidget(compact) {
+  var sm = getSeasonalMonth();
+  var sr = getSeasonalRecipes();
+  var label = lang === 'en' ? sm.labelEn : sm.label;
+  var desc = lang === 'en' ? sm.descEn : sm.desc;
+  var html = '<div class="dash-card seasonal-card' + (compact ? ' seasonal-card-compact' : '') + '"><div class="seasonal-header"><span class="seasonal-icon">' + sm.emoji + '</span><div><div class="seasonal-title">' + (lang==='en'?'In season: ':'Sezóna: ') + label + '</div><div class="seasonal-desc">' + desc + '</div></div></div>';
+  if (sr.length) {
+    html += '<div class="seasonal-recipes">' + sr.map(function(r) {
+      var name = lang === 'en' && r.nameEn ? r.nameEn : r.name;
+      return '<div class="seasonal-recipe" onclick="viewRecipe(' + r.id + ')">🍽️ ' + esc(name) + '</div>';
+    }).join('') + '</div>';
+  }
+  html += '<div style="font-size:.62rem;color:var(--text3);margin-top:.25rem;">' + (lang==='en'?'Based on seasonal produce':'Podľa sezónnych surovín') + '</div></div>';
+  return html;
+}
+
+// =================== AUTO SEASON TAGGING ===================
+var SEASONAL_KEYS = {
+  jar: { en: 'spring', keywords: ['spargla','asparagus','rebarbora','rhubarb','mlady','mlada','mlade','redkovka','radish','jarna','jahoda','strawberry','jahody','strawberries','spenat','spinach','hrach','pea','pazitka','chives','bylinky','herbs','mata','mint','kopor','dill','zerucha','cress'] },
+  leto: { en: 'summer', keywords: ['paradajka','tomato','paradajky','tomatoes','uhorka','cucumber','paprika','pepper','cuketa','zucchini','baklazan','eggplant','kukurica','corn','fazula','bean','ceresne','cherries','bros kyna','peach','bros kyne','peaches','marhula','apricot','slivka','plum','malina','raspberry','maliny','raspberries','ribezle','currants','melon','gril','grill','salat','salad','cvikla','beetroot','sosovica','lentil','osviezujuci'] },
+  jesen: { en: 'autumn', keywords: ['tekvica','pumpkin','gastan','chestnut','gastany','chestnuts','hrozno','grapes','jablko','apple','jablka','apples','hruska','pear','hrusky','pears','orech','nut','orechy','nuts','huby','mushrooms','hrfb','hrfby','kapusta','cabbage','kel','kale','batat','sweet potato','pastrnak','parsnip','peeeny','peena','peene'] },
+  zima: { en: 'winter', keywords: ['pomaranc','orange','mandarinka','mandarin','citron','lemon','limetka','lime','datle','dates','figy','figs','zemiak','potato','zemiaky','potatoes','vyvar','broth','teply','klobasa','sausage','kapustnica','korenova','cibula','onion','cesnak','garlic'] }
+};
+
+function autoSeasonTag(ingredients, name) {
+  if (!ingredients || !ingredients.length) return { tags: [], tagsEn: [] };
+  var text = ingredients.join(' ').toLowerCase();
+  if (name) text += ' ' + name.toLowerCase();
+  // Normalize
+  text = text.replace(/\u010d/g,'c').replace(/\u010f/g,'d').replace(/\u013e/g,'l').replace(/\u0148/g,'n').replace(/\u0155/g,'r').replace(/\u0161/g,'s').replace(/\u0165/g,'t').replace(/\u017e/g,'z').replace(/\u00e1/g,'a').replace(/\u00e4/g,'a').replace(/\u00e9/g,'e').replace(/\u00ed/g,'i').replace(/\u00f3/g,'o').replace(/\u00f4/g,'o').replace(/\u00fa/g,'u').replace(/\u00fd/g,'y');
+  var result = [], resultEn = [];
+  for (var season in SEASONAL_KEYS) {
+    var data = SEASONAL_KEYS[season];
+    var score = 0;
+    for (var k = 0; k < data.keywords.length; k++) {
+      if (text.indexOf(data.keywords[k]) >= 0) score += data.keywords[k].length;
+    }
+    if (score >= 5) {
+      result.push(season);
+      resultEn.push(data.en);
+    }
+  }
+  if (result.length === 0) {
+    // Guess based on category if available
+    return { tags: [], tagsEn: [] };
+  }
+  return { tags: result, tagsEn: resultEn };
+}
+
+function previewSeasonTags() {
+  var text = document.getElementById('r-ingredients').value;
+  var name = document.getElementById('r-name').value;
+  var result = autoSeasonTag(text.split('\n').map(function(s) { return s.trim(); }).filter(Boolean), name);
+  var el = document.getElementById('season-status');
+  if (el) {
+    if (result.tags.length) {
+      el.textContent = (lang==='en'?'Season: ':'Sezóna: ') + result.tags.map(function(t) { return {jar:'🌸 jar',leto:'🌞 leto',jesen:'🍂 jeseň',zima:'❄️ zima'}[t]||t; }).join(', ');
+    } else {
+      el.textContent = '';
+    }
+  }
+}
+
+// ======================== COOKING HISTORY ========================
+function logCooking(recipeId) {
+  const existing = cookingHistory.find(h => h.recipeId === recipeId && h.date === new Date().toISOString().slice(0,10));
+  if (existing) {
+    existing.count = (existing.count || 1) + 1;
+  } else {
+    cookingHistory.push({ recipeId, date: new Date().toISOString().slice(0,10), notes: '', count: 1 });
+  }
+  localStorage.setItem('cookingHistory', JSON.stringify(cookingHistory));
+}
+
+function openHistory() {
+  const el = document.getElementById('history-list');
+  const sorted = [...cookingHistory].sort((a,b) => b.date.localeCompare(a.date));
+  if (!sorted.length) {
+    el.innerHTML = `<p style="color:var(--text2);padding:.5rem 0;" data-lang="historyEmpty">Zatiaľ žiadna história.</p>`;
+  } else {
+    el.innerHTML = sorted.slice(0, 50).map(h => {
+      const r = recipes.find(rec => rec.id === h.recipeId);
+      const name = r ? (lang==='en'&&r.nameEn?r.nameEn:r.name) : '?';
+      return `<div style="display:flex;align-items:center;gap:.4rem;padding:.3rem .4rem;border-bottom:1px solid var(--border);font-size:.85rem;">
+        <span style="flex:1;">${esc(name)}${h.count > 1 ? ` <span style="color:var(--text2);font-size:.75rem;">×${h.count}</span>` : ''}</span>
+        <span style="color:var(--text2);font-size:.75rem;">${esc(h.date)}</span>
+      </div>`;
+    }).join('');
+  }
+  openModal('history-modal');
+}
+
+function clearHistory() {
+  showConfirmModal(lang==='en'?'Clear cooking history?':'Vymazať celú históriu?', '🗑️', lang==='en'?'Clear':'Vymazať', function() {
+  
+  cookingHistory = [];
+  localStorage.setItem('cookingHistory', JSON.stringify(cookingHistory));
+  openHistory();
+  });
+}
+
+// ======================== DEEP SEARCH ========================
+function applyIngredientSearch() {
+  if (ingredientSearchSelected.size > 0) {
+    const sel = [...ingredientSearchSelected];
+    const cat = document.getElementById('ingr-category').value;
+    const matching = recipes.filter(r => {
+      const ingr = (lang === "en" && r.ingredientsEn ? r.ingredientsEn : r.ingredients) || [];
+      return sel.some(s => ingr.some(i => norm(i).includes(norm(s)))) && (!cat || r.category === cat);
+    });
+    const grid = document.getElementById('recipe-grid');
+    if (!matching.length) { grid.innerHTML = `<div class="empty-state"><h3>😕 ${t('noRecipes')}</h3></div>`; return; }
+    grid.innerHTML = matching.map(r => {
+      const name = lang==='en'&&r.nameEn?r.nameEn:r.name;
+      const tags = ((lang==="en"&&r.tagsEn?r.tagsEn:r.tags)||[]).slice(0, 2);
+      const diff = r.difficulty||1;
+      const san = esc(name), sanCat = esc(r.category), sanTime = esc(r.time);
+      return `<div class="recipe-card" data-id="${r.id}"><button class="fav-btn ${r.favorite?'fav-active':''}" onclick="event.stopPropagation();toggleFav(${r.id})" aria-label="${r.favorite ? (lang==='en'?'Remove from favorites':'Odstrániť z obľúbených') : (lang==='en'?'Add to favorites':'Pridať do obľúbených')}">${r.favorite?'❤️':'🤍'}</button>
+        <div class="recipe-card-img">${r.image||r.imageData?`<img src="${escAttr(r.imageData||r.image)}" alt="${san}" loading="lazy" style="width:100%;height:100%;object-fit:cover" onerror="this.outerHTML='<span style=\\'font-size:2.4rem\\'>🍽️</span>'">`:`🍽️`}</div>
+        <div class="recipe-card-body">
+        <h3>${san}</h3>
+        <div class="meta-line"><span>📂 ${sanCat}</span><span>⏱ ${sanTime}</span>
+        ${r.nutrition && appSettings.mealPlanner.showNutrition?`<span class="kcal-badge">🔥 ${esc(r.nutrition.kcal||'?')}</span>`:''}</div>
+        <div style="display:flex;align-items:center;gap:.15rem;margin-top:.1rem;">
+          ${[1,2,3].map(i=>`<span class="difficulty-dot ${i<=diff?'filled':'empty'}"></span>`).join('')}
+        </div>
+        <div class="tags">${tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div></div></div>`;
+    }).join('');
+  } else {
+    render();
+  }
+}
+
+// ======================== IMPORT FROM URL ========================
+function cleanHtml(text) {
+  if (!text || typeof text !== 'string') return '';
+  let t = text;
+  // Decode HTML entities (run twice for double-encoded entities)
+  for (let pass = 0; pass < 2; pass++) {
+    t = t.replace(/&aacute;/gi, '\u00e1').replace(/&eacute;/gi, '\u00e9').replace(/&iacute;/gi, '\u00ed')
+      .replace(/&oacute;/gi, '\u00f3').replace(/&uacute;/gi, '\u00fa').replace(/&yacute;/gi, '\u00fd')
+      .replace(/&Aacute;/gi, '\u00c1').replace(/&Eacute;/gi, '\u00c9').replace(/&Iacute;/gi, '\u00cd')
+      .replace(/&Oacute;/gi, '\u00d3').replace(/&Uacute;/gi, '\u00da')
+      .replace(/&scaron;/gi, '\u0161').replace(/&Scaron;/gi, '\u0160')
+      .replace(/&ccaron;/gi, '\u010d').replace(/&Ccaron;/gi, '\u010c')
+      .replace(/&zcaron;/gi, '\u017e').replace(/&Zcaron;/gi, '\u017d')
+      .replace(/&ncaron;/gi, '\u0148').replace(/&dcaron;/gi, '\u010f').replace(/&tcaron;/gi, '\u0165')
+      .replace(/&lcaron;/gi, '\u013e').replace(/&rcaron;/gi, '\u0159')
+      .replace(/&auml;/gi, '\u00e4').replace(/&ouml;/gi, '\u00f6').replace(/&uuml;/gi, '\u00fc')
+      .replace(/&ocirc;/gi, '\u00f4')
+      .replace(/&amp;/gi, '&').replace(/&lt;/gi, '<').replace(/&gt;/gi, '>')
+      .replace(/&quot;/gi, '"').replace(/&apos;/gi, "'")
+      .replace(/&nbsp;/gi, ' ').replace(/&#160;/gi, ' ')
+      .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(parseInt(n)))
+      .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCharCode(parseInt(n, 16)));
+  }
+  // Convert HTML breaks to newlines
+  t = t.replace(/<br\s*\/?>/gi, '\n').replace(/<p[^>]*>/gi, '\n').replace(/<\/p>/gi, '\n');
+  t = t.replace(/<\/li>/gi, '\n').replace(/<li[^>]*>/gi, '');
+  t = t.replace(/<\/div>/gi, '\n').replace(/<div[^>]*>/gi, '');
+  t = t.replace(/<ol[^>]*>/gi, '').replace(/<\/ol>/gi, '\n');
+  t = t.replace(/<ul[^>]*>/gi, '').replace(/<\/ul>/gi, '\n');
+  // Strip all remaining HTML tags
+  t = t.replace(/<[^>]+>/g, '');
+  // Normalize
+  t = t.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  t = t.split('\n').map(l => l.trim()).filter(Boolean).join('\n');
+  t = t.replace(/[ \t]{2,}/g, ' ').replace(/^\d+\.\s*/, ''); // Remove leading step numbers
+  return t.trim();
+}
+
+const IMPORT_URL_HISTORY_KEY = 'importUrlHistory';
+const SUPPORTED_SITES = ['varecha.pravda.sk', 'mnamky.sk', 'recepty.sk', 'allrecipes.com', 'bbcgoodfood.com', 'foodnetwork.com'];
+
+function showImportUrlModal() {
+  const input = document.getElementById('import-url-input');
+  if (input) { input.value = ''; input.className = ''; }
+  setImportStatus('');
+  setImportBusy(false);
+  // Show supported site chips
+  const chips = document.getElementById('import-url-chips');
+  if (chips) {
+    chips.innerHTML = SUPPORTED_SITES.map(site =>
+      `<span class="site-chip" onclick="document.getElementById('import-url-input').value='https://${site}/';document.getElementById('import-url-input').focus();validateImportUrl()">${esc(site)}</span>`
+    ).join('');
+  }
+  // Hide any old history
+  const hist = document.getElementById('import-url-history');
+  if (hist) hist.style.display = 'none';
+  openModal('import-url-modal');
+  setTimeout(function() { if (input) input.focus(); }, 300);
+}
+
+function validateImportUrl() {
+  const input = document.getElementById('import-url-input');
+  const btn = document.getElementById('import-url-btn');
+  if (!input) return;
+  const url = input.value.trim();
+  if (!url) { input.className = ''; if (btn) btn.disabled = true; setImportStatus(''); return; }
+  try {
+    const parsed = new URL(url);
+    if (!parsed.protocol.startsWith('http')) throw new Error();
+    input.className = 'valid';
+    if (btn) btn.disabled = false;
+    setImportStatus('✅ ' + (lang === 'en' ? 'Valid URL' : 'Platná URL'));
+  } catch(e) {
+    input.className = 'invalid';
+    if (btn) btn.disabled = true;
+    setImportStatus('⚠️ ' + (lang === 'en' ? 'Invalid URL' : 'Neplatná URL'));
+  }
+}
+
+function pasteImportUrl() {
+  navigator.clipboard.readText().then(text => {
+    const input = document.getElementById('import-url-input');
+    if (input && text) { input.value = text; validateImportUrl(); }
+  }).catch(function() {
+    showToast(lang === 'en' ? 'Cannot access clipboard' : 'Nedá sa pristúpiť ku schránke');
+  });
+}
+
+function openImportUrlModal() {
+  showImportUrlModal();
+}
+
+function setImportStatus(message) {
+  const status = document.getElementById('import-url-status');
+  if (status) status.textContent = message || '';
+}
+
+function setImportBusy(isBusy) {
+  const btn = document.getElementById('import-url-btn');
+  if (btn) btn.disabled = !!isBusy;
+}
+
+function fillImportedRecipe(data) {
+  openFormModal();
+  setValueSafe('r-name', data.name || '');
+  setValueSafe('r-image', data.image || '');
+  setValueSafe('r-ingredients', data.ingredients || '');
+  setValueSafe('r-steps', data.steps || '');
+  setValueSafe('r-time', data.time || 30);
+  if (data.category) setValueSafe('r-category', data.category);
+  setValueSafe('r-tags', (data.tags || []).join(', '));
+  if (data.calories) setValueSafe('r-kcal', data.calories);
+  setValueSafe('r-portions', data.portions || 4);
+  const imageInput = document.getElementById('r-image');
+  if (imageInput) imageInput.dispatchEvent(new Event('input'));
+  if (!data.calories && data.rawIngredients) estimateAndFillImport(data.rawIngredients, data.portions || 4);
+}
+
+function showImportReview(data) {
+  const old = document.getElementById('import-review-modal');
+  if (old) old.remove();
+  const ingredientsCount = data.ingredients ? data.ingredients.split('\n').filter(Boolean).length : 0;
+  const stepsCount = data.steps ? data.steps.split('\n').filter(Boolean).length : 0;
+  const div = document.createElement('div');
+  div.id = 'import-review-modal';
+  div.className = 'modal-overlay active';
+  div.innerHTML = `<div class="modal import-review-modal">
+    <button class="modal-close" onclick="document.getElementById('import-review-modal').remove()" aria-label="Zavrieť">✕</button>
+    <h2>🌐 ${lang === 'en' ? 'Review import' : 'Skontrolovať import'}</h2>
+    <div class="import-review-card">
+      ${data.image ? `<img class="import-review-img" src="${escAttr(data.image)}" alt="">` : '<div class="import-review-img placeholder">🍽️</div>'}
+      <div class="import-review-info">
+        <div class="import-review-title">${esc(data.name || (lang === 'en' ? 'Untitled recipe' : 'Recept bez názvu'))}</div>
+        <div class="import-review-meta">
+          <span>⏱ ${esc(String(data.time || 30))} min</span>
+          <span>🍽️ ${esc(String(data.portions || 4))}</span>
+          <span>🥣 ${ingredientsCount}</span>
+          <span>📝 ${stepsCount}</span>
+        </div>
+        <div class="import-review-source">${esc(data.source || '')}</div>
+      </div>
+    </div>
+    <div class="import-review-columns">
+      <div><strong>${lang === 'en' ? 'Ingredients' : 'Suroviny'}</strong><pre>${esc((data.ingredients || '').slice(0, 700))}</pre></div>
+      <div><strong>${lang === 'en' ? 'Steps' : 'Postup'}</strong><pre>${esc((data.steps || '').slice(0, 700))}</pre></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="document.getElementById('import-review-modal').remove()">${lang === 'en' ? 'Cancel' : 'Zrušiť'}</button>
+      <button class="btn btn-primary" onclick="acceptImportedRecipe()">${lang === 'en' ? 'Use this recipe' : 'Použiť recept'}</button>
+    </div>
+  </div>`;
+  window._pendingImportRecipe = data;
+  document.body.appendChild(div);
+}
+
+function acceptImportedRecipe() {
+  try {
+    if (window._pendingImportRecipe) fillImportedRecipe(window._pendingImportRecipe);
+    const review = document.getElementById('import-review-modal');
+    if (review) review.remove();
+    closeModal('import-url-modal');
+  } catch(e) {
+    console.error('Import accept error:', e);
+    showToast(lang === 'en' ? 'Import could not open the form.' : 'Import sa nepodarilo otvoriť vo formulári.', 'warning');
+  }
+}
+
+function importFromUrl() {
+  const input = document.getElementById('import-url-input');
+  const url = input ? input.value.trim() : '';
+  if (!url) return;
+  // Validate URL
+  try { new URL(url); } catch(e) { setImportStatus('❌ ' + (lang === 'en' ? 'Invalid URL format' : 'Neplatný formát URL')); return; }
+  const loader = document.getElementById('import-url-loader');
+  if (loader) loader.style.display = 'block';
+  setImportStatus('⏳ ' + (lang === 'en' ? 'Fetching recipe...' : 'Sťahujem recept...'));
+  setImportBusy(true);
+  const SCRAPER_URL = 'https://mealnest-scraper.waldis994.workers.dev';
+  let maxRetries = 2;
+  function tryFetch(retriesLeft) {
+    if (retriesLeft === undefined) retriesLeft = maxRetries;
+    const proxyUrl = SCRAPER_URL + '?url=' + encodeURIComponent(url);
+    let fetchUrl = proxyUrl;
+    try {
+      const parsedUrl = new URL(url, window.location.href);
+      if (parsedUrl.origin === window.location.origin || /^(localhost|127\.0\.0\.1|\[::1\])$/.test(parsedUrl.hostname)) {
+        fetchUrl = parsedUrl.href;
+      }
+    } catch(e) {}
+    setImportStatus(retriesLeft < maxRetries ? '⏳ Opakujem...' : '⏳ Načítavam...');
+    fetch(fetchUrl, { cache: 'no-store' })
+      .then(r => {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.text();
+      })
+      .catch(err => {
+        if (retriesLeft > 0) { setTimeout(() => tryFetch(retriesLeft - 1), 1500); return; }
+        throw err;
+      })
+      .then(raw => {
+        if (!raw) return;
+        let html = raw;
+        try {
+          const parsed = JSON.parse(raw);
+          if (parsed.contents) html = parsed.contents;
+        } catch(e) {}
+        const jsonlds = [];
+        const re = /<script\s+type=["']application\/ld\+json(?:;[\s\S]*?)?["'][^>]*>([\s\S]*?)<\/script>/gi;
+        let m;
+        while ((m = re.exec(html)) !== null) {
+          try { jsonlds.push(JSON.parse(m[1])); } catch(e) {}
+        }
+        let recipe = null;
+        for (const item of jsonlds) {
+          const types = Array.isArray(item['@type']) ? item['@type'] : [item['@type']];
+          if (types.some(t => t === 'Recipe' || t.endsWith(':Recipe'))) {
+            recipe = item; break;
+          }
+          if (item['@graph']) {
+            for (const g of item['@graph']) {
+              const gTypes = Array.isArray(g['@type']) ? g['@type'] : [g['@type']];
+              if (gTypes.some(t => t === 'Recipe' || t.endsWith(':Recipe'))) {
+                recipe = g; break;
+              }
+            }
+          }
+          if (recipe) break;
+        }
+        if (!recipe) {
+          setImportStatus(html.length < 200
+            ? t('importUrlFail') + ' (prázdna odpoveď)'
+            : t('importUrlBad'));
+          setImportBusy(false);
+          return;
+        }
+        const name = cleanHtml(recipe.name || '');
+        const ingr = recipe.recipeIngredient || [];
+        const steps = recipe.recipeInstructions || [];
+        const time = recipe.totalTime || recipe.cookTime || '';
+        const image = recipe.image ? (typeof recipe.image === 'string' ? recipe.image : recipe.image.url || (Array.isArray(recipe.image) ? recipe.image[0] : '') || '') : '';
+        const yield_ = recipe.recipeYield || '';
+        const cuisine = recipe.recipeCuisine || '';
+        const category = recipe.recipeCategory || '';
+        const calories = recipe.nutrition && recipe.nutrition.calories ? String(recipe.nutrition.calories).replace(/[^0-9]/g,'') : '';
+        const ingrText = (Array.isArray(ingr) ? ingr : []).map(i => cleanHtml(typeof i === 'string' ? i : '')).join('\n');
+        const stepsArr = Array.isArray(steps) ? steps.map(s => cleanHtml(typeof s === 'string' ? s : s.text || s.name || '')) :
+          typeof steps === 'string' ? cleanHtml(steps).split('\n').filter(Boolean) : [];
+        // Ak nedostaneme vela krokov, skusime delit podla <p> alebo <br>
+        if (stepsArr.length <= 2 && typeof steps === 'string' && steps.match(/<p|<br|<li/i)) {
+          const htmlSteps = steps.split(/<\/p>|<br\s*\/?|<\/li>/i).map(s => cleanHtml(s)).filter(s => s.length > 3);
+          if (htmlSteps.length > stepsArr.length) stepsArr.length = 0, stepsArr.push.apply(stepsArr, htmlSteps);
+        }
+        const stepText = stepsArr.join('\n');
+        let timeNum = 30;
+        if (time) {
+          timeNum = 0;
+          const hMatch = time.match(/(\d+)\s*H/i);
+          const mMatch = time.match(/(\d+)\s*M/i);
+          if (hMatch) timeNum += parseInt(hMatch[1]) * 60;
+          if (mMatch) timeNum += parseInt(mMatch[1]);
+          if (!timeNum) timeNum = parseInt(time.replace(/[^0-9]/g,'')) || 30;
+        }
+        const cats = ['Hlavné jedlá','Polievky','Šaláty','Dezerty','Pečivo','Nápoje','Predjedlá','Raňajky','Prílohy','Detské'];
+        const catMatch = cats.find(c => norm(category).includes(norm(c)) || norm(c).includes(norm(category)));
+        let yieldNum = parseInt(yield_) || 4;
+        const tags = [];
+        if (cuisine) { const t = cuisine.split(',').map(s => s.trim().toLowerCase()); tags.push(...t); }
+        if (recipe.keywords) { const t = (typeof recipe.keywords === 'string' ? recipe.keywords : (Array.isArray(recipe.keywords) ? recipe.keywords.join(',') : '')).split(',').map(s => s.trim().toLowerCase()); tags.push(...t); }
+        let perPortionCalories = '';
+        if (calories) {
+          // Source provided total calories - divide by yield for per-portion
+          const calTotal = parseInt(calories);
+          perPortionCalories = Math.round(calTotal / yieldNum) || calTotal;
+        }
+        const importData = {
+          name: name,
+          image: image,
+          ingredients: ingrText,
+          rawIngredients: Array.isArray(ingr) ? ingr : [],
+          steps: stepText,
+          time: timeNum,
+          category: catMatch || '',
+          tags: [...new Set(tags)],
+          calories: perPortionCalories,
+          portions: yieldNum,
+          source: url
+        };
+        setImportStatus(t('importUrlOk'));
+        setImportBusy(false);
+        showImportReview(importData);
+      })
+      .catch(err => {
+        // Chyba už je ošetrená v .catch() pred .then()
+        // Ak by sa dostala sem, skúsime ešte raz
+        setImportStatus(t('importUrlFail'));
+        setImportBusy(false);
+        console.error('Scraper error:', err);
+      });
+  }
+  tryFetch(maxRetries);
+}
+
