@@ -2230,7 +2230,7 @@ body { overscroll-behavior: none; -webkit-overflow-scrolling: touch; -webkit-tou
   from { transform: rotate(0deg); }
   to { transform: rotate(135deg); }
 }
-.nav-item[data-tab="add"].fab-open .nav-icon {
+.nav-item[data-tab="add"].fab-open .nav-plus {
   animation: fabSpin .3s cubic-bezier(.16,1,.3,1) forwards;
 }
 

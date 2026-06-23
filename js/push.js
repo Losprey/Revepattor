@@ -343,8 +343,8 @@ function formatAiSuggestionReply(text) {
     .replace(/\n/g, '<br>');
 }
 
-async function aiDailyTip() {
-  var btn = document.getElementById('dash-ai-tip-btn');
+async function aiDailyTip(fromFab) {
+  var btn = fromFab ? null : document.getElementById('dash-ai-tip-btn');
   var origHTML = btn ? btn.innerHTML : '';
   if (btn) { btn.disabled = true; btn.innerHTML = '<span style="display:inline-block;animation:spin .6s linear infinite">⏳</span> ' + (lang==='en'?'Thinking...':'Premýšľam...'); }
   const season = ['jar','jar','jar','leto','leto','leto','leto','leto','jeseň','jeseň','jeseň','zima'][new Date().getMonth()];
@@ -353,8 +353,12 @@ async function aiDailyTip() {
     : 'Daj mi jeden krátky tip na dnešné varenie. Sezóna: '+season+'. Buď vtipný, originálny, max 2 vety. Odpovedaj v slovenčine.';
   const reply = await aiGenerate([{ role: 'user', content: prompt }]);
   if (reply) {
-    document.getElementById('dash-message').textContent = reply;
-    document.getElementById('dash-message-sub').textContent = t('🤖 Vygenerované AI','🤖 AI-generated');
+    if (fromFab) {
+      showToast(reply, 'info', 6000);
+    } else {
+      document.getElementById('dash-message').textContent = reply;
+      document.getElementById('dash-message-sub').textContent = t('🤖 Vygenerované AI','🤖 AI-generated');
+    }
   }
   // Restore button
   if (btn) { btn.disabled = false; btn.innerHTML = origHTML || ('🤖 <span id="dash-ai-label">' + t('AI tip dňa','AI tip of the day') + '</span>'); }
