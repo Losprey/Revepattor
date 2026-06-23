@@ -562,10 +562,13 @@
 <script>
 (function() {
   var startY = 0, pulling = false, pulled = false;
+  // Seasonal refresh icon
+  var _m = new Date().getMonth();
+  var _seasonIcon = _m < 2 || _m === 11 ? '❄️' : _m < 5 ? '🌸' : _m < 8 ? '☀️' : '🍂';
   var indicator = document.createElement('div');
   indicator.id = 'ptr-indicator';
   indicator.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99998;display:flex;align-items:center;justify-content:center;padding:12px;font-size:.75rem;color:var(--text3);font-weight:600;transform:translateY(-100%);transition:transform .3s var(--ease-out-expo);background:var(--surface);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);gap:6px;';
-  indicator.innerHTML = '<span class="ptr-icon">↓</span> <span class="ptr-text">Potiahnutím obnovíš</span>';
+  indicator.innerHTML = '<span class="ptr-icon">' + _seasonIcon + '</span> <span class="ptr-text">Potiahnutím obnovíš</span>';
   document.body.appendChild(indicator);
 
   var ptrIcon = indicator.querySelector('.ptr-icon');
@@ -594,7 +597,7 @@
       ptrText.textContent = 'Pustíš — obnovím';
     } else if (progress < 1) {
       pulled = false;
-      ptrIcon.textContent = '↓';
+      ptrIcon.textContent = _seasonIcon;
       ptrIcon.style.animation = '';
       ptrText.textContent = 'Potiahnutím obnovíš';
     }
@@ -624,7 +627,7 @@
       if (refreshTimeout) clearTimeout(refreshTimeout);
       refreshTimeout = setTimeout(function() {
         indicator.style.transform = 'translateY(-100%)';
-        ptrIcon.textContent = '↓';
+        ptrIcon.textContent = _seasonIcon;
         ptrIcon.style.animation = '';
         ptrText.textContent = 'Potiahnutím obnovíš';
         pulled = false;
