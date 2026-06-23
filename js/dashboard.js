@@ -267,7 +267,7 @@ function renderMobileAiRecommendation() {
   const img = getDashboardRecipeImage(recipe);
   const kcal = recipe.nutrition && recipe.nutrition.kcal ? recipe.nutrition.kcal + ' kcal' : '— kcal';
   return `<section class="mn-ai-card mn-card">
-    <div class="mn-section-head compact mn-ai-head"><h2>AI ODPORÚČA PRE VÁS</h2><button onclick="event.stopPropagation();cycleAiSuggestion()" title="Ďalší návrh">▶</button></div>
+    <div class="mn-section-head compact mn-ai-head"><h2>AI ODPORÚČA PRE VÁS</h2><button onclick="event.stopPropagation();cycleAiSuggestion()" title="Ďalší návrh">↻</button></div>
     <div onclick="viewRecipe(${recipe.id})">
     ${img ? `<img class="mn-ai-image" src="${escAttr(img)}" alt="${escAttr(title)}" loading="lazy" onerror="this.style.display='none'">` : `<div class="mn-ai-image mn-ai-fallback">🍽️</div>`}
     <div class="mn-ai-copy">
