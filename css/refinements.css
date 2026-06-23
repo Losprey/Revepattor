@@ -110,7 +110,7 @@
   min-height: 32px !important;
   padding: 0 14px !important;
   border-radius: 10px !important;
-  background: #d88a3d !important;
+  background: var(--primary) !important;
   color: #fff !important;
   font-size: .68rem !important;
 }
@@ -254,7 +254,7 @@
 }
 
 #dashboard .mn-meal-row.filled .mn-row-action {
-  background: #63d471 !important;
+  background: var(--primary) !important;
   color: #071014 !important;
 }
 
@@ -357,7 +357,7 @@
 }
 
 .task-filter-chip.active {
-  background: #63d471 !important;
+  background: var(--primary) !important;
   color: #071014 !important;
 }
 
@@ -402,8 +402,8 @@
 }
 
 .task-card .tc-check.done {
-  background: #63d471 !important;
-  border-color: #63d471 !important;
+  background: var(--primary) !important;
+  border-color: var(--primary) !important;
   color: #071014 !important;
 }
 
@@ -430,7 +430,7 @@
   margin: 18px 0;
   border: 0;
   border-radius: 12px;
-  background: #63d471;
+  background: var(--primary);
   color: #071014;
   font-size: .88rem;
   font-weight: 900;
@@ -486,7 +486,7 @@
   display: block;
   align-self: end;
   border-radius: 999px;
-  background: #63d471;
+  background: var(--primary);
 }
 
 .task-bars em {
@@ -523,7 +523,7 @@
   height: 38px;
   display: grid;
   place-items: center;
-  border: 2px solid #63d471;
+  border: 2px solid var(--primary);
   border-radius: 999px;
   color: #fff;
   font-size: .68rem;
@@ -612,7 +612,7 @@
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: #63d471;
+  background: var(--primary);
 }
 
 .family-goal em {
