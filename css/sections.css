@@ -1186,7 +1186,7 @@ html.light .dash-cockpit {
   border-radius: 999px;
   background:
     radial-gradient(circle at center, rgba(24,24,20,.94) 0 55%, transparent 56%),
-    conic-gradient(#34d399 calc(var(--pct) * 1%), rgba(255,255,255,.12) 0);
+    conic-gradient(var(--primary) calc(var(--pct) * 1%), rgba(255,255,255,.12) 0);
 }
 
 .dash-ring span {
@@ -1310,7 +1310,7 @@ html.light .ai-tip-card {
 }
 
 .today-focus-kicker {
-  color: #34d399;
+  color: var(--primary);
   font-size: .62rem;
   font-weight: 900;
   letter-spacing: .13em;
@@ -3797,7 +3797,7 @@ html.light .planner-agenda-day {
   display: grid;
   place-items: center;
   border-radius: .8rem;
-  color: #34d399;
+  color: var(--primary);
   background: linear-gradient(145deg, rgba(16,185,129,.24), rgba(16,185,129,.08));
   border: 1px solid rgba(52,211,153,.22);
   font-size: 1.35rem;
@@ -3949,7 +3949,7 @@ html.light .planner-agenda-day {
   font-weight: 900;
   background:
     radial-gradient(circle at center, rgba(24,24,22,.95) 0 58%, transparent 59%),
-    conic-gradient(#34d399 calc(var(--pct) * 1%), rgba(255,255,255,.18) 0);
+    conic-gradient(var(--primary) calc(var(--pct) * 1%), rgba(255,255,255,.18) 0);
 }
 
 .planner-ref-day-meta {
@@ -3994,7 +3994,7 @@ html.light .planner-agenda-day {
 }
 
 .planner-ref-selected-title span {
-  color: #34d399;
+  color: var(--primary);
   font-size: 1.18rem;
 }
 
@@ -4142,7 +4142,7 @@ html.light .planner-agenda-day {
   border-radius: 1rem;
   border: 1px solid rgba(52,211,153,.22);
   background: rgba(16,185,129,.1);
-  color: #34d399;
+  color: var(--primary);
   font-size: 1.8rem;
   font-weight: 500;
 }
@@ -4183,7 +4183,7 @@ html.light .planner-agenda-day {
   border-radius: 999px;
   background:
     radial-gradient(circle at center, rgba(19,20,20,.98) 0 58%, transparent 59%),
-    conic-gradient(#34d399 calc(var(--pct) * 1%), rgba(255,255,255,.16) 0);
+    conic-gradient(var(--primary) calc(var(--pct) * 1%), rgba(255,255,255,.16) 0);
 }
 
 .planner-ref-summary-ring span {
@@ -4362,7 +4362,7 @@ html.light .planner-agenda-day {
 
 #planner-container .planner-week-row.today .planner-week-day span,
 #planner-container .planner-week-row.today .planner-week-day strong {
-  color: #34d399;
+  color: var(--primary);
 }
 
 #planner-container .planner-week-day strong {
@@ -4566,7 +4566,7 @@ html.light .planner-agenda-day {
   border-radius: 999px;
   background:
     radial-gradient(circle at center, rgba(13,18,18,.98) 0 58%, transparent 59%),
-    conic-gradient(#34d399 calc(var(--pct) * 1%), rgba(255,255,255,.16) 0);
+    conic-gradient(var(--primary) calc(var(--pct) * 1%), rgba(255,255,255,.16) 0);
 }
 
 #planner-container .planner-week-total-ring strong,
@@ -4817,7 +4817,7 @@ body {
 }
 
 #planner-container .planner-reference-icon {
-  color: #34d399;
+  color: var(--primary);
 }
 
 #planner-container .planner-segment button {
@@ -5286,7 +5286,7 @@ html.light #planner-container .planner-week-legend-slots span {
   place-items: center;
   border-radius: 999px;
   color: #062f24;
-  background: #34d399;
+  background: var(--primary);
   font-size: .72rem;
   font-weight: 950;
 }
@@ -5785,7 +5785,7 @@ html.light .task-hero-add {
 
 .task-filter-chip.active {
   color: #062f24;
-  background: linear-gradient(135deg, #34d399, #10b981);
+  background: linear-gradient(135deg, var(--primary), #10b981);
   border-color: rgba(52,211,153,.9);
   box-shadow: 0 0 0 1px rgba(52,211,153,.28), 0 12px 24px rgba(16,185,129,.22);
 }
@@ -7045,7 +7045,7 @@ body[data-tab="board"] .more-screen {
   --text2: #A8B3B0;
   --text3: rgba(255,255,255,.56);
   --border: rgba(255,255,255,.10);
-  --primary: #63d471;
+  --primary: var(--primary);
   --primary-rgb: 99, 212, 113;
   --orange: #f59b43;
   --purple: #8b5cf6;
@@ -7064,7 +7064,7 @@ body {
   --mn-bg: #081014;
   --mn-card: rgba(255,255,255,.06);
   --mn-card-2: rgba(255,255,255,.08);
-  --mn-primary: #63d471;
+  --mn-primary: var(--primary);
   --mn-secondary: #38bdf8;
   --mn-ai: #f59b43;
   --mn-muted: #A8B3B0;
@@ -7178,7 +7178,7 @@ body {
   min-height: 48px;
   border: 0;
   border-radius: 999px;
-  background: #63d471;
+  background: var(--primary);
   color: #06130c;
   font-size: .9rem;
   font-weight: 900;
@@ -7289,7 +7289,7 @@ body {
 }
 
 .bottom-nav .nav-item.active {
-  color: #63d471 !important;
+  color: var(--primary) !important;
   background: rgba(99,212,113,.12);
 }
 
@@ -7307,7 +7307,7 @@ body {
   display: grid;
   place-items: center;
   border-radius: 999px;
-  background: #63d471;
+  background: var(--primary);
   color: #06130c;
   font-size: 2rem;
   font-weight: 700;
@@ -7426,7 +7426,7 @@ body[data-tab="board"] {
 
 .planner-view-toggle button.active,
 .planner-day-strip button.active {
-  background: #63d471;
+  background: var(--primary);
   color: #06130c;
 }
 
@@ -7554,7 +7554,7 @@ body[data-tab="board"] {
   border: 0;
   border-radius: 999px;
   background: rgba(99,212,113,.14);
-  color: #63d471;
+  color: var(--primary);
   font-weight: 900;
 }
 
