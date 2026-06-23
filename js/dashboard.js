@@ -17,8 +17,11 @@ function renderDashboard() {
   const html = `<div class="mn-home-shell">
     <section class="mn-home-header">
       <div class="mn-home-greeting">
-        <h1>${esc(greetingText)}</h1>
-        <p>${esc(currentDate)}</p>
+        <div class="mn-progress-ring-wrap">
+          <div class="mn-progress-ring-small" style="--meal-pct:${mealPct}" data-pct="${todayMeals}/${MEALS.length}"></div>
+          <div><h1>${esc(greetingText)}</h1>
+        <p>${esc(currentDate)}</p></div>
+        </div>
       </div>
       <div class="mn-home-actions">
         <button class="mn-avatar-btn" onclick="openMorePageFromAnywhere('account')" aria-label="Profil">${getDashboardAvatar()}</button>
