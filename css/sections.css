@@ -6208,12 +6208,12 @@ body .bottom-nav .nav-icon {
 
 body .bottom-nav .nav-item.active {
   background: transparent;
-  color: #22C55E;
+  color: var(--primary);
 }
 
 body .bottom-nav .nav-item.active .nav-label,
 body .bottom-nav .nav-item.active .nav-icon {
-  color: #22C55E;
+  color: var(--primary);
 }
 
 body .bottom-nav .nav-item {
@@ -6270,7 +6270,7 @@ body .bottom-nav .nav-item {
   overflow: hidden;
   border: 0;
   border-radius: 1rem;
-  background: #22C55E;
+  background: var(--primary);
   color: #07110B;
   font-weight: 900;
   box-shadow: none;
@@ -6468,7 +6468,7 @@ body .bottom-nav .nav-item {
   min-height: 2.5rem;
   padding: 0 .85rem;
   border-radius: 15px;
-  color: #22C55E;
+  color: var(--primary);
   font-size: .78rem;
   font-weight: 820;
 }
@@ -6573,7 +6573,7 @@ body .bottom-nav .nav-item {
 .more-primary,
 .more-preview button,
 .more-board-row button {
-  background: #22C55E;
+  background: var(--primary);
   color: #06110A;
 }
 
@@ -6734,8 +6734,8 @@ body .bottom-nav .nav-item {
 }
 
 .more-pill.active {
-  border-color: #22C55E;
-  background: #22C55E;
+  border-color: var(--primary);
+  background: var(--primary);
   color: #06110A;
 }
 
@@ -6930,7 +6930,7 @@ body .bottom-nav .nav-item {
 }
 
 .more-language-grid button.active {
-  border-color: #22C55E;
+  border-color: var(--primary);
 }
 
 .more-language-grid span {
@@ -6996,7 +6996,7 @@ body .bottom-nav .nav-item {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: #22C55E;
+  background: var(--primary);
 }
 
 @media (max-width: 374px) {
