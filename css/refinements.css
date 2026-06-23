@@ -54,10 +54,10 @@
 #dashboard .mn-family-avatars span,
 #dashboard .mn-family-avatars button,
 #dashboard .mn-avatar-btn {
-  width: 30px !important;
-  height: 30px !important;
-  min-width: 30px !important;
-  min-height: 30px !important;
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  min-height: 36px !important;
   border: 1px solid rgba(255,255,255,.10) !important;
   border-radius: 999px !important;
   background: rgba(255,255,255,.09) !important;

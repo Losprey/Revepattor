@@ -305,18 +305,18 @@
 
 #dashboard .mn-meal-list {
   display: grid;
-  gap: .58rem;
+  gap: .4rem;
 }
 
 #dashboard .mn-meal-row {
   display: grid;
-  grid-template-columns: 2.6rem minmax(0, 1fr) auto auto;
+  grid-template-columns: 2.2rem minmax(0, 1fr) auto auto;
   align-items: center;
-  gap: .64rem;
-  min-height: 4.65rem;
-  padding: .62rem;
+  gap: .4rem;
+  min-height: 3.2rem;
+  padding: .35rem .5rem;
   border: 1px solid #252B34;
-  border-radius: 20px;
+  border-radius: 14px;
   background: #151A21;
   transition: background .2s ease, transform .15s ease, border-color .2s ease;
 }
@@ -327,13 +327,13 @@
 }
 
 #dashboard .mn-meal-icon {
-  width: 2.6rem;
-  height: 2.6rem;
+  width: 2.2rem;
+  height: 2.2rem;
   display: grid;
   place-items: center;
-  border-radius: 16px;
+  border-radius: 12px;
   background: #11161D;
-  font-size: 1.15rem;
+  font-size: 1rem;
 }
 
 #dashboard .mn-meal-body {
