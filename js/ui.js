@@ -402,7 +402,6 @@ function renderMoreAppearancePage() {
   const s = appSettings;
   const colors = ['#22C55E','#3B82F6','#F59E0B','#EC4899','#8B5CF6','#06B6D4'];
   const body = `
-    ${moreCard('Theme', `<div class="more-option-grid">${['light','dark','system'].map(v => morePill(v === 'light' ? 'Light' : v === 'dark' ? 'Dark' : 'System', s.theme === v, `setMoreTheme('${v}')`)).join('')}</div>`)}
     ${moreCard('Accent color', `<div class="more-color-grid">${colors.map(c => `<button class="more-color ${s.accentColor === c ? 'active' : ''}" style="--swatch:${c}" onclick="setMoreAccent('${c}')"><span></span></button>`).join('')}</div>`)}
     ${moreCard('Preview cards', (function() { const tp = getTodayRecipes(); return `<div class="more-preview"><div><strong>Dnešný plán</strong><small>${tp.length} / 5 jedál naplánovaných</small></div><button onclick="switchTab('planner')">Naplánovať deň</button></div>`; })())}
     ${moreCard('Text size', `<div class="more-option-grid">${['compact','normal','large'].map(v => morePill(v === 'compact' ? 'Compact' : v === 'normal' ? 'Normal' : 'Large', s.textSize === v, `setMoreTextSize('${v}')`)).join('')}</div>`)}
