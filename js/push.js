@@ -359,6 +359,8 @@ async function aiDailyTip(fromFab) {
       document.getElementById('dash-message').textContent = reply;
       document.getElementById('dash-message-sub').textContent = t('🤖 Vygenerované AI','🤖 AI-generated');
     }
+  } else if (fromFab) {
+    showToast(t('AI nie je k dispozícii. Skontroluj nastavenia.','AI is not available. Check settings.'), 'error');
   }
   // Restore button
   if (btn) { btn.disabled = false; btn.innerHTML = origHTML || ('🤖 <span id="dash-ai-label">' + t('AI tip dňa','AI tip of the day') + '</span>'); }
