@@ -183,18 +183,12 @@ function toggleQuickAddSheet() {
   if (!sheet) return;
   sheet.style.display = 'block';
   sheet.classList.toggle('open');
-  // FAB rotation
-  const fab = document.querySelector('.nav-item[data-tab="add"]');
-  if (fab) fab.classList.toggle('fab-open', sheet.classList.contains('open'));
 }
 
 function closeQuickAddSheet() {
   const sheet = document.getElementById('fab-quick-add');
   if (!sheet) return;
   sheet.classList.remove('open');
-  // Remove FAB rotation
-  const fab = document.querySelector('.nav-item[data-tab="add"]');
-  if (fab) fab.classList.remove('fab-open');
 }
 
 function renderMoreScreen() {
