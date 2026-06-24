@@ -6,7 +6,7 @@
     "families": {
       "$familyCode": {
         ".read": true,
-        ".write": "$familyCode.length() >= 6",
+        ".write": "$familyCode.length >= 6",
         // Validácia pre member záznamy
         "members": {
           "$memberId": {
