@@ -2,29 +2,7 @@
 /* ================================ */
 
 /* ===== REFERENCE MATCH PASS: FAMILY HUB MOCKUP ===== */
-#dashboard,
-#tasks-container,
-#board-container {
-  width: min(100%, 390px) !important;
-  margin-inline: auto !important;
-  background: #071014 !important;
-}
-
-#dashboard {
-  padding: calc(22px + env(safe-area-inset-top)) 12px calc(88px + env(safe-area-inset-bottom)) !important;
-}
-
-#dashboard .mn-home-shell {
-  gap: 12px !important;
-}
-
-#dashboard .mn-home-header {
-  min-height: 52px;
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center !important;
-  padding: 0 2px 2px !important;
-}
+/* width, background, padding, shell gap, and header grid moved to components.css */
 
 #dashboard .mn-home-greeting h1 {
   margin: 0 0 4px !important;

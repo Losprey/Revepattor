@@ -20,7 +20,7 @@ function renderDashboard() {
         <div class="mn-progress-ring-wrap">
           <div class="mn-progress-ring-small" style="--meal-pct:${mealPct}" data-pct="${todayMeals}/${MEALS.length}"></div>
           <div><h1>${esc(greetingText)}</h1>
-        <p>${esc(currentDate)}</p></div>
+        <p>${esc(currentDate)}${recipeCountBadge()}</p></div>
         </div>
       </div>
       <div class="mn-home-actions">
@@ -52,7 +52,11 @@ function getDashboardAvatar() {
   const initial = getDashboardUserName().slice(0, 1).toUpperCase() || '👤';
   return `<span>${esc(initial)}</span>`;
 }
-
+function recipeCountBadge() {
+  var rc = Array.isArray(window.recipes) ? window.recipes.length : 0;
+  if (rc === 0) return '';
+  return ' <span style="font-size:.68rem;color:var(--text3);margin-left:.3rem;">🍽' + rc + '</span>';
+}
 function formatDashboardDate(date) {
   try {
     return date.toLocaleDateString(lang === 'en' ? 'en-US' : 'sk-SK', {
@@ -288,18 +292,26 @@ function renderMobileAiRecommendation() {
 let _aiSuggestionIndex = 0;
 
 function cycleAiSuggestion() {
-  const todays = new Set(getTodayRecipes().map(r => r.id));
-  const candidates = (Array.isArray(recipes) ? recipes : []).filter(recipe => recipe && !todays.has(recipe.id));
-  if (candidates.length < 2) return;
-  _aiSuggestionIndex = (_aiSuggestionIndex + 1) % candidates.length;
-  // Override pickDashboardAiRecipe temporarily via data attr
-  const dash = document.getElementById('dash-content');
-  if (dash) {
-    // Re-render with next recipe
-    pickDashboardAiRecipe._override = candidates[_aiSuggestionIndex];
-    renderDashboard();
-    pickDashboardAiRecipe._override = null;
+  // Show spinner in the "Ďalší" button for 1s
+  const nextBtn = document.querySelector('.mn-ai-next');
+  if (nextBtn) {
+    nextBtn.innerHTML = '<span class="ptr-spinner" style="display:inline-block;width:16px;height:16px;border-width:2px;vertical-align:middle;"></span>';
+    nextBtn.disabled = true;
   }
+  setTimeout(function() {
+    const todays = new Set(getTodayRecipes().map(r => r.id));
+    const candidates = (Array.isArray(recipes) ? recipes : []).filter(recipe => recipe && !todays.has(recipe.id));
+    if (candidates.length < 2) { if (nextBtn) nextBtn.disabled = false; return; }
+    _aiSuggestionIndex = (_aiSuggestionIndex + 1) % candidates.length;
+    // Override pickDashboardAiRecipe temporarily via data attr
+    const dash = document.getElementById('dash-content');
+    if (dash) {
+      // Re-render with next recipe
+      pickDashboardAiRecipe._override = candidates[_aiSuggestionIndex];
+      renderDashboard();
+      pickDashboardAiRecipe._override = null;
+    }
+  }, 1000);
 }
 
 // Patch pickDashboardAiRecipe to support override

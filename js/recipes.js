@@ -307,8 +307,23 @@ function toggleRecipeToolsPanel() {
 }
 
 // ======================== FORM ========================
+function clearValidationErrors() {
+  ['r-name', 'r-ingredients', 'r-steps', 'r-time', 'r-category', 'r-tags'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) {
+      el.classList.remove('input-error');
+      el.style.borderColor = '';
+      el.style.boxShadow = '';
+      if (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') {
+        el.placeholder = '';
+      }
+    }
+  });
+}
+
 function openFormModal(recipe) {
   editingId = recipe ? recipe.id : null;
+  clearValidationErrors();
   // Inject import card dynamically (sure way to handle translations)
   var importCard = document.getElementById('form-import-card');
   if (importCard) {
@@ -380,8 +395,22 @@ function saveRecipe() {
   if (autoSeason.tags.length) {
     document.getElementById('season-status').textContent = (lang==='en'?'Detected season: ':'Detekovaná sezóna: ') + autoSeason.tags.map(function(t) { return {jar:'🌸',leto:'🌞',jesen:'🍂',zima:'❄️'}[t]||t; }).join(' ');
   }
-  if (!name) return showToast(t('formName')+(lang==='en'?' is required.':' je povinný.'),'error');
-  if (!ingredients.length) return showToast(t('formIngredients')+(lang==='en'?' are required.':' sú povinné.'),'error');
+  // Clear previous validation errors before checking
+  clearValidationErrors();
+  if (!name) {
+    var nameEl = document.getElementById('r-name');
+    nameEl.classList.add('input-error');
+    nameEl.placeholder = lang === 'en' ? 'Recipe name is required' : 'Názov receptu je povinný';
+    nameEl.focus();
+    return showToast(t('formName')+(lang==='en'?' is required.':' je povinný.'),'error');
+  }
+  if (!ingredients.length) {
+    var ingEl = document.getElementById('r-ingredients');
+    ingEl.classList.add('input-error');
+    ingEl.placeholder = lang === 'en' ? 'Ingredients are required' : 'Suroviny sú povinné';
+    ingEl.focus();
+    return showToast(t('formIngredients')+(lang==='en'?' are required.':' sú povinné.'),'error');
+  }
   const nutrition = {kcal,protein,fat,carbs};
   // Sanity check
   const check = sanitizeNutrition(nutrition, portions);
@@ -1182,7 +1211,9 @@ function importFromUrl() {
   try { new URL(url); } catch(e) { setImportStatus('❌ ' + (lang === 'en' ? 'Invalid URL format' : 'Neplatný formát URL')); return; }
   const loader = document.getElementById('import-url-loader');
   if (loader) loader.style.display = 'block';
-  setImportStatus('⏳ ' + (lang === 'en' ? 'Fetching recipe...' : 'Sťahujem recept...'));
+  // Show spinner in status area
+  const statusEl = document.getElementById('import-url-status');
+  if (statusEl) statusEl.innerHTML = '<span class="ptr-spinner" style="display:inline-block;width:14px;height:14px;border-width:2px;vertical-align:middle;margin-right:6px;"></span> ' + (lang === 'en' ? 'Fetching recipe...' : 'Sťahujem recept...');
   setImportBusy(true);
   const SCRAPER_URL = 'https://mealnest-scraper.waldis994.workers.dev';
   let maxRetries = 2;

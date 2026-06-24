@@ -7,10 +7,21 @@ button:focus:not(:focus-visible), .btn:focus:not(:focus-visible) { outline: none
 
 /* ===== UTILITIES ===== */
 .import-hidden { display: none; }
-.skeleton { background: linear-gradient(90deg, var(--border) 25%, var(--hover-bg) 50%, var(--border) 75%); background-size: 200% 100%; animation: shimmer 1.4s ease infinite; border-radius: var(--radius-md); }
+.skeleton { background: linear-gradient(90deg, var(--border) 25%, var(--hover-bg) 50%, var(--border) 75%); background-size: 200% 100%; will-change: background-position; animation: shimmer 1.4s ease infinite; border-radius: var(--radius-md); }
 @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 .voice-btn.listening { background: var(--danger) !important; color: #fff !important; animation: pulse 1.2s infinite; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }
+
+/* ===== FAB PULSE HINT ===== */
+.nav-plus-pulse { animation: fabPulse 2.5s ease-in-out 3; }
+@keyframes fabPulse { 0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(255,77,109,.4);} 50%{transform:scale(1.12);box-shadow:0 0 12px 3px rgba(255,77,109,.15);} }
+
+/* ===== AI LOADING SPINNER ===== */
+.ai-spinner, .ptr-spinner { display:inline-block;width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:ptrSpin .6s linear infinite;vertical-align:middle;margin-right:4px; }
+
+/* ===== RECIPE FORM VALIDATION ===== */
+.input-error { border-color: var(--danger) !important; box-shadow: 0 0 0 2px rgba(255,77,109,.2) !important; animation: inputShake .4s ease; }
+@keyframes inputShake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-4px)} 40%{transform:translateX(4px)} 60%{transform:translateX(-3px)} 80%{transform:translateX(2px)} }
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 700px) {
@@ -83,7 +94,7 @@ button:focus:not(:focus-visible), .btn:focus:not(:focus-visible) { outline: none
 @keyframes floatSlow { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
 @keyframes floatBlob { 0%,100%{ transform: translate(0, 0) scale(1); } 33%{ transform: translate(5%, -3%) scale(1.05); } 66%{ transform: translate(-3%, 2%) scale(0.95); } }
 @keyframes shimmerWide { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
-.skeleton-dash { background: linear-gradient(90deg, var(--border) 25%, var(--hover-bg) 50%, var(--border) 75%); background-size: 200% 100%; animation: shimmerWide 1.8s ease infinite; border-radius: var(--radius-md); }
+.skeleton-dash { background: linear-gradient(90deg, var(--border) 25%, var(--hover-bg) 50%, var(--border) 75%); background-size: 200% 100%; will-change: background-position; animation: shimmerWide 1.8s ease infinite; border-radius: var(--radius-md); }
 
 /* ===== DASHBOARD ===== */
 #dashboard { display: block; padding-top: .5rem; }
@@ -1726,6 +1737,7 @@ button, .btn, .nav-item, .recipe-card, .dash-stat-pill, .settings-row { transiti
 .skeleton-pulse {
   background: linear-gradient(90deg, var(--border) 25%, var(--hover-bg) 50%, var(--border) 75%);
   background-size: 200% 100%;
+  will-change: background-position;
   animation: skeletonShimmer 1.4s ease infinite;
   border-radius: var(--radius-sm);
 }
@@ -7061,7 +7073,7 @@ body {
 }
 
 #dashboard {
-  --mn-bg: #081014;
+  --mn-bg: #071014; /* merged from refinements */
   --mn-card: rgba(255,255,255,.06);
   --mn-card-2: rgba(255,255,255,.08);
   --mn-primary: var(--primary);
@@ -7069,7 +7081,7 @@ body {
   --mn-ai: #f59b43;
   --mn-muted: #A8B3B0;
   --mn-border: rgba(255,255,255,.10);
-  width: min(100%, 430px);
+  width: min(100%, 390px); /* merged from refinements */
   background: transparent;
   padding-inline: 16px;
 }

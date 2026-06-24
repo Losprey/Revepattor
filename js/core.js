@@ -97,6 +97,13 @@ function signInWithGoogle() {
   const doSignIn = () => firebase.auth().signInWithPopup(provider).catch(err => {
     if (err.code === 'auth/popup-blocked' || err.code === 'auth/cancelled-popup-request') {
       firebase.auth().signInWithRedirect(provider);
+    } else if (err.code === 'auth/network-request-failed') {
+      showToast('❌ Sieťová chyba — skontroluj pripojenie a skús znova.','error',4000);
+    } else if (err.code === 'auth/user-disabled') {
+      showToast('❌ Účet bol zablokovaný. Kontaktuj podporu.','error',5000);
+    } else {
+      showToast('❌ Prihlásenie zlyhalo: ' + (err.message || err.code),'error',4000);
+      console.error('Google Sign-In error:', err);
     }
   });
   if (authIsGuest) {
@@ -132,8 +139,15 @@ function continueAsGuest() {
   localStorage.removeItem('authUser');
   document.getElementById('login-overlay').style.display = 'none';
   updateAuthUI();
-  // onAuthStateChanged callback už prekreslí UI a načíta správny namespace
-  // location.reload() nie je potrebný a spôsobuje zbytočné bliknutie
+  // Ak Firebase nie je ready, onAuthStateChanged sa nespustí —
+  // zavoláme renderDashboard() a initFirebaseAuth() manuálne
+  if (!firebaseReady || typeof firebase.auth !== 'function') {
+    try { renderDashboard(); } catch(e) {}
+    try { renderTaskWidget(); } catch(e) {}
+  }
+  // Skry onboarding overlay ak je otvorený
+  var onb = document.getElementById('onboarding-overlay');
+  if (onb) onb.remove();
 }
 
 function migrateGuestToUser() {
