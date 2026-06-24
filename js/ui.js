@@ -1002,7 +1002,7 @@ function showToast(msg, type, duration) {
   }
   const toast = document.createElement('div');
   toast.className = 'toast toast-' + type + ' toast-stacked';
-  toast.innerHTML = '<span class="toast-icon">' + (icons[type] || 'ℹ️') + '</span><span class="toast-text">' + msg + '</span>';
+  toast.innerHTML = '<span class="toast-icon">' + (icons[type] || 'ℹ️') + '</span><span class="toast-text">' + esc(msg) + '</span>';
   // Stack positioning - shift existing toasts up
   var existing = container.querySelectorAll('.toast');
   existing.forEach(function(t) {

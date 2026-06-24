@@ -4,6 +4,21 @@
 const DEEPSEEK_API = 'https://api.deepseek.com/v1/chat/completions';
 const rateMap = new Map();
 
+
+// Povolené domény pre CORS (namiesto wildcard *)
+const ALLOWED_ORIGINS = [
+  'https://losprey.github.io',
+  'https://www.mealnest.app',
+  'https://mealnest.app'
+];
+function getCorsOrigin(request) {
+  const origin = request.headers.get('Origin') || '';
+  if (ALLOWED_ORIGINS.includes(origin)) return origin;
+  // Pre vývoj lokálne povolíme file:// a localhost
+  if (origin.startsWith('http://localhost') || origin.startsWith('file://')) return origin;
+  return 'https://losprey.github.io'; // fallback
+}
+
 const VAPID_PUBLIC_KEY = 'BI6Fga-GXSKggkNJ58R1VEYEfGE6KfWgnuDtI9sHqQLQJzGLshJuIuODmI13AVzX5D2Kd7SBxrr7Cvf-xRAowg0';
 const VAPID_SUBJECT = 'mailto:receptar@waldis994.workers.dev';
 
@@ -18,7 +33,7 @@ async function handleRequest(request) {
   if (request.method === 'OPTIONS') {
     return new Response(null, {
       headers: {
-        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Origin': getCorsOrigin(request),
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type',
         'Access-Control-Max-Age': '86400',
@@ -51,7 +66,7 @@ async function handleRequest(request) {
       if (timestamps.length >= 60) {
         return new Response(JSON.stringify({ error: 'Príliš veľa requestov. Skús neskôr.' }), {
           status: 429,
-          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': getCorsOrigin(request) }
         });
       }
       timestamps.push(now);
@@ -64,7 +79,7 @@ async function handleRequest(request) {
     if (!messages || !messages.length) {
       return new Response(JSON.stringify({ error: 'Missing messages' }), {
         status: 400,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': getCorsOrigin(request) }
       });
     }
 
@@ -72,7 +87,7 @@ async function handleRequest(request) {
     if (!deepseekKey) {
       return new Response(JSON.stringify({ error: 'AI nie je nakonfigurované.' }), {
         status: 503,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': getCorsOrigin(request) }
       });
     }
 
@@ -95,7 +110,7 @@ async function handleRequest(request) {
       console.error('DeepSeek error:', response.status, errText.slice(0, 200));
       return new Response(JSON.stringify({ error: 'AI chyba: ' + response.status }), {
         status: 502,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': getCorsOrigin(request) }
       });
     }
 
@@ -103,14 +118,14 @@ async function handleRequest(request) {
     const reply = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
 
     return new Response(JSON.stringify({ reply: reply || '' }), {
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': getCorsOrigin(request) }
     });
 
   } catch (e) {
     console.error('Worker error:', e.message);
     return new Response(JSON.stringify({ error: 'Server error' }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': getCorsOrigin(request) }
     });
   }
 }
@@ -131,7 +146,7 @@ async function handlePexelsSearch(request, url) {
   if (request.method !== 'GET') {
     return new Response(JSON.stringify({ error: 'GET required' }), {
       status: 405,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': getCorsOrigin(request) }
     });
   }
 
@@ -139,7 +154,7 @@ async function handlePexelsSearch(request, url) {
   if (!pexelsKey) {
     return new Response(JSON.stringify({ error: 'Pexels nie je nakonfigurovaný.' }), {
       status: 503,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': getCorsOrigin(request) }
     });
   }
 
@@ -147,7 +162,7 @@ async function handlePexelsSearch(request, url) {
   if (!query) {
     return new Response(JSON.stringify({ error: 'Missing query' }), {
       status: 400,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': getCorsOrigin(request) }
     });
   }
 
@@ -162,7 +177,7 @@ async function handlePexelsSearch(request, url) {
     if (!response.ok) {
       return new Response(JSON.stringify({ error: 'Pexels chyba: ' + response.status }), {
         status: 502,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': getCorsOrigin(request) }
       });
     }
 
@@ -170,14 +185,14 @@ async function handlePexelsSearch(request, url) {
     return new Response(JSON.stringify(data), {
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Origin': getCorsOrigin(request),
         'Cache-Control': 'public, max-age=86400'
       }
     });
   } catch (e) {
     return new Response(JSON.stringify({ error: 'Pexels proxy error' }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': getCorsOrigin(request) }
     });
   }
 }
@@ -209,7 +224,7 @@ async function handlePushNotify(request) {
     }));
 
     return new Response(JSON.stringify({ sent, failed }), {
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': getCorsOrigin(request) }
     });
 
   } catch(e) {

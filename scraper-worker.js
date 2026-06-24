@@ -16,6 +16,21 @@ const ALLOWED_DOMAINS = [
   'slovenske-recepty.sk'
 ];
 
+
+// Povolené domény pre CORS (namiesto wildcard *)
+const ALLOWED_ORIGINS = [
+  'https://losprey.github.io',
+  'https://www.mealnest.app',
+  'https://mealnest.app'
+];
+function getCorsOrigin(request) {
+  const origin = request.headers.get('Origin') || '';
+  if (ALLOWED_ORIGINS.includes(origin)) return origin;
+  // Pre vývoj lokálne povolíme file:// a localhost
+  if (origin.startsWith('http://localhost') || origin.startsWith('file://')) return origin;
+  return 'https://losprey.github.io'; // fallback
+}
+
 addEventListener('fetch', event => {
   event.respondWith(handleRequest(event.request));
 });
@@ -25,7 +40,7 @@ async function handleRequest(request) {
   if (request.method === 'OPTIONS') {
     return new Response(null, {
       headers: {
-        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Origin': getCorsOrigin(request),
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type',
         'Access-Control-Max-Age': '86400',
@@ -50,7 +65,7 @@ async function handleRequest(request) {
   if (!targetUrl) {
     return new Response(JSON.stringify({ error: 'Chýba URL parameter' }), {
       status: 400,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': getCorsOrigin(request) }
     });
   }
 
@@ -63,7 +78,7 @@ async function handleRequest(request) {
   } catch (e) {
     return new Response(JSON.stringify({ error: 'Neplatná URL: ' + e.message }), {
       status: 400,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': getCorsOrigin(request) }
     });
   }
 
@@ -82,7 +97,7 @@ async function handleRequest(request) {
     return new Response(text, {
       headers: {
         'Content-Type': 'text/html; charset=utf-8',
-        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Origin': getCorsOrigin(request),
         'X-Scraper-Status': resp.ok ? 'ok' : 'error',
         'X-Scraper-Code': resp.status,
       }
@@ -94,7 +109,7 @@ async function handleRequest(request) {
       url: targetUrl
     }), {
       status: 502,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': getCorsOrigin(request) }
     });
   }
 }
