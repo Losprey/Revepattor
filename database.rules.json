@@ -5,7 +5,7 @@
     // Minimálna dĺžka 6 znakov — zabraňuje enumerácii krátkych kódov
     "families": {
       "$familyCode": {
-        ".validate": "$familyCode.val().length() >= 6",
+        ".validate": "$familyCode.length() >= 6",
         ".read": true,
         ".write": true,
         // Validácia pre member záznamy
