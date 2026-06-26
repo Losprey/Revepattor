@@ -7305,30 +7305,34 @@ body {
   background: rgba(99,212,113,.12);
 }
 
-.bottom-nav .nav-fab-slot {
-  transform: translateY(-18px);
-}
-
-.bottom-nav .nav-fab-slot:active {
-  transform: translateY(-18px) scale(.96);
-}
-
-.bottom-nav .nav-plus {
-  width: 56px;
-  height: 56px;
-  display: grid;
-  place-items: center;
-  border-radius: 999px;
+/* ===== FLOATING FAB (namiesto nav-fab-slot) ===== */
+#floating-fab {
+  position: fixed;
+  bottom: calc(92px + env(safe-area-inset-bottom));
+  right: max(12px, env(safe-area-inset-right));
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
   background: var(--primary);
   color: #06130c;
-  font-size: 2rem;
+  font-size: 1.8rem;
   font-weight: 700;
-  box-shadow: 0 16px 32px rgba(99,212,113,.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(99,212,113,.35);
+  z-index: 999;
+  cursor: pointer;
+  transition: transform .2s cubic-bezier(.34,1.56,.64,1), box-shadow .2s ease;
+  animation: fabAppear .4s cubic-bezier(.34,1.56,.64,1) both;
+  -webkit-tap-highlight-color: transparent;
 }
-
-.bottom-nav .nav-fab-slot .nav-label {
-  margin-top: -2px;
-  color: rgba(255,255,255,.72);
+#floating-fab:active {
+  transform: scale(.92);
+}
+@keyframes fabAppear {
+  0% { transform: scale(0) translateY(20px); opacity: 0; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
 }
 
 #fab-quick-add {

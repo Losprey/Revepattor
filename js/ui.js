@@ -119,10 +119,6 @@ function dismissTip() {
 }
 
 function switchTab(tab) {
-  if (tab === 'add') {
-    toggleQuickAddSheet();
-    return;
-  }
   const requestedTab = tab;
   if (tab === 'family') tab = 'board';
   haptic(8);
@@ -1161,3 +1157,126 @@ document.addEventListener('click', function(e) {
     if (btn && !btn.closest('.bottom-nav')) addRipple(e, btn);
   } catch(_) {}
 }, { passive: true });
+
+// =================== LONG PRESS ON BOTTOM NAV ===================
+(function initNavLongPress() {
+  var longPressTimer = null;
+  var longPressTarget = null;
+
+  document.addEventListener('touchstart', function(e) {
+    var navItem = e.target.closest('.bottom-nav .nav-item');
+    if (!navItem || navItem.dataset.tab === 'tasks') { longPressTarget = null; return; }
+    longPressTarget = navItem;
+    longPressTimer = setTimeout(function() {
+      if (!longPressTarget) return;
+      haptic(12);
+      var tab = longPressTarget.dataset.tab;
+      var actions = {
+        dashboard: [
+          { icon: '🌙', label: 'Tmavý režim', action: 'toggleDark' },
+          { icon: '🌐', label: 'Jazyk', action: 'toggleLang' },
+          { icon: '🤖', label: 'AI tip', action: 'aiTip' }
+        ],
+        planner: [
+          { icon: '🤖', label: 'AI týždeň', action: 'aiWeek' },
+          { icon: '↺', label: 'Reset', action: 'resetWeek' }
+        ],
+        shopping: [
+          { icon: '🏪', label: 'Režim obchodu', action: 'storeMode' },
+          { icon: '🧹', label: 'Vyčistiť hotové', action: 'clearShop' }
+        ],
+        home: [
+          { icon: '🌐', label: 'Import URL', action: 'importUrl' },
+          { icon: '🥕', label: 'Čo mám doma', action: 'ingredientSearch' },
+          { icon: '🎲', label: 'Náhodný recept', action: 'randomRecipe' }
+        ]
+      };
+      var menu = actions[tab];
+      if (!menu) { longPressTarget = null; return; }
+      showNavContextMenu(longPressTarget, menu);
+      longPressTarget = null;
+    }, 400);
+  }, { passive: true });
+
+  document.addEventListener('touchend', function() {
+    clearTimeout(longPressTimer);
+    longPressTarget = null;
+  }, { passive: true });
+  document.addEventListener('touchmove', function() {
+    clearTimeout(longPressTimer);
+    longPressTarget = null;
+  }, { passive: true });
+
+  function showNavContextMenu(anchor, items) {
+    var existing = document.getElementById('nav-context-menu');
+    if (existing) existing.remove();
+    var el = document.createElement('div');
+    el.id = 'nav-context-menu';
+    el.style.cssText = 'position:fixed;bottom:calc(92px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:10001;background:rgba(18,18,18,.96);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:6px;backdrop-filter:blur(20px);box-shadow:0 8px 32px rgba(0,0,0,.5);min-width:200px;animation:ctxUp .22s cubic-bezier(.22,1,.36,1) both;';
+    el.innerHTML = items.map(function(item, i) {
+      return '<div class="nav-ctx-item" data-idx="' + i + '" style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;cursor:pointer;font-size:.85rem;color:#fff;transition:background .15s;" onmouseover="this.style.background=\'rgba(255,255,255,.06)\'" onmouseout="this.style.background=\'\'">' +
+        '<span style="font-size:1.1rem;">' + item.icon + '</span><span>' + item.label + '</span></div>';
+    }).join('');
+    el.addEventListener('click', function(ev) {
+      var ctxItem = ev.target.closest('.nav-ctx-item');
+      if (!ctxItem) return;
+      var idx = parseInt(ctxItem.dataset.idx);
+      var action = items[idx].action;
+      el.remove();
+      executeNavAction(action);
+    });
+    document.body.appendChild(el);
+    // Add keyframe
+    if (!document.getElementById('ctx-up-style')) {
+      var s = document.createElement('style');
+      s.id = 'ctx-up-style';
+      s.textContent = '@keyframes ctxUp {from{opacity:0;transform:translateX(-50%) translateY(12px) scale(.96)}to{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}}';
+      document.head.appendChild(s);
+    }
+    // Tap outside to close
+    setTimeout(function() {
+      document.addEventListener('click', function closeCtx(ce) {
+        if (!ce.target.closest('#nav-context-menu')) {
+          var m = document.getElementById('nav-context-menu');
+          if (m) m.remove();
+          document.removeEventListener('click', closeCtx);
+        }
+      }, { once: false });
+    }, 10);
+  }
+
+  function executeNavAction(action) {
+    switch(action) {
+      case 'toggleDark':
+        try { toggleDarkMode(); } catch(e) {}
+        break;
+      case 'toggleLang':
+        try { openMorePageFromAnywhere('language'); } catch(e) {}
+        break;
+      case 'aiTip':
+        try { aiDailyTip(true); } catch(e) {}
+        break;
+      case 'aiWeek':
+        try { switchTab('planner'); setTimeout(function() { try { aiGenerateFullWeek(); } catch(e) {} }, 200); } catch(e) {}
+        break;
+      case 'resetWeek':
+        try { switchTab('planner'); setTimeout(function() { try { resetWeek(); } catch(e) {} }, 200); } catch(e) {}
+        break;
+      case 'storeMode':
+        try { switchTab('shopping'); setTimeout(function() { try { toggleStoreMode(); } catch(e) {} }, 200); } catch(e) {}
+        break;
+      case 'clearShop':
+        try { switchTab('shopping'); setTimeout(function() { try { clearCheckedItems(); } catch(e) {} }, 200); } catch(e) {}
+        break;
+      case 'importUrl':
+        try { switchTab('home'); setTimeout(function() { try { showImportUrlModal(); } catch(e) {} }, 200); } catch(e) {}
+        break;
+      case 'ingredientSearch':
+        try { document.querySelector('.recipe-tools-toggle')?.click(); setTimeout(function() { try { document.querySelector('[onclick*=\"ingredientSearch\"]')?.click(); } catch(e) {} }, 150); } catch(e) {}
+        break;
+      case 'randomRecipe':
+        try { switchTab('home'); setTimeout(function() { try { randomRecipe(); } catch(e) {} }, 200); } catch(e) {}
+        break;
+    }
+  }
+})();
