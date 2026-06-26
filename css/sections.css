@@ -7298,6 +7298,9 @@ body {
   min-height: 56px;
   border-radius: 20px;
   color: rgba(255,255,255,.56);
+  touch-action: none;
+  -webkit-touch-callout: none;
+  user-select: none;
 }
 
 .bottom-nav .nav-item.active {
