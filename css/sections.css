@@ -7302,6 +7302,12 @@ body {
   touch-action: none;
   -webkit-touch-callout: none;
   user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none; /* prevent drag */
+}
+/* Ensure SVGs inside nav don't trigger image context menu */
+.bottom-nav .nav-item svg {
+  pointer-events: none;
 }
 
 .bottom-nav .nav-item.active {

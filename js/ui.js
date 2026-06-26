@@ -1208,9 +1208,10 @@ document.addEventListener('click', function(e) {
   }, { passive: true });
 
   // Also block contextmenu on nav items explicitly
-  document.addEventListener('contextmenu', function(e) {
-    if (e.target.closest('.bottom-nav')) e.preventDefault();
-  });
+  document.querySelector('.bottom-nav')?.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }, true);
 
   function showNavContextMenu(anchor, items) {
     var existing = document.getElementById('nav-context-menu');
