@@ -540,13 +540,11 @@
 <div id="fab-quick-add" style="display:none">
   <div class="fab-backdrop" onclick="document.getElementById('fab-quick-add').classList.remove('open')"></div>
   <div class="fab-menu">
-    <div class="fab-sheet-handle"></div>
-    <strong>Rýchlo pridať</strong>
-    <button id="fab-btn-meal" class="fab-item" onclick="event.stopPropagation();closeQuickAddSheet();switchTab('planner')">🍽️ Pridať jedlo</button>
-    <button id="fab-btn-task" class="fab-item" onclick="event.stopPropagation();closeQuickAddSheet();switchTab('tasks');setTimeout(()=>openTaskSheet(),100)">✅ Pridať úlohu</button>
-    <button id="fab-btn-food" class="fab-item" onclick="event.stopPropagation();closeQuickAddSheet();switchTab('shopping');setTimeout(()=>openAddItemSheet(),100)">🛒 Pridať položku</button>
-    <button class="fab-item" onclick="event.stopPropagation();closeQuickAddSheet();openImportUrlModal()">🌐 Importovať recept</button>
-    <button class="fab-item" onclick="event.stopPropagation();closeQuickAddSheet();aiDailyTip(true)">🤖 Spýtať sa AI</button>
+    <button id="fab-btn-meal" class="fab-item" onclick="event.stopPropagation();closeQuickAddSheet();switchTab('planner')"><span style="font-size:1.3rem;">🍽️</span> Pridať jedlo</button>
+    <button id="fab-btn-task" class="fab-item" onclick="event.stopPropagation();closeQuickAddSheet();switchTab('tasks');setTimeout(()=>openTaskSheet(),100)"><span style="font-size:1.3rem;">✅</span> Pridať úlohu</button>
+    <button id="fab-btn-food" class="fab-item" onclick="event.stopPropagation();closeQuickAddSheet();switchTab('shopping');setTimeout(()=>openAddItemSheet(),100)"><span style="font-size:1.3rem;">🛒</span> Pridať položku</button>
+    <button class="fab-item" onclick="event.stopPropagation();closeQuickAddSheet();openImportUrlModal()"><span style="font-size:1.3rem;">🌐</span> Importovať recept</button>
+    <button class="fab-item" onclick="event.stopPropagation();closeQuickAddSheet();aiDailyTip(true)"><span style="font-size:1.3rem;">🤖</span> Spýtať sa AI</button>
   </div>
 </div>
 
