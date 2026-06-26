@@ -7292,6 +7292,7 @@ body {
   background: rgba(12,23,28,.92) !important;
   box-shadow: 0 22px 55px rgba(0,0,0,.42) !important;
   backdrop-filter: blur(18px);
+  z-index: 100;
 }
 
 .bottom-nav .nav-item {

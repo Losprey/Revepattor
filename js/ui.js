@@ -1167,8 +1167,6 @@ document.addEventListener('click', function(e) {
     var navItem = e.target.closest('.bottom-nav .nav-item');
     if (!navItem || navItem.dataset.tab === 'tasks') { longPressTarget = null; return; }
     longPressTarget = navItem;
-    // Prevent browser's native context menu on long press
-    e.preventDefault();
     longPressTimer = setTimeout(function() {
       if (!longPressTarget) return;
       haptic(12);
@@ -1198,13 +1196,12 @@ document.addEventListener('click', function(e) {
       showNavContextMenu(longPressTarget, menu);
       longPressTarget = null;
     }, 400);
-  }, { passive: false }); // NOT passive — need preventDefault
+  }, { passive: true });
 
   document.addEventListener('touchend', function(e) {
-    if (longPressTarget) e.preventDefault();
     clearTimeout(longPressTimer);
     longPressTarget = null;
-  }, { passive: false });
+  }, { passive: true });
   document.addEventListener('touchmove', function() {
     clearTimeout(longPressTimer);
     longPressTarget = null;
