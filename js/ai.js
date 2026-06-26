@@ -2,7 +2,7 @@
 // ==========================================
 
 // ======================== AI (DEEPSEEK PROXY) ========================
-const APP_VERSION = '1.0.53';
+const APP_VERSION = '1.0.54';
 const VAPID_PUBLIC_KEY = 'BI6Fga-GXSKggkNJ58R1VEYEfGE6KfWgnuDtI9sHqQLQJzGLshJuIuODmI13AVzX5D2Kd7SBxrr7Cvf-xRAowg0';
 const PUSH_PROXY_URL = 'https://receptar.waldis994.workers.dev';
 
@@ -135,4 +135,3 @@ async function batchFetchImages() {
     if (i + 3 < toFetch.length) await new Promise(r => setTimeout(r, 500));
   }
 }
-

@@ -599,3 +599,43 @@
   font-style: normal;
   font-weight: 850;
 }
+
+/* Final mobile dark-mode guard: keep "DNES RÝCHLO" cards visibly tinted
+   even when Android/WebView system dark mode tries to flatten subtle layers. */
+@media (max-width: 430px) {
+  html.dark #dashboard .mn-overview-grid button,
+  html.dark-only #dashboard .mn-overview-grid button,
+  body.dark #dashboard .mn-overview-grid button {
+    border: 1px solid rgba(255,255,255,.08) !important;
+    color: #fff !important;
+    forced-color-adjust: none;
+  }
+
+  html.dark #dashboard .mn-overview-grid button.meals,
+  html.dark-only #dashboard .mn-overview-grid button.meals,
+  body.dark #dashboard .mn-overview-grid button.meals {
+    background-color: #0f2a1b !important;
+    background-image: linear-gradient(180deg, rgba(99,212,113,.34), rgba(34,197,94,.16)) !important;
+  }
+
+  html.dark #dashboard .mn-overview-grid button.shop,
+  html.dark-only #dashboard .mn-overview-grid button.shop,
+  body.dark #dashboard .mn-overview-grid button.shop {
+    background-color: #102436 !important;
+    background-image: linear-gradient(180deg, rgba(56,189,248,.34), rgba(59,130,246,.16)) !important;
+  }
+
+  html.dark #dashboard .mn-overview-grid button.tasks,
+  html.dark-only #dashboard .mn-overview-grid button.tasks,
+  body.dark #dashboard .mn-overview-grid button.tasks {
+    background-color: #21183a !important;
+    background-image: linear-gradient(180deg, rgba(139,92,246,.36), rgba(124,58,237,.16)) !important;
+  }
+
+  html.dark #dashboard .mn-overview-grid button.streak,
+  html.dark-only #dashboard .mn-overview-grid button.streak,
+  body.dark #dashboard .mn-overview-grid button.streak {
+    background-color: #331f12 !important;
+    background-image: linear-gradient(180deg, rgba(245,155,67,.38), rgba(217,119,6,.17)) !important;
+  }
+}
