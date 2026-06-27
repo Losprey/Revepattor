@@ -182,21 +182,37 @@ function toggleQuickAddSheet() {
     sheet.style.display = 'none';
   } else {
     sheet.style.display = 'block';
-    // Close when tapping outside the menu (on the overlay itself)
-    sheet._closeHandler = function(e) {
-      if (!e.target.closest('.fab-menu')) {
-        sheet.classList.remove('open');
-        sheet.style.display = 'none';
-        sheet.removeEventListener('click', sheet._closeHandler);
-        delete sheet._closeHandler;
-      }
-    };
-    // Use capture phase so backdrop clicks close too
-    sheet.addEventListener('click', sheet._closeHandler);
     void sheet.offsetHeight;
     sheet.classList.add('open');
   }
 }
+
+// Close FAB menu when tapping outside
+document.addEventListener('click', function(e) {
+  const sheet = document.getElementById('fab-quick-add');
+  if (!sheet || !sheet.classList.contains('open')) return;
+  if (!e.target.closest('.fab-menu') && !e.target.closest('#floating-fab')) {
+    closeQuickAddSheet();
+  }
+});
+
+// Event delegation — clicks on FAB menu items
+document.addEventListener('click', function(e) {
+  const item = e.target.closest('#fab-quick-add.open .fab-item');
+  if (!item) return;
+  const action = item.dataset.action;
+  closeQuickAddSheet();
+  // Defer action to let close animation start
+  setTimeout(function() {
+    switch(action) {
+      case 'meal': switchTab('planner'); break;
+      case 'task': switchTab('tasks'); setTimeout(function() { try { openTaskSheet(); } catch(e) {} }, 120); break;
+      case 'food': switchTab('shopping'); setTimeout(function() { try { openAddItemSheet(); } catch(e) {} }, 120); break;
+      case 'import': try { openImportUrlModal(); } catch(e) {} break;
+      case 'ai': try { aiDailyTip(true); } catch(e) {} break;
+    }
+  }, 150);
+});
 
 function closeQuickAddSheet() {
   const sheet = document.getElementById('fab-quick-add');
