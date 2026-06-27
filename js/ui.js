@@ -177,7 +177,9 @@ function switchTab(tab) {
 function toggleQuickAddSheet() {
   const sheet = document.getElementById('fab-quick-add');
   if (!sheet) return;
-  sheet.style.display = 'block';
+  sheet.style.display = 'flex';
+  // Force reflow before adding class for animation
+  void sheet.offsetHeight;
   sheet.classList.toggle('open');
 }
 
