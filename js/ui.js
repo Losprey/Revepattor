@@ -206,14 +206,7 @@ function switchTab(tab) {
 function toggleQuickAddSheet() {
   const sheet = document.getElementById('fab-quick-add');
   if (!sheet) return;
-  if (sheet.classList.contains('open')) {
-    sheet.classList.remove('open');
-    sheet.style.display = 'none';
-  } else {
-    sheet.style.display = 'block';
-    void sheet.offsetHeight;
-    sheet.classList.add('open');
-  }
+  sheet.classList.toggle('open');
 }
 
 // Close FAB menu when tapping outside
@@ -235,17 +228,15 @@ document.addEventListener('click', function(e) {
     const action = item.dataset.action;
     if (!action) return;
     closeQuickAddSheet();
-    setTimeout(function() {
-      try {
-        switch(action) {
-          case 'meal': switchTab('planner'); break;
-          case 'task': switchTab('tasks'); setTimeout(function() { try { openTaskSheet(); } catch(e) {} }, 80); break;
-          case 'food': switchTab('shopping'); setTimeout(function() { try { openAddItemSheet(); } catch(e) {} }, 80); break;
-          case 'import': openImportUrlModal(); break;
-          case 'ai': aiDailyTip(true); break;
-        }
-      } catch(e) { console.warn('FAB action error:', e); }
-    }, 50);
+    try {
+      switch(action) {
+        case 'meal': switchTab('planner'); break;
+        case 'task': switchTab('tasks'); setTimeout(function() { try { openTaskSheet(); } catch(e) {} }, 120); break;
+        case 'food': switchTab('shopping'); setTimeout(function() { try { openAddItemSheet(); } catch(e) {} }, 120); break;
+        case 'import': openImportUrlModal(); break;
+        case 'ai': aiDailyTip(true); break;
+      }
+    } catch(e) { console.warn('FAB action error:', e); }
   } catch(e) { console.warn('FAB click error:', e); }
 });
 
@@ -253,7 +244,6 @@ function closeQuickAddSheet() {
   const sheet = document.getElementById('fab-quick-add');
   if (!sheet) return;
   sheet.classList.remove('open');
-  sheet.style.display = 'none';
 }
 
 function renderMoreScreen() {
