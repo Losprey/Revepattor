@@ -7420,7 +7420,13 @@ body {
 
 #fab-quick-add .fab-item:active {
   background: rgba(255,255,255,.10);
-  transform: scale(.97);
+  transform: scale(.97) !important;
+}
+
+/* Prevent native Chrome image context menu on long-press */
+img {
+  touch-action: none;
+  -webkit-touch-callout: none;
 }
 
 body[data-tab="dashboard"],
