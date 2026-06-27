@@ -27,8 +27,37 @@ function toggleRecipeMoreTools() {
   if (toggle) toggle.classList.toggle('btn-primary', isOpen);
   if (!isOpen && aiTools) aiTools.classList.remove('active');
 }
-document.querySelectorAll('.modal-overlay').forEach(el => {
-  el.addEventListener('click', e => { if (e.target === el) { el.classList.remove('active'); } });
+// Close any overlay/modal/sheet by tapping outside the content
+document.addEventListener('click', function(e) {
+  // Modal overlays (class="modal-overlay")
+  var modalOv = e.target.closest('.modal-overlay');
+  if (modalOv && e.target === modalOv) {
+    modalOv.classList.remove('active');
+    return;
+  }
+  // Sheet overlays (class="sheet-overlay")
+  var sheetOv = e.target.closest('.sheet-overlay');
+  if (sheetOv && e.target === sheetOv) {
+    sheetOv.classList.remove('active');
+    return;
+  }
+  // Login overlay (id="login-overlay")
+  if (e.target.id === 'login-overlay') {
+    // Don't close login — user must pick option
+    return;
+  }
+  // Confirm modal (id="confirm-modal")
+  var confirmEl = e.target.closest('#confirm-modal');
+  if (confirmEl && e.target === confirmEl) {
+    closeConfirmModal();
+    return;
+  }
+  // Cooking mode (id="cooking-mode")
+  var cookOv = e.target.closest('#cooking-mode');
+  if (cookOv && e.target === cookOv) {
+    closeCookingMode();
+    return;
+  }
 });
 
 // =================== SKELETON HELPERS ===================
