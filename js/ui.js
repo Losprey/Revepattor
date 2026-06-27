@@ -177,16 +177,21 @@ function switchTab(tab) {
 function toggleQuickAddSheet() {
   const sheet = document.getElementById('fab-quick-add');
   if (!sheet) return;
-  sheet.style.display = 'flex';
-  // Force reflow before adding class for animation
-  void sheet.offsetHeight;
-  sheet.classList.toggle('open');
+  if (sheet.classList.contains('open')) {
+    sheet.classList.remove('open');
+    sheet.style.display = 'none';
+  } else {
+    sheet.style.display = 'block';
+    void sheet.offsetHeight;
+    sheet.classList.add('open');
+  }
 }
 
 function closeQuickAddSheet() {
   const sheet = document.getElementById('fab-quick-add');
   if (!sheet) return;
   sheet.classList.remove('open');
+  sheet.style.display = 'none';
 }
 
 function renderMoreScreen() {
