@@ -892,6 +892,14 @@ function doPullRefresh() {
 }
 
 // =================== PREVENT CONTEXT MENU ===================
+// Capture phase — blocks Chrome native image context menu at browser level
+document.addEventListener('contextmenu', function(e) {
+  if (!e.target.closest('input, textarea, [contenteditable]')) {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+  }
+}, true);
+
 document.addEventListener('contextmenu', function(e) {
   // Allow context menu on input/textarea
   if (e.target.closest && !e.target.closest('input, textarea, [contenteditable]')) {
@@ -1125,14 +1133,6 @@ window.addEventListener('unhandledrejection', function(e) {
   e.preventDefault();
 });
 
-// =================== PREVENT CONTEXT MENU ===================
-document.addEventListener('contextmenu', function(e) {
-  // Allow context menu on input/textarea
-  if (e.target.closest && !e.target.closest('input, textarea, [contenteditable]')) {
-    e.preventDefault();
-    haptic(6);
-  }
-});
 document.addEventListener('selectstart', function(e) {
   if (e.target.closest && !e.target.closest('input, textarea, [contenteditable]')) {
     e.preventDefault();
@@ -1266,11 +1266,6 @@ document.addEventListener('click', function(e) {
     longPressTarget = null;
   }, { passive: true });
 
-  // Also block contextmenu on nav items explicitly
-  document.querySelector('.bottom-nav')?.addEventListener('contextmenu', function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-  }, true);
 
   function showNavContextMenu(anchor, items) {
     var existing = document.getElementById('nav-context-menu');
