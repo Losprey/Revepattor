@@ -7354,7 +7354,7 @@ body {
 }
 #fab-quick-add.open {
   display: block !important;
-  pointer-events: auto;
+  pointer-events: none; /* Let clicks through — only .fab-menu captures them */
 }
 
 #fab-quick-add .fab-backdrop {
