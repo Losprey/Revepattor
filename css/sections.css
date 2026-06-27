@@ -7425,6 +7425,7 @@ body {
 
 /* Prevent native Chrome image context menu on long-press */
 img {
+  pointer-events: none;
   touch-action: none;
   -webkit-touch-callout: none;
 }
