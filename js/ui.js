@@ -182,6 +182,17 @@ function toggleQuickAddSheet() {
     sheet.style.display = 'none';
   } else {
     sheet.style.display = 'block';
+    // Close when tapping outside the menu (on the overlay itself)
+    sheet._closeHandler = function(e) {
+      if (!e.target.closest('.fab-menu')) {
+        sheet.classList.remove('open');
+        sheet.style.display = 'none';
+        sheet.removeEventListener('click', sheet._closeHandler);
+        delete sheet._closeHandler;
+      }
+    };
+    // Use capture phase so backdrop clicks close too
+    sheet.addEventListener('click', sheet._closeHandler);
     void sheet.offsetHeight;
     sheet.classList.add('open');
   }

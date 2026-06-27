@@ -7364,6 +7364,7 @@ body {
   background: rgba(0,0,0,.48);
   opacity: 0;
   transition: opacity .22s ease;
+  pointer-events: none; /* Let clicks through — overlay handles closing */
 }
 #fab-quick-add.open .fab-backdrop {
   opacity: 1;

@@ -538,8 +538,8 @@
 
 <!-- Quick add FAB -->
 <div id="fab-quick-add" style="display:none">
-  <div class="fab-backdrop" onclick="closeQuickAddSheet()"></div>
-  <div class="fab-menu">
+  <div class="fab-backdrop"></div>
+  <div class="fab-menu" onclick="event.stopPropagation()">
     <button id="fab-btn-meal" class="fab-item" onclick="event.stopPropagation();closeQuickAddSheet();switchTab('planner')"><span style="font-size:1.3rem;">🍽️</span> Pridať jedlo</button>
     <button id="fab-btn-task" class="fab-item" onclick="event.stopPropagation();closeQuickAddSheet();switchTab('tasks');setTimeout(()=>openTaskSheet(),100)"><span style="font-size:1.3rem;">✅</span> Pridať úlohu</button>
     <button id="fab-btn-food" class="fab-item" onclick="event.stopPropagation();closeQuickAddSheet();switchTab('shopping');setTimeout(()=>openAddItemSheet(),100)"><span style="font-size:1.3rem;">🛒</span> Pridať položku</button>
