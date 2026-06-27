@@ -24,6 +24,7 @@ function renderDashboard() {
         </div>
       </div>
       <div class="mn-home-actions">
+        <button class="mn-icon-btn" onclick="openSettings()" aria-label="Nastavenia" title="Nastavenia">⚙️</button>
         <button class="mn-avatar-btn" onclick="openMorePageFromAnywhere('account')" aria-label="Profil">${getDashboardAvatar()}</button>
       </div>
     </section>
