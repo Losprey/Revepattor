@@ -198,20 +198,26 @@ document.addEventListener('click', function(e) {
 
 // Event delegation — clicks on FAB menu items
 document.addEventListener('click', function(e) {
-  const item = e.target.closest('#fab-quick-add.open .fab-item');
-  if (!item) return;
-  const action = item.dataset.action;
-  closeQuickAddSheet();
-  // Defer action to let close animation start
-  setTimeout(function() {
-    switch(action) {
-      case 'meal': switchTab('planner'); break;
-      case 'task': switchTab('tasks'); setTimeout(function() { try { openTaskSheet(); } catch(e) {} }, 120); break;
-      case 'food': switchTab('shopping'); setTimeout(function() { try { openAddItemSheet(); } catch(e) {} }, 120); break;
-      case 'import': try { openImportUrlModal(); } catch(e) {} break;
-      case 'ai': try { aiDailyTip(true); } catch(e) {} break;
-    }
-  }, 150);
+  try {
+    const item = e.target.closest('.fab-item');
+    if (!item) return;
+    const sheet = document.getElementById('fab-quick-add');
+    if (!sheet || !sheet.classList.contains('open')) return;
+    const action = item.dataset.action;
+    if (!action) return;
+    closeQuickAddSheet();
+    setTimeout(function() {
+      try {
+        switch(action) {
+          case 'meal': switchTab('planner'); break;
+          case 'task': switchTab('tasks'); setTimeout(function() { try { openTaskSheet(); } catch(e) {} }, 80); break;
+          case 'food': switchTab('shopping'); setTimeout(function() { try { openAddItemSheet(); } catch(e) {} }, 80); break;
+          case 'import': openImportUrlModal(); break;
+          case 'ai': aiDailyTip(true); break;
+        }
+      } catch(e) { console.warn('FAB action error:', e); }
+    }, 50);
+  } catch(e) { console.warn('FAB click error:', e); }
 });
 
 function closeQuickAddSheet() {

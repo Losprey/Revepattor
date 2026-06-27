@@ -7407,6 +7407,7 @@ body {
   align-items: center;
   gap: 10px;
   transition: background .15s ease;
+  pointer-events: auto;
 }
 #fab-quick-add.open .fab-item {
   transition: background .15s ease;
