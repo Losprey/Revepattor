@@ -1,0 +1,24 @@
+{
+  "name": "mealnest",
+  "version": "1.8.0",
+  "private": true,
+  "description": "Family meal planner, shopping list & task manager",
+  "scripts": {
+    "build": "bash build.sh",
+    "build:release": "bash build.sh release",
+    "build:js": "esbuild js/init.js --bundle --outfile=dist/app.js",
+    "build:js:min": "esbuild js/init.js --bundle --minify --outfile=dist/app.min.js",
+    "build:css": "esbuild css/base.css --bundle --outfile=dist/styles.css",
+    "build:css:min": "esbuild css/base.css --bundle --minify --outfile=dist/styles.min.css",
+    "build:all": "npm run build:js && npm run build:css"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  },
+  "dependencies": {
+    "acorn": "^8.16.0",
+    "firebase-admin": "^14.0.0",
+    "firebase-tools": "^15.20.0",
+    "web-push": "^3.6.7"
+  }
+}

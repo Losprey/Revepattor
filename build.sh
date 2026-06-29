@@ -1,7 +1,8 @@
 #!/bin/bash
 # ==================== MEALNEST BUILD SCRIPT ====================
 # Usage: bash build.sh [release]
-#   release — also minifies app.js and bumps SW cache version
+#
+# Requirements: npm install (installs esbuild for minification)
 #
 set -e
 
@@ -20,63 +21,92 @@ else
   echo "   ⚠️  rsvg-convert not found. Install librsvg."
 fi
 
-# 2. Build mode
-if [ "$1" = "release" ]; then
-  echo ""
-  echo "🔧 Release mode"
-  
-  # 2a. Minify app.js
-  echo "   Minifying app.js..."
-  if command -v node &>/dev/null; then
-    node -e "
-    const fs = require('fs');
-    let code = fs.readFileSync('app.js', 'utf8');
-    const orig = code.length;
-    // Strip single-line comments
-    code = code.replace(/\\/\\/[^\\n]*\\n/g, '\\n');
-    // Strip block comments (careful with regex)
-    code = code.replace(/\\/\\*[\\s\\S]*?\\*\\//g, '');
-    // Collapse multiple blank lines
-    code = code.replace(/\\n{3,}/g, '\\n\\n');
-    // Remove trailing whitespace
-    code = code.replace(/[ \\t]+\\n/g, '\\n');
-    fs.writeFileSync('app.js.min', code, 'utf8');
-    const saved = ((orig - code.length)/orig*100).toFixed(1);
-    console.log('   ✅ app.js: ' + (orig/1024).toFixed(0) + 'KB → ' + (code.length/1024).toFixed(0) + 'KB (-' + saved + '%)');
-    "
-  fi
-  
-  # 2b. Bump SW cache version
-  echo "   Bumping SW cache version..."
-  if command -v node &>/dev/null; then
-    node -e "
-    const fs = require('fs');
-    let sw = fs.readFileSync('sw.js', 'utf8');
-    sw = sw.replace(/CACHE = 'mealnest-v\\d+'/, function(m) {
-      const n = parseInt(m.match(/\\d+/)[0]) + 1;
-      const r = \"CACHE = 'mealnest-v\" + n + \"'\";
-      console.log('   ✅ ' + m + ' → ' + r);
-      return r;
-    });
-    fs.writeFileSync('sw.js', sw, 'utf8');
-    "
-  fi
+MODE="development"
+[ "$1" = "release" ] && MODE="release"
+echo ""
+echo "🔧 Mode: $MODE"
+echo ""
+
+mkdir -p dist
+
+# 2. Bundle CSS (4 files → 1)
+echo "📄 Bundling CSS..."
+cat css/base.css css/components.css css/sections.css css/refinements.css > dist/styles.concat.css
+CSS_RAW=$(wc -c < dist/styles.concat.css)
+
+if [ "$MODE" = "release" ]; then
+  npx esbuild dist/styles.concat.css --minify --outfile=dist/styles.min.css 2>/dev/null
+  CSS_FILE="dist/styles.min.css"
+  CSS_SIZE=$(du -h "$CSS_FILE" | cut -f1)
+  CSS_SAVED=$(( (CSS_RAW - $(wc -c < "$CSS_FILE")) * 100 / CSS_RAW ))
+  rm -f dist/styles.concat.css
+  echo "   ✅ CSS bundle: $CSS_FILE ($CSS_SIZE, -${CSS_SAVED}%)"
 else
-  echo ""
-  echo "ℹ️  Run 'bash build.sh release' for full build (minify + cache bump)"
+  mv dist/styles.concat.css dist/styles.css
+  CSS_FILE="dist/styles.css"
+  CSS_SIZE=$(du -h "$CSS_FILE" | cut -f1)
+  echo "   ✅ CSS bundle: $CSS_FILE ($CSS_SIZE)"
 fi
 
-# 3. Stats
-echo ""
-echo "📊 Bundle size:"
-if command -v du &>/dev/null; then
-  for f in app.js styles.css index.html icon.svg icon-192.png icon-512.png recipes-default.json sw.js manifest.json; do
-    if [ -f "$f" ]; then
-      echo "   $(du -h "$f" | cut -f1)	$f"
-    fi
-  done
-  echo "   ---"
-  echo "   $(du -h app.js styles.css index.html manifest.json icon.svg icon-192.png icon-512.png recipes-default.json sw.js 2>/dev/null | tail -1 | cut -f1)	total (core assets)"
+# 3. Bundle JS (16 files + board.js → 1)
+echo "📜 Bundling JavaScript..."
+JS_ORDER=(
+  js/i18n.js
+  js/core.js
+  js/data.js
+  js/ui.js
+  js/nutrition.js
+  js/ai.js
+  js/push.js
+  js/onboarding.js
+  js/recipes.js
+  js/dashboard.js
+  js/planner.js
+  js/shopping.js
+  js/tasks.js
+  js/cooking.js
+  js/features.js
+  js/init.js
+  board.js
+)
+cat "${JS_ORDER[@]}" > dist/app.concat.js
+JS_RAW=$(wc -c < dist/app.concat.js)
+
+if [ "$MODE" = "release" ]; then
+  npx esbuild dist/app.concat.js --minify --outfile=dist/app.min.js 2>/dev/null
+  JS_FILE="dist/app.min.js"
+  JS_SIZE=$(du -h "$JS_FILE" | cut -f1)
+  JS_SAVED=$(( (JS_RAW - $(wc -c < "$JS_FILE")) * 100 / JS_RAW ))
+  rm -f dist/app.concat.js
+  echo "   ✅ JS bundle: $JS_FILE ($JS_SIZE, -${JS_SAVED}%)"
+else
+  mv dist/app.concat.js dist/app.js
+  JS_FILE="dist/app.js"
+  JS_SIZE=$(du -h "$JS_FILE" | cut -f1)
+  echo "   ✅ JS bundle: $JS_FILE ($JS_SIZE)"
 fi
+
+# 4. Bump SW cache version (release only)
+if [ "$MODE" = "release" ]; then
+  echo ""
+  echo "🔁 Bumping SW cache version..."
+  node -e "
+  const fs = require('fs');
+  let sw = fs.readFileSync('sw.js', 'utf8');
+  sw = sw.replace(/CACHE = 'mealnest-v\d+'/, function(m) {
+    const n = parseInt(m.match(/\d+/)[0]) + 1;
+    const r = \"CACHE = 'mealnest-v\" + n + \"'\";
+    console.log('   ✅ ' + m + ' → ' + r);
+    return r;
+  });
+  fs.writeFileSync('sw.js', sw, 'utf8');
+  "
+fi
+
+# 5. Stats
 echo ""
-echo "✅ Done"
+echo "📊 Bundle stats ($MODE):"
+echo "   JS:  $JS_FILE ($JS_SIZE)"
+echo "   CSS: $CSS_FILE ($CSS_SIZE)"
+echo ""
+echo "✅ Done!"

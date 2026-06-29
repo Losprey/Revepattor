@@ -15,10 +15,7 @@
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <title data-lang="appTitle">Mealnest</title>
-  <link rel="stylesheet" href="css/base.css?v=6">
-  <link rel="stylesheet" href="css/components.css?v=6">
-  <link rel="stylesheet" href="css/sections.css?v=6">
-  <link rel="stylesheet" href="css/refinements.css?v=6">
+  <link rel="stylesheet" href="dist/styles.css?v=1">
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -515,26 +512,8 @@
 </div>
 
 
-<!-- JS Modules (split from app.js) -->
-<!-- Critical (blocking) — needed for first paint -->
-<script src="js/i18n.js?v=4"></script>
-<script src="js/core.js?v=4"></script>
-<script src="js/data.js?v=4"></script>
-<script src="js/ui.js?v=4"></script>
-<!-- Non-critical (deferred) — load after HTML parsed -->
-<script src="js/nutrition.js?v=4" defer></script>
-<script src="js/ai.js?v=4" defer></script>
-<script src="js/push.js?v=4" defer></script>
-<script src="js/onboarding.js?v=4" defer></script>
-<script src="js/recipes.js?v=4" defer></script>
-<script src="js/dashboard.js?v=4" defer></script>
-<script src="js/planner.js?v=4" defer></script>
-<script src="js/shopping.js?v=4" defer></script>
-<script src="js/tasks.js?v=4" defer></script>
-<script src="js/cooking.js?v=4" defer></script>
-<script src="js/features.js?v=4" defer></script>
-<script src="js/init.js?v=4" defer></script>
-<script src="board.js?v=66" defer></script>
+<!-- Bundled via esbuild (was 16 JS + 4 CSS files) -->
+<script src="dist/app.js?v=1" defer></script>
 
 <!-- Quick add FAB -->
 <div id="fab-quick-add" style="display:none">
