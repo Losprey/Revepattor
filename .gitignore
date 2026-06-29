@@ -28,3 +28,7 @@ icon-192.png
 icon-512.png
 
 
+
+# Dev build outputs (min versions are committed)
+dist/app.js
+dist/styles.css
