@@ -1,0 +1,36 @@
+name: Deploy receptar Worker
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cloudflare-receptar-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Deploy to Cloudflare
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          npx --yes wrangler@4 deploy --config wrangler.toml --keep-vars
+      - name: Verify Pexels search
+        run: |
+          curl --fail-with-body --silent --show-error --retry 3 --max-time 20 \
+            --header 'Origin: https://losprey.github.io' \
+            'https://receptar.waldis994.workers.dev/api/pexels?query=pasta' \
+            | jq -e '.photos | type == "array" and length > 0' > /dev/null
