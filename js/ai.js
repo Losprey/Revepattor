@@ -36,9 +36,17 @@ async function aiGenerateFullWeekRun() {
   document.body.appendChild(div);
 }
 
+const DEFAULT_RECIPE_PHOTOS = {
+  93: {"url": "images/recipes/93.jpg", "source": "https://commons.wikimedia.org/wiki/File:%D0%A1%D0%BB%D0%B8%D0%B2%D0%BE%D0%B2%D0%BE%D0%B5_%D0%BF%D1%8E%D1%80%D0%B5_01.jpg", "license": "CC BY-SA 4.0", "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0", "author": "Anastasiya Lvova"},
+  95: {"url": "images/recipes/95.jpg", "source": "https://commons.wikimedia.org/wiki/File:Pumpkin_Puree_Drained_(4107746280).jpg", "license": "CC BY-SA 2.0", "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0", "author": "Veganbaking.net"},
+  99: {"url": "images/recipes/99.jpg", "source": "https://commons.wikimedia.org/wiki/File:Chinese_rice_congee.jpg", "license": "CC BY-SA 2.5", "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.5", "author": "Daiju Azuma"},
+};
+const DEFAULT_PUREE_PHOTO = 'images/recipes/puree-illustration.jpg';
+let commonsRetryAt = 0;
+
 async function fetchCommonsRecipePhoto(query) {
   const words = query.replace(/[^\p{L}\p{N}\s-]/gu, ' ').trim().slice(0, 100);
-  if (!words) return null;
+  if (!words || Date.now() < commonsRetryAt) return null;
   const params = new URLSearchParams({
     action: 'query', format: 'json', origin: '*', generator: 'search',
     gsrnamespace: '6', gsrsearch: words + ' filetype:bitmap', gsrlimit: '5',
@@ -48,6 +56,12 @@ async function fetchCommonsRecipePhoto(query) {
     const response = await fetch('https://commons.wikimedia.org/w/api.php?' + params, {
       signal: AbortSignal.timeout(8000), referrerPolicy: 'no-referrer'
     });
+    if (response.status === 429) {
+      const retryAfter = response.headers.get('Retry-After');
+      const seconds = Number(retryAfter);
+      const delay = retryAfter && Number.isFinite(seconds) ? seconds * 1000 : Date.parse(retryAfter) - Date.now();
+      commonsRetryAt = Date.now() + Math.max(1000, Number.isFinite(delay) ? delay : 60000);
+    }
     if (!response.ok) return null;
     const result = await response.json();
     const pages = Object.values(result.query?.pages || {}).sort((a, b) => a.index - b.index);
@@ -78,10 +92,11 @@ async function fetchCommonsRecipePhoto(query) {
 
 function getRecipeImageSource(recipe) {
   const explicit = recipe.imageData || (recipe.image && !recipe.image.includes('placehold.co') ? recipe.image : '');
-  const builtIn = PRELOADED_IMAGES[recipe.id];
+  const builtIn = PRELOADED_IMAGES[recipe.id] || DEFAULT_RECIPE_PHOTOS[recipe.id]?.url;
   if (explicit || builtIn) return explicit || builtIn;
   const cached = getImageCache()[recipe.id];
-  return (typeof cached === 'string' ? cached : cached?.url) || '';
+  return (typeof cached === 'string' ? cached : cached?.url) ||
+    (recipe.id >= 90 && recipe.id <= 102 && recipe.category === 'Detské' ? DEFAULT_PUREE_PHOTO : '');
 }
 
 async function getRecipeImage(recipe) {
@@ -97,7 +112,9 @@ async function getRecipeImage(recipe) {
 }
 
 function renderRecipeImageCredit(recipe, image) {
-  const photo = getImageCache()[recipe.id];
+  if (image === DEFAULT_PUREE_PHOTO) return t('Ilustračná fotka', 'Illustrative photo');
+  const preset = DEFAULT_RECIPE_PHOTOS[recipe.id];
+  const photo = preset?.url === image ? preset : getImageCache()[recipe.id];
   if (!photo || typeof photo !== 'object' || photo.url !== image ||
       !/^https:\/\/commons\.wikimedia\.org\/wiki\/File:/i.test(photo.source) ||
       !/^https:\/\/creativecommons\.org\/licenses\//i.test(photo.licenseUrl)) return '';
@@ -119,11 +136,8 @@ async function refreshRecipeImages() {
 async function batchFetchImages() {
   const toFetch = recipes.filter(recipe => !getRecipeImageSource(recipe));
   if (!toFetch.length) return;
-  // Fetch in batches of 3 to avoid rate limiting
-  for (let i = 0; i < toFetch.length; i += 3) {
-    const batch = toFetch.slice(i, i + 3);
-    await Promise.all(batch.map(r => getRecipeImage(r).catch(() => {})));
-    // Small delay between batches
-    if (i + 3 < toFetch.length) await new Promise(r => setTimeout(r, 500));
+  for (const recipe of toFetch) {
+    if (Date.now() < commonsRetryAt) break;
+    await getRecipeImage(recipe);
   }
 }
