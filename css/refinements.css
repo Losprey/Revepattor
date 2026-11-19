@@ -964,6 +964,11 @@ html.light .today-sun {
   font-size: .87rem;
 }
 
+.today-meal-copy .today-meal-planned {
+  color: var(--today-accent);
+  font-weight: 700;
+}
+
 .today-empty {
   margin: 6px 4px 10px;
 }

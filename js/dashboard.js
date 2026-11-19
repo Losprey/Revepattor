@@ -260,7 +260,9 @@ function renderMobileMealRow(meal, ctx) {
   const edit = `pickRecipe('${ctx.todayName}','${meal.id}','${ctx.weekKey}')`;
   return `<button type="button" class="today-meal" onclick="${edit}">
     <span class="today-meal-icon">${todayIcon(meal.id)}${image ? `<img src="${escAttr(image)}" alt="" loading="lazy" onerror="this.remove()">` : ''}</span>
-    <span class="today-meal-copy"><strong>${esc(label)}</strong><span>${esc(title || t('Pridať jedlo','Add meal'))}</span></span>
+    <span class="today-meal-copy"><strong>${esc(label)}</strong>
+      <span class="${title ? 'today-meal-planned' : ''}">${esc(title || t('Pridať jedlo','Add meal'))}</span>
+    </span>
     ${todayIcon('chevron')}
   </button>`;
 }
