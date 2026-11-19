@@ -1084,7 +1084,7 @@ function cleanHtml(text) {
 const IMPORT_URL_HISTORY_KEY = 'importUrlHistory';
 const SUPPORTED_SITES = ['varecha.pravda.sk', 'mnamky.sk', 'recepty.sk', 'allrecipes.com', 'bbcgoodfood.com', 'foodnetwork.com'];
 
-function showImportUrlModal() {
+function showImportUrlModal(focusInput = true) {
   const input = document.getElementById('import-url-input');
   if (input) { input.value = ''; input.className = ''; }
   setImportStatus('');
@@ -1100,7 +1100,7 @@ function showImportUrlModal() {
   const hist = document.getElementById('import-url-history');
   if (hist) hist.style.display = 'none';
   openModal('import-url-modal');
-  setTimeout(function() { if (input) input.focus(); }, 300);
+  if (focusInput) setTimeout(function() { if (input) input.focus(); }, 300);
 }
 
 function validateImportUrl() {
@@ -1293,7 +1293,7 @@ function importFromUrl() {
         throw err;
       })
       .then(raw => {
-        if (!raw) return;
+        if (!raw || !document.getElementById('import-url-modal').classList.contains('active')) return;
         let html = raw;
         try {
           const parsed = JSON.parse(raw);

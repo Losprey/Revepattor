@@ -174,6 +174,7 @@ function prevOnboardSlide() {
 function closeOnboarding() {
   document.getElementById('onboarding-overlay')?.remove();
   localStorage.setItem('onboardingCompleted', '1');
+  openPendingSharedRecipe();
 }
 
 function pickOnboardLang(l) {

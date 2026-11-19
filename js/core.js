@@ -88,6 +88,7 @@ function initFirebaseAuth() {
     }
     // Hide splash after first auth state is resolved
     if (window._hideSplash) window._hideSplash();
+    openPendingSharedRecipe();
   });
 }
 
@@ -132,6 +133,7 @@ function signOutUser() {
 }
 
 function continueAsGuest() {
+  authLoading = false;
   authIsGuest = true;
   authUser = null;
   setStoreNamespace('guest_');
@@ -148,6 +150,7 @@ function continueAsGuest() {
   // Skry onboarding overlay ak je otvorený
   var onb = document.getElementById('onboarding-overlay');
   if (onb) onb.remove();
+  openPendingSharedRecipe();
 }
 
 function migrateGuestToUser() {

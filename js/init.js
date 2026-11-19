@@ -23,6 +23,61 @@ document.getElementById('recipe-grid').addEventListener('click', function(e) {
     if (!isNaN(id)) viewRecipe(id);
   }
 });
+const sharedRecipeStorageKey = 'pendingSharedRecipe';
+let pendingSharedRecipe = null;
+
+function getSharedRecipeUrl(params) {
+  for (const field of ['shared_url', 'shared_text', 'shared_title']) {
+    const value = params.get(field) || '';
+    const candidate = value.trim().match(/^https?:\/\/\S+$/i)?.[0] ||
+      value.match(/https?:\/\/[^\s<>"']+/i)?.[0]?.replace(/[.,;!?]+$/, '');
+    if (!candidate || candidate.length > 4096) continue;
+    try {
+      const url = new URL(candidate);
+      if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password) continue;
+      if (url.origin === location.origin || /^(?:localhost|127\.|\[::1\])/i.test(url.hostname)) continue;
+      return url.href;
+    } catch (error) {}
+  }
+  return '';
+}
+
+function captureSharedRecipe() {
+  const locationUrl = new URL(location.href);
+  const shareFields = ['shared_url', 'shared_text', 'shared_title'];
+  if (!shareFields.some(field => locationUrl.searchParams.has(field))) {
+    try { pendingSharedRecipe = JSON.parse(sessionStorage.getItem(sharedRecipeStorageKey) || 'null'); } catch (error) {}
+    return;
+  }
+
+  pendingSharedRecipe = { url: getSharedRecipeUrl(locationUrl.searchParams) };
+  try { sessionStorage.setItem(sharedRecipeStorageKey, JSON.stringify(pendingSharedRecipe)); } catch (error) {}
+  for (const key of shareFields) locationUrl.searchParams.delete(key);
+  history.replaceState(history.state, '', locationUrl);
+}
+
+function openPendingSharedRecipe() {
+  if (!pendingSharedRecipe) return;
+  if (authLoading && typeof firebase !== 'undefined') return;
+  if (document.getElementById('login-overlay').style.display === 'flex' ||
+      document.getElementById('onboarding-overlay')) return;
+
+  const { url } = pendingSharedRecipe;
+  pendingSharedRecipe = null;
+  try { sessionStorage.removeItem(sharedRecipeStorageKey); } catch (error) {}
+  if (!url) {
+    showToast(t('V zdieľaní sa nenašiel odkaz na recept.', 'No recipe link was found in the share.'), 'warning');
+    return;
+  }
+
+  switchTab('home');
+  showImportUrlModal(false);
+  document.getElementById('import-url-input').value = url;
+  validateImportUrl();
+  importFromUrl();
+}
+
+captureSharedRecipe();
 try { applyLang(); } catch(e) {}
 try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch(e) {}
 const initialHashTab = (location.hash || '').replace(/^#tab-/, '').replace('#', '');
@@ -32,6 +87,7 @@ document.body.dataset.tab = initialTab;
 switchTab(initialTab);
 render();
 showTipOfDay();
+setTimeout(openPendingSharedRecipe, 350);
 
 // Background image fetch for Pexels – fetches any still-missing images
 batchFetchImages().then(() => { render(); renderDashboard(); showTipOfDay(); });
