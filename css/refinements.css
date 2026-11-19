@@ -1870,3 +1870,13 @@ body:is([data-tab="dashboard"], [data-tab="board"]) .app-family-write-status {
     max-width: 860px;
   }
 }
+
+
+.shop-bought-chevron {
+  margin-inline-start: 4px;
+  color: var(--today-accent);
+}
+
+.shop-bought-section[open] .shop-bought-chevron {
+  transform: rotate(180deg);
+}

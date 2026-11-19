@@ -120,6 +120,7 @@ function toggleStoreMode() {
 
 function renderShoppingList() {
   const container = document.getElementById('shopping-list-view');
+  const boughtWasOpen = container.querySelector('.shop-bought-section[open]') !== null;
   loadShopItems();
   // Only keep manual items (recipe auto-population removed per user request)
   shopItems = shopItems.filter(function(it) { return it && it.source === 'manual'; });
@@ -187,15 +188,14 @@ function renderShoppingList() {
 
   html += renderShopCategoryCards(openGroups, { bought: false });
   if (boughtItems.length) {
-    const tag = storeMode ? 'details' : 'div';
-    const header = storeMode ? 'summary' : 'div';
-    html += `<${tag} class="shop-bought-section">
-      <${header} class="shop-bought-head">
+    html += `<details class="shop-bought-section"${boughtWasOpen && !storeMode ? ' open' : ''}>
+      <summary class="shop-bought-head">
         <span>✅ ${t('Kúpené', 'Bought')}</span>
         <small>${boughtItems.length}</small>
-      </${header}>
+        <span class="shop-bought-chevron" aria-hidden="true">⌄</span>
+      </summary>
       ${renderShopCategoryCards(boughtGroups, { bought: true })}
-    </${tag}>`;
+    </details>`;
   }
 
   container.innerHTML = html;
