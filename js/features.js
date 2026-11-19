@@ -220,9 +220,9 @@ try { initNotifications(); } catch(e) {}
   const _origSWP = saveWeekPlan;
   const _origST = saveTasks;
   const _origSLS = saveToLS;
-  saveShopItems = function() { try { _origSSI(); } catch(e) {}; if (familyCode) try { pushToFirebase('shoppingItems','shoppingItems'); } catch(e) {} };
+  saveShopItems = function() { try { _origSSI(); } catch(e) { return false; } if (familyCode) try { pushToFirebase('shoppingItems','shoppingItems'); } catch(e) {} return true; };
   saveWeekPlan = function() { try { _origSWP(); } catch(e) {}; if (familyCode) try { pushToFirebase('mealPlan','mealPlan'); pushToFirebase('mealPlanKids','mealPlanKids'); } catch(e) {} };
-  saveTasks = function() { try { _origST(); } catch(e) {}; if (familyCode) try { pushToFirebase('tasks','tasks'); } catch(e) {} };
+  saveTasks = function() { try { _origST(); } catch(e) { return false; } if (familyCode) try { pushToFirebase('tasks','tasks'); } catch(e) {} return true; };
   saveToLS = function() { try { _origSLS(); } catch(e) {}; if (familyCode) try { pushToFirebase('recipes','recipes'); } catch(e) {} };
 })();
 

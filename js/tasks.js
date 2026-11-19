@@ -421,28 +421,19 @@ function deleteTask(id) {
   });
 }
 
-function toggleTaskExtra() {
-  var el = document.getElementById('task-extra-fields');
-  var btn = document.getElementById('task-extra-toggle');
-  if (!el || !btn) return;
-  var isVisible = el.style.display !== 'none';
-  el.style.display = isVisible ? 'none' : '';
-  btn.textContent = isVisible ? '▼ ' + (lang==='en'?'More options':'Viac možností') : '▲ ' + (lang==='en'?'Less options':'Menej možností');
-}
-
 function openTaskSheet(editId) {
   const sheet = document.getElementById('task-sheet');
   document.getElementById('task-sheet-title').textContent = editId
-    ? (lang==='en'?'✏️ Edit task':'✏️ Upraviť úlohu')
-    : (lang==='en'?'✅ Add task':'✅ Pridať úlohu');
-  document.getElementById('task-save-btn').textContent = editId
-    ? (lang==='en'?'💾 Save':'💾 Uložiť')
-    : (lang==='en'?'💾 Add':'💾 Pridať');
+    ? (lang==='en'?'Edit task':'Upraviť úlohu')
+    : (lang==='en'?'Add task':'Pridať úlohu');
+  document.getElementById('task-save-btn').textContent = t('Uložiť', 'Save');
 
-  // Hide extra fields by default for new tasks
+  document.getElementById('task-entry-status').textContent = '';
+  document.getElementById('task-extra-fields').open = false;
+  document.getElementById('task-extra-toggle').textContent = t('Viac možností', 'More options');
+  document.getElementById('task-date-label').textContent = t('Termín', 'Due date');
+  document.getElementById('task-time-label').textContent = t('Čas', 'Time');
   if (!editId) {
-    document.getElementById('task-extra-fields').style.display = 'none';
-    document.getElementById('task-extra-toggle').textContent = '▼ ' + (lang==='en'?'More options':'Viac možností');
     document.getElementById('task-date').value = new Date().toISOString().slice(0,10);
     document.getElementById('task-time').value = '';
     document.getElementById('task-priority').value = 'medium';
@@ -450,10 +441,6 @@ function openTaskSheet(editId) {
     document.getElementById('task-note').value = '';
     document.getElementById('task-title').value = '';
     document.getElementById('task-edit-id').value = '';
-  } else {
-    // Show extra fields when editing
-    document.getElementById('task-extra-fields').style.display = '';
-    document.getElementById('task-extra-toggle').textContent = '▲ ' + (lang==='en'?'Less options':'Menej možností');
   }
 
   // Render category chips
@@ -519,7 +506,12 @@ function saveTask() {
   } else {
     tasks.push({ id: generateTaskId(), title, category, completed: false, date: date || new Date().toISOString().slice(0,10), time, priority, repeat, note, source: 'manual', completedDate: '' });
   }
-  saveTasks();
+  if (saveTasks() === false) {
+    loadTasks();
+    document.getElementById('task-entry-status').textContent = t('Úlohu sa nepodarilo uložiť. Skús to znova.', 'Could not save the task. Try again.');
+    return;
+  }
+  showToast(t('Úloha uložená v zariadení.', 'Task saved on this device.'), 'success');
   // Notify family
   if (typeof sendPushToFamily === 'function' && typeof taskTitle !== 'undefined' && taskTitle) {
     var pushAuthor = authUser ? (authUser.displayName || authUser.email || '👤') : t('Hosť','Guest');

@@ -90,7 +90,7 @@ function renderPlanner() {
       }
       const pick = `pickRecipe('${day}','${meal.id}','${weekKey}')`;
       const label = mealLabel(meal.id);
-      const action = recipe ? `viewRecipe(${recipe.id})` : pick;
+      const action = entry ? `openMealSlotActions('${day}','${meal.id}','${weekKey}')` : pick;
       return `<td><button type="button" class="weekly-slot ${name ? 'filled' : 'empty'}" onclick="${action}"
           title="${escAttr(name || label)}" aria-label="${escAttr(label + ': ' + (name || t('Pridať jedlo','Add meal')))}">
           <span>${name ? esc(name) : '+'}</span>
@@ -247,16 +247,53 @@ function selectCustomMeal(day, slot, text, weekKey) {
   localStorage.setItem('mealPlan', JSON.stringify(mealPlan));
   localStorage.setItem('mealPlanKids', JSON.stringify(mealPlanKids));
   renderPlanner();
+  showToast(t('Jedlo uložené v zariadení.', 'Meal saved on this device.'), 'success');
 }
+function openMealSlotActions(day, slot, weekKey) {
+  const entry = getWeekPlan(weekKey)[day]?.[slot];
+  if (!entry) {
+    pickRecipe(day, slot, weekKey);
+    return;
+  }
+  const recipe = getSlotRecipe(entry);
+  const dialog = document.createElement('dialog');
+  dialog.id = 'meal-slot-actions';
+  dialog.className = 'entry-sheet meal-slot-dialog';
+  dialog.setAttribute('aria-labelledby', 'meal-slot-title');
+  dialog.innerHTML = `<div class="sheet-header">
+    <h2 id="meal-slot-title">${esc(getSlotName(entry) || mealLabel(slot))}</h2>
+    <button type="button" class="sheet-close" aria-label="${t('Zavrieť','Close')}" data-meal-action="close">✕</button>
+  </div>
+  <div class="meal-slot-buttons">
+    ${recipe ? `<button type="button" class="btn btn-secondary" data-meal-action="view">${t('Otvoriť recept','Open recipe')}</button>` : ''}
+    <button type="button" class="btn btn-primary" data-meal-action="replace">${t('Vymeniť jedlo','Replace meal')}</button>
+    <button type="button" class="btn btn-secondary meal-remove" data-meal-action="remove">${t('Odstrániť','Remove')}</button>
+  </div>`;
+  const actions = {
+    view: () => { if (recipe) viewRecipe(recipe.id); },
+    replace: () => pickRecipe(day, slot, weekKey),
+    remove: () => removeSlot(day, slot, weekKey)
+  };
+  dialog.addEventListener('click', event => {
+    const action = event.target.closest('[data-meal-action]')?.dataset.mealAction;
+    if (!action && event.target !== dialog) return;
+    dialog.close();
+    actions[action]?.();
+  });
+  dialog.addEventListener('close', () => dialog.remove(), { once: true });
+  document.body.appendChild(dialog);
+  dialog.showModal();
+}
+
 function createPickerModal() {
   const div = document.createElement('div');
   div.id = 'planner-picker';
   div.className = '';
   div.onclick = function(e) { if (e.target === div) closePickerModal(); };
-  div.innerHTML = `<div class="picker-sheet">
-    <div class="picker-header">
-      <span class="picker-title">${lang==='en'?'Pick a recipe':'Vybrať recept'}</span>
-      <button class="picker-close" onclick="closePickerModal()" aria-label="Zavrieť">✕</button>
+  div.innerHTML = `<div class="picker-sheet entry-sheet" role="dialog" aria-modal="true" aria-labelledby="picker-title">
+    <div class="picker-header sheet-header">
+      <h2 class="picker-title" id="picker-title">${lang==='en'?'Pick a recipe':'Vybrať recept'}</h2>
+      <button class="picker-close sheet-close" onclick="closePickerModal()" aria-label="Zavrieť">✕</button>
     </div>
     <div class="picker-search-wrap">
       <input id="picker-search" type="text" placeholder="🔍 ${lang==='en'?'Search recipes...':'Hľadať recept...'}" aria-label="${lang==='en'?'Search recipes':'Hľadať recepty'}" oninput="filterPickerRecipes()">
@@ -271,9 +308,9 @@ function createPickerModal() {
       <span class="picker-chip" data-cat="__favs__" onclick="setPickerFilter(this,'__favs__')">❤️ ${lang==='en'?'Favorites':'Obľúbené'}</span>
     </div>
     <div class="picker-list" id="picker-recipes"></div>
-    <div class="picker-custom-row" id="picker-custom-row">
+    <div class="picker-custom-row entry-footer" id="picker-custom-row">
       <input id="picker-custom" type="text" placeholder="✍️ ${lang==='en'?'Or type custom meal...':'Alebo napíš vlastné jedlo...'}" aria-label="${lang==='en'?'Custom meal':'Vlastné jedlo'}">
-      <button id="picker-custom-btn" onclick="submitCustomMeal()">${lang==='en'?'Add':'Pridať'}</button>
+      <button type="button" class="btn btn-primary" id="picker-custom-btn" onclick="submitCustomMeal()">${lang==='en'?'Add':'Pridať'}</button>
     </div>
   </div>`;
   document.body.appendChild(div);
@@ -288,16 +325,16 @@ function openPickerModal(day, slot, wk) {
   document.getElementById('picker-chips')?.querySelectorAll('.picker-chip').forEach(c => c.classList.toggle('active', c.dataset.cat === ''));
   document.getElementById('picker-search').value = '';
   const customInput = document.getElementById('picker-custom');
-  const weekPlan = getWeekPlan(wk);
+  const weekPlan = getWeekPlan(_pickerWk);
   const cur = weekPlan[day] && weekPlan[day][slot];
   customInput.value = (cur && cur.type === 'custom') ? cur.text : '';
   customInput.onkeydown = function(e) {
     if (e.key === 'Enter' && this.value.trim()) {
-      selectCustomMeal(day, slot, this.value.trim(), wk);
-      closePickerModal();
+      submitCustomMeal();
     }
   };
   renderPickerRecipes();
+  el.querySelector('.picker-close').focus();
 }
 
 function closePickerModal() {

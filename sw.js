@@ -51,12 +51,12 @@ self.addEventListener('message', function(e) {
   }
 });
 
-var CACHE = 'mealnest-v71';
+var CACHE = 'mealnest-v72';
 const appShell = new URL('index.html', self.registration.scope).href;
 const PRECACHE = [
   appShell,
-  'dist/app.min.js?v=9',
-  'dist/styles.min.css?v=9',
+  'dist/app.min.js?v=10',
+  'dist/styles.min.css?v=10',
   'recipes-default.json',
   'images/recipes/93.jpg',
   'images/recipes/95.jpg',

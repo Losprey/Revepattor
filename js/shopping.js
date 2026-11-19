@@ -414,31 +414,33 @@ function openAddItemSheet(editId) {
   const noteEl = document.getElementById('shop-item-note');
   const editIdEl = document.getElementById('shop-edit-id');
   const saveBtn = document.getElementById('shop-save-btn');
-  const chips = document.getElementById('shop-cat-chips');
+  document.getElementById('shop-entry-status').textContent = '';
 
   if (editId) {
     const it = shopItems.find(i => i.id === editId);
     if (!it) return;
-    title.textContent = lang === 'en' ? '✏️ Edit item' : '✏️ Upraviť položku';
+    title.textContent = lang === 'en' ? 'Edit item' : 'Upraviť položku';
     nameEl.value = it.name;
     amountEl.value = it.amount || '';
     unitEl.value = it.unit || '';
     noteEl.value = it.note || '';
     editIdEl.value = editId;
-    saveBtn.textContent = lang === 'en' ? '💾 Save' : '💾 Uložiť';
     renderCategoryChips(it.category);
   } else {
-    title.textContent = lang === 'en' ? '✏️ Add item' : '✏️ Pridať potravinu';
+    title.textContent = lang === 'en' ? 'Add item' : 'Pridať položku';
     nameEl.value = '';
     amountEl.value = '';
     unitEl.value = '';
     noteEl.value = '';
     editIdEl.value = '';
-    saveBtn.textContent = lang === 'en' ? '💾 Add' : '💾 Pridať';
     renderCategoryChips('other');
   }
+  saveBtn.textContent = t('Uložiť', 'Save');
+  const nextButton = document.getElementById('shop-save-next');
+  nextButton.hidden = Boolean(editId);
+  nextButton.textContent = t('Uložiť a pridať ďalšiu', 'Save and add another');
   sheet.classList.add('active');
-  nameEl.focus();
+  document.getElementById('shop-item-name').focus();
 }
 
 function renderCategoryChips(selected) {
@@ -457,7 +459,7 @@ function closeShopSheet() {
   document.getElementById('shop-sheet').classList.remove('active');
 }
 
-function saveShopItem() {
+function saveShopItem(addAnother = false) {
   const nameEl = document.getElementById('shop-item-name');
   const amountEl = document.getElementById('shop-item-amount');
   const unitEl = document.getElementById('shop-item-unit');
@@ -497,9 +499,20 @@ function saveShopItem() {
   }
   // Auto-merge duplicates after adding new item
   try { autoMergeShopItems(); } catch(e) {}
-  saveShopItems();
-  closeShopSheet();
+  const status = document.getElementById('shop-entry-status');
+  if (saveShopItems() === false) {
+    loadShopItems();
+    status.textContent = t('Položku sa nepodarilo uložiť. Skús to znova.', 'Could not save the item. Try again.');
+    return;
+  }
   renderShoppingList();
+  if (addAnother && !editId) {
+    openAddItemSheet();
+    status.textContent = t('Položka uložená v zariadení.', 'Item saved on this device.');
+  } else {
+    closeShopSheet();
+    showToast(t('Položka uložená v zariadení.', 'Item saved on this device.'), 'success');
+  }
 }
 
 function deleteShopItem(id) {

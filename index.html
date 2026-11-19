@@ -15,7 +15,7 @@
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <title data-lang="appTitle">Mealnest</title>
-  <link rel="stylesheet" href="dist/styles.min.css?v=9">
+  <link rel="stylesheet" href="dist/styles.min.css?v=10">
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -206,8 +206,8 @@
 </div>
 
 <!-- ADD ITEM SHEET -->
-<div class="sheet-overlay" id="shop-sheet">
-  <div class="sheet">
+<div class="sheet-overlay" id="shop-sheet" onclick="if(event.target===this)closeShopSheet()">
+  <div class="sheet entry-sheet" role="dialog" aria-modal="true" aria-labelledby="shop-sheet-title">
     <div class="sheet-handle"></div>
     <div class="sheet-header">
       <h2 id="shop-sheet-title">✏️ Pridať potravinu</h2>
@@ -215,9 +215,9 @@
     </div>
     <div class="sheet-body">
       <div class="form-group"><input id="shop-item-name" placeholder="Názov potraviny" aria-label="Názov potraviny" style="font-size:.9rem;font-weight:600;" oninput="guessShopCategory()"></div>
-      <div class="form-row" style="gap:.35rem;">
-        <div class="form-group" style="flex:1;"><input id="shop-item-amount" type="number" step="0.1" min="0" placeholder="Množstvo" aria-label="Množstvo"></div>
-        <div class="form-group" style="flex:1;"><input id="shop-item-unit" placeholder="Jednotka (g, ks, ml...)" aria-label="Jednotka"></div>
+      <div class="entry-form-row">
+        <div class="form-group"><input id="shop-item-amount" type="number" step="0.1" min="0" placeholder="Množstvo" aria-label="Množstvo"></div>
+        <div class="form-group"><input id="shop-item-unit" placeholder="Jednotka (g, ks, ml...)" aria-label="Jednotka"></div>
       </div>
       <div class="form-group">
         <label class="shop-sheet-label">Kategória</label>
@@ -225,9 +225,13 @@
       </div>
       <div class="form-group"><input id="shop-item-note" placeholder="Poznámka (voliteľné)"></div>
       <input type="hidden" id="shop-edit-id" value="">
-      <div class="form-row" style="gap:.35rem;margin-top:.3rem;">
-        <button class="btn primary" onclick="saveShopItem()" style="flex:1;font-size:.82rem;" id="shop-save-btn">💾 Pridať</button>
-        <button class="btn btn-secondary" onclick="closeShopSheet()" style="font-size:.82rem;" data-lang="cancel">Zrušiť</button>
+    </div>
+    <div class="entry-footer">
+      <p class="entry-status" id="shop-entry-status" role="status"></p>
+      <div class="entry-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeShopSheet()" data-lang="cancel">Zrušiť</button>
+        <button type="button" class="btn btn-secondary" id="shop-save-next" onclick="saveShopItem(true)">Uložiť a pridať ďalšiu</button>
+        <button type="button" class="btn btn-primary" id="shop-save-btn" onclick="saveShopItem()">Uložiť</button>
       </div>
     </div>
   </div>
@@ -239,8 +243,8 @@
 </div>
 
 <!-- ADD TASK SHEET -->
-<div class="sheet-overlay" id="task-sheet">
-  <div class="sheet">
+<div class="sheet-overlay" id="task-sheet" onclick="if(event.target===this)closeTaskSheet()">
+  <div class="sheet entry-sheet" role="dialog" aria-modal="true" aria-labelledby="task-sheet-title">
     <div class="sheet-handle"></div>
     <div class="sheet-header">
       <h2 id="task-sheet-title">✅ Pridať úlohu</h2>
@@ -248,17 +252,18 @@
     </div>
     <div class="sheet-body">
       <div class="form-group"><input id="task-title" placeholder="Názov úlohy" aria-label="Názov úlohy" style="font-size:.9rem;font-weight:600;"></div>
-      <div class="form-group">
-        <label class="shop-sheet-label" data-lang="tasksCategory" id="tl-cat">Kategória</label>
-        <div class="shop-cat-chips" id="task-cat-chips"></div>
+      <div class="entry-field-row">
+        <label for="task-date"><span id="task-date-label">Termín</span><input id="task-date" type="date"></label>
+        <label for="task-time"><span id="task-time-label">Čas</span><input id="task-time" type="time"></label>
       </div>
-      <div class="form-group" id="task-extra-fields" style="display:none;">
-        <div class="form-row" style="gap:.35rem;">
-          <div class="form-group" style="flex:1;"><input id="task-date" type="date"></div>
-          <div class="form-group" style="flex:1;"><input id="task-time" type="time" placeholder="Čas"></div>
+      <details class="entry-options" id="task-extra-fields">
+        <summary id="task-extra-toggle">Viac možností</summary>
+        <div class="form-group">
+          <span class="shop-sheet-label" data-lang="tasksCategory" id="tl-cat">Kategória</span>
+          <div class="shop-cat-chips" id="task-cat-chips"></div>
         </div>
-        <div class="form-row" style="gap:.35rem;">
-          <div class="form-group" style="flex:1;">
+        <div class="entry-form-row">
+          <div class="form-group">
             <label class="shop-sheet-label" data-lang="tasksPriority" id="tl-priority">Priorita</label>
             <select id="task-priority" aria-label="Priorita úlohy" style="width:100%;padding:.45rem .5rem;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.8rem;background:var(--input-bg);color:var(--text);">
               <option value="low">🟢 Nízka</option>
@@ -266,7 +271,7 @@
               <option value="high">🔴 Vysoká</option>
             </select>
           </div>
-          <div class="form-group" style="flex:1;">
+          <div class="form-group">
             <label class="shop-sheet-label" data-lang="tasksRepeat" id="tl-repeat">Opakovanie</label>
             <select id="task-repeat" aria-label="Opakovanie úlohy" style="width:100%;padding:.45rem .5rem;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.8rem;background:var(--input-bg);color:var(--text);">
               <option value="none">❌ Žiadne</option>
@@ -276,12 +281,14 @@
           </div>
         </div>
         <div class="form-group"><input id="task-note" placeholder="✏️ Poznámka (voliteľné)"></div>
-      </div>
-      <button class="btn btn-secondary" onclick="toggleTaskExtra()" style="font-size:.7rem;margin-bottom:.3rem;width:100%;" id="task-extra-toggle">▼ Viac možností</button>
+      </details>
       <input type="hidden" id="task-edit-id" value="">
-      <div class="form-row" style="gap:.35rem;margin-top:.3rem;">
-        <button class="btn primary" onclick="saveTask()" style="flex:1;font-size:.82rem;" id="task-save-btn">💾 Pridať</button>
-        <button class="btn btn-secondary" onclick="closeTaskSheet()" style="font-size:.82rem;" data-lang="cancel">Zrušiť</button>
+    </div>
+    <div class="entry-footer">
+      <p class="entry-status" id="task-entry-status" role="status"></p>
+      <div class="entry-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeTaskSheet()" data-lang="cancel">Zrušiť</button>
+        <button type="button" class="btn btn-primary" id="task-save-btn" onclick="saveTask()">Uložiť</button>
       </div>
     </div>
   </div>
@@ -498,7 +505,7 @@
 
 
 <!-- Bundled via esbuild (was 16 JS + 4 CSS files) -->
-<script src="dist/app.min.js?v=9" defer></script>
+<script src="dist/app.min.js?v=10" defer></script>
 
 <!-- Quick add FAB -->
 <div id="fab-quick-add" style="display:none">

@@ -642,6 +642,7 @@
 
 /* Lock the document only while a full-screen overlay is visible. */
 html:has(#planner-picker.active),
+html:has(.sheet-overlay.active .entry-sheet),
 html:has(#onboarding-overlay.active) {
   overflow: hidden;
 }
@@ -1591,4 +1592,184 @@ html.light .weekly-overview {
 .recipe-image-credit a {
   color: inherit;
   text-decoration: underline;
+}
+
+.entry-sheet {
+  --entry-gap: 12px;
+  --entry-space: clamp(14px, 4vw, 22px);
+}
+
+.sheet-overlay:has(.entry-sheet).active {
+  padding-inline: min(8px, 2vw);
+}
+
+body[data-tab] :is(.sheet.entry-sheet, .picker-sheet.entry-sheet) {
+  display: flex;
+  flex-direction: column;
+  width: min(100%, 520px);
+  max-height: min(90vh, 90dvh);
+  overflow: hidden;
+}
+
+.entry-sheet .sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--entry-gap);
+  padding: 6px var(--entry-space);
+  flex: 0 0 auto;
+}
+
+.entry-sheet .sheet-header h2 {
+  margin: 0;
+  font-size: 1.12rem;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.entry-sheet .sheet-close {
+  flex: none;
+  width: 44px;
+  min-height: 44px;
+}
+
+.entry-sheet .sheet-body {
+  overflow: auto;
+  padding: var(--entry-gap) var(--entry-space);
+  overscroll-behavior: contain;
+}
+
+.entry-sheet :is(input:not([type="hidden"]), select) {
+  min-height: 44px;
+  font-size: 1rem !important;
+  min-width: 0;
+}
+
+.entry-field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--entry-gap);
+}
+
+.entry-field-row label {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+  font-size: .82rem;
+  color: var(--today-muted);
+}
+
+.entry-field-row input {
+  width: 100%;
+}
+
+.entry-options {
+  margin-top: 12px;
+}
+
+.entry-options summary {
+  padding-block: 12px;
+  min-height: 44px;
+  cursor: pointer;
+  font-weight: 650;
+}
+
+.entry-footer {
+  flex: 0 0 auto;
+  padding: var(--entry-gap) var(--entry-space) calc(var(--entry-gap) + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--today-line);
+  background: var(--today-card);
+}
+
+.entry-status {
+  margin: 0 0 8px;
+  color: var(--today-muted);
+  font-size: .84rem;
+}
+
+.entry-status:empty {
+  display: none;
+}
+
+.entry-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.entry-actions .btn,
+.entry-footer .btn {
+  min-height: 44px;
+  white-space: normal;
+}
+
+.entry-actions [hidden] {
+  display: none !important;
+}
+
+.entry-sheet .picker-list {
+  min-height: 0;
+}
+
+.entry-sheet .picker-custom-row {
+  display: flex;
+  gap: 8px;
+}
+
+.entry-sheet .picker-custom-row input {
+  flex: 1;
+}
+
+.entry-sheet .picker-custom-row button {
+  flex: 0 0 auto;
+}
+
+.meal-slot-dialog {
+  inset: auto 0 0;
+  width: min(calc(100% - 16px), 520px);
+  margin: 0 auto 8px;
+  padding: 0;
+  border: 1px solid var(--today-line);
+  border-radius: 18px;
+  background: var(--today-card);
+  color: var(--today-text);
+}
+
+.meal-slot-dialog::backdrop {
+  background: rgba(0, 0, 0, .52);
+}
+
+.meal-slot-buttons {
+  display: grid;
+  gap: 8px;
+  padding: var(--entry-gap) var(--entry-space) calc(var(--entry-space) + env(safe-area-inset-bottom, 0px));
+}
+
+.meal-slot-buttons .btn {
+  min-height: 44px;
+}
+
+.meal-slot-buttons .meal-remove {
+  color: var(--danger);
+}
+
+@media (min-width: 680px) {
+  .meal-slot-dialog {
+    inset: 0;
+    margin: auto;
+  }
+}
+
+.entry-form-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--entry-gap);
+}
+
+@media (max-width: 420px) {
+  #shop-save-next {
+    order: -1;
+    flex-basis: 100%;
+  }
 }

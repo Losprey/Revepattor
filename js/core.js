@@ -704,7 +704,7 @@ function autoPullFromFirebase() {
 let _backPressTimer = 0;
 
 function isAnyModalOpen() {
-  return document.querySelector('.modal-overlay.active, #planner-picker.active, #login-overlay[style*="flex"], .sheet-overlay.active') !== null;
+  return document.querySelector('.modal-overlay.active, #meal-slot-actions[open], #planner-picker.active, #login-overlay[style*="flex"], .sheet-overlay.active') !== null;
 }
 
 // =================== CUSTOM CONFIRM MODAL ===================
@@ -734,6 +734,11 @@ function executeConfirm() {
 }
 
 function closeTopModal() {
+  const mealActions = document.querySelector('#meal-slot-actions[open]');
+  if (mealActions) {
+    mealActions.close();
+    return true;
+  }
   // Close any open modal/sheet/overlay
   const selectors = [
     '#ai-modal', '#ai-plan-modal',          // AI modals
