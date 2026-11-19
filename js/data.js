@@ -212,18 +212,8 @@ function applyLang() {
     if (formTitle) formTitle.textContent = t('formTitle');
   }
   // Planner labels
-  const phTitle = document.getElementById('planner-hero-title'); if (phTitle) phTitle.textContent = lang==='en'?'📅 Meal Planner':'📅 Plánovač jedál';
-  const phSub = document.getElementById('planner-hero-sub'); if (phSub) phSub.textContent = lang==='en'?'Plan the whole week in a few taps':'Naplánuj si celý týždeň na pár kliknutí';
-  const phBtns = document.querySelectorAll('#planner-hero .hero-header-actions .btn');
-  if (phBtns[0]) phBtns[0].textContent = lang==='en'?'🤖 AI week':'🤖 AI týždeň';
-  if (phBtns[1]) phBtns[1].textContent = '↺ Reset';
-  const ptA = document.getElementById('pt-adults-label'); if (ptA) ptA.textContent = lang==='en'?'Adults':'Dospelí';
-  const ptK = document.getElementById('pt-kids-label'); if (ptK) ptK.textContent = lang==='en'?'Kids':'Deti';
-  const plnThis = document.getElementById('pln-this'); if (plnThis) plnThis.textContent = lang==='en'?'This week':'Tento t\u00fd\u017ede\u0148';
-  const plnNext = document.getElementById('pln-next'); if (plnNext) plnNext.textContent = lang==='en'?'Next week':'Bud\u00faci t\u00fd\u017ede\u0148';
   const paC = document.getElementById('pa-clear-label'); if (paC) paC.textContent = lang==='en'?'Clear current week':'Vymazať aktuálny týždeň';
   const paA = document.getElementById('pa-ai-label'); if (paA) paA.textContent = lang==='en'?'📝 AI Shop':'📝 AI nákup';
-  const pipMealsLabel = document.getElementById('pip-meals-label'); if (pipMealsLabel) pipMealsLabel.textContent = lang==='en'?'meals':'jedál';
   const aiTip = document.getElementById('dash-ai-label'); if (aiTip) aiTip.textContent = lang==='en'?'AI tip of the day':'AI tip dňa';
   const rab = document.getElementById('recipe-ai-btn'); if (rab) { rab.textContent = lang==='en'?'🤖 What to cook?':'🤖 Čo uvariť?'; rab.title = lang==='en'?'AI suggestion from your ingredients':'AI návrh z vašich surovín'; }
   // Category dropdowns

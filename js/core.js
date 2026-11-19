@@ -621,37 +621,6 @@ function updateSeason() {
   document.body.dataset.season = seasons[new Date().getMonth()];
 }
 
-// =================== PARALLAX HERO COLLAPSE ===================
-var _plannerScrollHandler = null;
-function initPlannerParallax() {
-  if (_plannerScrollHandler) { document.removeEventListener('scroll', _plannerScrollHandler, { passive: true }); }
-  var _pipAutoHide = null;
-  _plannerScrollHandler = function() {
-    var hero = document.getElementById('planner-hero');
-    var pip = document.getElementById('planner-info-panel');
-    if (!hero || !pip || document.getElementById('planner-container').style.display === 'none') return;
-    var scrollY = window.pageYOffset || document.documentElement.scrollTop;
-    hero.classList.toggle('collapsed', scrollY > 20);
-    pip.classList.toggle('visible', scrollY > 80);
-    // Auto-hide floating panel after 2.5s of no scroll
-    if (scrollY > 80) {
-      if (_pipAutoHide) clearTimeout(_pipAutoHide);
-      _pipAutoHide = setTimeout(function() {
-        pip.classList.remove('visible');
-        _pipAutoHide = null;
-      }, 2500);
-    }
-  };
-  document.addEventListener('scroll', _plannerScrollHandler, { passive: true });
-}
-
-// Call parallax init after each planner render
-var _origRenderPlanner2 = renderPlanner;
-renderPlanner = function() {
-  _origRenderPlanner2.apply(this, arguments);
-  initPlannerParallax();
-};
-
 // Load family code from localStorage on init
 try { familyCode = localStorage.getItem('familyCode') || ''; } catch(e) { familyCode = ''; }
 if (familyCode) { setTimeout(function() { initFirebase(); if (firebaseReady) { connectToFamily(familyCode); setTimeout(function() { autoPullFromFirebase(); }, 2500); } }, 1500); }
@@ -736,6 +705,7 @@ function closeTopModal() {
     '#cooking-overlay.active',               // Cooking mode
     '#import-url-modal.active',              // Import URL
     '#form-modal.active',                    // Recipe form
+    '#day-detail-modal.active',              // Planner day detail
     '#planner-picker.active',                // Recipe picker
     '#shop-sheet.active',                    // Shop sheet
     '#task-sheet.active',                    // Task sheet
@@ -747,7 +717,8 @@ function closeTopModal() {
     if (el) {
       const active = el.classList.contains('active') || (el.id === 'login-overlay' && el.style.display === 'flex');
       if (active) {
-        if (typeof closeModal === 'function' && el.id.endsWith('-modal')) closeModal(el.id);
+        if (el.id === 'day-detail-modal') closeDayDetail();
+        else if (typeof closeModal === 'function' && el.id.endsWith('-modal')) closeModal(el.id);
         else if (el.id === 'planner-picker') closePickerModal();
         else if (el.id === 'shop-sheet') closeShopSheet();
         else if (el.id === 'task-sheet') closeTaskSheet();

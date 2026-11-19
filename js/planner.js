@@ -22,13 +22,6 @@ function mealShortLabel(id) {
   return map[id] ? map[id][lang] || map[id].sk : id;
 }
 
-function compactPlannerSlotName(name) {
-  const clean = String(name || '').trim();
-  if (!clean) return '';
-  const words = clean.split(/\s+/).slice(0, 2).join(' ') || clean;
-  return words.length > 24 ? words.slice(0, 23) + '…' : words;
-}
-
 function catLabel(cat) {
   const map = {
     'Hlavné jedlá':'Main dishes','Polievky':'Soups','Šaláty':'Salads','Dezerty':'Desserts',
@@ -51,149 +44,80 @@ function nextPlannerDay() { if (_selectedPlannerDay < 6) selectPlannerDay(_selec
 function prevPlannerDay() { if (_selectedPlannerDay > 0) selectPlannerDay(_selectedPlannerDay-1); }
 
 function renderPlanner() {
-  const todayEl = document.getElementById('planner-today');
-  const weekEl = document.getElementById('planner-week-grid');
-  const dayNames = lang === 'en' ? DAYS_EN : DAYS_SK;
   const weekKey = currentWeekKey();
   const weekPlan = getWeekPlan(weekKey);
-  const startOfWeek = plannerWeekStart(plannerWeekOffset);
-  const totalSlots = MEALS.length;
-  const todayStr = localDateKey(new Date());
-  const todayIdx = (new Date().getDay() + 6) % 7;
+  const start = plannerWeekStart(plannerWeekOffset);
+  const end = new Date(start);
+  end.setDate(start.getDate() + DAYS.length - 1);
+  const locale = lang === 'en' ? 'en-GB' : 'sk-SK';
+  const dateFormat = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', ...(start.getFullYear() !== end.getFullYear() ? { year: 'numeric' } : {}) });
+  const startLabel = start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear()
+    ? String(start.getDate()) + (lang === 'sk' ? '.' : '')
+    : dateFormat.format(start);
+  const range = startLabel + ' – ' + dateFormat.format(end);
 
-  const heroTitle = document.getElementById('planner-hero-title');
-  if (heroTitle) heroTitle.textContent = lang === 'en' ? '📅 Meal Planner' : '📅 Plánovač jedál';
-  const heroSub = document.getElementById('planner-hero-sub');
-  if (heroSub) heroSub.textContent = lang === 'en' ? 'Plan the whole week in a few taps' : 'Naplánuj si celý týždeň na pár kliknutí';
-  const planButtons = document.querySelectorAll('#planner-hero .hero-header-actions .btn');
-  if (planButtons[0]) planButtons[0].textContent = lang === 'en' ? '🤖 AI week' : '🤖 AI týždeň';
-  if (planButtons[1]) planButtons[1].textContent = lang === 'en' ? '↺ Reset' : '↺ Reset';
-  const paClear = document.getElementById('pa-clear-label');
-  if (paClear) paClear.textContent = lang === 'en' ? 'Clear current week' : 'Vymazať aktuálny týždeň';
-  const paAi = document.getElementById('pa-ai-label');
-  if (paAi) paAi.textContent = lang === 'en' ? '📝 AI Shop' : '📝 AI nákup';
-
-  // Plan type switcher
-  const pts = document.getElementById('plan-type-switch');
-  if (pts) pts.className = 'plan-type-switch' + (planType === 'kids' ? ' kids' : '');
-  document.querySelectorAll('.plan-type-btn').forEach(b => b.classList.toggle('active', b.dataset.pt === planType));
-  const ptA = document.getElementById('pt-adults-label'); if (ptA) ptA.textContent = lang === 'en' ? 'Adults' : 'Dospelí';
-  const ptK = document.getElementById('pt-kids-label'); if (ptK) ptK.textContent = lang === 'en' ? 'Kids' : 'Deti';
-
-  // Week nav active state
-  const plnThis = document.getElementById('pln-this');
-  const plnNext = document.getElementById('pln-next');
-  if (plnThis) {
-    plnThis.classList.toggle('active', plannerWeekOffset === 0);
-    plnThis.textContent = lang==='en'?'This week':'Tento týždeň';
-  }
-  if (plnNext) {
-    plnNext.classList.toggle('active', plannerWeekOffset === 1);
-    plnNext.textContent = lang==='en'?'Next week':'Budúci týždeň';
-  }
-
-  // ===== TODAY SECTION =====
-  const dayNameToday = dayNames[todayIdx];
-  const todayDate = new Date();
-  const todayDisp = todayDate.getDate() + '. ' + (todayDate.getMonth()+1) + '. ' + todayDate.getFullYear();
-  const todayWk = getWeekKey(new Date());
-  const todayPlan = getWeekPlan(todayWk);
-  const todayDay = todayPlan[DAYS[todayIdx]] || {};
-  let todayKcal = 0;
-  Object.values(todayDay).filter(Boolean).forEach(entry => {
-    const r = getSlotRecipe(entry);
-    if (r && r.nutrition) todayKcal += r.nutrition.kcal || 0;
+  document.getElementById('weekly-title').textContent = t('Jedálniček', 'Meal planner');
+  document.getElementById('weekly-range').textContent = range;
+  document.getElementById('week-previous').setAttribute('aria-label', t('Predchádzajúci týždeň', 'Previous week'));
+  document.getElementById('week-next').setAttribute('aria-label', t('Nasledujúci týždeň', 'Next week'));
+  document.querySelector('.weekly-search').setAttribute('aria-label', t('Hľadať recepty', 'Search recipes'));
+  document.getElementById('weekly-reset').textContent = t('Tento týždeň', 'This week');
+  document.getElementById('weekly-ai').textContent = t('AI týždeň', 'AI week');
+  document.getElementById('pt-adults-label').textContent = t('Dospelí', 'Adults');
+  document.getElementById('pt-kids-label').textContent = t('Deti', 'Kids');
+  document.querySelectorAll('.weekly-types .plan-type-btn').forEach(button => {
+    const selected = button.dataset.pt === planType;
+    button.classList.toggle('active', selected);
+    button.setAttribute('aria-pressed', String(selected));
   });
-  let totalKcal = 0, totalMeals = 0, totalTime = 0;
-  const dayStats = DAYS.map(function(d, i) {
-    const day = weekPlan[d] || {};
-    const date = new Date(startOfWeek);
-    date.setDate(startOfWeek.getDate() + i);
-    let kcal = 0;
-    let time = 0;
-    const filled = Object.values(day).filter(Boolean).length;
-    Object.values(day).filter(Boolean).forEach(function(entry) {
-      const recipe = getSlotRecipe(entry);
-      if (!recipe) return;
-      kcal += recipe.nutrition ? (recipe.nutrition.kcal || 0) : 0;
-      time += recipe.time || 0;
-    });
-    totalMeals += filled;
-    totalKcal += kcal;
-    totalTime += time;
-    return { key: d, index: i, day: day, date: date, filled: filled, kcal: kcal, time: time };
-  });
-  // Summary with progress bar
-  var maxMeals = DAYS.length * totalSlots;
-  var mealPct = maxMeals > 0 ? Math.round((totalMeals / maxMeals) * 100) : 0;
-  const weekRange = getWeekLabel(startOfWeek);
-  if (todayEl) todayEl.innerHTML = '';
 
-  const weekMealLegend = MEALS.map(function(m) {
-    return `<span title="${escAttr(mealLabel(m.id))}"><i>${m.icon}</i>${esc(mealShortLabel(m.id))}</span>`;
-  }).join('');
-  const weekRows = dayStats.map(function(info) {
-    const isToday = localDateKey(info.date) === todayStr;
-    const pct = Math.round((info.filled / totalSlots) * 100);
-    const dayShort = (dayNames[info.index] || '').slice(0,3);
-    const daySlots = MEALS.map(function(m) {
-      const mealClass = 'meal-' + m.id.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-      const entry = info.day[m.id];
+  const today = localDateKey(new Date());
+  const dayNames = lang === 'en' ? DAYS_EN : DAYS_SK;
+  let totalMeals = 0, totalKcal = 0, totalTime = 0;
+  const rows = DAYS.map((day, index) => {
+    const date = new Date(start);
+    date.setDate(start.getDate() + index);
+    const isToday = localDateKey(date) === today;
+    const dayShort = dayNames[index].slice(0, lang === 'en' ? 3 : 2);
+    const slots = MEALS.map(meal => {
+      const entry = weekPlan[day]?.[meal.id];
       const recipe = getSlotRecipe(entry);
-      const isCustom = entry && entry.type === 'custom';
       const name = getSlotName(entry);
-      const image = recipe ? (recipe.imageData || recipe.image || '') : '';
-      if (recipe || isCustom) {
-        const slotAction = recipe ? `viewRecipe(${recipe.id})` : `pickRecipe('${info.key}','${m.id}','${weekKey}')`;
-        const slotMeta = recipe && recipe.nutrition ? `🔥 ${recipe.nutrition.kcal || '?'}` : (recipe && recipe.time ? `⏱ ${recipe.time}m` : '');
-        return `<div class="planner-week-slot filled ${mealClass}" title="${escAttr(mealLabel(m.id)+': '+name)}">
-          <button class="planner-week-slot-open" onclick="${slotAction}">
-            ${image ? `<span class="planner-week-slot-img" style="background-image:url('${escAttr(image)}')"><b>${esc(compactPlannerSlotName(name) || mealShortLabel(m.id))}</b></span>` : `<span class="planner-week-slot-icon">${m.icon}<b>${esc(compactPlannerSlotName(name) || mealShortLabel(m.id))}</b></span>`}
-            ${slotMeta ? `<em>${slotMeta}</em>` : ''}
-          </button>
-          <button class="planner-week-slot-remove" onclick="event.stopPropagation();removeSlot('${info.key}','${m.id}','${weekKey}')" aria-label="${escAttr(lang==='en'?'Remove meal':'Odstrániť jedlo')}">×</button>
-        </div>`;
+      if (entry) totalMeals++;
+      if (recipe) {
+        totalKcal += Number(recipe.nutrition?.kcal) || 0;
+        totalTime += Number(recipe.time) || 0;
       }
-      return `<button class="planner-week-slot empty ${mealClass}" onclick="pickRecipe('${info.key}','${m.id}','${weekKey}')" title="${escAttr(mealLabel(m.id))}">
-        <span class="planner-week-plus">＋</span>
-      </button>`;
+      const pick = `pickRecipe('${day}','${meal.id}','${weekKey}')`;
+      const label = mealLabel(meal.id);
+      const action = recipe ? `viewRecipe(${recipe.id})` : pick;
+      return `<td><button type="button" class="weekly-slot ${name ? 'filled' : 'empty'}" onclick="${action}"
+          title="${escAttr(name || label)}" aria-label="${escAttr(label + ': ' + (name || t('Pridať jedlo','Add meal')))}">
+          <span>${name ? esc(name) : '+'}</span>
+        </button></td>`;
     }).join('');
-    return `<article class="planner-week-row ${isToday?'today':''}" style="--pct:${pct}">
-      <button class="planner-week-day" onclick="selectPlannerDay(${info.index})">
-        <span>${esc(dayShort)}</span>
-        <strong>${info.date.getDate()}.${info.date.getMonth()+1}.</strong>
-        <em>${info.filled}/${totalSlots}</em>
-      </button>
-      <div class="planner-week-slots">${daySlots}</div>
-    </article>`;
+    return `<tr${isToday ? ' class="weekly-today"' : ''}>
+      <th scope="row"><button type="button" class="weekly-day" onclick="showDayDetail('${day}')"
+        title="${escAttr(dayNames[index])}" ${isToday ? 'aria-current="date"' : ''}>${esc(dayShort)}
+        ${isToday ? `<small>${t('dnes','today')}</small>` : ''}</button></th>
+      ${slots}</tr>`;
   }).join('');
-  weekEl.innerHTML = `<section class="planner-week-agenda-shell">
-    <div class="planner-week-legend">
-      <span class="planner-week-legend-spacer"></span>
-      <div class="planner-week-legend-slots">${weekMealLegend}</div>
-    </div>
-    <div class="planner-week-rows">${weekRows}</div>
-  </section>`;
-  document.getElementById('planner-summary').innerHTML = '<div class="planner-week-total"><div class="planner-week-total-ring" style="--pct:'+mealPct+'"><strong>'+totalMeals+'/'+maxMeals+'</strong><span>'+(lang==='en'?'planned':'naplánované')+'</span></div><div><strong>🔥 '+totalKcal+' kcal</strong><span>'+(lang==='en'?'week total':'týždeň spolu')+'</span></div><div><strong>🕒 '+Math.floor(totalTime/60)+'h '+(totalTime%60)+'m</strong><span>'+(lang==='en'?'active time':'aktívny čas')+'</span></div><div><strong>📖 '+recipes.length+'</strong><span>'+(lang==='en'?'recipes':'receptov')+'</span></div></div>';
-  const todayRow = weekEl.querySelector('.planner-week-row.today');
-  const rowList = weekEl.querySelector('.planner-week-rows');
-  if (todayRow && rowList) {
-    requestAnimationFrame(() => {
-      const offset = Math.max(0, todayRow.offsetTop - 12);
-      if (plannerWeekOffset === 0 && offset > 240) rowList.scrollTop = offset;
-    });
-  }
 
-  // Floating info panel
-  var pip = document.getElementById('planner-info-panel');
-  if (pip) {
-    document.getElementById('pip-meals').textContent = totalMeals+'/'+maxMeals;
-    const pipMealsLabel = document.getElementById('pip-meals-label');
-    if (pipMealsLabel) pipMealsLabel.textContent = lang === 'en' ? 'meals' : 'jedál';
-    document.getElementById('pip-kcal').textContent = totalKcal;
-    document.getElementById('pip-time').textContent = totalTime;
-    document.getElementById('pip-fill').style.width = mealPct+'%';
-  }
+  const headers = MEALS.map(meal => `<th scope="col" title="${escAttr(mealLabel(meal.id))}">
+    <span class="weekly-short" aria-hidden="true">${esc(mealShortLabel(meal.id))}</span>
+    <span class="weekly-full">${esc(mealLabel(meal.id))}</span></th>`).join('');
+  document.getElementById('planner-week-grid').innerHTML = `<table aria-label="${escAttr(range)}">
+    <colgroup><col class="weekly-day-column"><col span="${MEALS.length}"></colgroup>
+    <thead><tr><th scope="col" aria-label="${t('Deň','Day')}"></th>${headers}</tr></thead>
+    <tbody>${rows}</tbody></table>`;
+
+  const maxMeals = DAYS.length * MEALS.length;
+  const mealPct = Math.round(totalMeals / maxMeals * 100);
+  document.getElementById('planner-summary').innerHTML = `<div class="planner-week-total">
+    <div class="planner-week-total-ring" style="--pct:${mealPct}"><strong>${totalMeals}/${maxMeals}</strong><span>${t('naplánované','planned')}</span></div>
+    <div><strong>🔥 ${totalKcal} kcal</strong><span>${t('týždeň spolu','week total')}</span></div>
+    <div><strong>🕒 ${Math.floor(totalTime / 60)}h ${totalTime % 60}m</strong><span>${t('aktívny čas','active time')}</span></div>
+    <div><strong>📖 ${recipes.length}</strong><span>${t('receptov','recipes')}</span></div></div>`;
 }
 
 function renderPlannerDayView(info, weekKey, totalSlots) {
@@ -237,26 +161,9 @@ function clearDay(dayKey, weekKey) {
 }
 
 function goToWeek(offset) {
-  var grid = document.getElementById('planner-week-grid');
-  if (grid) {
-    grid.classList.remove('morph-out', 'morph-in');
-    // Force reflow
-    void grid.offsetWidth;
-    grid.classList.add('morph-out');
-  }
+  plannerWeekOffset = offset;
   haptic(12);
-  setTimeout(function() {
-    plannerWeekOffset = offset;
-    _selectedPlannerDay = 0;
-    renderPlanner();
-    var grid2 = document.getElementById('planner-week-grid');
-    if (grid2) {
-      grid2.classList.remove('morph-out', 'morph-in');
-      void grid2.offsetWidth;
-      grid2.classList.add('morph-in');
-      setTimeout(function() { grid2.classList.remove('morph-in'); }, 500);
-    }
-  }, 300);
+  renderPlanner();
 }
 
 function showDayDetail(dayKey) {
@@ -270,7 +177,7 @@ function showDayDetail(dayKey) {
   var html = '<div class="modal-overlay active" id="day-detail-modal" style="z-index:2000;" onclick="if(event.target===this)closeDayDetail()">'
     + '<div class="modal" style="max-width:480px;">'
     + '<button class="modal-close" onclick="closeDayDetail()" aria-label="Zavrieť">\u2715</button>'
-    + '<h2>\ud83d\udcc5 '+name+' ('+filled+'/'+totalSlots+')</h2>';
+    + '<h2>\ud83d\udcc5 '+name+' ('+filled+'/'+MEALS.length+')</h2>';
   MEALS.forEach(function(m) {
     var e = d[m.id];
     var r = getSlotRecipe(e);

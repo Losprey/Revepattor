@@ -15,7 +15,7 @@
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <title data-lang="appTitle">Mealnest</title>
-  <link rel="stylesheet" href="dist/styles.min.css?v=5">
+  <link rel="stylesheet" href="dist/styles.min.css?v=6">
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -168,49 +168,33 @@
 </div>
 
 <div class="container planner-container" id="planner-container" style="display:none;">
-  <!-- HERO HEADER -->
-  <div class="hero-header parallax" id="planner-hero">
-    <span class="hero-blob hero-blob-1"></span>
-    <span class="hero-blob hero-blob-2"></span>
-    <span class="hero-blob hero-blob-3"></span>
-    <div class="hero-header-title" id="planner-hero-title">📅 Plánovač jedál</div>
-    <div class="hero-header-sub" id="planner-hero-sub">Naplánuj si celý týždeň na pár kliknutí</div>
-    <div class="hero-header-actions">
-      <button class="btn btn-primary" onclick="aiGenerateFullWeek()" style="font-size:.7rem;padding:.3rem .65rem;">🤖 AI týždeň</button>
-      <button class="btn" onclick="resetWeek()" style="font-size:.7rem;padding:.3rem .65rem;background:var(--surface);border:1px solid var(--border);">↺ Reset</button>
+  <div class="weekly-brand">
+    <span class="today-brand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 11h20a10 10 0 0 1-20 0Z" fill="currentColor"/><path d="M12 10c0-6 4-8 9-8-1 4-4 7-9 8ZM12 10C10 6 7 5 4 6c1 3 4 5 8 4Z"/></svg> Mealnest</span>
+    <button type="button" class="weekly-search" onclick="switchTab('home');document.getElementById('search').focus()" data-lang-title="searchPlaceholder" aria-label="Hľadať recepty">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
+    </button>
+  </div>
+  <h1 id="weekly-title">Jedálniček</h1>
+  <div class="weekly-controls">
+    <div class="weekly-nav">
+      <button type="button" id="week-previous" onclick="goToWeek(plannerWeekOffset - 1)" aria-label="Predchádzajúci týždeň">‹</button>
+      <span id="weekly-range" aria-live="polite"></span>
+      <button type="button" id="week-next" onclick="goToWeek(plannerWeekOffset + 1)" aria-label="Nasledujúci týždeň">›</button>
+    </div>
+    <div class="weekly-types" id="plan-type-switch">
+      <button type="button" class="plan-type-btn active" data-pt="adults" onclick="setPlanType('adults')" aria-pressed="true"><span id="pt-adults-label">Dospelí</span></button>
+      <button type="button" class="plan-type-btn" data-pt="kids" onclick="setPlanType('kids')" aria-pressed="false"><span id="pt-kids-label">Deti</span></button>
     </div>
   </div>
-  <!-- FLOATING INFO PANEL -->
-  <div class="planner-info-panel" id="planner-info-panel">
-    <span class="pip-item"><span class="pip-val" id="pip-meals">0/35</span> <span id="pip-meals-label">jedál</span></span>
-    <span class="pip-item">🔥 <span class="pip-val" id="pip-kcal">0</span></span>
-    <span class="pip-item">⏱ <span class="pip-val" id="pip-time">0</span>min</span>
-    <div class="pip-progress"><div class="pip-fill" id="pip-fill" style="width:0%"></div></div>
-  </div>
-  <!-- WEEK NAV -->
-  <div class="planner-week-nav" id="planner-week-nav">
-    <button class="pln-btn active" onclick="goToWeek(0)" id="pln-this">Tento týždeň</button>
-    <button class="pln-btn" onclick="goToWeek(1)" id="pln-next">Budúci týždeň</button>
-  </div>
-
-  <!-- PLAN TYPE SWITCHER -->
-  <div class="plan-type-switch" id="plan-type-switch">
-    <div class="pts-bg"></div>
-    <button class="plan-type-btn active" data-pt="adults" onclick="setPlanType('adults')"><span class="pt-icon">👨</span><span id="pt-adults-label">Dospelí</span></button>
-    <button class="plan-type-btn" data-pt="kids" onclick="setPlanType('kids')"><span class="pt-icon">👶</span><span id="pt-kids-label">Deti</span></button>
-  </div>
-
-  <!-- TODAY SECTION -->
-  <div class="planner-today" id="planner-today"></div>
-
-  <!-- FULL WEEK GRID -->
-  <div class="planner-week-grid" id="planner-week-grid"></div>
+  <div id="planner-week-grid" class="weekly-overview"></div>
 
   <!-- WEEKLY SUMMARY -->
   <div class="planner-summary" id="planner-summary"></div>
 
   <!-- ACTIONS -->
   <div class="planner-actions">
+    <button class="pa-btn" id="weekly-reset" onclick="resetWeek()">Tento týždeň</button>
+    <button class="pa-btn" id="weekly-ai" onclick="aiGenerateFullWeek()">AI týždeň</button>
     <button class="pa-btn" onclick="clearPlan()" aria-label="Vymazať týždeň">🗑 <span id="pa-clear-label">Vymazať týždeň</span></button>
     <button class="pa-btn" onclick="aiGenerateShoppingList()" style="background:linear-gradient(135deg,#059669,#047857);color:#fff;border:none;" id="pa-ai-label">📝 AI nákup</button>
   </div>
@@ -514,7 +498,7 @@
 
 
 <!-- Bundled via esbuild (was 16 JS + 4 CSS files) -->
-<script src="dist/app.min.js?v=5" defer></script>
+<script src="dist/app.min.js?v=6" defer></script>
 
 <!-- Quick add FAB -->
 <div id="fab-quick-add" style="display:none">

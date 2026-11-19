@@ -1328,3 +1328,243 @@ html body[data-tab] :is(.shop-item .si-check, .shop-item.checked .si-check, .tas
   min-width: 0;
   overflow-wrap: anywhere;
 }
+
+html body[data-tab="planner"] #app-header,
+body[data-tab="planner"] #floating-fab {
+  display: none !important;
+}
+
+html body[data-tab="planner"] #planner-container {
+  padding-top: calc(10px + env(safe-area-inset-top));
+}
+
+.weekly-brand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+}
+
+.weekly-search,
+.weekly-nav button,
+.weekly-day {
+  display: grid;
+  place-content: center;
+  border: 0;
+  background: transparent;
+  color: var(--today-text);
+  cursor: pointer;
+  font: inherit;
+}
+
+.weekly-search,
+.weekly-nav button {
+  width: 44px;
+  height: 44px;
+}
+
+#weekly-title {
+  margin: 6px 0 12px;
+  color: var(--today-text);
+  font-size: clamp(1.85rem, 7.5vw, 3rem);
+  line-height: 1.05;
+  letter-spacing: -.045em;
+}
+
+.weekly-controls {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.weekly-nav,
+.weekly-types {
+  display: grid;
+  align-items: center;
+  background: var(--today-card);
+  border: 1px solid var(--today-line);
+  border-radius: 14px;
+  font-weight: 750;
+}
+
+.weekly-nav {
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  text-align: center;
+  font-size: clamp(.8rem, 3.6vw, 1rem);
+}
+
+.weekly-nav button {
+  font-size: 1.55rem;
+  color: var(--today-accent);
+}
+
+.weekly-types {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: 2px;
+}
+
+#planner-container .weekly-types .plan-type-btn {
+  min-height: 40px;
+  justify-content: center;
+  padding: 4px;
+  border: 0;
+  border-radius: 11px;
+  font: inherit;
+}
+
+.weekly-overview {
+  --weekly-filled: #bed9b5;
+}
+
+html.light .weekly-overview {
+  --weekly-filled: #dfe9cf;
+}
+
+.weekly-overview table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 2px;
+  text-align: left;
+  color: var(--today-text);
+}
+
+.weekly-day-column {
+  width: 36px;
+}
+
+.weekly-overview :is(th, td) {
+  padding: 0;
+}
+
+.weekly-overview thead th {
+  padding-block: 5px;
+  background: var(--today-card);
+  text-align: center;
+  font-size: clamp(.65rem, 3vw, .79rem);
+  white-space: nowrap;
+}
+
+.weekly-overview thead th:first-child {
+  border-radius: 8px 0 0 8px;
+}
+
+.weekly-overview thead th:last-child {
+  border-radius: 0 8px 8px 0;
+}
+
+.weekly-full {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.weekly-day {
+  width: 100%;
+  min-height: 44px;
+  justify-items: start;
+  text-transform: capitalize;
+  font-size: .85rem;
+  font-weight: 800;
+}
+
+.weekly-day small {
+  text-transform: none;
+  font-size: .57rem;
+}
+
+.weekly-overview .weekly-today {
+  outline: 2px solid var(--today-accent);
+  outline-offset: 0;
+}
+
+.weekly-today .weekly-day {
+  color: var(--today-accent);
+}
+
+.weekly-slot {
+  display: grid;
+  width: 100%;
+  min-height: 44px;
+  min-width: 0;
+  align-content: center;
+  padding: 2px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: var(--weekly-filled);
+  color: #11351f;
+  cursor: pointer;
+  font: inherit;
+  font-size: clamp(.625rem, 2.85vw, .85rem);
+  font-weight: 650;
+  line-height: 1.13;
+  text-align: start;
+}
+
+.weekly-slot span {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+.weekly-slot.empty {
+  border: 1px dashed var(--today-line);
+  background: transparent;
+  color: var(--today-accent);
+  font-size: 1.05rem;
+  text-align: center;
+}
+
+.weekly-overview :is(.weekly-slot, .weekly-day):focus-visible {
+  outline: 2px solid var(--today-accent);
+  outline-offset: -2px;
+}
+
+#planner-container .planner-summary {
+  margin-top: 12px;
+}
+
+@media (min-width: 680px) {
+  .weekly-controls {
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .weekly-day-column {
+    width: 52px;
+  }
+
+  .weekly-overview table {
+    border-spacing: 5px;
+  }
+
+  .weekly-overview thead th {
+    font-size: .95rem;
+  }
+
+  .weekly-short {
+    display: none;
+  }
+
+  .weekly-full {
+    position: static;
+    width: auto;
+    height: auto;
+    clip-path: none;
+    text-transform: capitalize;
+  }
+
+  .weekly-day {
+    font-size: 1rem;
+  }
+
+  .weekly-slot {
+    min-height: 52px;
+    padding-inline: 8px;
+    font-size: .93rem;
+  }
+}
