@@ -639,3 +639,66 @@
     background-image: linear-gradient(180deg, rgba(245,155,67,.38), rgba(217,119,6,.17)) !important;
   }
 }
+
+/* Lock the document only while a full-screen overlay is visible. */
+html:has(#planner-picker.active),
+html:has(#onboarding-overlay.active) {
+  overflow: hidden;
+}
+
+#onboarding-overlay .onboard-slide {
+  justify-content: safe center;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+#onboarding-overlay .onboard-slide > * {
+  flex-shrink: 0;
+}
+
+#dashboard .mn-overview-grid button {
+  min-width: 0;
+  min-height: 76px !important;
+  border-radius: 16px;
+}
+
+#dashboard .mn-overview-grid small {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 375px) {
+  #dashboard.container {
+    padding-inline: 12px;
+  }
+
+  #dashboard .mn-overview-grid {
+    gap: 6px;
+  }
+}
+
+@media (min-width: 680px) {
+  #dashboard.container {
+    width: min(100%, 1000px);
+    max-width: 1000px;
+    padding-inline: clamp(20px, 4vw, 40px);
+  }
+
+  #dashboard .mn-home-shell {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    align-items: start;
+  }
+
+  #dashboard .mn-home-header,
+  #dashboard .mn-hub-section {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #dashboard,
+  #splash {
+    animation: none !important;
+    transition: none !important;
+  }
+}

@@ -58,7 +58,7 @@ function renderPlanner() {
   const weekPlan = getWeekPlan(weekKey);
   const startOfWeek = plannerWeekStart(plannerWeekOffset);
   const totalSlots = MEALS.length;
-  const todayStr = new Date().toISOString().slice(0,10);
+  const todayStr = localDateKey(new Date());
   const todayIdx = (new Date().getDay() + 6) % 7;
 
   const heroTitle = document.getElementById('planner-hero-title');
@@ -133,7 +133,7 @@ function renderPlanner() {
     return `<span title="${escAttr(mealLabel(m.id))}"><i>${m.icon}</i>${esc(mealShortLabel(m.id))}</span>`;
   }).join('');
   const weekRows = dayStats.map(function(info) {
-    const isToday = info.date.toISOString().slice(0,10) === todayStr;
+    const isToday = localDateKey(info.date) === todayStr;
     const pct = Math.round((info.filled / totalSlots) * 100);
     const dayShort = (dayNames[info.index] || '').slice(0,3);
     const daySlots = MEALS.map(function(m) {
@@ -391,12 +391,10 @@ function openPickerModal(day, slot, wk) {
     }
   };
   renderPickerRecipes();
-  document.body.style.overflow = 'hidden';
 }
 
 function closePickerModal() {
   document.getElementById('planner-picker')?.classList.remove('active');
-  document.body.style.overflow = '';
 }
 
 function submitCustomMeal() {

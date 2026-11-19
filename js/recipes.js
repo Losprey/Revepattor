@@ -858,7 +858,6 @@ function showTipOfDay() {
 
 setTimeout(function() {
   setDynamicGradient();
-  initSwipeTabs();
   initPullToRefresh();
   initScrollHeader();
   initLongPress();

@@ -51,68 +51,43 @@ self.addEventListener('message', function(e) {
   }
 });
 
-var CACHE = 'mealnest-v62';
-var PRECACHE = [
+var CACHE = 'mealnest-v64';
+const appShell = new URL('index.html', self.registration.scope).href;
+const PRECACHE = [
+  appShell,
+  'dist/app.min.js?v=2',
+  'dist/styles.min.css?v=2',
   'recipes-default.json',
   'manifest.json',
   'icon.svg',
-  'icon-192.png',
-  'icon-512.png',
-  'icon-180.png',
-  'icon-48.png',
   'family-dinner-hero.png'
 ];
 
-self.addEventListener('install', function(e) {
-  self.skipWaiting();
-  e.waitUntil(
-    caches.open(CACHE).then(function(cache) {
-      return cache.addAll(PRECACHE);
-    }).catch(function(err) {
-      // Non-critical: skip if offline during first install
-      console.log('SW precache partial:', err.message);
-    })
-  );
+self.addEventListener('install', event => {
+  event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(PRECACHE)));
 });
 
-self.addEventListener('activate', function(e) {
-  e.waitUntil(
-    caches.keys().then(function(keys) {
-      return Promise.all(keys.map(function(k) {
-        if (k !== CACHE) return caches.delete(k);
-      }));
-    })
-  );
-  e.waitUntil(clients.claim());
+self.addEventListener('activate', event => {
+  event.waitUntil(caches.keys().then(keys => Promise.all(
+    keys.filter(key => key.startsWith('mealnest-v') && key !== CACHE)
+      .map(key => caches.delete(key))
+  )).then(() => clients.claim()));
 });
 
-self.addEventListener('fetch', e => {
-  const url = new URL(e.request.url);
+self.addEventListener('fetch', event => {
+  const request = event.request;
+  if (request.method !== 'GET' || !request.url.startsWith(self.registration.scope)) return;
 
-  // Network-first for HTML
-  if (e.request.mode === 'navigate') {
-    e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+  if (request.mode === 'navigate') {
+    event.respondWith(fetch(request).catch(async () => {
+      const cache = await caches.open(CACHE);
+      return await cache.match(appShell) || Response.error();
+    }));
     return;
   }
 
-  // Network-first for ALL images (pexels, placehold.co, remote recipe images)
-  if (e.request.destination === 'image' || /\.(png|jpg|jpeg|gif|webp|svg|ico)/i.test(url.pathname)) {
-    e.respondWith(
-      fetch(e.request, { cache: 'no-store' }).catch(() => caches.match(e.request))
-    );
-    return;
-  }
-
-  // Stale-while-revalidate for local assets (icons, manifest)
-  e.respondWith(
-    caches.open(CACHE).then(cache =>
-      cache.match(e.request).then(cached => {
-        const fetched = fetch(e.request).then(response => {
-          cache.put(e.request, response.clone());
-          return response;
-        }).catch(() => cached);
-        return cached || fetched;
-      })
-    )
-  );
+  if (!PRECACHE.some(path => new URL(path, self.registration.scope).href === request.url)) return;
+  event.respondWith(caches.open(CACHE).then(async cache =>
+    await cache.match(request) || fetch(request)
+  ));
 });

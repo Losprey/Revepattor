@@ -30,13 +30,6 @@ const validInitialTabs = new Set(['dashboard', 'planner', 'home', 'shopping', 't
 const initialTab = validInitialTabs.has(initialHashTab) ? initialHashTab : (localStorage.getItem('lastTab') || 'dashboard');
 document.body.dataset.tab = initialTab;
 switchTab(initialTab);
-setTimeout(function() {
-  try {
-    document.body.classList.remove('header-collapsed');
-    window.scrollTo(0, 0);
-  } catch(e) {}
-}, 0);
-
 render();
 showTipOfDay();
 

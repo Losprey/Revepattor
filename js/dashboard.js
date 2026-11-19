@@ -28,9 +28,9 @@ function renderDashboard() {
         <button class="mn-avatar-btn" onclick="openMorePageFromAnywhere('account')" aria-label="Profil">${getDashboardAvatar()}</button>
       </div>
     </section>
-    ${renderFamilyHubHero({ todayMeals, totalMeals: MEALS.length, uncheckedShop, todayTasks: todayTasksArr.filter(t => !t.completed).length, aiRecipe })}
     ${renderFamilyOverviewCards({ todayMeals, totalMeals: MEALS.length, uncheckedShop, todayTasks: todayTasksArr.filter(t => !t.completed).length, aiRecipe })}
     ${renderMobileMealsCard()}
+    ${renderFamilyHubHero({ todayMeals, totalMeals: MEALS.length, uncheckedShop, todayTasks: todayTasksArr.filter(t => !t.completed).length, aiRecipe })}
     ${renderMobileAiRecommendation()}
     ${renderFamilyActivityCard()}
   </div>`;

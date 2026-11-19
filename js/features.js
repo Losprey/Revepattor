@@ -27,8 +27,8 @@ function showSyncToast(key) {
 
 function reloadFromLocalStorage(key, data) {
   try {
-    if (key === 'mealPlan') { mealPlan = JSON.parse(JSON.stringify(data)); renderPlanner(); }
-    else if (key === 'mealPlanKids') { mealPlanKids = JSON.parse(JSON.stringify(data)); }
+    if (key === 'mealPlan') { mealPlan = migrateFlatMealPlan(data); renderPlanner(); }
+    else if (key === 'mealPlanKids') { mealPlanKids = migrateFlatMealPlan(data); }
     else if (key === 'shoppingItems') { loadShopItems(); renderShoppingList(); }
     else if (key === 'tasks') { tasks = Array.isArray(data) ? data.slice() : []; renderTasks(); }
     else if (key === 'planType') { planType = data; renderPlanner(); }

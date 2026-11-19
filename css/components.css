@@ -751,7 +751,7 @@ html.light {
 html {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 *,
@@ -763,7 +763,7 @@ html {
 body {
   font-family: var(--font);
   letter-spacing: -.01em;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 .container {
@@ -2135,7 +2135,7 @@ body[data-season="zima"] .planner-week-nav .pln-btn.active { background: linear-
   transition: width .4s var(--ease-smooth);
 }
 
-body { overscroll-behavior: none; -webkit-overflow-scrolling: touch; -webkit-touch-callout: none !important; -webkit-user-select: none !important; user-select: none !important; }
+body { -webkit-touch-callout: none !important; -webkit-user-select: none !important; user-select: none !important; }
 
 /* URL Import */
 #import-url-input.valid { border-color: var(--success, #22c55e) !important; }

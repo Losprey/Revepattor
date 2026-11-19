@@ -200,10 +200,6 @@ function updateAuthUI() {
     setTimeout(waitForFirebaseSDK, 200, retries - 1);
   } else {
     console.warn('Firebase SDK not loaded after 5s');
-    setTimeout(function() {
-      initFirebase();
-      initFirebaseAuth();
-    }, 50);
   }
 }(25)); // max ~5s wait
 
@@ -228,7 +224,7 @@ let firebaseListeners = []; // track active listeners for cleanup
 let _syncing = {}; // Track which keys are being pushed to Firebase
 
 function initFirebase() {
-  if (firebaseReady) return;
+  if (firebaseReady || typeof firebase === 'undefined') return;
   if (!FIREBASE_CONFIG.apiKey || FIREBASE_CONFIG.apiKey === 'YOUR_API_KEY') {
     console.warn('Firebase not configured.');
     return;
@@ -241,8 +237,7 @@ function initFirebase() {
       firebaseReady = true;
     }
   } catch(e) {
-    // Already initialized
-    firebaseReady = true;
+    console.warn('Firebase initialization failed:', e.message);
   }
 }
 
@@ -272,31 +267,39 @@ function createFamily() {
   updateSyncIndicator();
 }
 
-function joinFamily(code) {
+async function joinFamily(code) {
   initFirebase();
   if (!firebaseReady) { showToast(t('Firebase nie je nastavený.','Firebase not configured.'),'error'); return; }
   code = code.toUpperCase().trim();
-  if (!code) return;
-  familyCode = code;
-  localStorage.setItem('familyCode', code);
-  connectToFamily(code);
-  // Wait for remote data, then ask about merge
-  setTimeout(function() {
-    var hasRemote = false;
-    try {
-      var mp = localStorage.getItem('mealPlan');
-      if (mp && mp !== '{}') hasRemote = true;
-    } catch(e) {}
-    if (hasRemote) {
-      showConfirmModal(t('Rodina má dáta. Použiť rodinné dáta?','Family has data. Use family data?'), '👨‍👩‍👧‍👦', t('Použiť rodinné','Use family'), function() {
-        showToast(t('Rodinné dáta zostali aktívne','Family data kept active'), 'success');
-      });
-    } else {
-      pushAllLocalData();
-    }
-  }, 2000);
-  openMorePageFromAnywhere('family');
-  updateSyncIndicator();
+  if (!/^[A-Z2-9]{6,8}$/.test(code)) {
+    showToast(t('Neplatný rodinný kód.','Invalid family code.'), 'error');
+    return;
+  }
+
+  const previousCode = familyCode;
+  let snapshot;
+  try {
+    snapshot = await firebase.database().ref('families/' + code).once('value');
+  } catch (error) {
+    showToast(t('Rodinu sa nepodarilo načítať.','Could not load the family.'), 'error');
+    return;
+  }
+  if (familyCode !== previousCode) return;
+  if (!snapshot.exists()) {
+    showToast(t('Rodina sa nenašla.','Family not found.'), 'error');
+    return;
+  }
+  const connect = () => {
+    if (familyCode !== previousCode) return;
+    localStorage.setItem('familyCode', code);
+    familyCode = code;
+    connectToFamily(code);
+    openMorePageFromAnywhere('family');
+    updateSyncIndicator();
+  };
+  if (code === previousCode) connect();
+  else showConfirmModal(t('Použiť zdieľané dáta tejto rodiny?','Use this family’s shared data?'), '👨‍👩‍👧‍👦',
+    t('Pripojiť sa','Join'), connect);
 }
 
 function showFamilyMembers() {
@@ -342,7 +345,7 @@ function connectToFamily(code) {
     const ref = familyDbRef.child(path);
     ref.on('value', snap => {
       var remoteData = snap.val();
-      if (!remoteData) return;
+      if (remoteData === null && path !== 'shoppingItems') return;
       if (mergeFn) {
         var localRaw = localStorage.getItem(localKey);
         var localData = localRaw ? JSON.parse(localRaw) : null;
@@ -363,7 +366,21 @@ function connectToFamily(code) {
     firebaseListeners.push(ref);
   };
 
-  bindPath('shoppingItems', 'shoppingItems', mergeShoppingItems);
+  const shoppingIdsKey = 'remoteShoppingIds:' + code;
+  let previousShoppingIds = new Set();
+  try {
+    previousShoppingIds = new Set(JSON.parse(localStorage.getItem(shoppingIdsKey) || '[]'));
+  } catch (error) {}
+  bindPath('shoppingItems', 'shoppingItems', (localItems, remoteItems) => {
+    const currentItems = Array.isArray(remoteItems) ? remoteItems : [];
+    const currentIds = new Set(currentItems.filter(Boolean).map(item => item.id));
+    const retainedItems = Array.isArray(localItems) ? localItems.filter(item =>
+      item && (!previousShoppingIds.has(item.id) || currentIds.has(item.id))
+    ) : [];
+    previousShoppingIds = currentIds;
+    localStorage.setItem(shoppingIdsKey, JSON.stringify([...currentIds]));
+    return mergeShoppingItems(retainedItems, currentItems);
+  });
   bindPath('mealPlan', 'mealPlan');
   bindPath('mealPlanKids', 'mealPlanKids');
   bindPath('tasks', 'tasks');
@@ -430,8 +447,8 @@ function debugFirebasePull() {
     if (!val) { showToast('No data at families/'+familyCode,'info'); return; }
     var keys = Object.keys(val);
     // Directly set JS variables
-    if (val.mealPlan) { mealPlan = val.mealPlan; }
-    if (val.mealPlanKids) { mealPlanKids = val.mealPlanKids; }
+    if (val.mealPlan) { mealPlan = migrateFlatMealPlan(val.mealPlan); }
+    if (val.mealPlanKids) { mealPlanKids = migrateFlatMealPlan(val.mealPlanKids); }
     if (val.shoppingItems) { shopItems = Array.isArray(val.shoppingItems) ? val.shoppingItems : []; saveShopItems(); }
     if (val.tasks) { tasks = Array.isArray(val.tasks) ? val.tasks : []; }
     if (val.recipes) { recipes = Array.isArray(val.recipes) ? val.recipes : []; saveToLS(); }
@@ -646,7 +663,9 @@ function autoPullFromFirebase() {
     if (el) el.textContent = '❌ Nepripojené k Firebase';
     return;
   }
-  familyDbRef.once('value', function(snap) {
+  const requestedFamily = familyDbRef;
+  requestedFamily.once('value', function(snap) {
+    if (familyDbRef !== requestedFamily) return;
     var val = snap.val();
     if (!val) {
       if (el) el.textContent = '⚪ Firebase prázdne – používam lokálne dáta';
@@ -656,10 +675,6 @@ function autoPullFromFirebase() {
     // Merge recipes (preserve local recipes not in remote)
     if (val.recipes && Array.isArray(val.recipes)) {
       recipes = mergeRecipes(recipes, val.recipes);
-    }
-    // Merge shopping items
-    if (val.shoppingItems && Array.isArray(val.shoppingItems)) {
-      shopItems = mergeShoppingItems(shopItems, val.shoppingItems);
     }
     // Direct assignments for simple data
     if (val.mealPlan) { mealPlan = val.mealPlan; }
@@ -774,58 +789,6 @@ window.addEventListener('popstate', function(e) {
     }
   }
 });
-
-// ======================== EDGE SWIPE BACK GESTURE ========================
-(function() {
-  let _edgeSwipeData = null;
-  document.addEventListener('touchstart', function(e) {
-    // Only edge swipe from left edge (< 40px from left)
-    if (e.touches[0].clientX > 40) { _edgeSwipeData = null; return; }
-    // Don't swipe on inputs or when a sheet is open
-    if (e.target.closest('input, textarea, .sheet-overlay, .cooking-overlay')) { _edgeSwipeData = null; return; }
-    _edgeSwipeData = { startX: e.touches[0].clientX, startY: e.touches[0].clientY };
-    // Cancel tab swipe when edge swipe is active
-    if (typeof _swipeTabData !== 'undefined') _swipeTabData = null;
-  }, { passive: true });
-
-  document.addEventListener('touchmove', function(e) {
-    if (!_edgeSwipeData) return;
-    const dx = e.touches[0].clientX - _edgeSwipeData.startX;
-    const dy = Math.abs(e.touches[0].clientY - _edgeSwipeData.startY);
-    // Horizontal swipe only, minimum ~20px to show indicator
-    if (dx < 20 || dy > dx * 0.5) { _edgeSwipeData = null; return; }
-    // Cancel tab swipe while edge swipe is active
-    if (typeof _swipeTabData !== 'undefined') _swipeTabData = null;
-    // Visual hint: show a subtle edge glow when swiping
-    if (!document.getElementById('edge-swipe-indicator')) {
-      const ind = document.createElement('div');
-      ind.id = 'edge-swipe-indicator';
-      ind.style.cssText = 'position:fixed;left:0;top:0;bottom:0;width:4px;background:var(--primary);z-index:99998;opacity:0;transition:opacity .15s;border-radius:0 4px 4px 0;';
-      document.body.appendChild(ind);
-    }
-    const opacity = Math.min(1, (dx - 20) / 120);
-    document.getElementById('edge-swipe-indicator').style.opacity = opacity;
-    e.preventDefault();
-  }, { passive: false });
-
-  document.addEventListener('touchend', function(e) {
-    if (!_edgeSwipeData) return;
-    const dx = e.changedTouches[0].clientX - _edgeSwipeData.startX;
-    const dy = Math.abs(e.changedTouches[0].clientY - _edgeSwipeData.startY);
-    const indicator = document.getElementById('edge-swipe-indicator');
-    if (indicator) { indicator.style.opacity = '0'; setTimeout(function() { if (indicator.parentNode) indicator.remove(); }, 300); }
-    if (dx < 80 || dy > dx * 0.6) { _edgeSwipeData = null; return; }
-    _edgeSwipeData = null;
-    // Cancel any tab swipe
-    if (typeof _swipeTabData !== 'undefined') _swipeTabData = null;
-    // Edge swipe detected — go back
-    if (closeTopModal()) {
-      // Modal was closed, don't also navigate
-    } else {
-      history.back();
-    }
-  }, { passive: true });
-})();
 
 // Ensure we always have at least 2 history entries on page load
 if (history.length <= 1) {

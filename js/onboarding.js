@@ -122,14 +122,19 @@ function showOnboarding(forceShow) {
   _onboardIndex = 0;
   renderOnboardSlide();
   document.getElementById('onboard-next').onclick = nextOnboardSlide;
-  // Swipe support
-  let touchStartX = 0;
-  ov.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
-  ov.addEventListener('touchend', e => {
-    const diff = touchStartX - e.changedTouches[0].clientX;
-    if (diff > 60) nextOnboardSlide();
-    else if (diff < -60) prevOnboardSlide();
-  });
+  let start;
+  ov.addEventListener('touchstart', event => { start = event.touches[0]; }, { passive: true });
+  ov.addEventListener('touchcancel', () => { start = null; }, { passive: true });
+  ov.addEventListener('touchend', event => {
+    if (!start) return;
+    const end = event.changedTouches[0];
+    const dx = end.clientX - start.clientX;
+    const dy = end.clientY - start.clientY;
+    start = null;
+    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    if (dx < 0) nextOnboardSlide();
+    else prevOnboardSlide();
+  }, { passive: true });
 }
 
 function renderOnboardSlide() {

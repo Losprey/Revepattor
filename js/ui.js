@@ -938,37 +938,6 @@ function initScrollHeader() {
   }, { passive: true });
 }
 
-// =================== SWIPE BETWEEN TABS ===================
-var _swipeTabData = null;
-function initSwipeTabs() {
-  var main = document.querySelector('.container') || document.body;
-  main.addEventListener('touchstart', function(e) {
-    // Don't swipe on interactive elements
-    if (e.target.closest('input') || e.target.closest('button') || e.target.closest('.bottom-nav') || e.target.closest('.modal-overlay.active') || e.target.closest('.sheet-overlay') || e.target.closest('.cooking-overlay.active')) return;
-    _swipeTabData = { startX: e.touches[0].clientX, startY: e.touches[0].clientY };
-  }, { passive: true });
-  
-  main.addEventListener('touchmove', function(e) {
-    if (!_swipeTabData) return;
-    var dx = e.touches[0].clientX - _swipeTabData.startX;
-    var dy = Math.abs(e.touches[0].clientY - _swipeTabData.startY);
-    if (Math.abs(dx) < 30 || dy > Math.abs(dx) * 0.5) { _swipeTabData = null; return; }
-    e.preventDefault();
-  }, { passive: false });
-  
-  main.addEventListener('touchend', function(e) {
-    if (!_swipeTabData) return;
-    var dx = e.changedTouches[0].clientX - _swipeTabData.startX;
-    var dy = Math.abs(e.changedTouches[0].clientY - _swipeTabData.startY);
-    if (Math.abs(dx) < 60 || dy > Math.abs(dx) * 0.6) { _swipeTabData = null; return; }
-    var tabs = ['dashboard', 'home', 'planner', 'shopping', 'tasks', 'board'];
-    var current = document.body.dataset.tab || 'dashboard';
-    var idx = tabs.indexOf(current);
-    if (dx > 0 && idx > 0) { switchTab(tabs[idx - 1]); }
-    else if (dx < 0 && idx < tabs.length - 1) { switchTab(tabs[idx + 1]); }
-    _swipeTabData = null;
-  }, { passive: true });
-}
 // =================== LONG PRESS ON RECIPES ===================
 function initLongPress() {
   document.addEventListener('touchstart', function(e) {

@@ -280,7 +280,8 @@ document.addEventListener('touchstart', function(e) {
 function initShopSwipe() {
   document.querySelectorAll('.shop-item').forEach(function(item) {
     item.addEventListener('touchstart', onSwipeStart, { passive: true });
-    item.addEventListener('touchmove', onSwipeMove, { passive: false });
+    item.addEventListener('touchmove', onSwipeMove, { passive: true });
+    item.addEventListener('touchcancel', onSwipeEnd, { passive: true });
     item.addEventListener('touchend', onSwipeEnd, { passive: true });
     // Reset any existing revealed state
     var del = item.querySelector('.si-swipe-delete');
@@ -301,26 +302,24 @@ function onSwipeMove(e) {
   if (!_swipeData) return;
   var dx = e.touches[0].clientX - _swipeData.startX;
   var dy = Math.abs(e.touches[0].clientY - _swipeData.startY);
-  // If scrolling vertically, don't swipe
-  if (dy > 20 && Math.abs(dx) < 10) {
-    _swipeData = null;
-    return;
+  if (!_swipeData.moved) {
+    if (dy >= 12 && dy >= Math.abs(dx)) { _swipeData = null; return; }
+    if (dx > 12) { _swipeData = null; return; }
+    if (dx > -16 || -dx < dy * 1.5) return;
   }
-  if (dx > 0) { _swipeData = null; return; } // Only left swipe
   _swipeData.moved = true;
-  var translateX = Math.max(dx, -80);
+  var translateX = Math.max(-80, Math.min(0, dx));
   _swipeData.item.querySelector('.si-check').style.transform = 'translateX(' + translateX + 'px)';
   _swipeData.item.querySelector('.si-info').style.transform = 'translateX(' + translateX + 'px)';
   _swipeData.item.querySelector('.si-actions').style.transform = 'translateX(' + translateX + 'px)';
   var del = _swipeData.item.querySelector('.si-swipe-delete');
   if (del) del.style.transition = 'none';
-  e.preventDefault();
 }
 
 function onSwipeEnd(e) {
   if (!_swipeData) return;
   var del = _swipeData.item.querySelector('.si-swipe-delete');
-  var dx = e.changedTouches[0].clientX - _swipeData.startX;
+  var dx = e.changedTouches[0]?.clientX - _swipeData.startX;
   var snapBack = function() {
     var check = _swipeData.item.querySelector('.si-check');
     var info = _swipeData.item.querySelector('.si-info');
@@ -331,7 +330,7 @@ function onSwipeEnd(e) {
     if (del) { del.style.transition = ''; del.classList.remove('revealed'); }
   };
   
-  if (dx < -50 && _swipeData.moved) {
+  if (e.type === 'touchend' && dx < -50 && _swipeData.moved) {
     // Reveal delete button
     if (del) {
       del.classList.add('revealed');

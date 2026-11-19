@@ -89,7 +89,13 @@ function getWeekKey(date) {
   const day = d.getDay();
   const diff = d.getDate() - day + (day === 0 ? -6 : 1);
   d.setDate(diff);
-  return d.toISOString().slice(0, 10);
+  return localDateKey(d);
+}
+
+function localDateKey(date) {
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${date.getFullYear()}-${month}-${day}`;
 }
 
 function getWeekLabel(date) {
@@ -116,6 +122,17 @@ function currentWeekKey() {
 function getWeekPlan(weekKey) {
   const plan = planType === 'kids' ? mealPlanKids : mealPlan;
   if (!plan[weekKey]) {
+    // Older versions computed Monday locally and then formatted it in UTC.
+    const monday = new Date(weekKey + 'T12:00:00');
+    for (const offset of [-1, 1]) {
+      const legacyDate = new Date(monday);
+      legacyDate.setDate(monday.getDate() + offset);
+      const legacyWeek = plan[localDateKey(legacyDate)];
+      if (legacyWeek) {
+        plan[weekKey] = JSON.parse(JSON.stringify(legacyWeek));
+        return plan[weekKey];
+      }
+    }
     plan[weekKey] = {};
     DAYS.forEach(d => { plan[weekKey][d] = {}; });
   }
@@ -128,15 +145,25 @@ function saveWeekPlan() {
   localStorage.setItem('planType', planType);
 }
 
-// Migrate old flat mealPlan to week-based
-(function() {
-  const keys = Object.keys(mealPlan);
-  if (keys.length && DAYS.includes(keys[0])) {
-    const wk = getWeekKey(new Date());
-    mealPlan[wk] = mealPlan;
-    localStorage.setItem('mealPlan', JSON.stringify(mealPlan));
-  }
-})();
+// Migrate old flat meal plans, including snapshots received from older clients.
+function migrateFlatMealPlan(plan) {
+  if (!plan || typeof plan !== 'object' || Array.isArray(plan)) return {};
+  const flatDays = Object.keys(plan).filter(key => DAYS.includes(key));
+  if (!flatDays.length) return plan;
+
+  const weekKey = getWeekKey(new Date());
+  const migrated = { ...plan };
+  const week = { ...plan[weekKey] };
+  flatDays.forEach(day => {
+    week[day] = { ...plan[day], ...week[day] };
+    delete migrated[day];
+  });
+  migrated[weekKey] = week;
+  return migrated;
+}
+
+mealPlan = migrateFlatMealPlan(mealPlan);
+mealPlanKids = migrateFlatMealPlan(mealPlanKids);
 
 // ======================== LANGUAGE ========================
 function t(key, enFallback) {
@@ -503,9 +530,17 @@ function restoreBackupFromFile() {
       try {
         const data = JSON.parse(ev.target.result);
         if (!data || data.app !== 'Mealnest') throw new Error('invalid-backup');
+        const arrayKeys = ['recipes', 'shoppingItems', 'tasks', 'cookingHistory'];
+        const objectKeys = ['mealPlan', 'mealPlanKids', 'appSettings'];
+        if (arrayKeys.some(key => key in data && !Array.isArray(data[key])) ||
+            objectKeys.some(key => key in data && (!data[key] || typeof data[key] !== 'object' || Array.isArray(data[key]))) ||
+            ('planType' in data && !['adults', 'kids'].includes(data.planType))) {
+          throw new Error('invalid-backup');
+        }
+
         if (Array.isArray(data.recipes)) recipes = data.recipes;
-        if (data.mealPlan && typeof data.mealPlan === 'object') mealPlan = data.mealPlan;
-        if (data.mealPlanKids && typeof data.mealPlanKids === 'object') mealPlanKids = data.mealPlanKids;
+        if (data.mealPlan) mealPlan = migrateFlatMealPlan(data.mealPlan);
+        if (data.mealPlanKids) mealPlanKids = migrateFlatMealPlan(data.mealPlanKids);
         if (data.planType) planType = data.planType;
         if (Array.isArray(data.shoppingItems)) shopItems = data.shoppingItems;
         if (Array.isArray(data.tasks)) tasks = data.tasks;
@@ -515,11 +550,15 @@ function restoreBackupFromFile() {
         }
         saveToLS();
         saveTasks();
-        saveShop();
+        saveShopItems();
+        saveWeekPlan();
+        if (Array.isArray(data.cookingHistory)) {
+          localStorage.setItem('cookingHistory', JSON.stringify(data.cookingHistory));
+        }
         localStorage.setItem('_lastBackupRestore', Date.now().toString());
         render();
         renderTasks();
-        renderShopping();
+        renderShoppingList();
         openMorePage('backup-sync');
         showToast(lang === 'en' ? 'Backup restored ✓' : 'Záloha obnovená ✓', 'success');
       } catch(err) {
