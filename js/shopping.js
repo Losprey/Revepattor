@@ -149,11 +149,10 @@ function renderShoppingList() {
   // Summary
   html += `<section class="shop-hero">
     <div>
-      <span class="shop-hero-kicker">${lang==='en'?'Shopping':'Nákup'}</span>
       <h2>${remaining ? (lang==='en'?'Ready for the store':'Pripravené do obchodu') : (lang==='en'?'Everything bought':'Všetko kúpené')}</h2>
       <p>${lang==='en' ? `${remaining} items left across ${catCount} categories.` : `${remaining} položiek zostáva v ${catCount} kategóriách.`}</p>
     </div>
-    <button class="shop-hero-add" onclick="openAddItemSheet()">➕ ${lang==='en'?'Add':'Pridať'}</button>
+    <button class="shop-hero-add" onclick="openAddItemSheet()">+ ${t('Pridať položku','Add item')}</button>
   </section>`;
 
   html += `<div class="shop-summary">
@@ -168,14 +167,15 @@ function renderShoppingList() {
     <div class="shop-summary-progress"><div class="shop-summary-progress-bar" style="width:${pctAll}%"></div></div>
   </div>`;
 
-  // Top actions
-  html += `<div class="shop-actions">
-    <button class="sa-btn primary-action" onclick="openAddItemSheet()">➕ ${lang==='en'?'Add item':'Pridať položku'}</button>
-    <button class="sa-btn" onclick="copyShopList()">📋 ${lang==='en'?'Copy':'Kopírovať'}</button>
-    <button class="sa-btn" onclick="mergeDuplicateShopItems()">🔄 ${lang==='en'?'Merge dupes':'Zlúčiť duplicity'}</button>
-    <button class="sa-btn" onclick="clearCheckedShopItems()">✅ ${lang==='en'?'Clear checked':'Vyčistiť'}</button>
-    <button class="sa-btn danger" onclick="clearAllShopItems()" aria-label="${lang==='en'?'Clear all items':'Vymazať všetky položky'}">🗑 ${lang==='en'?'Clear all':'Všetko'}</button>
-  </div>`;
+  html += `<details class="shop-more">
+    <summary>${t('Viac','More')}</summary>
+    <div class="shop-more-actions" onclick="this.parentElement.open = false">
+      <button type="button" class="sa-btn" onclick="copyShopList()">${t('Kopírovať zoznam','Copy list')}</button>
+      <button type="button" class="sa-btn" onclick="mergeDuplicateShopItems()">${t('Zlúčiť duplicity','Merge duplicates')}</button>
+      <button type="button" class="sa-btn" onclick="clearCheckedShopItems()">${t('Odstrániť kúpené','Clear bought items')}</button>
+      <button type="button" class="sa-btn danger" onclick="clearAllShopItems()">${t('Vymazať celý zoznam','Clear entire list')}</button>
+    </div>
+  </details>`;
 
   html += renderShopCategoryCards(openGroups, { bought: false });
   if (boughtItems.length) {
@@ -187,9 +187,6 @@ function renderShoppingList() {
       ${renderShopCategoryCards(boughtGroups, { bought: true })}
     </div>`;
   }
-
-  // Add item button
-  html += `<button class="shop-add-btn" onclick="openAddItemSheet();springBounce(this)">➕ ${lang==='en'?'Add food item':'Pridať potravinu'}</button>`;
 
   container.innerHTML = html;
   container.classList.add('shop-animate-stagger');
@@ -239,7 +236,10 @@ function renderShopItem(it) {
   const catLabel = shopCatLabel(it.category);
   const amount = it.amount ? (it.unit ? `${it.amount} ${it.unit}` : it.amount) : '';
   return `<div class="shop-item ${ch}" data-id="${it.id}">
-    <div class="si-check ${ch}" onclick="toggleShopItem('${it.id}')">${it.checked?'✓':''}</div>
+    <button type="button" class="si-check ${ch}" aria-pressed="${!!it.checked}"
+      aria-label="${escAttr(t('Kúpené', 'Bought') + ': ' + it.name)}" onclick="toggleShopItem('${it.id}')">
+      <span class="list-check-mark" aria-hidden="true">${it.checked ? '✓' : ''}</span>
+    </button>
     <div class="si-info" onclick="openAddItemSheet('${it.id}')">
       <div class="si-name">${esc(it.name)}</div>
       <div class="si-meta">

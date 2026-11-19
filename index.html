@@ -15,7 +15,7 @@
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <title data-lang="appTitle">Mealnest</title>
-  <link rel="stylesheet" href="dist/styles.min.css?v=4">
+  <link rel="stylesheet" href="dist/styles.min.css?v=5">
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -117,20 +117,6 @@
 
 <!-- RECIPES -->
 <div class="container" id="home" style="display:none;">
-  <div class="hero-card" id="hero-card" onclick="viewRecipe(parseInt(this.dataset.id))">
-    <div class="hero-bg" id="hero-bg"></div>
-    <div class="hero-overlay"></div>
-    <button class="hero-dismiss" onclick="event.stopPropagation();dismissTip()" aria-label="Zavrieť tip dňa">✕</button>
-    <div class="hero-content">
-      <div class="hero-badge">💡 <span data-lang="tipOfDay">Tip dňa</span></div>
-      <div class="hero-title" id="hero-title"></div>
-      <div class="hero-meta">
-        <span>⏱ <span id="hero-time"></span></span>
-        <span>🔥 <span id="hero-kcal"></span></span>
-      </div>
-      <button class="hero-btn" aria-label="Zobraziť recept"><span data-lang="heroCta">Zobraziť recept</span></button>
-    </div>
-  </div>
   <div class="controls-bar" id="controls-bar">
     <div class="controls">
       <div class="search-wrap">
@@ -164,6 +150,20 @@
       </div>
     </div>
     </div>
+  <div class="hero-card" id="hero-card" onclick="viewRecipe(parseInt(this.dataset.id))">
+    <div class="hero-bg" id="hero-bg"></div>
+    <div class="hero-overlay"></div>
+    <button class="hero-dismiss" onclick="event.stopPropagation();dismissTip()" aria-label="Zavrieť tip dňa">✕</button>
+    <div class="hero-content">
+      <div class="hero-badge">💡 <span data-lang="tipOfDay">Tip dňa</span></div>
+      <div class="hero-title" id="hero-title"></div>
+      <div class="hero-meta">
+        <span>⏱ <span id="hero-time"></span></span>
+        <span>🔥 <span id="hero-kcal"></span></span>
+      </div>
+      <button class="hero-btn" aria-label="Zobraziť recept"><span data-lang="heroCta">Zobraziť recept</span></button>
+    </div>
+  </div>
   <div class="recipe-grid" id="recipe-grid"></div>
 </div>
 
@@ -514,7 +514,7 @@
 
 
 <!-- Bundled via esbuild (was 16 JS + 4 CSS files) -->
-<script src="dist/app.min.js?v=4" defer></script>
+<script src="dist/app.min.js?v=5" defer></script>
 
 <!-- Quick add FAB -->
 <div id="fab-quick-add" style="display:none">

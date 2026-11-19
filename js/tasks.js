@@ -198,16 +198,8 @@ function renderTasks() {
   const restWeekTasks = weekTasks.filter(t => t.date !== today && t.date !== tomStr);
   const activeTaskFilterClass = filter => _taskFilter === filter ? ' active' : '';
 
-  html += `<section class="task-screen-head">
-    <h1>${lang==='en'?'Tasks':'Úlohy'}</h1>
-    <div>
-      <button onclick="filterTasksTab(this,'today')" aria-label="${lang==='en'?'Filter today':'Filter dnes'}">≡</button>
-      <button onclick="filterTasksTab(this,'all')" aria-label="${lang==='en'?'All filters':'Všetky filtre'}">☰</button>
-    </div>
-  </section>`;
-
-  // Filter chips
   html += `<div class="task-filters">
+    <button class="task-filter-chip${activeTaskFilterClass('all')}" onclick="filterTasksTab(this,'all')">${t('Všetky','All')}</button>
     <button class="task-filter-chip${activeTaskFilterClass('today')}" onclick="filterTasksTab(this,'today')">📅 ${lang==='en'?'Today':'Dnes'}</button>
     <button class="task-filter-chip${activeTaskFilterClass('tomorrow')}" onclick="filterTasksTab(this,'tomorrow')">🌟 ${lang==='en'?'Tomorrow':'Zajtra'}</button>
     <button class="task-filter-chip${activeTaskFilterClass('week')}" onclick="filterTasksTab(this,'week')">📆 ${lang==='en'?'Week':'Týždeň'}</button>
@@ -363,14 +355,17 @@ function renderTaskCard(t) {
   const done = t.completed;
   const prioLabel = t.priority === 'high' ? '🔴' : t.priority === 'medium' ? '🟡' : '🟢';
   const dateLabel = formatTaskDate(t.date);
-  const timeStr = t.time ? ` · 🕐 ${t.time}` : '';
+  const deadline = [dateLabel, t.time].filter(Boolean).join(' · ');
   return `<div class="task-card${done?' done':''} prio-${t.priority}">
     <div class="task-card-body">
-      <div class="tc-check${done?' done':''}" onclick="toggleTask('${t.id}')">${done?'✓':''}</div>
+      <button type="button" class="tc-check${done ? ' done' : ''}" aria-pressed="${!!done}"
+        aria-label="${escAttr((lang === 'en' ? 'Completed: ' : 'Hotovo: ') + t.title)}" onclick="toggleTask('${t.id}')">
+        <span class="list-check-mark" aria-hidden="true">${done ? '✓' : ''}</span>
+      </button>
       <div class="tc-info" onclick="openTaskSheet('${t.id}')">
         <div class="tc-title">${esc(t.title)}</div>
         <div class="tc-meta">
-          <span class="tc-time">${t.time ? esc(t.time) : esc(dateLabel)}${timeStr && !t.time ? timeStr : ''}</span>
+          <span class="tc-time">${esc(deadline)}</span>
           ${t.note ? `<span>📝 ${esc(t.note)}</span>` : ''}
           ${t.repeat !== 'none' ? `<span>🔄 ${t.repeat === 'daily' ? (lang==='en'?'daily':'denne') : (lang==='en'?'weekly':'týždenne')}</span>` : ''}
         </div>

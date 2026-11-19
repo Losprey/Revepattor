@@ -1209,3 +1209,122 @@ html body[data-tab] .more-pill.active {
   background: var(--today-accent) !important;
   color: var(--today-action-text) !important;
 }
+
+#shopping-container .shop-hero-add {
+  flex-shrink: 0;
+  min-height: 44px;
+  max-width: 48%;
+  text-align: center;
+}
+
+body[data-tab="shopping"] #floating-fab {
+  display: none;
+}
+
+.shop-more {
+  margin-block: 12px;
+}
+
+.shop-more summary {
+  width: fit-content;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid var(--today-line);
+  border-radius: 12px;
+  background: var(--today-row);
+  color: var(--today-text);
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.shop-more-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 8px;
+}
+
+.shop-more-actions .sa-btn {
+  min-height: 44px;
+}
+
+html body[data-tab] .shop-more-actions .sa-btn.danger {
+  color: var(--danger) !important;
+}
+
+html body[data-tab] :is(.shop-item .si-check, .shop-item.checked .si-check, .task-card .tc-check) {
+  position: relative;
+  width: 44px !important;
+  height: 44px !important;
+  padding: 0;
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--today-text) !important;
+  box-shadow: none !important;
+  cursor: pointer;
+}
+
+.list-check-mark {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border: 1px solid var(--today-line);
+  border-radius: 6px;
+  font-size: .95rem;
+  line-height: 1;
+}
+
+[aria-pressed="true"] > .list-check-mark {
+  background: var(--today-accent);
+  color: var(--today-action-text);
+  border-color: var(--today-accent);
+}
+
+#home .recipe-card .recipe-card-img {
+  position: relative;
+  height: auto;
+  min-height: 0;
+  aspect-ratio: 4 / 3;
+  background: var(--today-row);
+}
+
+#home .recipe-card-img img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+#home .recipe-card .rc-name {
+  margin: 0 0 4px;
+  font-size: clamp(.88rem, 3.8vw, 1rem);
+  line-height: 1.25;
+  -webkit-line-clamp: 2;
+  overflow-wrap: anywhere;
+}
+
+#home .recipe-card .rc-meta {
+  color: var(--today-muted);
+}
+
+#tasks-container .task-filters {
+  flex-wrap: wrap;
+  padding-block: 8px;
+}
+
+#tasks-container .task-filter-chip {
+  min-height: 44px;
+}
+
+#tasks-container .task-card .tc-title,
+#shopping-container .shop-item .si-name {
+  font-size: .95rem;
+  overflow-wrap: anywhere;
+}
+
+#tasks-container .task-card .tc-info {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}

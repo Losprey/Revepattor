@@ -49,30 +49,27 @@ function render() {
   });
   document.getElementById('recipe-count').textContent = `(${filtered.length})`;
   updateMainHeader('home', filtered.length);
-  grid.innerHTML = filtered.map((r, idx) => {
-    const name = lang === 'en' && r.nameEn ? r.nameEn : r.name;
-    const tags = ((lang === 'en' && r.tagsEn ? r.tagsEn : r.tags) || []).slice(0, 2);
-    const diff = r.difficulty || 1;
-    const san = esc(name), sanCat = esc(r.category), sanTime = esc(r.time);
-    return `<div class="recipe-card" style="animation-delay:${Math.min(idx, 8) * .035}s" data-id="${r.id}">
-      <button class="fav-btn ${r.favorite?'fav-active':''}" onclick="event.stopPropagation();toggleFav(${r.id})">${r.favorite ? '❤️' : '🤍'}</button>
-      <div class="recipe-card-img${r.image||r.imageData?'':' img-skeleton'}" id="rcimg-${r.id}">${r.image||r.imageData
-        ? `<img src="${escAttr(imgUrl(r.imageData||r.image))}" alt="${san}" loading="lazy" onerror="this.outerHTML='<span style=\\'font-size:2.4rem\\'>🍽️</span>'" onload="this.classList.add('loaded');this.parentElement.classList.remove('img-skeleton')">`
-        : `<span style="font-size:2.4rem">🍽️</span>`}</div>
-      <div class="rc-info">
-        <div class="rc-name">${san}</div>
-        <div class="rc-meta">
-          <span class="rc-time">⏱ ${sanTime}</span>
-          ${r.nutrition && appSettings.mealPlanner.showNutrition ? `<span>🔥 ${esc(r.nutrition.kcal||'?')}</span>` : ''}
-          <span>${diffLabel(diff)}</span>
-        </div>
-        ${r.rating > 0 ? `<div class="stars" style="margin-top:.2rem;">${'★'.repeat(Math.round(r.rating))}${'☆'.repeat(5-Math.round(r.rating))}</div>` : ''}
-        ${tags.length ? `<div class="tags" style="margin-top:.25rem;">${tags.map(t => `<span class="tag">${esc(t)}</span>`).join('')}</div>` : ''}
-      </div>
-    </div>`;
-  }).join('');
+  grid.innerHTML = filtered.map(renderRecipeCard).join('');
   updateFavFilter();
   } catch(e) { var el = document.getElementById('boot-status'); if (el) { el.style.display = 'block'; el.style.background = 'rgba(200,0,0,.92)'; el.textContent = '❌ render: ' + (e.message || ''); } }
+}
+
+function renderRecipeCard(recipe, index) {
+  const name = lang === 'en' && recipe.nameEn ? recipe.nameEn : recipe.name;
+  const image = recipe.imageData || recipe.image;
+  const favoriteLabel = t('Obľúbené', 'Favorites') + ': ' + name;
+  return `<div class="recipe-card" style="animation-delay:${Math.min(index, 8) * .035}s" data-id="${recipe.id}">
+    <button type="button" class="fav-btn${recipe.favorite ? ' fav-active' : ''}" aria-label="${escAttr(favoriteLabel)}"
+      aria-pressed="${!!recipe.favorite}" onclick="event.stopPropagation();toggleFav(${recipe.id})">${recipe.favorite ? '❤️' : '🤍'}</button>
+    <div class="recipe-card-img" id="rcimg-${recipe.id}">
+      <span class="recipe-card-placeholder" aria-hidden="true">🍽️</span>
+      ${image ? `<img src="${escAttr(imgUrl(image))}" alt="" loading="lazy" onerror="this.remove()" onload="this.classList.add('loaded')">` : ''}
+    </div>
+    <div class="rc-info">
+      <h3 class="rc-name">${esc(name)}</h3>
+      ${recipe.time ? `<div class="rc-meta"><span class="rc-time">⏱ ${esc(recipe.time)} min</span></div>` : ''}
+    </div>
+  </div>`;
 }
 
 let searchTimer;
@@ -262,6 +259,7 @@ function toggleFav(id) {
     if (btn) {
       btn.classList.toggle('fav-active', r.favorite);
       btn.textContent = r.favorite ? '❤️' : '🤍';
+      btn.setAttribute('aria-pressed', String(r.favorite));
       springBounce(btn);
     }
   }
@@ -1015,22 +1013,7 @@ function applyIngredientSearch() {
     });
     const grid = document.getElementById('recipe-grid');
     if (!matching.length) { grid.innerHTML = `<div class="empty-state"><h3>😕 ${t('noRecipes')}</h3></div>`; return; }
-    grid.innerHTML = matching.map(r => {
-      const name = lang==='en'&&r.nameEn?r.nameEn:r.name;
-      const tags = ((lang==="en"&&r.tagsEn?r.tagsEn:r.tags)||[]).slice(0, 2);
-      const diff = r.difficulty||1;
-      const san = esc(name), sanCat = esc(r.category), sanTime = esc(r.time);
-      return `<div class="recipe-card" data-id="${r.id}"><button class="fav-btn ${r.favorite?'fav-active':''}" onclick="event.stopPropagation();toggleFav(${r.id})" aria-label="${r.favorite ? (lang==='en'?'Remove from favorites':'Odstrániť z obľúbených') : (lang==='en'?'Add to favorites':'Pridať do obľúbených')}">${r.favorite?'❤️':'🤍'}</button>
-        <div class="recipe-card-img">${r.image||r.imageData?`<img src="${escAttr(r.imageData||r.image)}" alt="${san}" loading="lazy" style="width:100%;height:100%;object-fit:cover" onerror="this.outerHTML='<span style=\\'font-size:2.4rem\\'>🍽️</span>'">`:`🍽️`}</div>
-        <div class="recipe-card-body">
-        <h3>${san}</h3>
-        <div class="meta-line"><span>📂 ${sanCat}</span><span>⏱ ${sanTime}</span>
-        ${r.nutrition && appSettings.mealPlanner.showNutrition?`<span class="kcal-badge">🔥 ${esc(r.nutrition.kcal||'?')}</span>`:''}</div>
-        <div style="display:flex;align-items:center;gap:.15rem;margin-top:.1rem;">
-          ${[1,2,3].map(i=>`<span class="difficulty-dot ${i<=diff?'filled':'empty'}"></span>`).join('')}
-        </div>
-        <div class="tags">${tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div></div></div>`;
-    }).join('');
+    grid.innerHTML = matching.map(renderRecipeCard).join('');
   } else {
     render();
   }
