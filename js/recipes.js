@@ -140,6 +140,7 @@ function applyTheme() {
     document.body.classList.toggle('dark', resolvedTheme === 'dark');
     document.body.classList.toggle('light', resolvedTheme === 'light');
   }
+  document.getElementById('today-theme')?.setAttribute('aria-pressed', String(resolvedTheme === 'dark'));
   const themeMeta = document.querySelector('meta[name="theme-color"]:not([media])');
   if (themeMeta) themeMeta.setAttribute('content', resolvedTheme === 'dark' ? '#0B0B0B' : '#FAF7F5');
 }

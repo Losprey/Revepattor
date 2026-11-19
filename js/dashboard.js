@@ -3,42 +3,69 @@
 
 // ======================== DASHBOARD ========================
 function renderDashboard() {
+  const root = document.getElementById('dash-content');
+  if (!root) return;
+  loadShopItems();
+  loadTasks();
   const now = new Date();
-  try { loadShopItems(); } catch(e) {}
-  try { loadTasks(); } catch(e) {}
-  const todayMeals = getTodayMealCount();
-  const todayTasksArr = getTodayTasks();
-  const uncheckedShop = (Array.isArray(shopItems) ? shopItems : []).filter(i => i && !i.checked).length;
-  const mealPct = Math.round((todayMeals / MEALS.length) * 100);
-  const userName = getDashboardUserName();
-  const greetingText = userName ? `Ahoj, ${userName} 👋` : 'Ahoj 👋';
-  const currentDate = formatDashboardDate(now);
-  const aiRecipe = pickDashboardAiRecipe();
-  const html = `<div class="mn-home-shell">
-    <section class="mn-home-header">
-      <div class="mn-home-greeting">
-        <div class="mn-progress-ring-wrap">
-          <div class="mn-progress-ring-small" style="--meal-pct:${mealPct}" data-pct="${todayMeals}/${MEALS.length}"></div>
-          <div><h1>${esc(greetingText)}</h1>
-        <p>${esc(currentDate)}${recipeCountBadge()}</p></div>
-        </div>
-      </div>
-      <div class="mn-home-actions">
-        <button class="mn-icon-btn" onclick="openSettings()" aria-label="Nastavenia" title="Nastavenia">⚙️</button>
-        <button class="mn-avatar-btn" onclick="openMorePageFromAnywhere('account')" aria-label="Profil">${getDashboardAvatar()}</button>
-      </div>
-    </section>
-    ${renderFamilyOverviewCards({ todayMeals, totalMeals: MEALS.length, uncheckedShop, todayTasks: todayTasksArr.filter(t => !t.completed).length, aiRecipe })}
-    ${renderMobileMealsCard()}
-    ${renderFamilyHubHero({ todayMeals, totalMeals: MEALS.length, uncheckedShop, todayTasks: todayTasksArr.filter(t => !t.completed).length, aiRecipe })}
-    ${renderMobileAiRecommendation()}
-    ${renderFamilyActivityCard()}
-  </div>`;
+  const today = localDateKey(now);
+  const pending = tasks.filter(task => task && !task.completed);
+  const due = pending.filter(task => !task.date || task.date <= today);
+  const openShoppingItems = shopItems.filter(item => item && !item.checked).length;
+  const dark = getResolvedTheme() === 'dark';
 
-  try { document.getElementById('dash-content').innerHTML = html; } catch(e) {}
-  setTimeout(function() {
-    document.querySelectorAll('.mn-count-up').forEach(function(el) { animateCountUp(el, el.dataset.target); });
-  }, 80);
+  root.innerHTML = `<div class="mealnest-today">
+    <header class="today-bar">
+      <span class="today-brand">${todayIcon('brand')} Mealnest</span>
+      <div class="today-controls">
+        <button type="button" id="today-theme" class="today-icon-button" aria-label="${t('Tmavý režim','Dark mode')}" aria-pressed="${dark}" onclick="appSettings.theme = getResolvedTheme() === 'dark' ? 'light' : 'dark'; saveSettings()">
+          <span class="today-sun">${todayIcon('sun')}</span><span class="today-moon">${todayIcon('moon')}</span>
+        </button>
+        <button type="button" class="today-icon-button today-profile" aria-label="${t('Profil a nastavenia','Profile and settings')}" onclick="switchTab('board')">${getDashboardAvatar()}</button>
+      </div>
+    </header>
+    <h1>${t('Dnes', 'Today')}</h1>
+    <p class="today-date">${esc(formatDashboardDate(now))}</p>
+    <div class="today-columns">
+      <div class="today-primary">
+        <div class="today-shortcuts">
+          <button type="button" onclick="switchTab('shopping')">${todayIcon('cart')} <span>${t('Nákup','Shopping')}</span><b>${openShoppingItems}</b></button>
+          <button type="button" onclick="switchTab('tasks')">${todayIcon('tasks')} <span>${t('Úlohy','Tasks')}</span><b>${due.length}</b></button>
+        </div>
+        ${renderMobileMealsCard()}
+      </div>
+      <div class="today-secondary">
+        ${renderMobileAiRecommendation()}
+        <section class="today-card">
+          <div class="today-card-heading">
+            <h2>${t('Rodinné úlohy','Family tasks')}</h2>
+            <button type="button" class="today-link" onclick="openMorePageFromAnywhere('family')">${t('Rodina','Family')}</button>
+          </div>
+          ${due.length ? `<div class="today-list">${due.slice(0, 3).map(task =>
+            `<button type="button" class="today-task" data-task-id="${escAttr(task.id)}" onclick="toggleTask(this.dataset.taskId); renderDashboard()">
+              <span class="today-checkbox" aria-hidden="true"></span><span>${esc(task.title)}</span>${todayIcon('chevron')}
+            </button>`).join('')}</div>` : `<p class="today-empty">${t('Na dnes nemáš otvorené úlohy.','No open tasks for today.')}</p>`}
+        </section>
+      </div>
+    </div>
+  </div>`;
+}
+
+function todayIcon(name) {
+  const paths = {
+    brand: '<path d="M2 11h20a10 10 0 0 1-20 0Z" fill="currentColor"/><path d="M12 10c0-6 4-8 9-8-1 4-4 7-9 8ZM12 10C10 6 7 5 4 6c1 3 4 5 8 4Z"/>',
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/>',
+    moon: '<path d="M20 16a9 9 0 0 1-12-12 9 9 0 1 0 12 12Z"/>',
+    cart: '<path d="M2 4h3l3 12h11l3-9H6"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/>',
+    tasks: '<rect x="3" y="3" width="18" height="18" rx="3"/><path d="m7 12 3 3 7-7"/>',
+    chevron: '<path d="m9 5 7 7-7 7"/>',
+    'raňajky': '<path d="M3 11h18a9 9 0 0 1-18 0Zm6-3 2-4 3 3m2 0 2-2"/>',
+    'desiata': '<path d="M5 9h14l-2 12H7L5 9Zm7 0 5-6 2 1-3 5M4 9h16"/>',
+    'obed': '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/>',
+    'olovrant': '<path d="M12 7c-2-3-7-2-8 2-1 6 3 12 6 11l2-1 2 1c3 1 7-5 6-11-1-4-6-5-8-2Zm0 0c0-3 1-4 4-5"/>',
+    'večera': '<path d="M2 19h20M4 16h16a8 8 0 0 0-16 0Zm8-8V6"/>',
+  };
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]}</svg>`;
 }
 
 function getDashboardUserName() {
@@ -215,35 +242,26 @@ function resolveMealEntry(entry) {
 
 function renderMobileMealsCard() {
   const ctx = getDashboardDayPlan();
-  return `<section class="mn-meals-card mn-card">
-    <div class="mn-section-head compact">
-      <h2>DNEŠNÉ JEDLÁ</h2>
-      <button onclick="switchTab('planner')">Upraviť</button>
+  return `<section class="today-card today-meals">
+    <div class="today-card-heading"><h2>${t('Dnešné jedlá','Today’s meals')}</h2>
+      <button type="button" class="today-link" onclick="switchTab('planner')">${t('Plán','Plan')}</button>
     </div>
-    <div class="mn-meal-list">
-      ${MEALS.map(meal => renderMobileMealRow(meal, ctx)).join('')}
-    </div>
+    <div class="today-list">${MEALS.map(meal => renderMobileMealRow(meal, ctx)).join('')}</div>
   </section>`;
 }
 
 function renderMobileMealRow(meal, ctx) {
   const resolved = resolveMealEntry(ctx.dayPlan[meal.id]);
-  const filled = !!resolved;
-  const recipe = resolved && resolved.recipe;
-  const title = recipe ? recipe.name : (resolved ? resolved.title : '');
-  const kcal = recipe && recipe.nutrition && recipe.nutrition.kcal ? recipe.nutrition.kcal + ' kcal' : (filled ? '—' : '');
+  const recipe = resolved?.recipe;
+  const title = recipe ? (lang === 'en' ? recipe.nameEn || recipe.name : recipe.name) : resolved?.title;
+  const label = lang === 'en' ? mealLabel(meal.id) : dashboardMealLabel(meal.id);
   const image = recipe && (recipe.imageData || recipe.image);
-  const addAction = `pickRecipe('${ctx.todayName}','${meal.id}','${ctx.weekKey}')`;
-  return `<article class="mn-meal-row ${filled ? 'filled' : 'empty'}" onclick="${filled && recipe ? `viewRecipe(${recipe.id})` : addAction}">
-    <div class="mn-meal-icon">${meal.icon}</div>
-      <div class="mn-meal-body">
-      <span>${dashboardMealLabel(meal.id)}</span>
-      ${filled ? `<strong>${esc(title)}</strong>` : `<strong class="mn-empty-meal">Pridať jedlo</strong>`}
-      ${filled ? `<small>${esc(kcal)}</small>` : ''}
-    </div>
-    ${image ? `<img class="mn-meal-thumb" src="${escAttr(image)}" alt="${escAttr(title)}" loading="lazy" onerror="this.remove()">` : ''}
-    <button class="mn-row-action" onclick="event.stopPropagation();${addAction}">${filled ? 'Upraviť' : '+'}</button>
-  </article>`;
+  const edit = `pickRecipe('${ctx.todayName}','${meal.id}','${ctx.weekKey}')`;
+  return `<button type="button" class="today-meal" onclick="${edit}">
+    <span class="today-meal-icon">${todayIcon(meal.id)}${image ? `<img src="${escAttr(image)}" alt="" loading="lazy" onerror="this.remove()">` : ''}</span>
+    <span class="today-meal-copy"><strong>${esc(label)}</strong><span>${esc(title || t('Pridať jedlo','Add meal'))}</span></span>
+    ${todayIcon('chevron')}
+  </button>`;
 }
 
 function dashboardMealLabel(id) {
@@ -265,28 +283,16 @@ function pickDashboardAiRecipe() {
 
 function renderMobileAiRecommendation() {
   const recipe = pickDashboardAiRecipe();
-  if (!recipe) {
-    return `<section class="mn-ai-card mn-card">
-      <div class="mn-ai-empty"><span>🤖</span><strong>AI odporúča</strong><p>Pridaj recepty a AI odporúčanie sa zobrazí tu.</p></div>
-    </section>`;
-  }
-  const ctx = getDashboardDayPlan();
-  const title = recipe.name;
-  const img = getDashboardRecipeImage(recipe);
-  const kcal = recipe.nutrition && recipe.nutrition.kcal ? recipe.nutrition.kcal + ' kcal' : '— kcal';
-  return `<section class="mn-ai-card mn-card">
-    <div class="mn-section-head compact mn-ai-head"><h2>AI ODPORÚČA PRE VÁS</h2><button onclick="event.stopPropagation();cycleAiSuggestion()" title="Ďalší návrh">↻</button></div>
-    <div onclick="viewRecipe(${recipe.id})">
-    ${img ? `<img class="mn-ai-image" src="${escAttr(img)}" alt="${escAttr(title)}" loading="lazy" onerror="this.style.display='none'">` : `<div class="mn-ai-image mn-ai-fallback">🍽️</div>`}
-    <div class="mn-ai-copy">
+  const title = recipe && (lang === 'en' ? recipe.nameEn || recipe.name : recipe.name);
+  return `<section class="today-card today-dinner">
+    <div class="today-card-heading"><h2>${t('Tip na večeru','Dinner idea')}</h2>
+      ${recipe ? `<button type="button" class="today-link mn-ai-next" onclick="cycleAiSuggestion()">${t('Ďalší','Next')}</button>` : ''}
+    </div>
+    ${recipe ? `<button type="button" class="today-recipe" onclick="viewRecipe(${recipe.id})">
+      <img src="${escAttr(getDashboardRecipeImage(recipe))}" alt="" loading="lazy" onerror="if (!this.src.endsWith('/ai-recommendation.png')) this.src='ai-recommendation.png'">
       <strong>${esc(title)}</strong>
-      <span>⏱ ${recipe.time || 25} min • 🔥 ${kcal} • Denný návrh</span>
-    </div>
-    </div>
-    <div class="mn-ai-actions">
-      <button class="mn-ai-button" onclick="event.stopPropagation();addDashboardRecommendationToPlan(${recipe.id})">Pridať do plánu</button>
-      <button class="mn-ai-next" onclick="event.stopPropagation();cycleAiSuggestion()" title="Ďalší návrh">Ďalší →</button>
-    </div>
+    </button>
+    <div class="today-dinner-actions"><button type="button" class="today-link" onclick="addDashboardRecommendationToPlan(${recipe.id})">${t('Pridať do plánu','Add to plan')}</button></div>` : `<p class="today-empty">${t('Pridaj recept a zobrazí sa tu návrh.','Add a recipe to see a suggestion.')}</p>`}
   </section>`;
 }
 
