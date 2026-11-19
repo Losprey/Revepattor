@@ -534,6 +534,7 @@ function viewRecipe(id) {
       <span aria-hidden="true">🍽️</span>
       ${image ? `<img src="${escAttr(image)}" alt="" decoding="async" onerror="this.remove()" onload="this.classList.add('loaded')">` : ''}
     </div>
+    <div id="recipe-image-credit" class="recipe-image-credit">${renderRecipeImageCredit(r, image)}</div>
     <div class="recipe-detail-head">
       <div class="recipe-detail-title">
         <span>${sanCat}</span>
@@ -620,6 +621,7 @@ function viewRecipe(id) {
       img.onerror = () => img.remove();
       img.src = url;
       wrap.appendChild(img);
+      document.getElementById('recipe-image-credit').innerHTML = renderRecipeImageCredit(r, url);
     });
   }
 }

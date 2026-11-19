@@ -36,63 +36,77 @@ async function aiGenerateFullWeekRun() {
   document.body.appendChild(div);
 }
 
-async function fetchPexelsImage(query) {
-  if (!query) return null;
-  const url = AI_PROXY_URL + '/api/pexels?query=' + encodeURIComponent(query);
+async function fetchCommonsRecipePhoto(query) {
+  const words = query.replace(/[^\p{L}\p{N}\s-]/gu, ' ').trim().slice(0, 100);
+  if (!words) return null;
+  const params = new URLSearchParams({
+    action: 'query', format: 'json', origin: '*', generator: 'search',
+    gsrnamespace: '6', gsrsearch: words + ' filetype:bitmap', gsrlimit: '5',
+    prop: 'imageinfo', iiprop: 'url|mime|extmetadata', iiurlwidth: '640'
+  });
   try {
-    const res = await fetch(url);
-    if (!res.ok) return null;
-    const data = await res.json();
-    if (data.photos && data.photos.length > 0) {
-      // Prefer food-looking images (try to avoid non-food results)
-      for (const photo of data.photos) {
-        if (photo.alt && /food|meal|dish|breakfast|lunch|dinner|cook/i.test(photo.alt)) {
-          return photo.src.large2x || photo.src.large || photo.src.medium;
-        }
-      }
-      return data.photos[0].src.large2x || data.photos[0].src.large || data.photos[0].src.medium;
+    const response = await fetch('https://commons.wikimedia.org/w/api.php?' + params, {
+      signal: AbortSignal.timeout(8000), referrerPolicy: 'no-referrer'
+    });
+    if (!response.ok) return null;
+    const result = await response.json();
+    const pages = Object.values(result.query?.pages || {}).sort((a, b) => a.index - b.index);
+    for (const page of pages) {
+      const info = page.imageinfo?.[0];
+      const metadata = info?.extmetadata;
+      const license = metadata?.LicenseShortName?.value;
+      const licenseUrl = metadata?.LicenseUrl?.value;
+      const url = info?.thumburl;
+      const source = info?.descriptionurl;
+      if (!/^CC BY(?:-SA)? [234](?:\.\d)?$/i.test(license) ||
+          !/^https?:\/\/creativecommons\.org\/licenses\/(?:by|by-sa)\/[\d.]+\/?$/i.test(licenseUrl) ||
+          !/^https:\/\/(?:upload|thumb)\.wikimedia\.org\/wikipedia\/commons\//.test(url) ||
+          !/^https:\/\/commons\.wikimedia\.org\/wiki\/File:/i.test(source) ||
+          !/^image\/(?:jpeg|png|webp)$/.test(info?.mime || '') ||
+          /^true$/i.test(metadata?.Restrictions?.value || '')) continue;
+      const author = document.createElement('template');
+      author.innerHTML = metadata?.Artist?.value || '';
+      const authorName = author.content.textContent.replace(/\s+/g, ' ').trim();
+      if (!authorName) continue;
+      return { url, source, license, licenseUrl: licenseUrl.replace(/^http:/, 'https:'), author: authorName };
     }
-    return null;
-  } catch(e) {
-    return null;
+  } catch (error) {
+    // A recipe remains usable without a photo.
   }
+  return null;
 }
 
 function getRecipeImageSource(recipe) {
-  const source = recipe.image;
-  return recipe.imageData ||
-    (source && !source.includes('placehold.co') ? source : '') ||
-    PRELOADED_IMAGES[recipe.id] || getImageCache()[recipe.id] || '';
+  const explicit = recipe.imageData || (recipe.image && !recipe.image.includes('placehold.co') ? recipe.image : '');
+  const builtIn = PRELOADED_IMAGES[recipe.id];
+  if (explicit || builtIn) return explicit || builtIn;
+  const cached = getImageCache()[recipe.id];
+  return (typeof cached === 'string' ? cached : cached?.url) || '';
 }
 
 async function getRecipeImage(recipe) {
   const existing = getRecipeImageSource(recipe);
   if (existing) return existing;
 
-  const query = translateRecipeQuery(lang === 'en' && recipe.nameEn ? recipe.nameEn : recipe.name);
-  const image = await fetchPexelsImage(query) || await fetchPexelsImage(categoryFallbackQuery(recipe.category));
-  if (image) setImageCache(recipe.id, image);
+  const photo = await fetchCommonsRecipePhoto(translateRecipeQuery(recipe.nameEn || recipe.name));
+  if (photo) {
+    // Keep attribution alongside the downloaded photo URL on this device.
+    setImageCache(recipe.id, photo);
+  }
   return getRecipeImageSource(recipe);
 }
 
-function categoryFallbackQuery(category) {
-  const map = {
-    'Raňajky': 'breakfast food',
-    'Polievky': 'soup food',
-    'Hlavné jedlá': 'main dish dinner',
-    'Šaláty': 'salad food',
-    'Dezerty': 'dessert',
-    'Pečivo': 'bread bakery',
-    'Nápoje': 'smoothie drink',
-    'Predjedlá': 'appetizer',
-    'Prílohy': 'side dish',
-    'Detské': 'baby food healthy',
-  };
-  return map[category] || 'food meal';
+function renderRecipeImageCredit(recipe, image) {
+  const photo = getImageCache()[recipe.id];
+  if (!photo || typeof photo !== 'object' || photo.url !== image ||
+      !/^https:\/\/commons\.wikimedia\.org\/wiki\/File:/i.test(photo.source) ||
+      !/^https:\/\/creativecommons\.org\/licenses\//i.test(photo.licenseUrl)) return '';
+  return `<a href="${escAttr(photo.source)}" target="_blank" rel="noopener noreferrer">${esc(photo.author)} · Wikimedia Commons</a>
+    · <a href="${escAttr(photo.licenseUrl)}" target="_blank" rel="noopener noreferrer">${esc(photo.license)}</a>
+    <span> · ${t('Ilustračná fotka','Illustrative photo')}</span>`;
 }
 
 async function refreshRecipeImages() {
-  localStorage.removeItem('pexels_cache_v3');
   await batchFetchImages();
   render();
   if (recipes.some(recipe => !getRecipeImageSource(recipe))) {
