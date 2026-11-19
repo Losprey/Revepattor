@@ -703,8 +703,8 @@ html:has(#onboarding-overlay.active) {
   }
 }
 
-/* Today screen and its navigation share the selected theme. */
-html body[data-tab="dashboard"] {
+/* Shared Mealnest palette. */
+:root {
   --today-bg: #10231a;
   --today-card: #23392e;
   --today-row: #293f33;
@@ -713,12 +713,9 @@ html body[data-tab="dashboard"] {
   --today-line: #4b6254;
   --today-accent: #a5ee9f;
   --today-action-text: #102b1b;
-  margin: 0;
-  background: var(--today-bg) !important;
-  color: var(--today-text);
 }
 
-html.light body[data-tab="dashboard"] {
+html.light {
   --today-bg: #faf5e9;
   --today-card: #eeebdc;
   --today-row: #f8f3e9;
@@ -727,6 +724,14 @@ html.light body[data-tab="dashboard"] {
   --today-line: #dad7c9;
   --today-accent: #07552e;
   --today-action-text: #fff9eb;
+}
+
+html body[data-tab] {
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0;
+  background: var(--today-bg) !important;
+  color: var(--today-text);
 }
 
 body[data-tab="dashboard"] #dashboard.container {
@@ -991,7 +996,7 @@ html.light .today-sun {
   border-radius: 12px;
 }
 
-html body[data-tab="dashboard"] .bottom-nav {
+html body[data-tab] .bottom-nav {
   width: min(100%, 1040px) !important;
   height: auto;
   bottom: 0 !important;
@@ -1003,7 +1008,7 @@ html body[data-tab="dashboard"] .bottom-nav {
   background: var(--today-bg) !important;
 }
 
-html body[data-tab="dashboard"] .bottom-nav .nav-item {
+html body[data-tab] .bottom-nav .nav-item {
   min-width: 0;
   min-height: 52px;
   color: var(--today-muted) !important;
@@ -1012,9 +1017,9 @@ html body[data-tab="dashboard"] .bottom-nav .nav-item {
   box-shadow: none !important;
 }
 
-html body[data-tab="dashboard"] .bottom-nav .nav-item.active,
-html body[data-tab="dashboard"] .bottom-nav .nav-item.active .nav-label,
-html body[data-tab="dashboard"] .bottom-nav .nav-item.active .nav-icon {
+html body[data-tab] .bottom-nav .nav-item.active,
+html body[data-tab] .bottom-nav .nav-item.active .nav-label,
+html body[data-tab] .bottom-nav .nav-item.active .nav-icon {
   color: var(--today-accent) !important;
 }
 
@@ -1027,4 +1032,180 @@ body[data-tab="dashboard"] #floating-fab {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 16px;
   }
+}
+
+/* The existing tools, lists and sheets use the same surfaces as Today. */
+html body[data-tab] :is(#app-header, #planner-container, #tasks-container, #shopping-container, #home, #board-container,
+  .sheet, .modal, .picker-sheet) {
+  --bg: var(--today-bg);
+  --surface: var(--today-card);
+  --surface-solid: var(--today-card);
+  --text: var(--today-text);
+  --text2: var(--today-muted);
+  --text3: var(--today-muted);
+  --border: var(--today-line);
+  --glass-border: var(--today-line);
+  --primary: var(--today-accent);
+  --primary-light: var(--today-accent);
+  color: var(--today-text);
+  font-family: 'Instrument Sans', system-ui, sans-serif;
+}
+
+html body[data-tab] #app-header {
+  max-width: 1040px;
+  margin-inline: auto;
+  padding-inline: clamp(14px, 4vw, 32px);
+  color: var(--today-text) !important;
+  background: var(--today-bg) !important;
+  border-color: var(--today-line);
+  box-shadow: none;
+}
+
+html body[data-tab] :is(#home, #planner-container, #tasks-container, #shopping-container, #board-container).container {
+  width: min(100%, 1040px);
+  max-width: 1040px;
+  padding-inline: clamp(14px, 4vw, 32px);
+  padding-bottom: calc(92px + env(safe-area-inset-bottom));
+  background: transparent !important;
+}
+
+html body[data-tab] :is(.planner-week-agenda-shell, .planner-day-view, .planner-week-total, .planner-info-panel,
+  .shop-hero, .shop-summary, .shop-cat-card, .shop-bought-section, .task-screen-head, .task-productivity, .task-card,
+  .recipe-card, .controls-bar, .recipe-tools-panel, .more-card, .more-tile, .more-list, .more-subhead,
+  .sheet, .modal, .picker-sheet, .empty-state) {
+  background: var(--today-card) !important;
+  color: var(--today-text) !important;
+  border: 1px solid var(--today-line) !important;
+  border-radius: 18px;
+  box-shadow: none !important;
+}
+
+html body[data-tab] :is(.picker-header, .picker-search, .picker-recipe-card, .sheet-header, .recipe-card-body,
+  .task-container, .shopping-scroll, .board-scroll, .more-screen) {
+  background: transparent;
+  color: var(--today-text);
+}
+
+html body[data-tab] :is(.planner-day-card, .planner-week-row, .planner-week-slot.empty,
+  .shop-item, .more-board-row, .more-list > button, .task-filter-chip, .sa-btn, .pa-btn,
+  .pln-btn, .plan-type-btn, .topbar-btn, .age-btn, .more-secondary, .more-back, .sheet-close) {
+  background: var(--today-row) !important;
+  color: var(--today-text) !important;
+  border-color: var(--today-line) !important;
+  box-shadow: none !important;
+}
+
+html body[data-tab] :is(#planner-hero, #shopping-container .hero-header, #tasks-container .hero-header) {
+  background: var(--today-card) !important;
+  color: var(--today-text) !important;
+  border: 1px solid var(--today-line);
+  border-radius: 18px;
+  box-shadow: none;
+}
+
+html body[data-tab] #planner-hero .hero-blob {
+  display: none;
+}
+
+html body[data-tab] :is(.hero-header-title, .hero-header-sub, .shop-hero h2, .shop-hero p, .shop-hero-kicker,
+  .shop-summary strong, .shop-summary-stats, .shop-cat-name, .shop-cat-count, .si-name, .si-meta,
+  .task-screen-head h1, .task-screen-head h2, .task-screen-head p, .task-screen-head button, .task-productivity h3, .task-section-title, .tc-title, .tc-meta,
+  .planner-day-view-head h2, .planner-day-view-head p, .planner-day-card strong, .planner-day-card small, .planner-day-card em,
+  .planner-week-day, .planner-week-legend, .planner-week-plus, .recipe-card-body h3, .recipe-card-body .card-meta,
+  .more-head h1, .more-subhead h1, .more-card h2, .more-tile strong, .more-list strong, .more-list small, .more-tile small) {
+  color: var(--today-text) !important;
+}
+
+html body[data-tab] :is(.shop-hero-add, .task-primary-add, .sa-btn.primary-action, .btn-primary, #floating-fab,
+  .sheet .btn.primary, .more-primary, .planner-day-card > button, .planner-week-slot.empty:focus-visible,
+  .plan-type-btn.active, .pln-btn.active, .task-filter-chip.active, .age-btn.active,
+  .shop-item.checked .si-check, .tc-check.done) {
+  background: var(--today-accent) !important;
+  color: var(--today-action-text) !important;
+  border-color: var(--today-accent) !important;
+  box-shadow: none !important;
+}
+
+html body[data-tab] :is(#planner-container, #shopping-container, #tasks-container, #home, #board-container,
+  .sheet, .modal, .picker-sheet) :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea) {
+  background: var(--today-row);
+  border-color: var(--today-line);
+  color: var(--today-text);
+}
+
+html body[data-tab] :is(.shop-hero-add, .task-primary-add, .planner-day-card > button, .more-back, .sheet-close) {
+  min-height: 44px;
+}
+
+html body[data-tab] :is(.task-card-body, .shop-item) {
+  min-height: 52px;
+}
+
+html body[data-tab] :is(.shop-summary-progress-bar, .pip-fill, .shop-cat-progress-bar) {
+  background: var(--today-accent) !important;
+}
+
+html body[data-tab] :is(.si-check, .tc-check) {
+  border-color: var(--today-line);
+}
+
+html body[data-tab] .shop-actions {
+  flex-wrap: wrap;
+}
+
+html body[data-tab] .shop-actions .sa-btn.danger {
+  color: var(--danger) !important;
+}
+
+html body[data-tab] #home #recipe-grid:not(.masonry) {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 680px) {
+  html body[data-tab] #home #recipe-grid:not(.masonry) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+html body[data-tab] #planner-container .planner-week-legend {
+  background: transparent;
+}
+
+html body[data-tab] #planner-container :is(.planner-week-legend-slots span, .planner-week-day em) {
+  background: var(--today-card);
+  color: var(--today-text);
+  border-color: var(--today-line);
+}
+
+html body[data-tab] #planner-container .planner-week-row.today .planner-week-day :is(strong, span) {
+  color: var(--today-accent);
+}
+
+html body[data-tab] .more-screen {
+  width: 100%;
+  max-width: none;
+  background: transparent !important;
+}
+
+html body[data-tab] :is(.more-empty-state, .more-action-row, .more-setting-row, .more-member,
+  .family-shared-grid button, .more-pill, .more-top-action) {
+  background: var(--today-row) !important;
+  color: var(--today-text) !important;
+  border-color: var(--today-line) !important;
+  box-shadow: none;
+}
+
+html body[data-tab] :is(.more-empty-state strong, .more-action-row strong, .more-setting-row strong,
+  .more-member strong, .family-shared-grid strong) {
+  color: var(--today-text) !important;
+}
+
+html body[data-tab] :is(.more-subhead p, .more-empty-state small, .more-action-row small,
+  .more-setting-row small, .more-member small) {
+  color: var(--today-muted) !important;
+}
+
+html body[data-tab] .more-pill.active {
+  background: var(--today-accent) !important;
+  color: var(--today-action-text) !important;
 }
