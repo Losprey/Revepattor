@@ -316,6 +316,7 @@ function openMorePage(page) {
     sync: renderMoreBackupSyncPage,
     board: renderMoreBoardPage,
     'family-board': renderMoreBoardPage,
+    'board-cards': () => renderMoreShell('Rodinná nástenka', '', '<div id="family-board-cards"></div>'),
     'recipes-shortcut': renderMoreRecipesShortcutPage,
     'family-permissions': renderMoreFamilyPermissionsPage,
     language: renderMoreLanguagePage,
@@ -327,6 +328,7 @@ function openMorePage(page) {
     about: renderMoreAboutPage
   };
   view.innerHTML = (renderers[page] || renderMoreSettingsHub)();
+  if (page === 'board-cards') window.renderBoard();
   try { window.scrollTo(0, 0); } catch(e) {}
 }
 
@@ -366,17 +368,22 @@ function moreEmptyState(icon, title, desc, actionLabel, action) {
   </div>`;
 }
 
+function renderFamilyMemberList() {
+  const members = Object.entries(familyMembers).filter(([, member]) => member && member.name);
+  if (!members.length) return `<p>${t('Zatiaľ nevidím žiadne pripojené zariadenia.', 'No connected devices found yet.')}</p>`;
+  const ownId = getDeviceId();
+  return members.map(([id, member]) => {
+    const self = id === ownId;
+    const status = member.online ? t('Online', 'Online') : t('Offline', 'Offline');
+    const detail = self ? t('Toto zariadenie', 'This device') : status;
+    return `<div class="more-member"><span>${esc(String(member.name).slice(0, 1).toUpperCase())}</span>
+      <div><strong>${esc(member.name)}</strong><small>${esc(detail)}</small></div></div>`;
+  }).join('');
+}
+
 function renderMoreFamilyPage() {
-  const ownerName = authUser && (authUser.displayName || authUser.email)
-    ? (authUser.displayName || authUser.email)
-    : (localStorage.getItem('deviceName') || 'Toto zariadenie');
-  const members = familyCode
-    ? getRealFamilyMembers().map((member, index) => [member.photo || member.initial || '👤', member.name || ownerName, index === 0 ? 'Ty' : 'Člen'])
-    : [];
-  if (familyCode && !members.length) members.push(['👤', ownerName, 'Ty']);
-  const shareStatus = familyCode ? 'Zapnuté' : 'Neaktívne';
-  const memberContent = members.length
-    ? `<div class="more-member-list hub-family-members">${members.map((m, index) => `<div class="more-member"><span>${String(m[0]).startsWith('http') ? `<img src="${escAttr(m[0])}" alt="">` : esc(m[0])}</span><div><strong>${esc(m[1])}</strong><small>${esc(m[2])}</small></div><em>${index === 0 ? 'Ty' : ''}</em></div>`).join('')}</div>`
+  const memberContent = familyCode
+    ? `<div id="family-member-list" class="more-member-list hub-family-members">${renderFamilyMemberList()}</div>`
     : moreEmptyState('👨‍👩‍👧‍👦', 'Rodina zatiaľ nie je pripojená', 'Vytvor rodinu alebo sa pripoj k existujúcemu kódu.', 'Vytvoriť rodinu', 'createFamily()');
   const body = `
     ${moreCard('', `${memberContent}${familyCode ? '<button class="more-primary family-invite" onclick="copyFamilyInvite()">＋ Pridať člena</button>' : ''}`)}
@@ -386,10 +393,11 @@ function renderMoreFamilyPage() {
       <button onclick="switchTab('home')"><span>📖</span><strong>Recepty</strong></button>
       <button onclick="switchTab('tasks')"><span>✓</span><strong>Úlohy</strong></button>
     </div>`)}
+    ${moreCard('Rodinná nástenka', moreActionRow('📌', 'Otvoriť nástenku', 'Poznámky, odkazy a fotky', "openMorePage('board-cards')"))}
     ${moreCard('Nedávna aktivita', renderMoreActivityFeed())}
     ${moreCard('Pripojenie', familyCode ? `
       ${moreActionRow('🔗','Rodinný kód', esc(familyCode), 'copyFamilyInvite()', 'Kopírovať')}
-      ${moreActionRow('🔄','Synchronizovať teraz','Odošle lokálne dáta do rodiny',"pushAllLocalData();showToast('Dáta odoslané.','success')")}
+      ${moreActionRow('🔄','Synchronizovať teraz','Odošle lokálne dáta do rodiny',"pushAllLocalData()")}
       ${moreInputRow('📱','Názov zariadenia','Zobrazuje sa pri rodinnom syncu', localStorage.getItem('deviceName') || '', 'setMoreDeviceName(this.value)')}
       ${moreActionRow('🚪','Opustiť rodinu','Lokálne dáta ostanú v zariadení','leaveFamily()','›')}
     ` : `
@@ -405,13 +413,10 @@ function renderMoreFamilyPage() {
 }
 
 function renderMoreFamilyPermissionsPage() {
-  const ownerName = authUser && (authUser.displayName || authUser.email)
-    ? (authUser.displayName || authUser.email)
-    : (localStorage.getItem('deviceName') || 'Toto zariadenie');
   const body = `
     ${moreCard('Permissions', `
       ${familyCode
-        ? moreInfoRow('👤', esc(ownerName), 'Vlastník · všetky práva', 'Owner')
+        ? moreInfoRow('🔗', 'Rodinné zdieľanie', 'Prístup k zdieľaným dátam je viazaný na rodinný kód.')
         : moreEmptyState('🔒', 'Žiadne rodinné oprávnenia', 'Najprv pripoj alebo vytvor rodinu.', 'Otvoriť rodinu', "openMorePage('family')")}
     `)}
     ${moreCard('Activity log', renderMoreActivityFeed())}
@@ -419,20 +424,24 @@ function renderMoreFamilyPermissionsPage() {
   return renderMoreShell('Permissions', 'Rodinné role a oprávnenia', body, "<button class=\"more-top-action\" onclick=\"openMorePage('family')\">Rodina</button>");
 }
 
-function copyFamilyInvite() {
+async function copyFamilyInvite() {
   if (!familyCode) {
     showToast('Najprv vytvor alebo pripoj rodinu', 'warning');
     return;
   }
   const code = familyCode;
-  try { navigator.clipboard && navigator.clipboard.writeText(code); } catch(e) {}
-  showToast('Pozvánka pripravená', 'success');
+  try {
+    await navigator.clipboard.writeText(code);
+    showToast('Rodinný kód skopírovaný.', 'success');
+  } catch (error) {
+    showToast('Rodinný kód: ' + code, 'info', 5000);
+  }
 }
 
 function renderMoreActivityFeed() {
   const recentCompleted = getRecentCompleted().slice(0, 3);
   if (!recentCompleted.length) {
-    return moreEmptyState('🕘', 'Zatiaľ žiadna aktivita', 'Keď niekto pridá recept, dokončí úlohu alebo zmení plán, zobrazí sa to tu.');
+    return moreEmptyState('🕘', 'Zatiaľ žiadna aktivita', 'Tu sa zobrazia nedávno dokončené úlohy.');
   }
   return `<div class="more-feed">${recentCompleted.map(task => `<div><span>✅</span><strong>${esc(task.title)}</strong><small>${task.completedDate ? formatTaskDate(task.completedDate.slice(0,10)) : 'Dokončené'}</small></div>`).join('')}</div>`;
 }

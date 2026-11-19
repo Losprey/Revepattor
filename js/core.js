@@ -220,6 +220,7 @@ const FIREBASE_CONFIG = {
 let firebaseReady = false;
 let familyCode = '';
 let familyDbRef = null;
+let familyMembers = {};
 let firebaseListeners = []; // track active listeners for cleanup
 let _syncing = {}; // Track which keys are being pushed to Firebase
 
@@ -326,6 +327,7 @@ function leaveFamily() {
   firebaseListeners = [];
   familyCode = '';
   familyDbRef = null;
+  familyMembers = {};
   localStorage.removeItem('familyCode');
   updateSyncIndicator();
   openMorePageFromAnywhere('family');
@@ -336,6 +338,7 @@ function connectToFamily(code) {
   if (!firebaseReady || !code) return;
   const db = firebase.database();
   familyDbRef = db.ref('families/' + code);
+  familyMembers = {};
   // Clean up old listeners
   firebaseListeners.forEach(ref => { try { ref.off(); } catch(e) {} });
   firebaseListeners = [];
@@ -390,13 +393,45 @@ function connectToFamily(code) {
   // Listen for recipe changes (merge by id, keep local-only recipes)
   bindPath('recipes', 'recipes', mergeRecipes);
 
-  // Also push local device presence
-  const presenceRef = familyDbRef.child('members').child(getDeviceId());
+  const membersRef = familyDbRef.child('members');
+  membersRef.on('value', snapshot => {
+    familyMembers = snapshot.val() || {};
+    const memberList = document.getElementById('family-member-list');
+    if (memberList) memberList.innerHTML = renderFamilyMemberList();
+  });
+  firebaseListeners.push(membersRef);
+
+  if (typeof window.bindFamilyBoard === 'function') window.bindFamilyBoard(familyDbRef);
+
+  const presenceRef = membersRef.child(getDeviceId());
   presenceRef.set({ name: localStorage.getItem('deviceName') || (lang==='en'?'Device':'Zariadenie'), lastSeen: firebase.database.ServerValue.TIMESTAMP, online: true });
   presenceRef.onDisconnect().update({ online: false, lastSeen: firebase.database.ServerValue.TIMESTAMP });
 }
 
-function pushAllLocalData() { pushToFirebase('shoppingItems', 'shoppingItems'); pushToFirebase('mealPlan', 'mealPlan'); pushToFirebase('mealPlanKids', 'mealPlanKids'); pushToFirebase('tasks', 'tasks'); pushToFirebase('childAge', 'childAge'); pushToFirebase('recipes', 'recipes'); pushToFirebase('planType', 'planType'); }
+let familyUpload = null;
+
+async function pushAllLocalData() {
+  const ref = familyDbRef;
+  if (!ref) {
+    showToast(t('Rodina nie je pripojená.', 'Family is not connected.'), 'warning');
+    return;
+  }
+  if (familyUpload === ref) return;
+  familyUpload = ref;
+  showToast(t('Čakám na potvrdenie synchronizácie…', 'Waiting for sync confirmation…'), 'info');
+  try {
+    const data = { shoppingItems: shopItems, mealPlan, mealPlanKids, tasks, recipes, planType };
+    const childAge = JSON.parse(localStorage.getItem('childAge') || 'null');
+    if (childAge !== null) data.childAge = childAge;
+    await ref.update(data);
+    if (familyDbRef === ref) showToast(t('Dáta boli synchronizované.', 'Data synced.'), 'success');
+  } catch (error) {
+    if (familyDbRef === ref) showToast(t('Synchronizácia zlyhala.', 'Sync failed.'), 'error');
+  } finally {
+    if (familyUpload === ref) familyUpload = null;
+  }
+}
+
 
 function firebaseHardTest() {
   try {
@@ -604,6 +639,7 @@ function refreshActiveTab() {
   setDynamicGradient();
   // Set season in real time
   updateSeason();
+  if (tab === 'home') render();
   if (tab === 'shopping') renderShoppingList();
   if (tab === 'planner') renderPlanner();
   if (tab === 'tasks') renderTasks();

@@ -339,7 +339,7 @@ function renderPickerRecipes() {
 
   list.innerHTML = filtered.map(r => {
     const name = lang === 'en' && r.nameEn ? r.nameEn : r.name;
-    const img = r.imageData || r.image || '';
+    const img = getRecipeImageSource(r);
     const kcal = r.nutrition && r.nutrition.kcal ? '🔥' + r.nutrition.kcal : '';
     const time = '⏱' + r.time + ' min';
     const tags = (lang === 'en' && r.tagsEn ? r.tagsEn : r.tags || []).slice(0, 2);

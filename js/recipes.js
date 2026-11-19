@@ -56,14 +56,14 @@ function render() {
 
 function renderRecipeCard(recipe, index) {
   const name = lang === 'en' && recipe.nameEn ? recipe.nameEn : recipe.name;
-  const image = recipe.imageData || recipe.image;
+  const image = getRecipeImageSource(recipe);
   const favoriteLabel = t('Obľúbené', 'Favorites') + ': ' + name;
   return `<div class="recipe-card" style="animation-delay:${Math.min(index, 8) * .035}s" data-id="${recipe.id}">
     <button type="button" class="fav-btn${recipe.favorite ? ' fav-active' : ''}" aria-label="${escAttr(favoriteLabel)}"
       aria-pressed="${!!recipe.favorite}" onclick="event.stopPropagation();toggleFav(${recipe.id})">${recipe.favorite ? '❤️' : '🤍'}</button>
     <div class="recipe-card-img" id="rcimg-${recipe.id}">
       <span class="recipe-card-placeholder" aria-hidden="true">🍽️</span>
-      ${image ? `<img src="${escAttr(imgUrl(image))}" alt="" loading="lazy" onerror="this.remove()" onload="this.classList.add('loaded')">` : ''}
+      ${image ? `<img src="${escAttr(image)}" alt="" loading="lazy" onerror="this.remove()" onload="this.classList.add('loaded')">` : ''}
     </div>
     <div class="rc-info">
       <h3 class="rc-name">${esc(name)}</h3>
@@ -527,11 +527,13 @@ function viewRecipe(id) {
   const n = r.nutrition;
   const el = document.getElementById('recipe-detail'); el.dataset.rid = id;
   const san = esc(name), sanCat = esc(r.category), sanTime = esc(r.time);
+  const image = getRecipeImageSource(r);
   el.innerHTML = `
     <div class="recipe-detail-shell">
-    <div id="detail-img-wrap" class="detail-img recipe-detail-hero ${r.image||r.imageData?'':'img-skeleton'}">${r.image || r.imageData
-      ? `<img src="${escAttr(r.imageData||r.image)}" alt="${san}" loading="eager" decoding="async" onerror="this.outerHTML='<span style=\\'font-size:3.4rem\\'>🍽️</span>'" onload="this.classList.add('loaded');this.parentElement.classList.remove('img-skeleton')">`
-      : `<span style="font-size:3.4rem">🍽️</span>`}</div>
+    <div id="detail-img-wrap" class="detail-img recipe-detail-hero">
+      <span aria-hidden="true">🍽️</span>
+      ${image ? `<img src="${escAttr(image)}" alt="" decoding="async" onerror="this.remove()" onload="this.classList.add('loaded')">` : ''}
+    </div>
     <div class="recipe-detail-head">
       <div class="recipe-detail-title">
         <span>${sanCat}</span>
@@ -607,16 +609,17 @@ function viewRecipe(id) {
   requestAnimationFrame(function() {
     try { window.scrollTo(0, pageScrollY); } catch(e) {}
   });
-  // Async image fetch in background
-  if (!r.image && !r.imageData) {
+  if (!image) {
     getRecipeImage(r).then(url => {
-      if (url) {
-        const wrap = document.getElementById('detail-img-wrap');
-        if (wrap) {
-          wrap.innerHTML = `<img src="${escAttr(url)}" alt="${san}" onerror="this.outerHTML='<span style=\\'font-size:3.4rem\\'>🍽️</span>'">`;
-          wrap.classList.remove('img-skeleton');
-        }
-      }
+      if (!url || viewingId !== id) return;
+      const wrap = document.getElementById('detail-img-wrap');
+      if (!wrap) return;
+      const img = document.createElement('img');
+      img.alt = '';
+      img.onload = () => img.classList.add('loaded');
+      img.onerror = () => img.remove();
+      img.src = url;
+      wrap.appendChild(img);
     });
   }
 }
@@ -846,8 +849,9 @@ function showTipOfDay() {
   document.getElementById('hero-title').textContent = name;
   document.getElementById('hero-time').textContent = r.time + ' min';
   document.getElementById('hero-kcal').textContent = (r.nutrition&&r.nutrition.kcal)||'?';
-  if (r.imageData || r.image) {
-    bg.style.backgroundImage = 'url("' + escAttr(r.imageData || r.image).replace(/[()\\]/g, c => '\\' + c) + '")';
+  const image = getRecipeImageSource(r);
+  if (image) {
+    bg.style.backgroundImage = 'url("' + escAttr(image).replace(/[()\\]/g, c => '\\' + c) + '")';
   } else {
     bg.style.background = 'linear-gradient(135deg, var(--primary), #1e1e1e)';
   }

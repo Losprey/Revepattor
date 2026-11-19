@@ -255,7 +255,7 @@ function renderMobileMealRow(meal, ctx) {
   const recipe = resolved?.recipe;
   const title = recipe ? (lang === 'en' ? recipe.nameEn || recipe.name : recipe.name) : resolved?.title;
   const label = lang === 'en' ? mealLabel(meal.id) : dashboardMealLabel(meal.id);
-  const image = recipe && (recipe.imageData || recipe.image);
+  const image = recipe && getRecipeImageSource(recipe);
   const edit = `pickRecipe('${ctx.todayName}','${meal.id}','${ctx.weekKey}')`;
   return `<button type="button" class="today-meal" onclick="${edit}">
     <span class="today-meal-icon">${todayIcon(meal.id)}${image ? `<img src="${escAttr(image)}" alt="" loading="lazy" onerror="this.remove()">` : ''}</span>
@@ -273,7 +273,7 @@ function pickDashboardAiRecipe() {
   const todays = new Set(getTodayRecipes().map(r => r.id));
   const candidates = (Array.isArray(recipes) ? recipes : []).filter(recipe => recipe && !todays.has(recipe.id));
   if (!candidates.length) return recipes[0] || null;
-  const withImages = candidates.filter(recipe => recipe.imageData || recipe.image);
+  const withImages = candidates.filter(getRecipeImageSource);
   const pool = withImages.length >= 3 ? withImages : candidates;
   const dayKey = new Date().toISOString().slice(0, 10);
   const seed = dayKey.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
@@ -337,7 +337,7 @@ function addDashboardRecommendationToPlan(recipeId) {
 }
 
 function getDashboardRecipeImage(recipe) {
-  const img = recipe && (recipe.imageData || recipe.image) || '';
+  const img = recipe && getRecipeImageSource(recipe) || '';
   if (!img || img.indexOf('placehold.co') !== -1) return 'ai-recommendation.png';
   return img;
 }

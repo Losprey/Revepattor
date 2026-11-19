@@ -58,34 +58,21 @@ async function fetchPexelsImage(query) {
   }
 }
 
+function getRecipeImageSource(recipe) {
+  const source = recipe.image;
+  return recipe.imageData ||
+    (source && !source.includes('placehold.co') ? source : '') ||
+    PRELOADED_IMAGES[recipe.id] || getImageCache()[recipe.id] || '';
+}
+
 async function getRecipeImage(recipe) {
-  if (recipe.imageData) return recipe.imageData;
-  // Never overwrite existing real image with cached/fetched one
-  if (recipe.image && !recipe.image.includes('placehold.co')) return recipe.image;
-  // Fetch from Pexels only for recipes without images
-  const cache = getImageCache();
-  if (cache[recipe.id]) { recipe.image = imgUrl(cache[recipe.id]); saveToLS(); return cache[recipe.id]; }
-  // Priority 4: Pexels fetch
+  const existing = getRecipeImageSource(recipe);
+  if (existing) return existing;
+
   const query = translateRecipeQuery(lang === 'en' && recipe.nameEn ? recipe.nameEn : recipe.name);
-  const img = await fetchPexelsImage(query);
-  if (img) {
-    setImageCache(recipe.id, img);
-    recipe.image = imgUrl(img);
-    saveToLS();
-    return img;
-  }
-  // Priority 5: category fallback via Pexels
-  const catQuery = categoryFallbackQuery(recipe.category);
-  if (catQuery) {
-    const fallbackImg = await fetchPexelsImage(catQuery);
-    if (fallbackImg) {
-      setImageCache(recipe.id, fallbackImg);
-      recipe.image = imgUrl(fallbackImg);
-      saveToLS();
-      return fallbackImg;
-    }
-  }
-  return null;
+  const image = await fetchPexelsImage(query) || await fetchPexelsImage(categoryFallbackQuery(recipe.category));
+  if (image) setImageCache(recipe.id, image);
+  return getRecipeImageSource(recipe);
 }
 
 function categoryFallbackQuery(category) {
@@ -104,28 +91,19 @@ function categoryFallbackQuery(category) {
   return map[category] || 'food meal';
 }
 
-function imgUrl(url) {
-  if (!url || url.startsWith('data:')) return url;
-  return url + (url.includes('?') ? '&' : '?') + 'v=' + APP_VERSION;
-}
-
 async function refreshRecipeImages() {
   localStorage.removeItem('pexels_cache_v3');
-  recipes.forEach(r => {
-    if (r.image && (r.image.includes('pexels.com') || r.image.includes('placehold.co'))) r.image = '';
-  });
-  saveToLS();
   await batchFetchImages();
   render();
-  showToast(t('Obrázky boli obnovené','Images refreshed'),'info');
+  if (recipes.some(recipe => !getRecipeImageSource(recipe))) {
+    showToast(t('Niektoré fotky sa nepodarilo načítať.', 'Some photos could not be loaded.'), 'warning');
+  } else {
+    showToast(t('Obrázky boli obnovené', 'Images refreshed'), 'success');
+  }
 }
 
 async function batchFetchImages() {
-  const toFetch = recipes.filter(r => {
-    if (r.imageData) return false;  // Never touch recipes with user-uploaded images
-    if (r.image && !r.image.includes('placehold.co')) return false;  // Never overwrite real images
-    return true;  // Only fetch for recipes with no image or placeholder
-  });
+  const toFetch = recipes.filter(recipe => !getRecipeImageSource(recipe));
   if (!toFetch.length) return;
   // Fetch in batches of 3 to avoid rate limiting
   for (let i = 0; i < toFetch.length; i += 3) {

@@ -11,7 +11,7 @@ function openCookingMode() {
   document.getElementById('cooking-mode').classList.add('active');
   renderCookingStep();
   // Async image fetch
-  if (!r.image && !r.imageData) {
+  if (!getRecipeImageSource(r)) {
     getRecipeImage(r).then(url => {
       if (url) renderCookingStep();
     });
@@ -26,8 +26,10 @@ function renderCookingStep() {
   const stps = (lang === "en" && r.stepsEn ? r.stepsEn : r.steps) || [];
   document.getElementById('cooking-title').textContent = name;
   const imgEl = document.getElementById('cooking-img');
-  if (r.image || r.imageData) {
-    imgEl.innerHTML = `<img src="${escAttr(r.imageData||r.image)}" style="width:100%;height:100%;object-fit:contain;" loading="lazy" onerror="this.outerHTML='🍽️'">`;
+  const image = getRecipeImageSource(r);
+  imgEl.classList.toggle('img-skeleton', !image);
+  if (image) {
+    imgEl.innerHTML = `<img src="${escAttr(image)}" style="width:100%;height:100%;object-fit:contain;" loading="lazy" onerror="this.outerHTML='🍽️'">`;
   } else { imgEl.textContent = '🍽️'; imgEl.className = 'cooking-img img-skeleton'; }
   document.getElementById('cooking-step-indicator').textContent = `${lang==='en'?'Step':'Krok'} ${cookingStep+1}/${total}`;
   document.getElementById('cooking-step-text').textContent = stps[cookingStep];

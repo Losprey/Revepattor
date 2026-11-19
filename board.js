@@ -5,16 +5,56 @@
   let boardCards = [];
   const BOARD_REACTIONS = ['👍', '❤️', '😂', '🎉', '😢', '😡'];
 
+  function boardStorageKey() {
+    return familyCode ? 'boardCards:' + familyCode : 'boardCards';
+  }
+
+  function readBoardList(key) {
+    try {
+      const data = JSON.parse(localStorage.getItem(key) || '[]');
+      return Array.isArray(data) ? data : [];
+    } catch (error) {
+      return [];
+    }
+  }
+
+  // Associate existing local cards only with the family already saved on this device.
+  if (familyCode && !localStorage.getItem('boardCardsMigrated')) {
+    const key = boardStorageKey();
+    if (localStorage.getItem(key) === null) {
+      localStorage.setItem(key, JSON.stringify(readBoardList('boardCards')));
+    }
+  }
+  localStorage.setItem('boardCardsMigrated', '1');
+
   window.loadBoardCards = function() {
-    try { boardCards = JSON.parse(localStorage.getItem('boardCards') || '[]'); } catch(e) { boardCards = []; }
-    if (!Array.isArray(boardCards)) boardCards = [];
+    boardCards = readBoardList(boardStorageKey());
   };
 
   window.saveBoardCards = function() {
-    if (!Array.isArray(boardCards)) boardCards = [];
-    var now = Date.now();
-    boardCards.forEach(function(c) { if (!c.createdAt) c.createdAt = now; c.updatedAt = now; });
-    localStorage.setItem('boardCards', JSON.stringify(boardCards));
+    const key = boardStorageKey();
+    const previous = new Map(readBoardList(key).filter(Boolean).map(card => [card.id, card]));
+    const current = new Map(boardCards.filter(Boolean).map(card => [card.id, card]));
+    const removed = [...previous.keys()].filter(id => !current.has(id));
+    const changed = [...current.values()].filter(card => JSON.stringify(previous.get(card.id)) !== JSON.stringify(card));
+    const now = Date.now();
+    changed.forEach(card => {
+      if (!card.createdAt) card.createdAt = now;
+      card.updatedAt = now;
+    });
+    localStorage.setItem(key, JSON.stringify(boardCards));
+    if (!familyDbRef || (!changed.length && !removed.length)) return;
+
+    familyDbRef.child('boardCards').transaction(remote => {
+      const list = Array.isArray(remote) ? remote : [];
+      const cards = new Map(list.filter(Boolean).map(card => [card.id, card]));
+      removed.forEach(id => cards.delete(id));
+      changed.forEach(card => cards.set(card.id, card));
+      return [...cards.values()];
+    }, undefined, false).catch(error => {
+      console.warn('Board sync failed:', error.message);
+      showToast(t('Karta je uložená lokálne. Zdieľanie zlyhalo.', 'Card saved locally. Sharing failed.'), 'warning');
+    });
   };
 
   window.generateBoardId = function() {
@@ -22,7 +62,7 @@
   };
 
   window.renderBoard = function() {
-    const container = document.getElementById('board-container-view');
+    const container = document.getElementById('family-board-cards');
     if (!container) return;
     loadBoardCards();
     
@@ -132,7 +172,6 @@
       });
     }
     saveBoardCards();
-    syncBoardToFirebase();
     // Notify family
     if (typeof sendPushToFamily === 'function') {
       var pushText = text.length > 80 ? text.slice(0, 80) + '...' : text;
@@ -145,21 +184,21 @@
   };
 
   window.deleteBoardCard = function(id) {
+    const key = boardStorageKey();
     showConfirmModal(t('Vymazať túto kartu?','Delete this card?'), '🗑️', t('Vymazať','Delete'), function() {
+      if (boardStorageKey() !== key) return;
       loadBoardCards();
       var deletedCard = boardCards.find(function(c) { return c.id === id; });
       var deletedIndex = boardCards.findIndex(function(c) { return c.id === id; });
       boardCards = boardCards.filter(function(c) { return c.id !== id; });
       saveBoardCards();
-      syncBoardToFirebase();
       renderBoard();
       if (typeof showUndoToast === 'function') {
         showUndoToast('🗑️ ' + t('Karta vymazaná','Card deleted'), function() {
-          if (!deletedCard) return;
+          if (!deletedCard || boardStorageKey() !== key) return;
           loadBoardCards();
           boardCards.splice(Math.max(0, deletedIndex), 0, deletedCard);
           saveBoardCards();
-          syncBoardToFirebase();
           renderBoard();
           showToast(t('Karta obnovená','Card restored'), 'success', 1200);
         });
@@ -170,7 +209,7 @@
   window.togglePinBoardCard = function(id) {
     loadBoardCards();
     var card = boardCards.find(function(c) { return c.id === id; });
-    if (card) { card.pinned = !card.pinned; saveBoardCards(); syncBoardToFirebase(); renderBoard(); }
+    if (card) { card.pinned = !card.pinned; saveBoardCards(); renderBoard(); }
   };
 
   window.editBoardCardColor = function(id) {
@@ -180,7 +219,6 @@
     var currentIdx = colors.indexOf(card.color);
     card.color = colors[(currentIdx + 1) % colors.length];
     saveBoardCards();
-    syncBoardToFirebase();
     renderBoard();
   };
 
@@ -195,7 +233,6 @@
     if (idx > -1) { card.reactions[emoji].splice(idx, 1); if (!card.reactions[emoji].length) delete card.reactions[emoji]; }
     else { card.reactions[emoji].push(deviceId); }
     saveBoardCards();
-    syncBoardToFirebase();
     renderBoard();
   };
 
@@ -221,29 +258,25 @@
     dropdown.style.display = isOpen ? 'none' : 'block';
   };
 
-  function syncBoardToFirebase() {
-    if (typeof familyDbRef === 'undefined' || !familyDbRef) return;
-    try { familyDbRef.child('boardCards').set(boardCards, function(err) { if (err) console.error('Board sync error:', err.message); }); } catch(e) {}
-  }
-
-  function initBoardFirebaseSync() {
-    if (typeof familyDbRef === 'undefined' || !familyDbRef) return;
-    var ref = familyDbRef.child('boardCards');
-    ref.on('value', function(snap) {
-      var remote = snap.val();
-      if (!remote || !Array.isArray(remote)) return;
-      var localRaw = localStorage.getItem('boardCards');
-      var local = localRaw ? JSON.parse(localRaw) : null;
-      if (!local || !Array.isArray(local)) local = [];
-      var map = {};
-      local.forEach(function(c) { if (c && c.id) map[c.id] = c; });
-      remote.forEach(function(c) { if (c && c.id) { var ex = map[c.id]; if (!ex || (c.updatedAt||0) >= (ex.updatedAt||0)) map[c.id] = c; } });
-      boardCards = Object.values(map);
-      saveBoardCards();
+  window.bindFamilyBoard = function(familyRef) {
+    if (!familyRef) return;
+    const ref = familyRef.child('boardCards');
+    const key = boardStorageKey();
+    const idsKey = key + ':shared';
+    let previousIds = new Set(readBoardList(idsKey));
+    ref.on('value', snapshot => {
+      if (familyDbRef !== familyRef) return;
+      const value = snapshot.val();
+      const remote = Array.isArray(value) ? value.filter(Boolean) : [];
+      const currentIds = new Set(remote.map(card => card.id));
+      const localOnly = readBoardList(key).filter(card => card && !previousIds.has(card.id) && !currentIds.has(card.id));
+      previousIds = currentIds;
+      localStorage.setItem(idsKey, JSON.stringify([...currentIds]));
+      localStorage.setItem(key, JSON.stringify([...localOnly, ...remote]));
       if (document.body.dataset.tab === 'board') renderBoard();
     });
-    if (typeof firebaseListeners !== 'undefined') firebaseListeners.push(ref);
-  }
+    firebaseListeners.push(ref);
+  };
 
   function timeAgo(ts) {
     var diff = Date.now() - ts;
@@ -256,14 +289,7 @@
     return days + ' ' + (days === 1 ? t('dňom','day ago') : t('dňami','days ago'));
   }
 
-  // Start Firebase sync when familyDbRef becomes available
-  var syncInterval = setInterval(function() {
-    if (typeof familyDbRef !== 'undefined' && familyDbRef) {
-      clearInterval(syncInterval);
-      initBoardFirebaseSync();
-    }
-  }, 500);
-  setTimeout(function() { clearInterval(syncInterval); }, 30000);
+  if (familyDbRef) window.bindFamilyBoard(familyDbRef);
 
   // Close board card dropdowns on outside click
   document.addEventListener('click', function _closeBoardMenu(e) {

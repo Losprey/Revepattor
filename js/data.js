@@ -17,6 +17,7 @@ async function loadDefaultRecipes() {
       recipes = data;
       saveToLS();
       refreshActiveTab();
+      batchFetchImages().then(refreshActiveTab);
       return;
     }
   } catch(e) {
@@ -38,30 +39,6 @@ async function loadDefaultRecipes() {
     if (raw !== null) { window._lsSet.call(localStorage, storeNs + k, raw); }
   });
   window._lsSet.call(localStorage, '_migrated_v2', '1');
-})();
-
-// One-time: clear old Pexels caches and force re-fetch on v1.0.4+
-(function migrateClearImageCache() {
-  if (window._lsGet.call(localStorage, '_imgcache_cleared_v4') === '1') return;
-  // Remove old pexels caches
-  try { localStorage.removeItem('pexels_cache_v2'); } catch(e) {}
-  try { localStorage.removeItem('pexels_cache_v3'); } catch(e) {}
-  // Strip all pexels/placehold image URLs to force fresh fetch
-  try {
-    const rawRecipes = window._lsGet.call(localStorage, storeNs + 'recipes');
-    if (rawRecipes) {
-      const arr = JSON.parse(rawRecipes);
-      let changed = false;
-      arr.forEach(r => {
-        if (r.image && (r.image.includes('pexels.com') || r.image.includes('placehold.co'))) {
-          r.image = '';
-          changed = true;
-        }
-      });
-      if (changed) window._lsSet.call(localStorage, storeNs + 'recipes', JSON.stringify(arr));
-    }
-  } catch(e) {}
-  window._lsSet.call(localStorage, '_imgcache_cleared_v4', '1');
 })();
 
 let recipes = (function() { var parsed = JSON.parse(localStorage.getItem('recipes') || 'null'); if (!parsed || !Array.isArray(parsed) || parsed.length === 0) { setTimeout(loadDefaultRecipes, 200); return []; } return parsed.filter(function(r) { return r != null && typeof r === 'object'; }); })();
