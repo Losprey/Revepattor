@@ -396,6 +396,7 @@ function renderMoreFamilyPage() {
     ${moreCard('Rodinná nástenka', moreActionRow('📌', 'Otvoriť nástenku', 'Poznámky, odkazy a fotky', "openMorePage('board-cards')"))}
     ${moreCard('Nedávna aktivita', renderMoreActivityFeed())}
     ${moreCard('Pripojenie', familyCode ? `
+      <p class="family-write-status" role="status" data-family-write-status>${esc(familyWriteStatus())}</p>
       ${moreActionRow('🔗','Rodinný kód', esc(familyCode), 'copyFamilyInvite()', 'Kopírovať')}
       ${moreActionRow('🔄','Synchronizovať teraz','Odošle lokálne dáta do rodiny',"pushAllLocalData()")}
       ${moreInputRow('📱','Názov zariadenia','Zobrazuje sa pri rodinnom syncu', localStorage.getItem('deviceName') || '', 'setMoreDeviceName(this.value)')}

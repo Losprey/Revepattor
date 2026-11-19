@@ -1773,3 +1773,82 @@ body[data-tab] :is(.sheet.entry-sheet, .picker-sheet.entry-sheet) {
     flex-basis: 100%;
   }
 }
+
+.recipe-detail-primary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.recipe-detail-primary .btn,
+.detail-nutrition-switch .btn {
+  min-height: 44px;
+  white-space: normal;
+}
+
+.recipe-detail-columns {
+  display: grid;
+  gap: 12px;
+}
+
+.detail-nutrition-switch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.detail-nutrition-switch [aria-pressed="true"] {
+  background: var(--today-accent) !important;
+  color: var(--today-action-text) !important;
+}
+
+.meal-slot-buttons label {
+  display: grid;
+  gap: 4px;
+}
+
+.meal-slot-buttons select {
+  width: 100%;
+  border: 1px solid var(--today-line);
+  border-radius: 8px;
+  background: var(--today-row);
+  color: var(--today-text);
+  padding: 8px;
+}
+
+.weekly-slot .weekly-custom-mark {
+  display: inline;
+}
+
+.shop-bought-section > summary {
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.family-write-status {
+  color: var(--today-muted);
+  font-size: .8rem;
+  margin-block: 4px 10px;
+}
+
+.app-family-write-status {
+  max-width: 1040px;
+  padding-inline: clamp(14px, 4vw, 32px);
+  margin-inline: auto;
+}
+
+body:is([data-tab="dashboard"], [data-tab="board"]) .app-family-write-status {
+  display: none;
+}
+
+@media (min-width: 680px) {
+  .recipe-detail-columns {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+    align-items: start;
+  }
+
+  #detail-modal > .modal {
+    max-width: 860px;
+  }
+}

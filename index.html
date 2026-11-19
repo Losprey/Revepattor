@@ -15,7 +15,7 @@
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <title data-lang="appTitle">Mealnest</title>
-  <link rel="stylesheet" href="dist/styles.min.css?v=10">
+  <link rel="stylesheet" href="dist/styles.min.css?v=11">
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -97,6 +97,7 @@
 
 <div id="boot-status" style="position:fixed;top:0;left:0;right:0;z-index:99999;background:rgba(0,0,0,.92);color:#fff;font-size:.7rem;padding:.3rem .6rem;text-align:center;font-weight:600;display:none;"></div>
 <div id="network-status"></div>
+<p class="family-write-status app-family-write-status" role="status" data-family-write-status hidden></p>
 
 <!-- DASHBOARD -->
 <div class="container" id="dashboard">
@@ -334,10 +335,10 @@
         </div>
       </div>
       <div class="form-row">
-        <div class="form-group"><input id="r-kcal" type="number" placeholder="🔥 kcal / porcia"></div>
-        <div class="form-group"><input id="r-protein" type="number" placeholder="💪 bielkoviny g"></div>
-        <div class="form-group"><input id="r-fat" type="number" placeholder="🧈 tuky g"></div>
-        <div class="form-group"><input id="r-carbs" type="number" placeholder="🍚 sacharidy g"></div>
+        <div class="form-group"><input id="r-kcal" type="number" min="0" step="0.1" placeholder="🔥 kcal / porcia"></div>
+        <div class="form-group"><input id="r-protein" type="number" min="0" step="0.1" placeholder="💪 bielkoviny g"></div>
+        <div class="form-group"><input id="r-fat" type="number" min="0" step="0.1" placeholder="🧈 tuky g"></div>
+        <div class="form-group"><input id="r-carbs" type="number" min="0" step="0.1" placeholder="🍚 sacharidy g"></div>
       </div>
       <button type="button" class="btn btn-sm" onclick="autoFillNutrition()" style="margin-top:.3rem;width:100%;">🔮 <span data-lang="autoFill">Auto-odhadnúť zo surovín</span></button>
       <div id="nutrition-status" style="font-size:.75rem;margin-top:.2rem;color:var(--text2);"></div>
@@ -370,7 +371,6 @@
     <div id="recipe-detail"></div>
     <div class="modal-footer recipe-detail-footer">
       <div class="recipe-footer-main">
-        <button class="btn btn-primary" onclick="openCookingMode()">👨‍🍳 <span data-lang="btnCook">Variť</span></button>
         <button class="btn btn-secondary" onclick="editCurrent()">✏️ <span data-lang="btnEdit">Upraviť</span></button>
         <button class="btn btn-secondary recipe-more-toggle" onclick="toggleRecipeMoreTools()" aria-label="Viac možností receptu">☰ <span>Viac</span></button>
         <button class="btn btn-secondary" onclick="closeModal('detail-modal')" data-lang="close">Zavrieť</button>
@@ -505,7 +505,7 @@
 
 
 <!-- Bundled via esbuild (was 16 JS + 4 CSS files) -->
-<script src="dist/app.min.js?v=10" defer></script>
+<script src="dist/app.min.js?v=11" defer></script>
 
 <!-- Quick add FAB -->
 <div id="fab-quick-add" style="display:none">

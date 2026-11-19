@@ -91,9 +91,9 @@ function renderPlanner() {
       const pick = `pickRecipe('${day}','${meal.id}','${weekKey}')`;
       const label = mealLabel(meal.id);
       const action = entry ? `openMealSlotActions('${day}','${meal.id}','${weekKey}')` : pick;
-      return `<td><button type="button" class="weekly-slot ${name ? 'filled' : 'empty'}" onclick="${action}"
+      return `<td><button type="button" class="weekly-slot ${entry ? 'filled' : 'empty'}" onclick="${action}"
           title="${escAttr(name || label)}" aria-label="${escAttr(label + ': ' + (name || t('Pridať jedlo','Add meal')))}">
-          <span>${name ? esc(name) : '+'}</span>
+          <span>${entry?.type === 'custom' ? '<span class="weekly-custom-mark" aria-hidden="true">✎</span> ' : ''}${entry ? esc(name || t('Uložené jedlo','Saved meal')) : '+'}</span>
         </button></td>`;
     }).join('');
     return `<tr${isToday ? ' class="weekly-today"' : ''}>

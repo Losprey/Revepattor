@@ -221,6 +221,7 @@ let firebaseReady = false;
 let familyCode = '';
 let familyDbRef = null;
 let familyMembers = {};
+const familyWrites = new Map();
 let firebaseListeners = []; // track active listeners for cleanup
 let _syncing = {}; // Track which keys are being pushed to Firebase
 
@@ -328,6 +329,8 @@ function leaveFamily() {
   familyCode = '';
   familyDbRef = null;
   familyMembers = {};
+  familyWrites.clear();
+  updateFamilyWriteStatus();
   localStorage.removeItem('familyCode');
   updateSyncIndicator();
   openMorePageFromAnywhere('family');
@@ -339,6 +342,8 @@ function connectToFamily(code) {
   const db = firebase.database();
   familyDbRef = db.ref('families/' + code);
   familyMembers = {};
+  familyWrites.clear();
+  updateFamilyWriteStatus();
   // Clean up old listeners
   firebaseListeners.forEach(ref => { try { ref.off(); } catch(e) {} });
   firebaseListeners = [];
@@ -518,6 +523,22 @@ function testFirebaseSync() {
   } catch(e) { showToast('Chyba: '+e.message,'error'); }
 }
 
+function familyWriteStatus() {
+  const states = [...familyWrites.values()].map(entry => entry.state);
+  if (states.includes('pending')) return t('Čaká na synchronizáciu', 'Waiting to sync');
+  if (states.includes('error')) return t('Zdieľanie zlyhalo · dáta sú v zariadení', 'Sharing failed · saved on this device');
+  if (states.includes('shared')) return t('Zdieľané s rodinou', 'Shared with family');
+  return familyCode ? t('Rodinné zdieľanie', 'Family sharing') : t('Uložené v zariadení', 'Saved on this device');
+}
+
+function updateFamilyWriteStatus() {
+  document.querySelectorAll('[data-family-write-status]').forEach(element => {
+    element.hidden = !familyCode;
+    element.textContent = familyWriteStatus();
+  });
+  updateSyncIndicator();
+}
+
 function pushToFirebase(path, localKey) {
   if (!familyDbRef) { console.log('Firebase push SKIP: no familyDbRef'); return; }
   try {
@@ -530,9 +551,16 @@ function pushToFirebase(path, localKey) {
     else if (localKey === 'planType') data = planType;
     else { data = JSON.parse(localStorage.getItem(localKey) || 'null'); }
     if (data !== null) {
-      familyDbRef.child(path).set(data, function(err) {
-        if (err) console.error('Firebase push ERROR:', localKey, err.message);
-      });
+      const ref = familyDbRef;
+      const write = { state: 'pending' };
+      familyWrites.set(path, write);
+      updateFamilyWriteStatus();
+      const finish = error => {
+        if (familyDbRef !== ref || familyWrites.get(path) !== write) return;
+        write.state = error ? 'error' : 'shared';
+        updateFamilyWriteStatus();
+      };
+      try { ref.child(path).set(data, finish); } catch (error) { finish(error); }
     }
   } catch(e) { console.error('Firebase push EXCEPTION:', localKey, e.message); }
 }
@@ -575,7 +603,8 @@ function updateSyncIndicator() {
   
   if (firebaseReady) {
     el.textContent = '🟢';
-    el.title = 'Synchronizované — kód: ' + familyCode;
+    el.title = familyWriteStatus();
+    el.setAttribute('aria-label', familyWriteStatus());
     el.classList.add('connected');
     if (_justConnected) {
       el.classList.add('sync-just-connected');
@@ -734,7 +763,7 @@ function executeConfirm() {
 }
 
 function closeTopModal() {
-  const mealActions = document.querySelector('#meal-slot-actions[open]');
+  const mealActions = document.querySelector('dialog.entry-sheet[open]');
   if (mealActions) {
     mealActions.close();
     return true;

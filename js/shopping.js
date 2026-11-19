@@ -112,6 +112,12 @@ function generateShopId() {
   return 'si_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8);
 }
 
+function toggleStoreMode() {
+  appSettings.shopping.storeMode = !appSettings.shopping.storeMode;
+  saveSettings();
+  renderShoppingList();
+}
+
 function renderShoppingList() {
   const container = document.getElementById('shopping-list-view');
   loadShopItems();
@@ -144,18 +150,19 @@ function renderShoppingList() {
   const biggestCat = Object.keys(openGroups).sort((a,b) => openGroups[b].length - openGroups[a].length)[0] || Object.keys(boughtGroups).sort((a,b) => boughtGroups[b].length - boughtGroups[a].length)[0];
 
   // Build HTML
+  const storeMode = appSettings.shopping.storeMode;
   let html = '';
 
   // Summary
   html += `<section class="shop-hero">
     <div>
-      <h2>${remaining ? (lang==='en'?'Ready for the store':'Pripravené do obchodu') : (lang==='en'?'Everything bought':'Všetko kúpené')}</h2>
-      <p>${lang==='en' ? `${remaining} items left across ${catCount} categories.` : `${remaining} položiek zostáva v ${catCount} kategóriách.`}</p>
+      <h2>${storeMode ? remaining + ' ' + t('zostáva', 'remaining') : remaining ? (lang==='en'?'Ready for the store':'Pripravené do obchodu') : (lang==='en'?'Everything bought':'Všetko kúpené')}</h2>
+      ${storeMode ? '' : `<p>${lang==='en' ? `${remaining} items left across ${catCount} categories.` : `${remaining} položiek zostáva v ${catCount} kategóriách.`}</p>`}
     </div>
     <button class="shop-hero-add" onclick="openAddItemSheet()">+ ${t('Pridať položku','Add item')}</button>
   </section>`;
 
-  html += `<div class="shop-summary">
+  if (!storeMode) html += `<div class="shop-summary">
     <div class="shop-summary-row">
       <div class="shop-summary-stats">
         <span>📦 <strong>${totalItems}</strong> ${lang==='en'?'items':'položiek'}</span>
@@ -170,6 +177,7 @@ function renderShoppingList() {
   html += `<details class="shop-more">
     <summary>${t('Viac','More')}</summary>
     <div class="shop-more-actions" onclick="this.parentElement.open = false">
+      <button type="button" class="sa-btn" onclick="toggleStoreMode()">${storeMode ? t('Ukončiť režim obchodu','Exit store mode') : t('Režim obchodu','Store mode')}</button>
       <button type="button" class="sa-btn" onclick="copyShopList()">${t('Kopírovať zoznam','Copy list')}</button>
       <button type="button" class="sa-btn" onclick="mergeDuplicateShopItems()">${t('Zlúčiť duplicity','Merge duplicates')}</button>
       <button type="button" class="sa-btn" onclick="clearCheckedShopItems()">${t('Odstrániť kúpené','Clear bought items')}</button>
@@ -179,13 +187,15 @@ function renderShoppingList() {
 
   html += renderShopCategoryCards(openGroups, { bought: false });
   if (boughtItems.length) {
-    html += `<div class="shop-bought-section">
-      <div class="shop-bought-head">
-        <span>✅ ${lang === 'en' ? 'Bought' : 'Kúpené'}</span>
-        <small>${boughtItems.length} ${lang === 'en' ? 'items' : 'položiek'}</small>
-      </div>
+    const tag = storeMode ? 'details' : 'div';
+    const header = storeMode ? 'summary' : 'div';
+    html += `<${tag} class="shop-bought-section">
+      <${header} class="shop-bought-head">
+        <span>✅ ${t('Kúpené', 'Bought')}</span>
+        <small>${boughtItems.length}</small>
+      </${header}>
       ${renderShopCategoryCards(boughtGroups, { bought: true })}
-    </div>`;
+    </${tag}>`;
   }
 
   container.innerHTML = html;
@@ -358,6 +368,20 @@ function toggleShopItem(id) {
   var itemEl = document.querySelector('.shop-item[data-id="' + id + '"]');
   if (itemEl) springBounce(itemEl);
   setTimeout(function() { renderShoppingList(); }, 300);
+  if (appSettings.shopping.storeMode) {
+    const checked = it.checked;
+    const activeFamily = familyCode;
+    const updatedAt = it.updatedAt;
+    showUndoToast(checked ? t('Položka označená ako kúpená', 'Item marked bought') : t('Položka vrátená do nákupu', 'Item marked unbought'), () => {
+      if (familyCode !== activeFamily) return;
+      loadShopItems();
+      const current = shopItems.find(item => item.id === id);
+      if (!current || current.checked !== checked || current.updatedAt !== updatedAt) return;
+      current.checked = !checked;
+      saveShopItems();
+      renderShoppingList();
+    });
+  }
 }
 
 function clearCheckedShopItems() {

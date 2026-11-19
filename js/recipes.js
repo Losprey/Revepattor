@@ -320,7 +320,10 @@ function clearValidationErrors() {
   });
 }
 
+let importedRecipeSource = null;
+
 function openFormModal(recipe) {
+  importedRecipeSource = null;
   editingId = recipe ? recipe.id : null;
   clearValidationErrors();
   // Inject import card dynamically (sure way to handle translations)
@@ -382,11 +385,17 @@ function saveRecipe() {
   const steps = document.getElementById('r-steps').value.split('\n').map(s => s.trim()).filter(Boolean);
   const tags = document.getElementById('r-tags').value.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
   const difficulty = parseInt(document.getElementById('r-difficulty').value) || 1;
-  const kcal = parseInt(document.getElementById('r-kcal').value) || 0;
-  const protein = parseInt(document.getElementById('r-protein').value) || 0;
-  const fat = parseInt(document.getElementById('r-fat').value) || 0;
-  const carbs = parseInt(document.getElementById('r-carbs').value) || 0;
-  const portions = parseInt(document.getElementById('r-portions').value) || 4;
+  const kcal = parseFloat(document.getElementById('r-kcal').value) || 0;
+  const protein = parseFloat(document.getElementById('r-protein').value) || 0;
+  const fat = parseFloat(document.getElementById('r-fat').value) || 0;
+  const carbs = parseFloat(document.getElementById('r-carbs').value) || 0;
+  const portionInput = document.getElementById('r-portions');
+  const portions = Number(portionInput.value);
+  if (!Number.isInteger(portions) || portions < 1 || portions > 50) {
+    portionInput.focus();
+    showToast(t('Zadaj pôvodný počet porcií od 1 do 50.', 'Enter the original serving count from 1 to 50.'), 'warning');
+    return;
+  }
   // Auto-detect season from ingredients
   var autoSeason = autoSeasonTag(ingredients, name);
   autoSeason.tags.forEach(function(t) { if (tags.indexOf(t) < 0) tags.push(t); });
@@ -411,32 +420,25 @@ function saveRecipe() {
     return showToast(t('formIngredients')+(lang==='en'?' are required.':' sú povinné.'),'error');
   }
   const nutrition = {kcal,protein,fat,carbs};
-  // Sanity check
+  const persist = () => {
+    if (editingId) {
+      const idx = recipes.findIndex(r => r.id === editingId);
+      if (idx !== -1) recipes[idx] = {...recipes[idx], name, nameEn, category, time, image, imageData, ingredients, steps, tags, nutrition, difficulty, portions, allergens: recipes[idx].allergens || []};
+      editingId = null;
+    } else {
+      recipes.push({id:Date.now()*1000+Math.floor(Math.random()*1000), name, nameEn, category, time, image, imageData, ingredients, steps, tags, rating:0, notes:'', notesEn:'', favorite:false, nutrition, difficulty, portions, allergens: [], ...(importedRecipeSource ? { source: importedRecipeSource } : {})});
+    }
+    saveToLS();
+    closeModal('form-modal');
+    render();
+  };
   const check = sanitizeNutrition(nutrition, portions);
   if (check.hasWarnings) {
-    showConfirmModal(
-      (lang === 'en' ? 'Per-portion values seem high:\n' : 'Hodnoty na porciu sú vysoké:\n') +
-      check.warnings.map(w => {
-        const labels = {kcal: '🔥 kcal > 1200', fat: '🧈 tuky > 80g', protein: '💪 bielkoviny > 80g', carbs: '🍚 sacharidy > 150g'};
-        return labels[w];
-      }).join('\n') + '\n\n' +
-      (lang === 'en' ? 'Save anyway?' : 'Aj tak uložiť?'),
-      '⚠️', lang==='en'?'Save anyway':'Aj tak uložiť', function() {
-        // continue saving
-      }
-    );
-    if (!check._proceed) return;
+    showConfirmModal(t('Nutričné hodnoty na porciu vyzerajú vysoké. Uložiť aj tak?', 'Per-serving nutrition looks high. Save anyway?'),
+      '⚠️', t('Uložiť', 'Save'), persist);
+    return;
   }
-  if (editingId) {
-    const idx = recipes.findIndex(r => r.id === editingId);
-    if (idx !== -1) recipes[idx] = {...recipes[idx], name, nameEn, category, time, image, imageData, ingredients, steps, tags, nutrition, difficulty, portions, allergens: recipes[idx].allergens || []};
-    editingId = null;
-  } else {
-          recipes.push({id:Date.now()*1000+Math.floor(Math.random()*1000), name, nameEn, category, time, image, imageData, ingredients, steps, tags, rating:0, notes:'', notesEn:'', favorite:false, nutrition, difficulty, portions, allergens: []});
-  }
-  saveToLS();
-  closeModal('form-modal');
-  render();
+  persist();
 }
 
 
@@ -444,47 +446,100 @@ function saveRecipe() {
 // ======================== PREPOČET PORCIÍ ========================
 function scaleAmount(text, factor) {
   if (factor === 1) return text;
-  const m = text.match(/^(\d+(?:\.\d+)?(?:\/\d+)?)\s*/);
-  if (!m) return text;
-  const val = parseFloat(m[1]);
-  if (isNaN(val)) return text;
-  const scaled = val * factor;
-  const rounded = Math.abs(scaled - Math.round(scaled)) < 0.05 
-    ? Math.round(scaled) 
-    : Math.round(scaled * 10) / 10;
-  return text.replace(m[1], String(rounded));
+  const first = readIngredientAmount(text);
+  if (!first) return text;
+  const rest = text.slice(first.length);
+  const format = new Intl.NumberFormat(lang === 'en' ? 'en' : 'sk', { maximumFractionDigits: 3, useGrouping: false });
+  const range = rest.match(/^\s*(?:[-–]|až\b|to\b)\s*/i);
+  const last = range ? readIngredientAmount(rest.slice(range[0].length)) : null;
+  const scaled = format.format(first.value * factor);
+  if (last) {
+    const ending = rest.slice(range[0].length + last.length);
+    return scaled + '–' + format.format(last.value * factor) + (/^\p{L}/u.test(ending) ? ' ' : '') + ending;
+  }
+  return scaled + (/^\p{L}/u.test(rest) ? ' ' : '') + rest;
 }
 
 function scaleIngredients(ingredients, oldPortions, newPortions) {
-  if (!ingredients || !ingredients.length) return ingredients;
-  if (oldPortions === newPortions) return ingredients;
-  const displayFactor = newPortions / oldPortions;
-  return ingredients.map(ing => scaleAmount(ing, displayFactor));
+  return (ingredients || []).map(ingredient => scaleAmount(ingredient, newPortions / oldPortions));
 }
 
-// ======================== ZMENA POČTU PORCIÍ ========================
+function recipeServingCount(recipe) {
+  const servings = Number(recipe.portions);
+  return Number.isInteger(servings) && servings > 0 ? servings : 4;
+}
+
 function changePortions(delta) {
-  const r = getCurrentRecipe();
-  if (!r) return;
-  const newP = Math.max(1, Math.min(50, (r.portions || 4) + delta));
-  if (newP === (r.portions || 4)) return;
-  r.portions = newP;
-  saveToLS();
-  viewRecipe(r.id);
+  const recipe = getCurrentRecipe();
+  if (!recipe) return;
+  currentPortion = Math.max(1, Math.min(50, currentPortion + delta));
+  document.getElementById('portion-display').textContent = currentPortion;
+  const ingredients = lang === 'en' && recipe.ingredientsEn ? recipe.ingredientsEn : recipe.ingredients;
+  document.getElementById('ingredient-list').innerHTML = scaleIngredients(ingredients, basePortion, currentPortion).map(item => `<li>${esc(item)}</li>`).join('');
+  updateRecipeNutrition(recipe);
 }
 
-function resetPortions() {
-  const r = getCurrentRecipe();
-  if (!r) return;
-  r.portions = 4;
-  saveToLS();
-  viewRecipe(r.id);
+function updateRecipeNutrition(recipe) {
+  const grid = document.getElementById('detail-nutrition-grid');
+  if (!grid) return;
+  const total = Boolean(window._showTotalNutri);
+  const multiplier = total ? currentPortion : 1;
+  const nutrients = { kcal: 'kcal', protein: 'g', fat: 'g', carbs: 'g' };
+  grid.innerHTML = Object.entries(nutrients).map(([key, unit]) => {
+    const value = Number(recipe.nutrition?.[key]);
+    return `<div class="nutrition-item"><div class="val">${value > 0 ? esc(String(Math.round(value * multiplier * 10) / 10)) + ' ' + unit : '—'}</div><div class="lbl">${t(key)}</div></div>`;
+  }).join('');
+  document.getElementById('detail-nutrition-label').textContent = total
+    ? t('Spolu za vybrané porcie', 'Total for selected servings') + ' (' + currentPortion + ')'
+    : t('Na jednu porciu', 'Per serving');
+  document.querySelectorAll('[data-nutrition-total]').forEach(button => {
+    button.setAttribute('aria-pressed', String((button.dataset.nutritionTotal === 'true') === total));
+  });
+}
+
+function showRecipeNutritionTotal(total) {
+  window._showTotalNutri = total;
+  const recipe = getCurrentRecipe();
+  if (recipe) updateRecipeNutrition(recipe);
 }
 
 function getCurrentRecipe() {
   const el = document.getElementById('recipe-detail');
   if (!el || !el.dataset.rid) return null;
   return recipes.find(r => r.id === parseInt(el.dataset.rid));
+}
+
+function openRecipePlanPicker(recipeId) {
+  const dialog = document.createElement('dialog');
+  dialog.className = 'entry-sheet meal-slot-dialog';
+  dialog.setAttribute('aria-labelledby', 'recipe-plan-title');
+  const today = (new Date().getDay() + 6) % DAYS.length;
+  const dayNames = lang === 'en' ? DAYS_EN : DAYS_SK;
+  dialog.innerHTML = `<form>
+    <div class="sheet-header"><h2 id="recipe-plan-title">${t('Pridať do plánu', 'Add to plan')}</h2>
+      <button type="button" class="sheet-close" aria-label="${t('Zavrieť','Close')}">✕</button></div>
+    <div class="meal-slot-buttons">
+      <p>${planType === 'kids' ? t('Plán pre deti', 'Kids’ plan') : t('Plán pre dospelých', 'Adults’ plan')} · ${t('Tento týždeň', 'This week')}</p>
+      <label>${t('Deň', 'Day')} <select name="day">${DAYS.map((day, index) => `<option value="${day}" ${index === today ? 'selected' : ''}>${esc(dayNames[index])}</option>`).join('')}</select></label>
+      <label>${t('Jedlo', 'Meal')} <select name="meal">${MEALS.map(meal => `<option value="${meal.id}">${esc(mealLabel(meal.id))}</option>`).join('')}</select></label>
+      <button type="submit" class="btn btn-primary">${t('Pridať do plánu', 'Add to plan')}</button>
+    </div>
+  </form>`;
+  dialog.querySelector('.sheet-close').onclick = () => dialog.close();
+  dialog.querySelector('form').onsubmit = event => {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const day = form.get('day'), slot = form.get('meal');
+    const week = getWeekKey(plannerWeekStart(0));
+    const entry = getWeekPlan(week)[day]?.[slot];
+    dialog.close();
+    const add = () => selectRecipe(day, slot, recipeId, week);
+    if (entry) showConfirmModal(t('Vymeniť jedlo v tomto políčku?', 'Replace the meal in this slot?'), '🍽️', t('Vymeniť','Replace'), add);
+    else add();
+  };
+  dialog.addEventListener('close', () => dialog.remove(), { once: true });
+  document.body.appendChild(dialog);
+  dialog.showModal();
 }
 
 function emptyStateHTML(opts) {
@@ -516,10 +571,10 @@ function viewRecipe(id) {
   const detailWasOpen = !!document.querySelector('#detail-modal.active');
   const sameRecipeOpen = detailWasOpen && viewingId === id;
   viewingId = id;
-  basePortion = 2;
-  currentPortion = basePortion;
   const r = recipes.find(rec => rec.id === id);
   if (!r) return;
+  basePortion = recipeServingCount(r);
+  if (!sameRecipeOpen) { currentPortion = basePortion; window._showTotalNutri = false; }
   const name = lang === 'en' && r.nameEn ? r.nameEn : r.name;
   const ingr = (lang === 'en' && r.ingredientsEn ? r.ingredientsEn : r.ingredients) || [];
   const stps = (lang === 'en' && r.stepsEn ? r.stepsEn : r.steps) || [];
@@ -543,7 +598,7 @@ function viewRecipe(id) {
       <div class="recipe-detail-controls">
         <span class="portion-stepper">
           <button onclick="changePortions(-1)" aria-label="${escAttr(lang==='en'?'Less portions':'Menej porcií')}">−</button>
-          <strong id="portion-display">${r.portions||4}</strong>
+          <strong id="portion-display">${currentPortion}</strong>
           <button onclick="changePortions(1)" aria-label="${escAttr(lang==='en'?'More portions':'Viac porcií')}">+</button>
           <small>${t('portionUnit')}</small>
         </span>
@@ -555,9 +610,15 @@ function viewRecipe(id) {
       ${tgs.length ? `<span>🏷 ${tgs.slice(0, 3).map(esc).join(', ')}</span>` : ''}
       ${(r.allergens||[]).length ? `<span>⚠️ ${r.allergens.map(esc).join(', ')}</span>` : ''}
     </div>
-    <div class="recipe-detail-quick-actions">
-      <button class="btn btn-secondary" onclick="editCurrent()">✏️ <span data-lang="btnEdit">Upraviť</span></button>
-      <button class="btn btn-danger" onclick="deleteCurrent()">🗑️ <span data-lang="btnDelete">Zmazať</span></button>
+    <div class="recipe-detail-primary">
+      <button type="button" class="btn btn-secondary" onclick="openRecipePlanPicker(${id})">${t('Pridať do plánu', 'Add to plan')}</button>
+      ${stps.length ? `<button type="button" class="btn btn-primary" onclick="openCookingMode()">${t('Začať variť', 'Start cooking')}</button>` : ''}
+    </div>
+    <div class="recipe-detail-columns">
+      <div class="detail-section"><h3>${t('Suroviny', 'Ingredients')}</h3>
+        <ul id="ingredient-list">${scaleIngredients(ingr, basePortion, currentPortion).map(item => `<li>${esc(item)}</li>`).join('')}</ul>
+      </div>
+      <div class="detail-section recipe-steps"><h3>${t('Postup', 'Steps')}</h3><ol>${stps.map(step => `<li>${esc(step)}</li>`).join('')}</ol></div>
     </div>
     <div class="detail-section">
       <div style="display:flex;align-items:center;justify-content:space-between;">
@@ -565,41 +626,20 @@ function viewRecipe(id) {
         <div class="star-rating">${[1,2,3,4,5].map(i => `<span class="star ${i<=Math.round(r.rating)?'active':''}" tabindex="0" role="button" onclick="setRating(${id},${i})" onkeydown="if(event.key==='Enter'||event.key===' ')event.preventDefault(),setRating(${id},${i})">★</span>`).join('')}</div>
       </div>
     </div>
-    ${appSettings.mealPlanner.showNutrition && n && (n.kcal||n.protein||n.fat||n.carbs) ? `<div class="detail-section">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:.3rem;flex-wrap:wrap;">
-        <h3>🥗 ${t('recipeNutri')}</h3>
-        <div style="display:flex;align-items:center;gap:.25rem;">
-          <button class="btn btn-sm ${!(window._showTotalNutri || false) ? 'btn-primary' : 'btn-secondary'}" onclick="window._showTotalNutri=false;viewRecipe(${id})" style="padding:.1rem .4rem;font-size:.65rem;" data-lang="nutritionPerPortion">Na porciu</button>
-          <button class="btn btn-sm ${window._showTotalNutri ? 'btn-primary' : 'btn-secondary'}" onclick="window._showTotalNutri=true;viewRecipe(${id})" style="padding:.1rem .4rem;font-size:.65rem;" data-lang="nutritionTotal">Celý recept</button>
-        </div>
+    ${appSettings.mealPlanner.showNutrition ? `<div class="detail-section">
+      <h3>${t('recipeNutri')}</h3>
+      ${n && Object.values(n).some(value => Number(value) > 0) ? `<div class="detail-nutrition-switch">
+        <button type="button" class="btn btn-secondary" data-nutrition-total="false" onclick="showRecipeNutritionTotal(false)">${t('Na porciu', 'Per serving')}</button>
+        <button type="button" class="btn btn-secondary" data-nutrition-total="true" onclick="showRecipeNutritionTotal(true)">${t('Spolu', 'Total')}</button>
       </div>
-      ${window._showTotalNutri ? '' : `<div style="font-size:.7rem;color:var(--text2);margin-bottom:.3rem;">${t('nutritionPerPortion')} — ${r.portions||4} ${t('portionUnit')}</div>`}
-      <div class="nutrition-grid">
-        <div class="nutrition-item"><div class="val">🔥 ${esc(window._showTotalNutri ? Math.round((n.kcal||0)*(r.portions||4)) : n.kcal||'?')}</div><div class="lbl">${t('kcal')}</div></div>
-        <div class="nutrition-item"><div class="val">💪 ${esc(window._showTotalNutri ? Math.round((n.protein||0)*(r.portions||4)) : n.protein||'?')}g</div><div class="lbl">${t('protein')}</div></div>
-        <div class="nutrition-item"><div class="val">🧈 ${esc(window._showTotalNutri ? Math.round((n.fat||0)*(r.portions||4)) : n.fat||'?')}g</div><div class="lbl">${t('fat')}</div></div>
-        <div class="nutrition-item"><div class="val">🍚 ${esc(window._showTotalNutri ? Math.round((n.carbs||0)*(r.portions||4)) : n.carbs||'?')}g</div><div class="lbl">${t('carbs')}</div></div>
-      </div>
-      ${!window._showTotalNutri && n.kcal > 800 && n.fat > 40 ? `<div style="font-size:.7rem;color:var(--gold);margin-top:.2rem;">🍖 ${t('nutritionHearty')}</div>` : ''}
-      ${window._showTotalNutri ? `<div style="font-size:.7rem;color:var(--text3);margin-top:.2rem;">${t('nutritionTotalLabel')} — ${r.portions||4} ${t('portionUnit')}</div>` : ''}
-      ${!window._showTotalNutri && (n.kcal > 1200 || n.fat > 80 || n.protein > 80 || n.carbs > 150) ? `<div style="font-size:.7rem;color:var(--danger);margin-top:.2rem;">⚠️ ${t('nutritionCheck')}</div>` : ''}
+      <p id="detail-nutrition-label"></p>
+      <div class="nutrition-grid" id="detail-nutrition-grid"></div>` : `<p>${t('Nutričné hodnoty nie sú k dispozícii.', 'Nutrition values are unavailable.')}</p>`}
     </div>` : ''}
-    <div class="detail-section">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.3rem;">
-        <h3>🥕 ${lang === 'en' ? 'Ingredients' : 'Suroviny'}</h3>
-        <div style="display:flex;align-items:center;gap:.35rem;">
-          <button class="btn btn-secondary" onclick="changePortion(-1)" style="padding:.1rem .45rem;font-size:.85rem;" aria-label="${lang==='en'?'Less portions':'Menej porcií'}">−</button>
-          <span id="portion-num" style="font-weight:700;font-size:.9rem;min-width:1.5rem;text-align:center;">${basePortion}</span>
-          <button class="btn btn-secondary" onclick="changePortion(1)" style="padding:.1rem .45rem;font-size:.85rem;" aria-label="${lang==='en'?'More portions':'Viac porcií'}">+</button>
-        </div>
-      </div>
-      <ul id="ingredient-list" style="margin-top:.3rem;">${scaleIngredients(ingr, 4, r.portions||4).map(i=>`<li>${esc(i)}</li>`).join('')}</ul>
-    </div>
-    <div class="detail-section recipe-steps"><h3>📝 ${lang === 'en' ? 'Steps' : 'Postup'}</h3><ol>${stps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol></div>
     <div class="detail-section"><h3>📓 ${lang === 'en' ? 'Notes' : 'Poznámky'}</h3>
       <textarea id="recipe-notes" style="width:100%;padding:.45rem;border:1px solid var(--border);border-radius:6px;min-height:45px;font-family:inherit;font-size:.82rem;background:var(--input-bg);color:var(--text);" onchange="saveNotes(${id},this.value)">${esc((lang==='en'&&r.notesEn?r.notesEn:r.notes)||'')}</textarea></div>
     </div>
   `;
+  updateRecipeNutrition(r);
   if (sameRecipeOpen) history.replaceState({ modal: 'detail', id: id }, '', '#recipe-' + id);
   else history.pushState({ modal: 'detail', id: id }, '', '#recipe-' + id);
   openModal('detail-modal');
@@ -815,28 +855,6 @@ document.getElementById('ingr-list').addEventListener('click', function(e) {
   const tag = e.target.closest('.ingr-tag');
   if (tag) toggleIngrSearch(tag.dataset.ingr);
 });
-
-// ======================== PORTION SCALING ========================
-function changePortion(delta) {
-  currentPortion = Math.max(1, currentPortion + delta);
-  document.getElementById('portion-num').textContent = currentPortion;
-  const r = recipes.find(rec => rec.id === viewingId);
-  if (!r) return;
-  const ingr = (lang === 'en' && r.ingredientsEn ? r.ingredientsEn : r.ingredients);
-  const ratio = currentPortion / basePortion;
-  const list = document.getElementById('ingredient-list');
-  if (list) {
-    list.innerHTML = ingr.map(i => `<li>${esc(scaleIngredient(i, ratio))}</li>`).join('');
-  }
-}
-
-function scaleIngredient(text, ratio) {
-  return text.replace(/^(\d+)([gmlkGLM]|[gG]ramov|[mM]l)?\s*/g, (match, num, unit) => {
-    const scaled = Math.round(parseInt(num) * ratio);
-    if (scaled === 0) return '';
-    return `${scaled}${unit || ''} `;
-  });
-}
 
 // ======================== COLLECTIONS ========================
 // ======================== TIP OF THE DAY ========================
@@ -1127,8 +1145,54 @@ function setImportBusy(isBusy) {
   if (btn) btn.disabled = !!isBusy;
 }
 
+function parseImportedServings(yieldValue) {
+  const values = Array.isArray(yieldValue) ? yieldValue : [yieldValue];
+  const counts = values.map(value => {
+    const match = String(value ?? '').trim().match(/^(?:(?:serves|výťažnosť|porcie)\s*)?(\d+)(?:\s*(?:servings?|portions?|porc\p{L}*|osoby|osôb|people|persons?))?$/iu);
+    return match ? Number(match[1]) : null;
+  }).filter(count => count >= 1 && count <= 50);
+  return counts.length && counts.every(count => count === counts[0]) ? counts[0] : null;
+}
+
+function parseImportedNutrition(nutrition, portions) {
+  if (!nutrition) return {};
+  const calories = String(nutrition.calories ?? '');
+  const serving = String(nutrition.servingSize ?? '');
+  const per100 = /(?:per|na|\/|pro)\s*100\s*(?:g|ml)\b/i;
+  const fullRecipe = /(?:whole|entire|full)\s+recipe|cel[ýého]+\s+recept|total\s+recipe/i;
+  let divisor = 1;
+  if (per100.test(calories) || per100.test(serving) || /^100\s*(?:g|ml)$/i.test(serving.trim())) return {};
+  if (fullRecipe.test(calories + ' ' + serving)) {
+    if (!portions) return {};
+    divisor = portions;
+  }
+  const numeric = (value, energy) => {
+    if (value == null) return null;
+    const match = String(value).trim().match(/^(\d+(?:[\s.,]\d+)*)/);
+    if (!match) return null;
+    const compact = match[1].replace(/\s/g, '');
+    const grouped = /^\d{1,3}([.,])\d{3}(?:\1\d{3})+$/.test(compact) ||
+      (energy && /^[1-9]\d{0,2}[.,]\d{3}$/.test(compact));
+    const decimal = compact.lastIndexOf(',') > compact.lastIndexOf('.') ? ',' : '.';
+    const amount = Number(grouped ? compact.replace(/[.,]/g, '')
+      : compact.replace(decimal === ',' ? /\./g : /,/g, '').replace(',', '.'));
+    return Number.isFinite(amount) ? amount : null;
+  };
+  const result = {};
+  for (const [key, value] of Object.entries({ kcal: nutrition.calories, protein: nutrition.proteinContent, fat: nutrition.fatContent, carbs: nutrition.carbohydrateContent })) {
+    if (per100.test(String(value))) continue;
+    const amount = numeric(value, key === 'kcal');
+    if (amount === null) continue;
+    const firstUnit = String(value).match(/\b(kcal|kJ|mg|g)\b/i)?.[1].toLowerCase();
+    const conversion = key === 'kcal' && firstUnit === 'kj' ? 4.184 : key !== 'kcal' && firstUnit === 'mg' ? 1000 : 1;
+    result[key] = Math.round(amount / divisor / conversion * 10) / 10;
+  }
+  return result;
+}
+
 function fillImportedRecipe(data) {
   openFormModal();
+  importedRecipeSource = data.source || null;
   setValueSafe('r-name', data.name || '');
   setValueSafe('r-image', data.image || '');
   setValueSafe('r-ingredients', data.ingredients || '');
@@ -1136,11 +1200,13 @@ function fillImportedRecipe(data) {
   setValueSafe('r-time', data.time || 30);
   if (data.category) setValueSafe('r-category', data.category);
   setValueSafe('r-tags', (data.tags || []).join(', '));
-  if (data.calories) setValueSafe('r-kcal', data.calories);
-  setValueSafe('r-portions', data.portions || 4);
+  for (const key of ['kcal', 'protein', 'fat', 'carbs']) setValueSafe('r-' + key, data.nutrition?.[key] ?? '');
+  setValueSafe('r-portions', data.portions ?? '');
+  if (!data.portions) setTextSafe('nutrition-portion-info', t('Zdroj neuvádza jednoznačný počet porcií. Doplň ho pred uložením.', 'The source has no unambiguous serving count. Enter it before saving.'));
+  else if (!Object.keys(data.nutrition || {}).length) setTextSafe('nutrition-portion-info', t('Zdroj neuvádza spoľahlivé hodnoty na porciu. Môžeš ich doplniť alebo použiť odhad.', 'The source has no reliable per-serving nutrition. Enter it or use the estimate.'));
+
   const imageInput = document.getElementById('r-image');
   if (imageInput) imageInput.dispatchEvent(new Event('input'));
-  if (!data.calories && data.rawIngredients) estimateAndFillImport(data.rawIngredients, data.portions || 4);
 }
 
 function showImportReview(data) {
@@ -1160,7 +1226,7 @@ function showImportReview(data) {
         <div class="import-review-title">${esc(data.name || (lang === 'en' ? 'Untitled recipe' : 'Recept bez názvu'))}</div>
         <div class="import-review-meta">
           <span>⏱ ${esc(String(data.time || 30))} min</span>
-          <span>🍽️ ${esc(String(data.portions || 4))}</span>
+          <span>🍽️ ${esc(String(data.portions ?? '—'))}</span>
           <span>🥣 ${ingredientsCount}</span>
           <span>📝 ${stepsCount}</span>
         </div>
@@ -1239,22 +1305,8 @@ function importFromUrl() {
         while ((m = re.exec(html)) !== null) {
           try { jsonlds.push(JSON.parse(m[1])); } catch(e) {}
         }
-        let recipe = null;
-        for (const item of jsonlds) {
-          const types = Array.isArray(item['@type']) ? item['@type'] : [item['@type']];
-          if (types.some(t => t === 'Recipe' || t.endsWith(':Recipe'))) {
-            recipe = item; break;
-          }
-          if (item['@graph']) {
-            for (const g of item['@graph']) {
-              const gTypes = Array.isArray(g['@type']) ? g['@type'] : [g['@type']];
-              if (gTypes.some(t => t === 'Recipe' || t.endsWith(':Recipe'))) {
-                recipe = g; break;
-              }
-            }
-          }
-          if (recipe) break;
-        }
+        const recipeNodes = jsonlds.flat().flatMap(item => [item, ...(Array.isArray(item?.['@graph']) ? item['@graph'] : [])]);
+        const recipe = recipeNodes.find(item => [item?.['@type']].flat().some(type => typeof type === 'string' && /(?:^|[/:#])Recipe$/.test(type)));
         if (!recipe) {
           setImportStatus(html.length < 200
             ? t('importUrlFail') + ' (prázdna odpoveď)'
@@ -1270,7 +1322,6 @@ function importFromUrl() {
         const yield_ = recipe.recipeYield || '';
         const cuisine = recipe.recipeCuisine || '';
         const category = recipe.recipeCategory || '';
-        const calories = recipe.nutrition && recipe.nutrition.calories ? String(recipe.nutrition.calories).replace(/[^0-9]/g,'') : '';
         const ingrText = (Array.isArray(ingr) ? ingr : []).map(i => cleanHtml(typeof i === 'string' ? i : '')).join('\n');
         const stepsArr = Array.isArray(steps) ? steps.map(s => cleanHtml(typeof s === 'string' ? s : s.text || s.name || '')) :
           typeof steps === 'string' ? cleanHtml(steps).split('\n').filter(Boolean) : [];
@@ -1291,26 +1342,19 @@ function importFromUrl() {
         }
         const cats = ['Hlavné jedlá','Polievky','Šaláty','Dezerty','Pečivo','Nápoje','Predjedlá','Raňajky','Prílohy','Detské'];
         const catMatch = cats.find(c => norm(category).includes(norm(c)) || norm(c).includes(norm(category)));
-        let yieldNum = parseInt(yield_) || 4;
+        const yieldNum = parseImportedServings(yield_);
         const tags = [];
         if (cuisine) { const t = cuisine.split(',').map(s => s.trim().toLowerCase()); tags.push(...t); }
         if (recipe.keywords) { const t = (typeof recipe.keywords === 'string' ? recipe.keywords : (Array.isArray(recipe.keywords) ? recipe.keywords.join(',') : '')).split(',').map(s => s.trim().toLowerCase()); tags.push(...t); }
-        let perPortionCalories = '';
-        if (calories) {
-          // Source provided total calories - divide by yield for per-portion
-          const calTotal = parseInt(calories);
-          perPortionCalories = Math.round(calTotal / yieldNum) || calTotal;
-        }
         const importData = {
           name: name,
           image: image,
           ingredients: ingrText,
-          rawIngredients: Array.isArray(ingr) ? ingr : [],
           steps: stepText,
           time: timeNum,
           category: catMatch || '',
           tags: [...new Set(tags)],
-          calories: perPortionCalories,
+          nutrition: parseImportedNutrition(recipe.nutrition, yieldNum),
           portions: yieldNum,
           source: url
         };

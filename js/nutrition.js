@@ -177,57 +177,35 @@ const UNIT_G = {
   'g':1, 'kg':1000, 'dkg':10, 'dag':10,
   'ml':1, 'l':1000, 'dl':100, 'cl':10,
   'pl':15, 'polievková lyžica':15, 'lyžica':15, 'lyžíc':15, 'lyžička':5, 'kl':5, 'čajová lyžička':5, 'čajové lyžičky':5,
-  'šálka':240, 'hrnček':250, 'pohár':250,
+  'šálka':240, 'hrnček':250, 'pohár':250, 'cups':240, 'cup':240, 'tbsp':15, 'tsp':5, 'oz':28.35, 'lb':453.59,
 };
+function readIngredientAmount(text) {
+  const fractions = { '½': .5, '¼': .25, '¾': .75, '⅓': 1/3, '⅔': 2/3, '⅕': .2, '⅖': .4, '⅗': .6, '⅘': .8, '⅙': 1/6, '⅚': 5/6, '⅛': .125, '⅜': .375, '⅝': .625, '⅞': .875 };
+  const match = text.match(/^\s*(?:(?:(\d+)\s+)?(\d+)\s*[\/⁄]\s*(\d+)|(\d*)\s*([½¼¾⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞])|(\d+(?:[.,]\d+)?))/);
+  if (!match) return null;
+  const [, whole, numerator, denominator, unicodeWhole, fraction, decimal] = match;
+  const value = denominator ? Number(whole || 0) + Number(numerator) / Number(denominator)
+    : fraction ? Number(unicodeWhole || 0) + fractions[fraction] : Number(decimal.replace(',', '.'));
+  return Number.isFinite(value) ? { value, length: match[0].length } : null;
+}
+
 function parseQuantity(raw) {
-  let s = raw.trim();
-  s = s.replace(/\b(mleté|prerastená|čerstvý|čerstvá|čerstvé|sušené|sušený|sušená|nakrájané|nakrájaný|nakrájaná|plátky|plátok|na kocky|na plátky|na mesiačiky|ošúpané|ošúpaný|vypečené|červenej|bieleho|tmavého|svetlej)\b/gi, '');
-  const normed = s.toLowerCase().replace(/^\d+[\.\,]\s*/, m => m.replace(',','.')).trim();
-  const fracMap = {'½':0.5,'¼':0.25,'¾':0.75,'⅓':0.333,'⅔':0.667,'⅕':0.2,'⅖':0.4,'⅗':0.6,'⅘':0.8,'⅙':0.167,'⅚':0.833,'⅛':0.125,'⅜':0.375,'⅝':0.625,'⅞':0.875};
-  let val = 0, unit = null;
-  for (const [f, v] of Object.entries(fracMap)) {
-    if (normed.startsWith(f)) { val = v; break; }
+  const text = raw.trim().toLowerCase();
+  const amount = readIngredientAmount(text);
+  if (amount && amount.value > 0) {
+    const rest = text.slice(amount.length).trimStart();
+    const unit = Object.keys(UNIT_G).find(name => rest.startsWith(name) && !/^\p{L}/u.test(rest.slice(name.length)));
+    if (unit) return { grams: amount.value * UNIT_G[unit], isPiece: false, val: amount.value };
+    if (!/^(?:[-–]|až\b|to\b)/i.test(rest)) return { grams: 0, isPiece: true, val: amount.value };
   }
-  const fracMatch = normed.match(/^(\d+)\s*\/\s*(\d+)/);
-  if (fracMatch) val = parseInt(fracMatch[1]) / parseInt(fracMatch[2]);
-  const numMatch = normed.match(/^(\d+[\.\,]?\d*)/);
-  if (numMatch) val = parseFloat(numMatch[1].replace(',','.')) || 0;
-  if (val) {
-    const afterNum = normed.replace(/^[\d\.\,\s]+/, '').trim();
-    for (const [u, g] of Object.entries(UNIT_G)) {
-      const re = new RegExp('^' + u.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '[\\s\\.]');
-      if (re.test(afterNum)) { unit = u; val *= g; break; }
-    }
-    if (!unit) {
-      const pieceMatch = afterNum.match(/^(ks|kus|kusy|strúčik|strúčiky|plátok|plátky|list|listy|balík|balenia|vajce|vajcia|kura|cibule|mrkvy|zemiaky|papriky|paradajky|stehná|prsia)\b/);
-      if (pieceMatch) unit = 'ks';
-      // If followed by word chars (no space-delimited unit), also treat as pieces
-      else if (afterNum.match(/^[a-záčďéěíňóřšťúůýž]/)) unit = 'ks';
+  if (!amount) {
+    const trailing = text.match(/(\d+(?:[.,]\d+)?)\s*(kg|dkg|dag|g|ml|dl|cl|l|oz|lb)(?!\p{L})/u);
+    if (trailing) {
+      const value = Number(trailing[1].replace(',', '.'));
+      return { grams: value * UNIT_G[trailing[2]], isPiece: false, val: value };
     }
   }
-  // Comma-separated fallback: try to find quantity anywhere in string
-  if (!val || val === 100) {
-    const gMatch = normed.match(/(\d+[\.\,]?\d*)\s*(kg|g|dkg|dag|ml|l|dl|cl)/);
-    if (gMatch) {
-      val = parseFloat(gMatch[1].replace(',','.'));
-      const u = gMatch[2];
-      val *= (UNIT_G[u] || 1);
-      unit = u;
-    } else {
-      const numAny = normed.match(/(\d+[\.\,]?\d*)/);
-      if (numAny) {
-        const afterAny = normed.replace(/^[\d\.\,\s]+/, '').trim();
-        if (afterAny.match(/^(ks|kus|kusy|strúčik|strúčiky|plátok|plátky|list|listy|balík|balenia)\b/)) {
-          val = parseFloat(numAny[1].replace(',','.'));
-          unit = 'ks';
-        } else if (!unit) {
-          val = parseFloat(numAny[1].replace(',','.'));
-          unit = 'ks';
-        }
-      }
-    }
-  }
-  return { grams: val > 0 ? val : 100, isPiece: unit === 'ks', val: val > 0 ? val : 100 };
+  return { grams: 0, isPiece: false, val: 0 };
 }
 const DESCRIPTIVE_STRIP = /\b(mleté|prerastená|čerstvý|čerstvá|čerstvé|sušené|sušený|sušená|nakrájané|nakrájaný|nakrájaná|ošúpané|vypečené|červenej|bieleho|tmavého|svetlej|domáce|domáci|domáca|čerstvo|hrsť|štipka|trochu|podľa|chuti)\b/gi;
 
@@ -244,6 +222,7 @@ function estimateNutrition(ingredients, portions) {
   }
   function processIngredient(ing) {
     const { grams, isPiece, val } = parseQuantity(ing);
+    if (!val) { unmatchedCount++; unmatched.push(ing); return; }
     const ingLookup = ing.toLowerCase().replace(DESCRIPTIVE_STRIP, '').trim();
     let best = null, bestLen = 0, bestKey = '';
     for (const [key, data] of Object.entries(NUTRITION_DB)) {
@@ -284,18 +263,9 @@ function estimateNutrition(ingredients, portions) {
       unmatched.push(ing);
     }
   }
-  // Round total
-  total.kcal = Math.round(total.kcal) || 0;
-  total.protein = Math.round(total.protein) || 0;
-  total.fat = Math.round(total.fat) || 0;
-  total.carbs = Math.round(total.carbs) || 0;
-  // Compute per-portion
-  const pp = {
-    kcal: Math.round(total.kcal / portionsNum) || 0,
-    protein: Math.round(total.protein / portionsNum) || 0,
-    fat: Math.round(total.fat / portionsNum) || 0,
-    carbs: Math.round(total.carbs / portionsNum) || 0,
-  };
+  const round = value => Math.round(value * 10) / 10;
+  const pp = Object.fromEntries(Object.entries(total).map(([key, value]) => [key, round(value / portionsNum)]));
+  total = Object.fromEntries(Object.entries(total).map(([key, value]) => [key, round(value)]));
   // Confidence
   const totalItems = matchedCount + estimatedCount + unmatchedCount;
   let confidence = 'presny';
@@ -328,8 +298,16 @@ function sanitizeNutrition(nutrition, portions) {
 function autoFillNutrition() {
   const ingredients = document.getElementById('r-ingredients').value.split('\n').map(s => s.trim()).filter(Boolean);
   if (!ingredients.length) return;
-  const portions = parseInt(document.getElementById('r-portions').value) || 4;
+  const portions = Number(document.getElementById('r-portions').value);
+  if (!Number.isInteger(portions) || portions < 1 || portions > 50) {
+    showToast(t('Najprv zadaj počet porcií.', 'Enter the serving count first.'), 'warning');
+    return;
+  }
   const result = estimateNutrition(ingredients, portions);
+  if (result.matchedCount + result.estimatedCount === 0) {
+    showToast(t('Zo zadaných surovín sa nutričné hodnoty nedajú spoľahlivo odhadnúť.', 'Nutrition could not be estimated from these ingredients.'), 'warning');
+    return;
+  }
   // Fill per-portion values
   document.getElementById('r-kcal').value = result.perPortion.kcal;
   document.getElementById('r-protein').value = result.perPortion.protein || '';
@@ -338,7 +316,7 @@ function autoFillNutrition() {
   // Show confidence
   const status = document.getElementById('nutrition-status');
   if (status) {
-    const labels = {presny: '✅ Presný výpočet', odhad: '📐 Odhad', hruby: '⚠️ Hrubý odhad'};
+    const labels = { presny: t('Odhad podľa surovín', 'Ingredient-based estimate'), odhad: t('Odhad', 'Estimate'), hruby: t('Hrubý odhad', 'Rough estimate') };
     let text = labels[result.confidence] || '';
     if (result.unmatched.length) {
       text += `<br><span style="font-size:.7rem;opacity:.7;">⚠️ ${result.unmatched.length} ${t('unmatchedHint')}</span>`;
@@ -351,16 +329,3 @@ function autoFillNutrition() {
     info.textContent = `Na 1 porciu z ${result.portions} (celý recept: ${result.total.kcal} kcal)`;
   }
 }
-
-function estimateAndFillImport(ingrArray, yieldNum) {
-  const result = estimateNutrition(ingrArray, yieldNum || 4);
-  if (result.perPortion.kcal > 0) {
-    document.getElementById('r-kcal').value = result.perPortion.kcal;
-    document.getElementById('r-protein').value = result.perPortion.protein || '';
-    document.getElementById('r-fat').value = result.perPortion.fat || '';
-    document.getElementById('r-carbs').value = result.perPortion.carbs || '';
-    document.getElementById('r-portions').value = result.portions;
-  }
-  return result;
-}
-

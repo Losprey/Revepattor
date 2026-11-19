@@ -26,6 +26,7 @@ function renderDashboard() {
     </header>
     <h1>${t('Dnes', 'Today')}</h1>
     <p class="today-date">${esc(formatDashboardDate(now))}</p>
+    <p class="family-write-status" role="status" data-family-write-status ${familyCode ? '' : 'hidden'}>${esc(familyWriteStatus())}</p>
     <div class="today-columns">
       <div class="today-primary">
         <div class="today-shortcuts">
