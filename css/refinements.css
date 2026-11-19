@@ -964,6 +964,19 @@ html.light .today-sun {
   font-size: .87rem;
 }
 
+.today-plan-types {
+  margin-bottom: 8px;
+}
+
+.today-plan-types .plan-type-btn {
+  justify-content: center;
+  min-height: 44px;
+  padding: 4px;
+  border: 0;
+  border-radius: 11px;
+  font-weight: 750;
+}
+
 .today-meal-copy .today-meal-planned {
   color: var(--today-accent);
   font-weight: 700;

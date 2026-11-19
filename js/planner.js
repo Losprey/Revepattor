@@ -209,12 +209,17 @@ function closeDayDetail() {
 }
 
 function setPlanType(type) {
-  if (type === planType) return;
+  if (type === planType || !['adults', 'kids'].includes(type)) return;
   planType = type;
-  saveWeekPlan();
+  localStorage.setItem('planType', type);
+  if (document.body.dataset.tab === 'dashboard') {
+    renderDashboard();
+    document.querySelector('.today-plan-types .plan-type-btn.active')?.focus({ preventScroll: true });
+    return;
+  }
   applyPageTransition(document.getElementById('planner-container'), 300);
   renderPlanner();
-  const activeBtn = document.querySelector('.plan-type-btn.active');
+  const activeBtn = document.querySelector('#plan-type-switch .plan-type-btn.active');
   if (activeBtn) springBounce(activeBtn);
 }
 function getDayIcon(dayIndex, filledCount) {

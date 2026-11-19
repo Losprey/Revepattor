@@ -247,6 +247,10 @@ function renderMobileMealsCard() {
     <div class="today-card-heading"><h2>${t('Dnešné jedlá','Today’s meals')}</h2>
       <button type="button" class="today-link" onclick="switchTab('planner')">${t('Plán','Plan')}</button>
     </div>
+    <div class="weekly-types today-plan-types" role="group" aria-label="${t('Typ plánu','Meal plan type')}">
+      <button type="button" class="plan-type-btn${planType !== 'kids' ? ' active' : ''}" data-pt="adults" aria-pressed="${planType !== 'kids'}" onclick="setPlanType('adults')">${t('Dospelí','Adults')}</button>
+      <button type="button" class="plan-type-btn${planType === 'kids' ? ' active' : ''}" data-pt="kids" aria-pressed="${planType === 'kids'}" onclick="setPlanType('kids')">${t('Deti','Kids')}</button>
+    </div>
     <div class="today-list">${MEALS.map(meal => renderMobileMealRow(meal, ctx)).join('')}</div>
   </section>`;
 }
